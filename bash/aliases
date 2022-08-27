@@ -1,0 +1,6 @@
+alias ..="cd .."
+alias ...="cd ../.."
+alias ....="cd ../../.."
+alias la="ls -al"
+
+alias sc="cd ~/dotfiles && source bash/bash_profile && cd -"

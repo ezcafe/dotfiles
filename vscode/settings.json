@@ -1,0 +1,17 @@
+{
+	"editor.detectIndentation": true,
+	"editor.fontSize" : 16,
+	"editor.formatOnSave": true,
+	"editor.formatOnSaveMode" : "modifications",
+	"editor.rulers": [80, 100],
+
+	"files.trimTrailingWhitespace": true,
+	
+	"git.autofetch" : true,
+
+	"javascript.updateImportsOnFileMove.enabled" : "always",
+
+	"terminal.integrated.fontSize" : 14,
+
+	"typescript.updateImportsOnFileMove.enabled": "always"
+}
