@@ -1,5 +1,15 @@
 alias d='docker'
 alias dc='docker-compose'
-alias dcd='docker-compose -d'
-alias dcu='docker-compose -u'
+
+alias dcd='docker-compose down'
+
+alias dcu='docker-compose up'
+alias dcud='docker-compose up -d'
+
 alias dps='docker ps'
+
+alias dprune='docker system prune -af --volumes'
+
+alias dvl='docker volume ls'
+alias dvi='docker volume inspect'
+alias dvr='docker volume rm'

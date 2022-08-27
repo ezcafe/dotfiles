@@ -1,6 +1,6 @@
 {
 	"Print to console": {
-		"scope": "javascript,typescript",
+		// "scope": "javascript,typescript",
 		"prefix": "ql",
 		"body": [
 			"console.log('Quang: $1', $2);",

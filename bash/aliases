@@ -1,6 +1,6 @@
 alias ..="cd .."
 alias ...="cd ../.."
 alias ....="cd ../../.."
+alias kp="npx kill-port"
 alias la="ls -al"
-
-alias sc="cd ~/dotfiles && source bash/bash_profile && cd -"
+alias rf="rm -rf"

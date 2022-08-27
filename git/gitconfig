@@ -1,0 +1,14 @@
+[core]
+	editor = code --wait
+  excludesfile = ~/.gitignore
+[merge]
+  tool = code
+[mergetool "code"]
+  cmd = code --wait --merge $REMOTE $LOCAL $BASE $MERGED
+[diff]
+	tool = vscode
+[difftool "vscode"]
+	cmd = "code --wait --diff  $LOCAL $REMOTE"
+[user]
+  name = Quang Pham
+  email = ""

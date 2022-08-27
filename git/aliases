@@ -1,36 +1,40 @@
-# alias g='git'
-# alias gb="git branch"
-# alias gba="git branch -a"
-# alias gbd="git branch -d"
-# alias gbdf="git branch -D"
+alias g='git'
+alias gb="git branch"
+alias gba="git branch -a"
+alias gbd="git branch -d"
+alias gbdf="git branch -D"
 
-# alias ga="git add"
-# alias ga.="git add ."
-# alias gac="git add . && git commit -m"
+alias ga="git add"
+alias ga.="git add ."
+alias gac="git add . && git commit -m"
 
 alias gc="git commit"
 alias gca="git commit --amend"
 alias gcm="git commit -m"
+alias gcme="git commit --allow-empty -m"
 
-# alias gco="git checkout"
-# alias gcob="git checkout -b"
+alias gco="git checkout"
+alias gcob="git checkout -b"
 
-# alias gd="git diff --color"
+alias gd="git diff --color"
 
-# alias gf="git fetch"
+alias gf="git fetch"
 
-# alias ggp="git push"
-# alias ggpf="git push -f"
+alias ggp="git push"
+alias ggpf="git push -f"
 
 alias gl="git log --oneline --all --graph --decorate  $(git reflog | awk '{print $1}')"
-alias gll="git log --graph --abbrev-commit --date=relative --pretty=format:'%C(red)%h%Creset %s - %C(yellow)%an%Creset%C(red)%d%Creset %C(green)%cr%Creset'"
+alias gll="git log --graph --abbrev-commit --date=relative --pretty=format:'%C(red)%h%Creset%C(green)%d%Creset %s - %C(yellow)%an%Creset %C(green)%cr%Creset'"
 
 alias gp="git pull"
 alias gpr="git pull --rebase"
 alias gpra="git rebase --abort"
 alias gprc="git rebase --continue"
-alias gs="git rebase -i HEAD~" # Squash gprs 2
+function gitSquash() {
+  git rebase -i HEAD~$1
+}
+alias gs=gitSquash
 
-# alias gr="git remote"
+alias gr="git remote"
 
-# alias gst="git status -sb"
+alias gst="git status -sb"
