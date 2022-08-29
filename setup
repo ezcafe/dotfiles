@@ -2,7 +2,6 @@ source ~/dotfiles/bash/aliases
 source ~/dotfiles/bash/bashrc
 source ~/dotfiles/bash/path
 source ~/dotfiles/code/aliases
-source ~/dotfiles/custom/aliases
 source ~/dotfiles/docker/aliases
 source ~/dotfiles/git/aliases
 if [ $(uname -s) = 'Darwin' ]; then

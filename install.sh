@@ -29,11 +29,21 @@ git clone https://github.com/zsh-users/zsh-autosuggestions $HOME/.oh-my-zsh/cust
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
 
 # Update gitconfig + gitignore
+echo "" >> ~/.gitconfig
 echo ~/dotfiles/git/gitconfig >> ~/.gitconfig
+echo "" >> ~/.gitignore
 echo ~/dotfiles/git/gitignore >> ~/.gitignore
 
 # Add this to .zshrc
+echo "" >> ~/.zshrc
 echo "source ~/dotfiles/setup" >> ~/.zshrc
+
+# Add nvim (Require Iterm or other Terminal simulator to work)
+curl --output ~/.config/nvim-macos.tar.gz -L https://github.com/neovim/neovim/releases/download/nightly/nvim-macos.tar.gz
+tar xzf ~/.config/nvim-macos.tar.gz
+cp -a ~/dotfiles/nvim ~/.config/nvim
+echo "" >> ~/.zshrc
+echo "source ~/dotfiles/nvim/setup" >> ~/.zshrc
 
 # Update
 # cd ~/dotfiles && gpr origin main
