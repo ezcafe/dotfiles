@@ -33,7 +33,7 @@ echo ~/dotfiles/git/gitconfig >> ~/.gitconfig
 echo ~/dotfiles/git/gitignore >> ~/.gitignore
 
 # Add this to .zshrc
-source ~/dotfiles/setup
+echo "source ~/dotfiles/setup" >> ~/.zshrc
 
 # Update
 # cd ~/dotfiles && gpr origin main

@@ -25,6 +25,28 @@ alias ggpf="git push -f"
 
 alias gl="git log --oneline --all --graph --decorate  $(git reflog | awk '{print $1}')"
 alias gll="git log --graph --abbrev-commit --date=relative --pretty=format:'%C(red)%h%Creset%C(green)%d%Creset %s - %C(yellow)%an%Creset %C(green)%cr%Creset'"
+glog() {
+    setterm -linewrap off
+
+    git --no-pager log --all --color=always --graph --abbrev-commit --decorate \
+        --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' | \
+        sed -E \
+            -e 's/\|(\x1b\[[0-9;]*m)+\\(\x1b\[[0-9;]*m)+ /├\1─╮\2/' \
+            -e 's/(\x1b\[[0-9;]+m)\|\x1b\[m\1\/\x1b\[m /\1├─╯\x1b\[m/' \
+            -e 's/\|(\x1b\[[0-9;]*m)+\\(\x1b\[[0-9;]*m)+/├\1╮\2/' \
+            -e 's/(\x1b\[[0-9;]+m)\|\x1b\[m\1\/\x1b\[m/\1├╯\x1b\[m/' \
+            -e 's/╮(\x1b\[[0-9;]*m)+\\/╮\1╰╮/' \
+            -e 's/╯(\x1b\[[0-9;]*m)+\//╯\1╭╯/' \
+            -e 's/(\||\\)\x1b\[m   (\x1b\[[0-9;]*m)/╰╮\2/' \
+            -e 's/(\x1b\[[0-9;]*m)\\/\1╮/g' \
+            -e 's/(\x1b\[[0-9;]*m)\//\1╯/g' \
+            -e 's/^\*|(\x1b\[m )\*/\1⎬/g' \
+            -e 's/(\x1b\[[0-9;]*m)\|/\1│/g' \
+        | command less -r +'/[^/]HEAD'
+
+    setterm -linewrap on
+}
+alias glg=glog
 
 alias gp="git pull"
 alias gpr="git pull --rebase"
