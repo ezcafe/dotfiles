@@ -3,6 +3,7 @@ alias gb="git branch"
 alias gba="git branch -a"
 alias gbd="git branch -d"
 alias gbdf="git branch -D"
+alias gbrn="git branch -m"
 
 alias ga="git add"
 alias ga.="git add ."
