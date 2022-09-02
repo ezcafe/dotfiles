@@ -3,6 +3,10 @@
 git config --global user.name "Your Name"
 git config --global user.email you@example.com
 
+# npm global
+mkdir ~/.npm-global
+npm config set prefix '~/.npm-global'
+
 # Clone dotfiles
 cd ~
 git clone --recursive https://github.com/ezcafe/dotfiles.git
@@ -54,14 +58,17 @@ cd ~/.config/lite-xl
 cp -a ~/dotfiles/lite-xl/init.lua ~/.config/lite-xl/init.lua
 git clone https://github.com/lite-xl/lite-xl-colors
 git clone https://github.com/lite-xl/lite-xl-plugins
+git clone -b 0.1 https://github.com/lite-xl/lite-xl-lsp
+git clone https://github.com/liquidev/lintplus plugins/lintplus
+git clone https://github.com/lite-xl/lite-xl-widgets widget
 rm -r colors
 ln -s lite-xl-colors/colors .
 cd ~/.config/lite-xl/plugins
 ln -s ../lite-xl-plugins/plugins/autoinsert.lua .
 ln -s ../lite-xl-plugins/plugins/bracketmatch.lua .
-ln -s ../lite-xl-plugins/plugins/console.lua .
-ln -s ../lite-xl-plugins/plugins/formatter.lua .
-ln -s ../lite-xl-plugins/plugins/gitdiff_highlight.lua .
+#ln -s ../lite-xl-plugins/plugins/console.lua .
+#ln -s ../lite-xl-plugins/plugins/formatter.lua .
+#ln -s ../lite-xl-plugins/plugins/gitdiff_highlight.lua .
 ln -s ../lite-xl-plugins/plugins/gitstatus.lua .
 ln -s ../lite-xl-plugins/plugins/indentguide.lua .
 ln -s ../lite-xl-plugins/plugins/language_containerfile.lua .
@@ -73,8 +80,10 @@ ln -s ../lite-xl-plugins/plugins/language_jsx.lua .
 ln -s ../lite-xl-plugins/plugins/language_ts.lua .
 ln -s ../lite-xl-plugins/plugins/language_tsx.lua .
 ln -s ../lite-xl-plugins/plugins/language_yaml.lua .
-ln -s ../lite-xl-plugins/plugins/lint+.lua .
+#ln -s ../lite-xl-plugins/plugins/lint+.lua .
 ln -s ../lite-xl-plugins/plugins/lsp.lua .
+ln -s ../lite-xl-lsp/lsp .
+ln -s ../lite-xl-lsp/autocomplete.lua .
 ln -s ../lite-xl-plugins/plugins/markers.lua .
 ln -s ../lite-xl-plugins/plugins/navigate.lua .
 ln -s ../lite-xl-plugins/plugins/rainbowparen.lua .
