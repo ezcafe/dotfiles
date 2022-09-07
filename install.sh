@@ -7,6 +7,12 @@ git config --global user.email you@example.com
 mkdir ~/.npm-global
 npm config set prefix '~/.npm-global'
 
+# Backup
+cp ~
+mkdir -p my_backups
+local bkzshrc="my_backups/.zshrc-bk-$(date +"%Y-%m-%d_%H%M")"
+cp .zshrc "$bkzshrc" &>/dev/null
+
 # Clone dotfiles
 cd ~
 git clone --recursive https://github.com/ezcafe/dotfiles.git
