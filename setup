@@ -1,10 +1,13 @@
-source ~/dotfiles/bash/aliases
-source ~/dotfiles/bash/bashrc
-source ~/dotfiles/bash/path
-source ~/dotfiles/code/aliases
-source ~/dotfiles/docker/aliases
-source ~/dotfiles/git/aliases
+[[ -f ~/dotfiles/bash/aliases ]] && . ~/dotfiles/bash/aliases
+[[ -f ~/dotfiles/bash/bashrc ]] && . ~/dotfiles/bash/bashrc
+[[ -f ~/dotfiles/bash/path ]] && . ~/dotfiles/bash/path
+
+[[ -f ~/dotfiles/code/aliases ]] && . ~/dotfiles/code/aliases
+[[ -f ~/dotfiles/docker/aliases ]] && . ~/dotfiles/docker/aliases
+[[ -f ~/dotfiles/git/aliases ]] && . ~/dotfiles/git/aliases
+
 if [ $(uname -s) = 'Darwin' ]; then
-	source ~/dotfiles/mac/setup
+	[[ -f ~/dotfiles/mac/setup ]] && . ~/dotfiles/mac/setup
 fi
-source ~/dotfiles/zsh/zshrc
+
+[[ -f ~/dotfiles/zsh/zshrc ]] && . ~/dotfiles/zsh/zshrc
