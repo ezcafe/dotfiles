@@ -37,6 +37,8 @@ git clone --depth=1 https://github.com/romkatv/powerlevel10k.git $HOME/.oh-my-zs
 git clone https://github.com/zsh-users/zsh-autosuggestions $HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions
 # Install zsh-syntax-highlighting/ plugin
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+# Install zsh-you-should-use
+git clone https://github.com/MichaelAquilina/zsh-you-should-use.git $HOME/.oh-my-zsh/custom/plugins/you-should-use
 
 # Update gitconfig + gitignore
 echo "" >> ~/.gitconfig

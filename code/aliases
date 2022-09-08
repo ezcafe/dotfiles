@@ -1,3 +1,6 @@
+alias ni="npm install"
+alias nr="npm run"
+
 alias yi="yarn install"
 alias yt="yarn test"
 alias ys="yarn start"
