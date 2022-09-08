@@ -48,6 +48,9 @@ echo ~/dotfiles/git/gitignore >> ~/.gitignore
 echo "" >> ~/.zshrc
 echo "source ~/dotfiles/setup" >> ~/.zshrc
 
+# Mac configs
+source ~/dotfiles/mac/setup
+
 # Add nvim (Require Iterm or other Terminal simulator to work)
 curl --output ~/.config/nvim-macos.tar.gz -L https://github.com/neovim/neovim/releases/download/nightly/nvim-macos.tar.gz
 tar xzf ~/.config/nvim-macos.tar.gz

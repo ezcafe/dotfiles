@@ -6,8 +6,8 @@
 [[ -f ~/dotfiles/docker/aliases ]] && . ~/dotfiles/docker/aliases
 [[ -f ~/dotfiles/git/aliases ]] && . ~/dotfiles/git/aliases
 
-if [ $(uname -s) = 'Darwin' ]; then
-	[[ -f ~/dotfiles/mac/setup ]] && . ~/dotfiles/mac/setup
-fi
-
 [[ -f ~/dotfiles/zsh/zshrc ]] && . ~/dotfiles/zsh/zshrc
+
+# if [ $(uname -s) = 'Darwin' ]; then
+# 	[[ -f ~/dotfiles/mac/setup ]] && . ~/dotfiles/mac/setup
+# fi
