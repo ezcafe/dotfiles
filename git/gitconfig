@@ -1,4 +1,4 @@
-[color] # colorize output
+[color]
   diff = auto
   status = auto
   branch = auto
@@ -8,14 +8,14 @@
 [core]
 	editor = code --wait
   excludesfile = ~/.gitignore
-[merge]
-  tool = code
-[mergetool "code"]
-  cmd = code --wait --merge $REMOTE $LOCAL $BASE $MERGED
 [diff]
 	tool = vscode
 [difftool "vscode"]
 	cmd = "code --wait --diff  $LOCAL $REMOTE"
+[merge]
+  tool = vscode
+[mergetool "vscode"]
+  cmd = code --wait --merge $REMOTE $LOCAL $BASE $MERGED
 [user]
   name = Quang Pham
   email = ""

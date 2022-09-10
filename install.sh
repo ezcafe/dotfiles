@@ -54,13 +54,16 @@ echo "source ~/dotfiles/setup" >> ~/.zshrc
 source ~/dotfiles/mac/setup
 
 # Add nvim (Require Iterm or other Terminal simulator to work)
-curl --output ~/.config/nvim-macos.tar.gz -L https://github.com/neovim/neovim/releases/download/nightly/nvim-macos.tar.gz
-tar xzf ~/.config/nvim-macos.tar.gz
+cd ~/.config
+curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim-macos.tar.gz
+tar xzf nvim-macos.tar.gz
 cp -a ~/dotfiles/nvim ~/.config/nvim
 echo "" >> ~/.zshrc
 echo "source ~/dotfiles/nvim/setup" >> ~/.zshrc
+source ~/.zshrc
 
 # Add Lite XL
+cd ~/.config
 curl -LO https://github.com/lite-xl/lite-xl/releases/download/v2.0.5/lite-xl-macos-x86_64.dmg
 # -> Run lite-xl-macos-x86_64.dmg and copy app to destination
 # -> Run Lite XL.app

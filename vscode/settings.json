@@ -1,27 +1,55 @@
 {
-	"editor.detectIndentation": true,
-	"editor.fontSize" : 16,
-	"editor.formatOnSave": true,
-	"editor.formatOnSaveMode" : "modifications",
-	"editor.minimap.enabled": false,
-	"editor.rulers": [80, 100],
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript, javascriptreact, typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
 
-	"files.trimTrailingWhitespace": true,
+  "conventionalCommits.autoCommit": false,
+  "conventionalCommits.emojiFormat": "emoji",
+  "conventionalCommits.lineBreak": "\\n",
+  "conventionalCommits.promptBody": false,
+  "conventionalCommits.scopes": ["a11y", "config", "tests"],
 
-	"git.autofetch" : true,
+  "editor.detectIndentation": true,
+  "editor.fontSize": 16,
+  "editor.formatOnSave": true,
+  "editor.formatOnSaveMode": "modifications",
+  "editor.guides.bracketPairs": "active",
+  "editor.minimap.enabled": false,
+  "editor.rulers": [80, 100],
 
-	"javascript.updateImportsOnFileMove.enabled" : "always",
+  "files.trimTrailingWhitespace": true,
 
-	"oneDarkPro.bold": true,
-	"oneDarkPro.editorTheme": "One Dark Pro Flat",
+  "git.autofetch": true,
 
-	"telemetry.telemetryLevel": "off",
+  "javascript.updateImportsOnFileMove.enabled": "always",
 
-	"terminal.integrated.fontSize" : 14,
+  "oneDarkPro.bold": true,
+  "oneDarkPro.editorTheme": "One Dark Pro Flat",
 
-	"typescript.updateImportsOnFileMove.enabled": "always",
+  "telemetry.telemetryLevel": "off",
 
-	"workbench.colorTheme": "One Dark Pro Darker",
-	"workbench.layoutControl.enabled": false,
-	"workbench.statusBar.visible": false
+  "terminal.integrated.fontSize": 14,
+
+  "typescript.updateImportsOnFileMove.enabled": "always",
+
+  "workbench.colorCustomizations": {
+    "editorBracketPairGuide.background1": "#F8B46C",
+    "editorBracketPairGuide.background2": "#FB78B5",
+    "editorBracketPairGuide.background3": "#4AACFB",
+    "editorBracketPairGuide.background4": "#B98BF5",
+    "editorBracketPairGuide.background5": "#DAD8D8",
+    "editorBracketPairGuide.background6": "#18EECE",
+
+    "editorBracketPairGuide.activeBackground1": "#F367C9",
+    "editorBracketPairGuide.activeBackground2": "#FD70B2",
+    "editorBracketPairGuide.activeBackground3": "#41A7FA",
+    "editorBracketPairGuide.activeBackground4": "#B084EB",
+    "editorBracketPairGuide.activeBackground5": "#DBDADA",
+    "editorBracketPairGuide.activeBackground6": "#16FAD8"
+  },
+  "workbench.colorTheme": "One Dark Pro Darker",
+  "workbench.layoutControl.enabled": false
 }
