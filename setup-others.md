@@ -1,7 +1,9 @@
-- Firefox Theme:
-https://github.com/catppuccin/firefox
+## Firefox Theme:
+- Menu Help => More Troubleshooting Information
+- Profile Folder row => click on Show in Finder
+- Copy firefox/user.js and firefox/chrome to Firefox Profile Folder
 
-- Wallpapers
+## Wallpapers
 https://github.com/gaffclant/sakura_dots/blob/main/Images/wallpaper2.png
 https://imgur.com/a/iY8CYVb
 https://www.artstation.com/artwork/q55m2
