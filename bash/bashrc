@@ -1,0 +1,5 @@
+# Customize fzf
+FZF_BASE="$HOME/.fzf"
+FZF_DEFAULT_OPTS="--height=40% --layout=reverse --info=inline --border"
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

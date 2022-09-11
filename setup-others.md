@@ -7,3 +7,8 @@ https://imgur.com/a/iY8CYVb
 https://www.artstation.com/artwork/q55m2
 https://imgur.com/a/gYcsPFm
 https://drive.google.com/file/d/1Rn1LUEWDkvFLs3qNLzKjdWNBN-DiNrvg/view
+https://rd.in4.vn/r/wallpaper/comments/xab2w4/pastel_samurai_3840x2160/
+https://unsplash.com/photos/LcsROIArfIo
+https://raw.githubusercontent.com/gh0stzk/dotfiles/master/config/bspwm/rices/melissa/wall-01.webp
+https://raw.githubusercontent.com/gh0stzk/dotfiles/master/config/bspwm/rices/aline/wall-01.webp
+https://www.wallpaperbetter.com/es/hd-wallpaper-wgfol

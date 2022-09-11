@@ -53,6 +53,7 @@ alias gp="git pull"
 alias gpr="git pull --rebase"
 alias gpra="git rebase --abort"
 alias gprc="git rebase --continue"
+
 function gitSquash() {
   git rebase -i HEAD~$1
 }
