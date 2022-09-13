@@ -1,7 +1,9 @@
 ## Firefox Theme:
 - Menu Help => More Troubleshooting Information
 - Profile Folder row => click on Show in Finder
-- Copy firefox/user.js and firefox/chrome to Firefox Profile Folder
+- Copy firefox contents (chrome, updater.sh, user.js, user-overrides.js, ...) to Firefox Profile Folder
+- chmod +x updater.sh
+- Run updater.sh
 
 ## Wallpapers
 https://github.com/gaffclant/sakura_dots/blob/main/Images/wallpaper2.png
