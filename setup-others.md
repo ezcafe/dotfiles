@@ -16,3 +16,6 @@ https://unsplash.com/photos/LcsROIArfIo
 https://raw.githubusercontent.com/gh0stzk/dotfiles/master/config/bspwm/rices/melissa/wall-01.webp
 https://raw.githubusercontent.com/gh0stzk/dotfiles/master/config/bspwm/rices/aline/wall-01.webp
 https://www.wallpaperbetter.com/es/hd-wallpaper-wgfol
+https://wallhaven.cc/w/q2m9z7
+https://wallhaven.cc/w/o3z85l
+https://www.deviantart.com/thisahami/art/Nord-theme-wallpaper-919137987

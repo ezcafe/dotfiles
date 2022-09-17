@@ -17,3 +17,11 @@ user_pref("browser.startup.page", 1);
  * about:home=Activity Stream (default, see 0105), custom URL, about:blank
  * [SETTING] Home>New Windows and Tabs>Homepage and new windows ***/
 user_pref("browser.startup.homepage", "https://pomofocus.io/");
+
+/* 0801: disable location bar using search
+ * Don't leak URL typos to a search engine, give an error message instead
+ * Examples: "secretplace,com", "secretplace/com", "secretplace com", "secret place.com"
+ * [NOTE] This does not affect explicit user action such as using search buttons in the
+ * dropdown, or using keyword search shortcuts you configure in options (e.g. "d" for DuckDuckGo)
+ * [SETUP-CHROME] Override this if you trust and use a privacy respecting search engine ***/
+user_pref("keyword.enabled", true);
