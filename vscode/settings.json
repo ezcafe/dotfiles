@@ -24,7 +24,6 @@
   "conventionalCommits.scopes": ["a11y", "config", "tests"],
   "editor.detectIndentation": true,
   "editor.fontSize": 16,
-  "editor.formatOnSave": true,
   "editor.formatOnSaveMode": "modifications",
   "editor.guides.bracketPairs": "active",
   "editor.minimap.enabled": false,
