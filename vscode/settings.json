@@ -51,5 +51,6 @@
     "editorBracketPairGuide.activeBackground6": "#16FAD8"
   },
   "workbench.colorTheme": "One Dark Pro Darker",
-  "workbench.layoutControl.enabled": false
+  "workbench.layoutControl.enabled": false,
+  "window.commandCenter": true
 }

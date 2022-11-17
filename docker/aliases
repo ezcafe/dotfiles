@@ -5,6 +5,8 @@ alias dcd='docker-compose down'
 alias dcu='docker-compose up'
 alias dcud='docker-compose up -d'
 
+alias dl='docker logs'
+
 alias dps='docker ps'
 
 alias dprune='docker system prune -af --volumes'
