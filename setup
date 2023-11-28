@@ -7,7 +7,7 @@
 [[ -f ~/dotfiles/git/aliases ]] && . ~/dotfiles/git/aliases
 [[ -f ~/dotfiles/unix/aliases ]] && . ~/dotfiles/unix/aliases
 
-[[ -f ~/dotfiles/zsh/zshrc ]] && . ~/dotfiles/zsh/zshrc
+# [[ -f ~/dotfiles/zsh/zshrc ]] && . ~/dotfiles/zsh/zshrc
 
 # if [ $(uname -s) = 'Darwin' ]; then
 # 	[[ -f ~/dotfiles/mac/setup ]] && . ~/dotfiles/mac/setup
