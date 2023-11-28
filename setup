@@ -1,3 +1,13 @@
+# # Add this to .bashrc
+# echo "" >> ~/.bashrc
+# echo "source ~/dotfiles/setup" >> ~/.bashrc
+# source ~/.bashrc
+
+# # Add this to .zshrc
+# echo "" >> ~/.zshrc
+# echo "source ~/dotfiles/setup" >> ~/.zshrc
+# source ~/.zshrc
+
 [[ -f ~/dotfiles/bash/aliases ]] && . ~/dotfiles/bash/aliases
 [[ -f ~/dotfiles/bash/bashrc ]] && . ~/dotfiles/bash/bashrc
 [[ -f ~/dotfiles/bash/path ]] && . ~/dotfiles/bash/path
@@ -6,8 +16,6 @@
 [[ -f ~/dotfiles/docker/aliases ]] && . ~/dotfiles/docker/aliases
 [[ -f ~/dotfiles/git/aliases ]] && . ~/dotfiles/git/aliases
 [[ -f ~/dotfiles/unix/aliases ]] && . ~/dotfiles/unix/aliases
-
-# [[ -f ~/dotfiles/zsh/zshrc ]] && . ~/dotfiles/zsh/zshrc
 
 # if [ $(uname -s) = 'Darwin' ]; then
 # 	[[ -f ~/dotfiles/mac/setup ]] && . ~/dotfiles/mac/setup
