@@ -26,7 +26,7 @@ alias ggpf="git push -f"
 
 alias gl="git log --graph --abbrev-commit --date=relative --pretty=format:'%C(red)%h%Creset%C(green)%d%Creset %s - %C(yellow)%an%Creset %C(green)%cr%Creset'"
 
-glog() {
+function glog {
     setterm -linewrap off
 
     git --no-pager log --all --color=always --graph --abbrev-commit --decorate \
