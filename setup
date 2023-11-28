@@ -5,6 +5,7 @@
 [[ -f ~/dotfiles/code/aliases ]] && . ~/dotfiles/code/aliases
 [[ -f ~/dotfiles/docker/aliases ]] && . ~/dotfiles/docker/aliases
 [[ -f ~/dotfiles/git/aliases ]] && . ~/dotfiles/git/aliases
+[[ -f ~/dotfiles/unix/aliases ]] && . ~/dotfiles/aliases/aliases
 
 [[ -f ~/dotfiles/zsh/zshrc ]] && . ~/dotfiles/zsh/zshrc
 
