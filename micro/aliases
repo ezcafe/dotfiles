@@ -1,22 +1,22 @@
 
 # ========
-# To install nano: brew install micro
+# # To install micro: brew install micro
 
-# for Intel
+# # for Intel
 # alias micro="/usr/local/bin/micro"
-# for ARM
+# # for ARM
 # alias micro="/opt/homebrew/bin/micro"
 
 # ========
-# OR:
+# # OR:
 # cd ~/dotfiles
 # curl https://getmic.ro | bash
 
-# OR:
+# # OR:
 # cd ~/dotfiles
 # git clone https://github.com/zyedidia/micro
 # cd micro
 # make build
 # sudo mv micro /usr/local/bin # optional
 
-alias micro="~/dotfiles/micro/micro"
+# alias micro="~/dotfiles/micro/micro"
