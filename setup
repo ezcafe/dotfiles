@@ -15,6 +15,7 @@
 [[ -f ~/dotfiles/code/aliases ]] && . ~/dotfiles/code/aliases
 [[ -f ~/dotfiles/docker/aliases ]] && . ~/dotfiles/docker/aliases
 [[ -f ~/dotfiles/git/aliases ]] && . ~/dotfiles/git/aliases
+[[ -f ~/dotfiles/nano/aliases ]] && . ~/dotfiles/nano/aliases
 [[ -f ~/dotfiles/unix/aliases ]] && . ~/dotfiles/unix/aliases
 
 # if [ $(uname -s) = 'Darwin' ]; then

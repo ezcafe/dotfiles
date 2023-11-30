@@ -1,0 +1,5 @@
+# To update nano: brew install nano
+# for Intel
+# alias nano="/usr/local/bin/nano"
+# for ARM
+alias nano="/opt/homebrew/bin/nano"
