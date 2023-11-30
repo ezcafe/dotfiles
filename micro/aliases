@@ -1,0 +1,13 @@
+# To install nano: brew install micro
+
+# OR: curl https://getmic.ro | bash
+
+# OR: git clone https://github.com/zyedidia/micro
+# cd micro
+# make build
+# sudo mv micro /usr/local/bin # optional
+
+# for Intel
+# alias micro="/usr/local/bin/micro"
+# for ARM
+alias micro="/opt/homebrew/bin/micro"

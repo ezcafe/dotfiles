@@ -1,0 +1,10 @@
+{
+    "colorcolumn": 80,
+    "diffgutter": true,
+    "hlsearch": true,
+    "keepautoindent": true,
+    "keymenu": true,
+    "reload": "auto",
+    "scrollbar": true,
+    "tabsize": 2
+}
