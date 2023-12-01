@@ -1,0 +1,3 @@
+# ========
+[[ ! -f ~/.gitconfig ]] && cp ~/dotfiles/git/.gitconfig ~/.gitconfig
+[[ ! -f ~/.gitignore ]] && cp ~/dotfiles/git/.gitignore ~/.gitignore

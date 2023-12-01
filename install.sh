@@ -37,13 +37,6 @@ git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $HOME/.oh-my-
 git clone https://github.com/MichaelAquilina/zsh-you-should-use.git $HOME/.oh-my-zsh/custom/plugins/you-should-use
 git clone https://github.com/MichaelAquilina/zsh-auto-notify.git $HOME/.oh-my-zsh/custom/plugins/auto-notify
 
-
-# Update gitconfig + gitignore
-echo "" >> ~/.gitconfig
-echo ~/dotfiles/git/gitconfig >> ~/.gitconfig
-echo "" >> ~/.gitignore
-echo ~/dotfiles/git/gitignore >> ~/.gitignore
-
 # Add this to .zshrc
 echo "" >> ~/.zshrc
 echo "source ~/dotfiles/setup" >> ~/.zshrc

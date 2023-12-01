@@ -13,14 +13,5 @@
 # make build
 # sudo mv micro /usr/local/bin # optional
 
-# ========
-# Install using brew for ARM
-if [[ -f /opt/homebrew/bin/micro ]] then alias micro="/opt/homebrew/bin/micro"
-# Install using brew for Intel
-elif [[ -f ~/dotfiles/micro/micro ]] then alias micro="/usr/local/bin/micro"
-# for custom build
-else alias micro="~/dotfiles/micro/micro"
-fi
-
 [[ ! -f ~/.config/micro/bindings.json ]] && ln -sv ~/dotfiles/micro/bindings.json ~/.config/micro/bindings.json
 [[ ! -f ~/.config/micro/settings.json ]] && ln -sv ~/dotfiles/micro/settings.json ~/.config/micro/settings.json

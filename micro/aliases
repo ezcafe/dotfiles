@@ -1,0 +1,8 @@
+# ========
+# Install using brew for ARM
+if [[ -f /opt/homebrew/bin/micro ]] then alias micro="/opt/homebrew/bin/micro"
+# Install using brew for Intel
+elif [[ -f /usr/local/bin/micro ]] then alias micro="/usr/local/bin/micro"
+# Install using curl or custom build
+elif [[ -f ~/dotfiles/micro/micro ]] then alias micro="~/dotfiles/micro/micro"
+fi

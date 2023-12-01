@@ -14,8 +14,13 @@
 
 [[ -f ~/dotfiles/code/aliases ]] && . ~/dotfiles/code/aliases
 [[ -f ~/dotfiles/docker/aliases ]] && . ~/dotfiles/docker/aliases
+
 [[ -f ~/dotfiles/git/aliases ]] && . ~/dotfiles/git/aliases
+[[ -f ~/dotfiles/git/setup ]] && . ~/dotfiles/git/setup
+
+[[ -f ~/dotfiles/micro/aliases ]] && . ~/dotfiles/micro/aliases
 [[ -f ~/dotfiles/micro/setup ]] && . ~/dotfiles/micro/setup
+
 # [[ -f ~/dotfiles/nano/aliases ]] && . ~/dotfiles/nano/aliases
 [[ -f ~/dotfiles/vscode/setup ]] && . ~/dotfiles/vscode/setup
 [[ -f ~/dotfiles/unix/aliases ]] && . ~/dotfiles/unix/aliases
