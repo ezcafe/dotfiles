@@ -19,10 +19,6 @@ mkdir ~/Library/Application\ Support/Code/User
 ln -sv ~/dotfiles/vscode/QDT.code-snippets ~/Library/Application\ Support/Code/User/snippets/QDT.code-snippets
 ln -sv ~/dotfiles/vscode/settings.json ~/Library/Application\ Support/Code/User/settings.json
 
-# micro stuffs
-ln -sv ~/dotfiles/micro/bindings.json ~/.config/micro/bindings.json
-ln -sv ~/dotfiles/micro/settings.json ~/.config/micro/settings.json
-
 # Create ws folder
 mkdir ~/ws
 
