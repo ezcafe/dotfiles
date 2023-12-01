@@ -22,21 +22,6 @@ git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
 ~/.fzf/install
 # Do you want to update your shell configuration files? ([y]/n) n
 
-# Install zsh
-# https://github.com/ohmyzsh/ohmyzsh/wiki/Installing-ZSH#install-and-set-up-zsh-as-default
-# Install ohmyzsh
-sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-# Install font
-# https://github.com/romkatv/powerlevel10k#meslo-nerd-font-patched-for-powerlevel10k
-# Install powerlevel10k theme
-git clone --depth=1 https://github.com/romkatv/powerlevel10k.git $HOME/.oh-my-zsh/custom/themes/powerlevel10k
-# Install plugins
-git clone https://github.com/zsh-users/zsh-autosuggestions $HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions
-
-git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
-git clone https://github.com/MichaelAquilina/zsh-you-should-use.git $HOME/.oh-my-zsh/custom/plugins/you-should-use
-git clone https://github.com/MichaelAquilina/zsh-auto-notify.git $HOME/.oh-my-zsh/custom/plugins/auto-notify
-
 # # Add nvim (Require Iterm or other Terminal simulator to work)
 # cd ~/.config
 # curl -LO https://github.com/neovim/neovim/releases/download/nightly/nvim-macos.tar.gz
