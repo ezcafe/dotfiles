@@ -1,6 +1,0 @@
-# # Add this to .zshrc
-# echo "" >> ~/.zshrc
-# echo "source ~/dotfiles/setup-zsh" >> ~/.zshrc
-# source ~/.zshrc
-
-[[ -f ~/dotfiles/zsh/zshrc ]] && . ~/dotfiles/zsh/zshrc

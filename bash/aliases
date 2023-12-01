@@ -1,6 +1,6 @@
 alias ..="cd .."
 alias ...="cd ../.."
 alias ....="cd ../../.."
-alias kp="npx kill-port"
 alias la="ls -a"
 alias rf="rm -rf"
+alias up="sudo apt-get update -y && sudo apt-get full-upgrade -y"

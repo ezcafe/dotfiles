@@ -1,0 +1,8 @@
+# ========
+# Install using brew for ARM
+if [[ -f /opt/homebrew/bin/zsh ]] then . ~/dotfiles/zsh/zshrc
+# Install using brew for Intel
+elif [[ -f /usr/local/bin/zsh ]] then . ~/dotfiles/zsh/zshrc
+# Install using other ways
+elif [[ -f /usr/bin/zsh ]] then . ~/dotfiles/zsh/zshrc
+fi

@@ -5,5 +5,8 @@ alias nr="npm run"
 
 alias yi="yarn install"
 alias yt="yarn test --coverage=false --silent=false"
-alias yta="yarn test"
+alias ytc="yarn test"
 alias ys="yarn start"
+
+alias .gs="./gradlew start"
+alias .gt="./gradlew test"

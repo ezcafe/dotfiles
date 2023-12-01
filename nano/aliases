@@ -1,6 +1,8 @@
 # To update/install nano: brew install nano
 
-# for Intel
-# alias nano="/usr/local/bin/nano"
-# for ARM
-alias nano="/opt/homebrew/bin/nano"
+# ========
+# Install using brew for ARM
+if [[ -f /opt/homebrew/bin/nano ]] then alias nano="/opt/homebrew/bin/nano"
+# Install using brew for Intel
+elif [[ -f /usr/local/bin/nano ]] then alias nano="/usr/local/bin/nano"
+fi

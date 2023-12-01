@@ -8,23 +8,26 @@
 # echo "source ~/dotfiles/setup" >> ~/.zshrc
 # source ~/.zshrc
 
-[[ -f ~/dotfiles/bash/aliases ]] && . ~/dotfiles/bash/aliases
-[[ -f ~/dotfiles/bash/bashrc ]] && . ~/dotfiles/bash/bashrc
-[[ -f ~/dotfiles/bash/path ]] && . ~/dotfiles/bash/path
+. ~/dotfiles/bash/aliases
+. ~/dotfiles/bash/bashrc
+. ~/dotfiles/bash/path
 
-[[ -f ~/dotfiles/code/aliases ]] && . ~/dotfiles/code/aliases
-[[ -f ~/dotfiles/docker/aliases ]] && . ~/dotfiles/docker/aliases
+. ~/dotfiles/code/aliases
 
-[[ -f ~/dotfiles/git/aliases ]] && . ~/dotfiles/git/aliases
-[[ -f ~/dotfiles/git/setup ]] && . ~/dotfiles/git/setup
+. ~/dotfiles/docker/aliases
 
-[[ -f ~/dotfiles/micro/aliases ]] && . ~/dotfiles/micro/aliases
-[[ -f ~/dotfiles/micro/setup ]] && . ~/dotfiles/micro/setup
+. ~/dotfiles/git/aliases
+. ~/dotfiles/git/setup
 
-# [[ -f ~/dotfiles/nano/aliases ]] && . ~/dotfiles/nano/aliases
-[[ -f ~/dotfiles/vscode/setup ]] && . ~/dotfiles/vscode/setup
-[[ -f ~/dotfiles/unix/aliases ]] && . ~/dotfiles/unix/aliases
+. ~/dotfiles/micro/aliases
+. ~/dotfiles/micro/setup
+
+. ~/dotfiles/nano/aliases
+
+. ~/dotfiles/vscode/setup
+
+. ~/dotfiles/zsh/setup
 
 # if [ $(uname -s) = 'Darwin' ]; then
-# 	[[ -f ~/dotfiles/mac/setup ]] && . ~/dotfiles/mac/setup
+# 	. ~/dotfiles/mac/setup
 # fi
