@@ -14,11 +14,6 @@ cp .zshrc "$bkzshrc" &>/dev/null
 cd ~
 git clone --recursive https://github.com/ezcafe/dotfiles.git
 
-# VSCode stuffs
-mkdir ~/Library/Application\ Support/Code/User
-ln -sv ~/dotfiles/vscode/QDT.code-snippets ~/Library/Application\ Support/Code/User/snippets/QDT.code-snippets
-ln -sv ~/dotfiles/vscode/settings.json ~/Library/Application\ Support/Code/User/settings.json
-
 # Create ws folder
 mkdir ~/ws
 
