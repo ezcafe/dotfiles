@@ -1,6 +1,7 @@
 # ========
-[[ ! -d ~/Library/Application\ Support/Code/User ]] && mkdir ~/Library/Application\ Support/Code/User
-
-[[ ! -f ~/Library/Application\ Support/Code/User/snippets/QDT.code-snippets ]] && ln -sv ~/dotfiles/vscode/QDT.code-snippets ~/Library/Application\ Support/Code/User/snippets/QDT.code-snippets
-
-[[ ! -f ~/Library/Application\ Support/Code/User/settings.json ]] && ln -sv ~/dotfiles/vscode/settings.json ~/Library/Application\ Support/Code/User/settings.json
+if [[ -d ~/Library/Application\ Support/Code/User ]]
+then
+  mkdir ~/Library/Application\ Support/Code/User
+  [[ ! -f ~/Library/Application\ Support/Code/User/snippets/QDT.code-snippets ]] && ln -sv ~/dotfiles/vscode/QDT.code-snippets ~/Library/Application\ Support/Code/User/snippets/QDT.code-snippets
+  [[ ! -f ~/Library/Application\ Support/Code/User/settings.json ]] && ln -sv ~/dotfiles/vscode/settings.json ~/Library/Application\ Support/Code/User/settings.json
+fi
