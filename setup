@@ -1,13 +1,3 @@
-# # Add this to .bashrc
-# echo "" >> ~/.bashrc
-# echo "source ~/dotfiles/setup" >> ~/.bashrc
-# source ~/.bashrc
-
-# # Add this to .zshrc
-# echo "" >> ~/.zshrc
-# echo "source ~/dotfiles/setup" >> ~/.zshrc
-# source ~/.zshrc
-
 . ~/dotfiles/bash/aliases
 . ~/dotfiles/bash/bashrc
 . ~/dotfiles/bash/path
