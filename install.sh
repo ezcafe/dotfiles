@@ -17,6 +17,12 @@ git clone --recursive https://github.com/ezcafe/dotfiles.git
 # Create ws folder
 mkdir ~/ws
 
+echo "Installing zsh"
+# Install zsh
+# https://github.com/ohmyzsh/ohmyzsh/wiki/Installing-ZSH#install-and-set-up-zsh-as-default
+# Install ohmyzsh
+sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
 # Install fzf
 git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
 ~/.fzf/install

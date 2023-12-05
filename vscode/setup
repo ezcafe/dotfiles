@@ -1,5 +1,5 @@
 # ========
-if [[ -d ~/Library/Application\ Support/Code/User ]]
+if [[ ! -d ~/Library/Application\ Support/Code/User ]]
 then
   mkdir ~/Library/Application\ Support/Code/User
   [[ ! -f ~/Library/Application\ Support/Code/User/snippets/QDT.code-snippets ]] && ln -sv ~/dotfiles/vscode/QDT.code-snippets ~/Library/Application\ Support/Code/User/snippets/QDT.code-snippets
