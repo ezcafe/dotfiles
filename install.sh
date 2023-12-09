@@ -1,9 +1,5 @@
 #!/bin/sh
 
-# npm global
-mkdir ~/.npm-global
-npm config set prefix '~/.npm-global'
-
 # Backup
 cp ~
 mkdir -p my_backups
@@ -14,29 +10,32 @@ cp .zshrc "$bkzshrc" &>/dev/null
 cd ~
 git clone --recursive https://github.com/ezcafe/dotfiles.git
 
-# Create ws folder
-mkdir ~/ws
-
 # Install zsh
 # https://github.com/ohmyzsh/ohmyzsh/wiki/Installing-ZSH#install-and-set-up-zsh-as-default
 sudo apt install zsh
 
-# Install ohmyzsh
+# Installing ohmyzsh
 sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-# Install fzf
-git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
-~/.fzf/install
+# # Add aliases to .bashrc
+# echo "" >> ~/.bashrc
+# echo "source ~/dotfiles/aliases" >> ~/.bashrc
+# source ~/.bashrc
 
-# Add this to .zshrc
+# Add aliases to .zshrc
 echo "" >> ~/.zshrc
-echo "source ~/dotfiles/setup" >> ~/.zshrc
+echo "source ~/dotfiles/aliases" >> ~/.zshrc
 source ~/.zshrc
 
 # # Add this to .bashrc
 # echo "" >> ~/.bashrc
 # echo "source ~/dotfiles/setup" >> ~/.bashrc
 # source ~/.bashrc
+
+# Add this to .zshrc
+echo "" >> ~/.zshrc
+echo "source ~/dotfiles/setup" >> ~/.zshrc
+source ~/.zshrc
 
 # # Add nvim (Require Iterm or other Terminal simulator to work)
 # cd ~/.config

@@ -1,0 +1,6 @@
+. ~/dotfiles/bash/aliases
+. ~/dotfiles/code/aliases
+. ~/dotfiles/docker/aliases
+. ~/dotfiles/git/aliases
+. ~/dotfiles/micro/aliases
+. ~/dotfiles/nano/aliases

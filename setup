@@ -1,23 +1,23 @@
-. ~/dotfiles/bash/aliases
-. ~/dotfiles/bash/bashrc
+# ========
 . ~/dotfiles/bash/path
-
-. ~/dotfiles/code/aliases
-
-. ~/dotfiles/docker/aliases
-
-. ~/dotfiles/git/aliases
+. ~/dotfiles/fzf/setup
 . ~/dotfiles/git/setup
-
-. ~/dotfiles/micro/aliases
 . ~/dotfiles/micro/setup
-
-. ~/dotfiles/nano/aliases
-
+. ~/dotfiles/nvm/setup
 . ~/dotfiles/vscode/setup
-
+. ~/dotfiles/yarn/setup
 . ~/dotfiles/zsh/setup
 
 # if [ $(uname -s) = 'Darwin' ]; then
 # 	. ~/dotfiles/mac/setup
 # fi
+
+# Create ws folder
+[[ ! -d ~/ws ]] && mkdir ~/ws
+
+# npm global
+if [[ ! -d ~/.npm-global ]]
+then
+  mkdir ~/.npm-global
+  npm config set prefix '~/.npm-global'
+fi
