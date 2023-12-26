@@ -4,3 +4,5 @@
 . ~/dotfiles/git/aliases
 . ~/dotfiles/micro/aliases
 . ~/dotfiles/nano/aliases
+. ~/dotfiles/utils/aliases
+

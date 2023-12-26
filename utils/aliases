@@ -1,0 +1,3 @@
+alias wtd="curl wttr.in/thu+duc"
+alias wd2="curl wttr.in/quan+2"
+alias wd4="curl wttr.in/quan+4"
