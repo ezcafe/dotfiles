@@ -1,3 +1,7 @@
 alias wtd="curl wttr.in/thu+duc"
 alias wd2="curl wttr.in/quan+2"
 alias wd4="curl wttr.in/quan+4"
+
+alias fwl="sudo ufw status numbered"
+alias fwr="sudo ufw delete"
+alias fwa="sudo ufw allow"
