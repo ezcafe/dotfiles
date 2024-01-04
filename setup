@@ -2,6 +2,7 @@
 . ~/dotfiles/bash/path
 . ~/dotfiles/fzf/setup
 . ~/dotfiles/git/setup
+. ~/dotfiles/lazygit/setup
 . ~/dotfiles/micro/setup
 . ~/dotfiles/nvm/setup
 . ~/dotfiles/vscode/setup

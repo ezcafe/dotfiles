@@ -2,6 +2,7 @@
 . ~/dotfiles/code/aliases
 . ~/dotfiles/docker/aliases
 . ~/dotfiles/git/aliases
+. ~/dotfiles/lazygit/aliases
 . ~/dotfiles/micro/aliases
 . ~/dotfiles/nano/aliases
 . ~/dotfiles/utils/aliases

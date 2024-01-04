@@ -1,12 +1,11 @@
 {
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "[css]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "[json][jsonc]": {
+  "[javascript][javascriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "[javascript][javascriptreact]": {
+  "[json][jsonc]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[typescript][typescriptreact]": {
@@ -16,40 +15,54 @@
   "conventionalCommits.emojiFormat": "emoji",
   "conventionalCommits.lineBreak": "\\n",
   "conventionalCommits.promptBody": false,
-  "conventionalCommits.scopes": ["a11y", "config", "tests"],
+  "conventionalCommits.scopes": [
+    "a11y",
+    "config",
+    "tests"
+  ],
+  "editor.accessibilitySupport": "off",
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.detectIndentation": true,
+  "editor.fontFamily": "Fira Code, Menlo, Monaco, 'Courier New', monospace",
+  "editor.fontLigatures": true,
   "editor.fontSize": 16,
   "editor.formatOnSaveMode": "modifications",
   "editor.guides.bracketPairs": "active",
   "editor.minimap.enabled": false,
-  "editor.rulers": [80, 100],
+  "editor.rulers": [
+    80,
+    100
+  ],
+  "editor.tabSize": 2,
   "files.trimTrailingWhitespace": true,
   "git.autofetch": true,
+  "gitlens.ai.experimental.openai.model": "gpt-4-1106-preview",
+  "gitlens.ai.experimental.provider": "openai",
   "javascript.updateImportsOnFileMove.enabled": "always",
   "oneDarkPro.bold": true,
   "oneDarkPro.editorTheme": "One Dark Pro Flat",
   "telemetry.telemetryLevel": "off",
   "terminal.integrated.fontSize": 14,
   "typescript.updateImportsOnFileMove.enabled": "always",
+  "window.commandCenter": true,
   "workbench.colorCustomizations": {
-    "editorBracketPairGuide.background1": "#F8B46C",
-    "editorBracketPairGuide.background2": "#FB78B5",
-    "editorBracketPairGuide.background3": "#4AACFB",
-    "editorBracketPairGuide.background4": "#B98BF5",
-    "editorBracketPairGuide.background5": "#DAD8D8",
-    "editorBracketPairGuide.background6": "#18EECE",
     "editorBracketPairGuide.activeBackground1": "#F367C9",
     "editorBracketPairGuide.activeBackground2": "#FD70B2",
     "editorBracketPairGuide.activeBackground3": "#41A7FA",
     "editorBracketPairGuide.activeBackground4": "#B084EB",
     "editorBracketPairGuide.activeBackground5": "#DBDADA",
-    "editorBracketPairGuide.activeBackground6": "#16FAD8"
+    "editorBracketPairGuide.activeBackground6": "#16FAD8",
+    "editorBracketPairGuide.background1": "#F8B46C",
+    "editorBracketPairGuide.background2": "#FB78B5",
+    "editorBracketPairGuide.background3": "#4AACFB",
+    "editorBracketPairGuide.background4": "#B98BF5",
+    "editorBracketPairGuide.background5": "#DAD8D8",
+    "editorBracketPairGuide.background6": "#18EECE"
   },
   "workbench.colorTheme": "One Dark Pro Darker",
   "workbench.layoutControl.enabled": false,
-  "window.commandCenter": true,
   "workbench.startupEditor": "none",
-  "editor.tabSize": 2,
-  "editor.fontFamily": "Fira Code, Menlo, Monaco, 'Courier New', monospace",
-  "editor.fontLigatures": true
+  "terminal.integrated.env.osx": {
+    "CW_NEW_SESSION": "1"
+  }
 }

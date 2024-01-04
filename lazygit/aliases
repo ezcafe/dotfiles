@@ -1,0 +1,5 @@
+# To update/install:
+# brew install lazygit
+# apt install lazygit
+
+alias lg="lazygit"

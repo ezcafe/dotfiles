@@ -1,0 +1,4 @@
+[[ ! -f /Users/ptquang86/.config/config.yml ]] && ln -sv ~/dotfiles/lazygit/config.yml ~/.config
+
+echo "" >> ~/.zshrc
+echo "export XDG_CONFIG_HOME='$HOME/.config'" >> ~/.zshrc
