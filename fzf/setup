@@ -5,6 +5,7 @@ then
   git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
   ~/.fzf/install
 
-  FZF_BASE="$HOME/.fzf"
-  FZF_DEFAULT_OPTS="--height=40% --layout=reverse --info=inline --border"
+  echo "" >> ~/.zshrc
+  echo "FZF_BASE='$HOME/.fzf'" >> ~/.zshrc
+  echo "FZF_DEFAULT_OPTS='--height=40% --layout=reverse --info=inline --border'" >> ~/.zshrc
 fi

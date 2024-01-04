@@ -1,0 +1,4 @@
+# export PATH=$PATH:/usr/local/bin
+
+echo "" >> ~/.zshrc
+echo "export PATH=~/.npm-global/bin:$PATH" >> ~/.zshrc

@@ -1,5 +1,5 @@
 # ========
-. ~/dotfiles/bash/path
+. ~/dotfiles/bash/setup
 . ~/dotfiles/fzf/setup
 . ~/dotfiles/git/setup
 . ~/dotfiles/lazygit/setup

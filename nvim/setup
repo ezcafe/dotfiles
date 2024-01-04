@@ -1,3 +1,2 @@
-export PATH=$PATH:~/.config/nvim-macos/bin/
-
-alias nv="nvim"
+echo "" >> ~/.zshrc
+echo "export PATH=$PATH:~/.config/nvim-macos/bin/" >> ~/.zshrc
