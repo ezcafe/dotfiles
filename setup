@@ -1,9 +1,9 @@
 # ========
 . ~/dotfiles/bash/setup
-. ~/dotfiles/fzf/setup
+# . ~/dotfiles/fzf/setup
 . ~/dotfiles/git/setup
-. ~/dotfiles/lazygit/setup
-. ~/dotfiles/micro/setup
+# . ~/dotfiles/lazygit/setup
+# . ~/dotfiles/micro/setup
 . ~/dotfiles/nvm/setup
 . ~/dotfiles/vscode/setup
 . ~/dotfiles/yarn/setup

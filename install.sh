@@ -32,10 +32,10 @@ source ~/.zshrc
 # echo "source ~/dotfiles/setup" >> ~/.bashrc
 # source ~/.bashrc
 
-# Add this to .zshrc
-echo "" >> ~/.zshrc
-echo "source ~/dotfiles/setup" >> ~/.zshrc
-source ~/.zshrc
+# # Add this to .zshrc
+# echo "" >> ~/.zshrc
+# echo "source ~/dotfiles/setup" >> ~/.zshrc
+# source ~/.zshrc
 
 # # Add nvim (Require Iterm or other Terminal simulator to work)
 # cd ~/.config

@@ -45,7 +45,7 @@ fi
 
 echo "AUTO_NOTIFY_IGNORE+=('docker' 'yarn start')" >> ~/.zshrc
 
-echo "plugins=(auto-notify fzf git you-should-use zsh-autosuggestions zsh-syntax-highlighting)" >> ~/.zshrc
+echo "plugins=(auto-notify you-should-use zsh-autosuggestions zsh-syntax-highlighting)" >> ~/.zshrc
 
 # if [[ -f $ZSH/oh-my-zsh.sh ]]
 # then
