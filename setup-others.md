@@ -1,3 +1,7 @@
+## Add permission
+
+chmod +x ~/dotfiles/setup
+
 ## Firefox Theme:
 - Menu Help => More Troubleshooting Information
 - Profile Folder row => click on Show in Finder

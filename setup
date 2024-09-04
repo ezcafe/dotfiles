@@ -4,6 +4,7 @@
 . ~/dotfiles/git/setup
 # . ~/dotfiles/lazygit/setup
 # . ~/dotfiles/micro/setup
+. ~/dotfiles/nom/setup
 . ~/dotfiles/nvm/setup
 . ~/dotfiles/vscode/setup
 . ~/dotfiles/yarn/setup

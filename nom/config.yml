@@ -1,0 +1,7 @@
+feeds:
+  - url: http://www.tinhte.vn/rss
+    name: TinhTe.vn
+  - url: https://hnrss.org/show
+    name: ShowHN
+  - url: http://www.reddit.com/r/AppHookup/.rss
+    name: AppHookup

@@ -5,6 +5,7 @@
 # . ~/dotfiles/lazygit/aliases
 # . ~/dotfiles/micro/aliases
 . ~/dotfiles/nano/aliases
+. ~/dotfiles/nom/aliases
 . ~/dotfiles/nvim/aliases
 . ~/dotfiles/utils/aliases
 

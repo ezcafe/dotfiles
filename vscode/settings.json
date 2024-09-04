@@ -64,5 +64,14 @@
   "workbench.startupEditor": "none",
   "terminal.integrated.env.osx": {
     "CW_NEW_SESSION": "1"
-  }
+  },
+  "window.confirmSaveUntitledWorkspace": false,
+  "cSpell.userWords": [
+    "dukascopy",
+    "macd",
+    "Minh",
+    "nodemon",
+    "Retracement",
+    "Timeframe"
+  ]
 }
