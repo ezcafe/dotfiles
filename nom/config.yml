@@ -1,3 +1,4 @@
+autoread: true
 feeds:
   - url: http://www.tinhte.vn/rss
     name: TinhTe.vn
