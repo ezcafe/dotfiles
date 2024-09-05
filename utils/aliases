@@ -1,5 +1,4 @@
-alias wtd="curl wttr.in/thu+duc"
-alias wd2="curl wttr.in/quan+2"
+alias wttd="curl wttr.in/thu+duc"
 alias wd4="curl wttr.in/quan+4"
 
 alias fwl="sudo ufw status numbered"
