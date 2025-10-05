@@ -73,5 +73,14 @@
     "nodemon",
     "Retracement",
     "Timeframe"
-  ]
+  ],
+  "git.enableSmartCommit": true,
+  "gitlens.ai.model": "vscode",
+  "gitlens.ai.vscode.model": "copilot:claude-3.5-sonnet",
+  "git.confirmSync": false,
+  "github.copilot.enable": {
+    ".env": false,
+    "env": false
+  },
+  "git.diagnosticsCommitHook.enabled": true
 }

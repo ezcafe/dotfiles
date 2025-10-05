@@ -1,12 +1,15 @@
-alias kp="npm kill-port"
+alias .kp="npm kill-port"
 
-alias ni="npm install"
-alias nr="npm run"
+alias .ni="npm install"
+alias .nb="npm run build"
+alias .nt="npm run test"
+alias .ns="npm run start"
 
-alias yi="yarn install"
-alias yt="yarn test --coverage=false --silent=false"
-alias ytc="yarn test"
-alias ys="yarn start"
+alias .yi="yarn install"
+alias .yb="yarn build"
+alias .yt="yarn test --coverage=false --silent=false"
+alias .ytc="yarn test"
+alias .ys="yarn start"
 
 alias .gs="./gradlew start"
 alias .gt="./gradlew test"
