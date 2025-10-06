@@ -2,6 +2,7 @@ alias .kp="npm kill-port"
 
 alias .ni="npm install"
 alias .nb="npm run build"
+alias .nf="npm run format"
 alias .nt="npm run test"
 alias .ns="npm run start"
 alias .nst="npm run stop"
