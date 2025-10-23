@@ -1,12 +1,13 @@
 alias .kp="npm kill-port"
 
 alias .ni="npm install"
-alias .nb="npm run build"
-alias .nd="npm run dev"
-alias .nf="npm run format"
 alias .nt="npm test"
 alias .ns="npm start"
 alias .nst="npm stop"
+alias .nd="npm run dev"
+alias .nf="npm run format"
+alias .nl="npm run lint"
+alias .nb="npm run build"
 
 alias .yi="yarn install"
 alias .yb="yarn build"
