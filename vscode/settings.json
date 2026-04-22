@@ -82,5 +82,29 @@
     ".env": false,
     "env": false
   },
-  "git.diagnosticsCommitHook.enabled": true
+  "git.diagnosticsCommitHook.enabled": true,
+  "chat.tools.terminal.autoApprove": {
+    "chmod": true,
+    "node": true,
+    "find": true,
+    "mv": true,
+    "rm": true,
+    "npm test": true,
+    "cp": true,
+    "npm run lint:fix": true,
+    "npx eslint": true,
+    "npm run lint": true,
+    "npx tsc": true,
+    "npx jest": true,
+    "npm run build": true,
+    "npm run cli": true,
+    "npm run dev": true,
+    "npm start": true,
+    "pkill": true,
+    "true": true,
+    "timeout": true,
+    "gtimeout": true,
+    "npx prettier": true
+  },
+  "chat.agent.maxRequests": 100
 }

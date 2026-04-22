@@ -4,11 +4,12 @@
 . ~/dotfiles/git/setup
 # . ~/dotfiles/lazygit/setup
 # . ~/dotfiles/micro/setup
-. ~/dotfiles/nom/setup
-. ~/dotfiles/nvm/setup
-. ~/dotfiles/vscode/setup
-. ~/dotfiles/yarn/setup
-. ~/dotfiles/zsh/setup
+. ~/dotfiles/nano/setup
+# . ~/dotfiles/nom/setup
+# . ~/dotfiles/nvm/setup
+# . ~/dotfiles/vscode/setup
+# . ~/dotfiles/yarn/setup
+# . ~/dotfiles/zsh/setup
 
 # if [ $(uname -s) = 'Darwin' ]; then
 # 	. ~/dotfiles/mac/setup

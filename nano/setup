@@ -1,0 +1,14 @@
+# Position Cursor With Mouse Click
+set mouse
+
+# Set the Tab Size
+set tabsize 2
+set tabstospaces
+
+# Auto Indentation
+set autoindent
+
+# Wrap Lines
+set softwrap
+set atblanks
+
