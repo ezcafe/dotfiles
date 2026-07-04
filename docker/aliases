@@ -15,4 +15,11 @@ alias dvl='docker volume ls'
 alias dvi='docker volume inspect'
 alias dvr='docker volume rm'
 
-alias dup='for d in ~/docker/*/; do (cd "$d" && sudo docker compose pull && sudo docker compose up -d); done'
+function dockerUpdatePull() {
+  local d
+  shopt -s nullglob
+  for d in ~/docker/*/; do
+    (cd "$d" && sudo docker compose pull && sudo docker compose up -d)
+  done
+}
+alias dup=dockerUpdatePull
