@@ -16,32 +16,32 @@ alias dvi='docker volume inspect'
 alias dvr='docker volume rm'
 
 function dockerUpdatePull() {
-  local d count=0 docker_root="${DOCKER_ROOT:-$HOME/dotfiles/docker}"
+  local d count=0 docker_root="${DOCKER_ROOT:-$HOME/docker}"
 
   if [[ ! -d "$docker_root" ]]; then
     echo "No such directory: $docker_root"
     return 1
   fi
 
-  _dup_has_compose() {
-    [[ -f "$1/docker-compose.yml" || -f "$1/docker-compose.yaml" || -f "$1/compose.yml" || -f "$1/compose.yaml" ]]
+  _dup_update_dir() {
+    local dir="$1"
+    if ! (cd "$dir" && sudo docker compose config --quiet &>/dev/null); then
+      return 1
+    fi
+    echo "→ $dir"
+    (cd "$dir" && sudo docker compose pull && sudo docker compose up -d)
   }
 
-  _dup_update() {
-    echo "→ $1"
-    (cd "$1" && sudo docker compose pull && sudo docker compose up -d) || return 1
-  }
-
-  if _dup_has_compose "$docker_root"; then
-    _dup_update "$docker_root" || return 1
-    count=$((count + 1))
-  fi
-
+  local candidates=("$docker_root")
   while IFS= read -r d; do
-    _dup_has_compose "$d" || continue
-    _dup_update "$d" || return 1
-    count=$((count + 1))
+    candidates+=("$d")
   done < <(find "$docker_root" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort)
+
+  for d in "${candidates[@]}"; do
+    if _dup_update_dir "$d"; then
+      count=$((count + 1))
+    fi
+  done
 
   if ((count == 0)); then
     echo "No docker compose projects found in $docker_root"
