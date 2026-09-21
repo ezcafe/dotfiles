@@ -9,6 +9,15 @@ alias .nf="npm run format"
 alias .nl="npm run lint"
 alias .nb="npm run build"
 
+alias .pi="pnpm install"
+alias .pt="pnpm test"
+alias .ps="pnpm start"
+alias .pst="pnpm stop"
+alias .pd="pnpm run dev"
+alias .pf="pnpm run format"
+alias .pl="pnpm run lint"
+alias .pb="pnpm run build"
+
 alias .yi="yarn install"
 alias .yb="yarn build"
 alias .yt="yarn test --coverage=false --silent=false"
@@ -18,3 +27,5 @@ alias .yst="yarn stop"
 
 alias .gs="./gradlew start"
 alias .gt="./gradlew test"
+
+alias .cafe="caffeinate -i -t 3600"
