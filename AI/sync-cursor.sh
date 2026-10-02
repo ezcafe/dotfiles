@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# Sync AI skills and rules from this repo to the global Cursor directories.
-# Source of truth: AI/skills and AI/rules
-# Targets:       ~/.cursor/skills and ~/.cursor/global-user-rules.md
+# Sync only the skills and rules that live in this repo to the global Cursor dirs.
+# Skills/rules present in ~/.cursor but missing from this repo are left alone.
 
 set -euo pipefail
 
@@ -10,27 +9,44 @@ SRC_SKILLS="${SCRIPT_DIR}/skills"
 SRC_RULES="${SCRIPT_DIR}/rules"
 DEST_CURSOR="${HOME}/.cursor"
 DEST_SKILLS="${DEST_CURSOR}/skills"
-DEST_RULES_FILE="${DEST_CURSOR}/global-user-rules.md"
-SRC_RULES_FILE="${SRC_RULES}/global-user-rules.md"
 
 if [[ ! -d "${SRC_SKILLS}" ]]; then
   echo "error: missing skills dir: ${SRC_SKILLS}" >&2
   exit 1
 fi
 
-if [[ ! -f "${SRC_RULES_FILE}" ]]; then
-  echo "error: missing rules file: ${SRC_RULES_FILE}" >&2
+if [[ ! -d "${SRC_RULES}" ]]; then
+  echo "error: missing rules dir: ${SRC_RULES}" >&2
   exit 1
 fi
 
 mkdir -p "${DEST_SKILLS}"
 
-echo "Syncing skills → ${DEST_SKILLS}"
-rsync -a --delete --exclude '.DS_Store' "${SRC_SKILLS}/" "${DEST_SKILLS}/"
+skill_count=0
+echo "Syncing repo skills → ${DEST_SKILLS}"
+shopt -s nullglob
+for skill_dir in "${SRC_SKILLS}"/*/; do
+  name="$(basename "${skill_dir}")"
+  echo "  skill: ${name}"
+  # Mirror this skill's contents only; do not touch sibling skills in DEST.
+  rsync -a --delete --exclude '.DS_Store' "${skill_dir}" "${DEST_SKILLS}/${name}/"
+  skill_count=$((skill_count + 1))
+done
 
-echo "Syncing rules  → ${DEST_RULES_FILE}"
-cp "${SRC_RULES_FILE}" "${DEST_RULES_FILE}"
+rule_count=0
+echo "Syncing repo rules → ${DEST_CURSOR}"
+for rule_file in "${SRC_RULES}"/*; do
+  [[ -f "${rule_file}" ]] || continue
+  name="$(basename "${rule_file}")"
+  [[ "${name}" == .DS_Store ]] && continue
+  echo "  rule: ${name}"
+  cp "${rule_file}" "${DEST_CURSOR}/${name}"
+  rule_count=$((rule_count + 1))
+done
+shopt -u nullglob
 
-skill_count="$(find "${DEST_SKILLS}" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')"
-echo "Done. ${skill_count} skill folders synced; global-user-rules.md updated."
-echo "Note: paste User Rules from ${DEST_RULES_FILE} into Cursor Settings → Rules if needed."
+echo "Done. Updated ${skill_count} skill(s) and ${rule_count} rule file(s) from this repo."
+echo "Other skills/rules already in ${DEST_CURSOR} were left unchanged."
+if [[ -f "${DEST_CURSOR}/global-user-rules.md" ]]; then
+  echo "Note: paste User Rules from ${DEST_CURSOR}/global-user-rules.md into Cursor Settings → Rules if needed."
+fi
