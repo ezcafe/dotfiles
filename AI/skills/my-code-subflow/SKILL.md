@@ -12,24 +12,24 @@ description: >-
 
 # my-code-subflow
 
-Build subflow of [`my-plan-flow`](../my-plan-flow/SKILL.md).
+Build subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md).
 
 - **TDD test-case review** runs **before Gate B** only when `04-tasks.md` has planned test cases.
 - **Build** runs **after Gate B** and produces a **draft** (then Smoke → review).
 - **Fix-from-tests** repairs [`my-test-subflow`](../my-test-subflow/SKILL.md) smoke or full failures.
 
-**Details:** [stages.md](stages.md) · templates [`../my-plan-flow/templates.md`](../my-plan-flow/templates.md)
+**Details:** [stages.md](stages.md) · templates [`../my-dev-flow/templates.md`](../my-dev-flow/templates.md)
 
 ## When to run
 
 `run my-code-subflow`, build from design, TDD test-case review, fix from test failures, or when
-`my-plan-flow` reaches Step 4a (before Gate B), Step 4 Build (after Gate B), or Test↔Code loop.
+`my-dev-flow` reaches Step 4a (before Gate B), Step 4 Build (after Gate B), or Test↔Code loop.
 
 ## Principles
 
 - First Build output is a draft, not a deliverable.
 - **TDD test-case review before Gate B (conditional):** Run only if `04-tasks.md` creates planned tests (non-empty TDD case lists). Otherwise skip — note `04a skipped — no planned test cases` in `00-run.md`; do not invent `04a`.
-- **Build after Gate B only** (when parent is `my-plan-flow`). Gate B may be HITL **auto**.
+- **Build after Gate B only** (when parent is `my-dev-flow`). Gate B may be HITL **auto**.
 - TDD: Red → Green → Refactor → Verify (when tasks include tests).
 - **Build when Has UI:** match Design UI specs + existing app chrome. Do not invent a conflicting layout.
 - When fixing from tests: **only** address `06-test-log.md` fix ask + stay aligned with design/tasks (+ Design UI when Has UI).
@@ -45,7 +45,7 @@ Build subflow of [`my-plan-flow`](../my-plan-flow/SKILL.md).
 
 ### Model availability
 
-Follow [`my-plan-flow`](../my-plan-flow/SKILL.md) → **Model availability (auto fallback)**.
+Follow [`my-dev-flow`](../my-dev-flow/SKILL.md) → **Model availability (auto fallback)**.
 
 ## Prerequisites
 
@@ -79,7 +79,7 @@ Build mode:                              Build TDD (Fast) → draft → parent r
 Fix-from-tests mode:                     Fix from 06-test-log (Fast, TDD) → re-run smoke or full test
 ```
 
-When parent runs `my-plan-flow`, it calls this skill for TDD review only when needed, then again for Build after Gate B.
+When parent runs `my-dev-flow`, it calls this skill for TDD review only when needed, then again for Build after Gate B.
 
 ## TDD (required when tests exist)
 
@@ -97,7 +97,7 @@ When parent runs `my-plan-flow`, it calls this skill for TDD review only when ne
 
 ## Orchestrator rules
 
-- Detect mode: no planned tests → skip TDD review; TDD review only / Step 4a → stop before Build; `06-test-log` failure → fix-from-tests; else Build (require Gate B when parent is my-plan-flow).
+- Detect mode: no planned tests → skip TDD review; TDD review only / Step 4a → stop before Build; `06-test-log` failure → fix-from-tests; else Build (require Gate B when parent is my-dev-flow).
 - Fresh Task per stage.
 - After **TDD review or skip**: next is **Gate B** (parent HITL).
 - After **Build**: next is Smoke (`my-test-subflow` smoke), then `my-review-subflow` (unless parent orchestrates).

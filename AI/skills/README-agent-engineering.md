@@ -19,7 +19,7 @@ Cursor-optimized adaptations of [addyosmani/agent-skills](https://github.com/add
 
 | Skill | Role |
 |-------|------|
-| [my-plan-flow](my-plan-flow/SKILL.md) | Full delivery pipeline; includes [grill.md](my-plan-flow/grill.md) (design-tree frontier + glossary/ADR) |
+| [my-dev-flow](my-dev-flow/SKILL.md) | Full delivery pipeline; includes [grill.md](my-dev-flow/grill.md) (design-tree frontier + glossary/ADR) |
 | [myplan](myplan/SKILL.md) | Discovery → spec → plan (use *before* task breakdown) |
 | [vercel-react-best-practices](vercel-react-best-practices/SKILL.md) | React/Next performance rule catalog |
 | [clean-minimal-ui](clean-minimal-ui/SKILL.md) | Visual tokens and clean-minimal styling |

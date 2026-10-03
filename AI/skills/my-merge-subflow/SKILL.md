@@ -9,13 +9,13 @@ description: >-
 
 # my-merge-subflow
 
-Merge subflow of [`my-plan-flow`](../my-plan-flow/SKILL.md). Human owns top risks.
+Merge subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). Human owns top risks.
 
-**Details:** [stages.md](stages.md) · PR body in [`../my-plan-flow/templates.md`](../my-plan-flow/templates.md)
+**Details:** [stages.md](stages.md) · PR body in [`../my-dev-flow/templates.md`](../my-dev-flow/templates.md)
 
 ## When to run
 
-`run my-merge-subflow`, merge the workflow, or when `my-plan-flow` reaches merge
+`run my-merge-subflow`, merge the workflow, or when `my-dev-flow` reaches merge
 after **my-test-subflow** success.
 
 ## Principles
@@ -34,7 +34,7 @@ after **my-test-subflow** success.
 
 ### Model availability
 
-Follow [`my-plan-flow`](../my-plan-flow/SKILL.md) → **Model availability (auto fallback)**.  
+Follow [`my-dev-flow`](../my-dev-flow/SKILL.md) → **Model availability (auto fallback)**.  
 Fast → `inherit`. Record the resolved slug (and any fallback) in `00-run.md`. Do not stop to ask unless no Task can run.
 
 ## Prerequisites
@@ -54,7 +54,7 @@ GATE C (blocking user yes) → Commit (only if approved) → Push + PR + merge (
 ## Orchestrator rules
 
 - Ask Gate C with a short risk summary from `05-review-log.md` / design, note full test Result from `06-test-log.md`, and list pending actions: commit? push? PR? merge?
-- After yes: launch Merge Task ([stages.md](stages.md)) with Task **`description`** `Push PR and merge` (see [`my-plan-flow`](../my-plan-flow/SKILL.md) → Task description map) so the Cursor subagent card shows live status. Pass only the actions the user approved.
+- After yes: launch Merge Task ([stages.md](stages.md)) with Task **`description`** `Push PR and merge` (see [`my-dev-flow`](../my-dev-flow/SKILL.md) → Task description map) so the Cursor subagent card shows live status. Pass only the actions the user approved.
 - If user says “PR only” / not merge yet: stop after `gh pr create`.
 - If user says “commit only”: commit and stop (no push).
 - Return PR URL and merge result (or stop reason).

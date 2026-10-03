@@ -1,5 +1,5 @@
 ---
-name: my-plan-flow
+name: my-dev-flow
 description: >-
   Orchestrates the full delivery pipeline by running my-design-subflow
   (Ideation → Gate A day-to-day auto-approve → light repo skim → Analyze →
@@ -12,12 +12,12 @@ description: >-
   blocking for Gate B only (Grill uses Gate B tier; prefer auto). On auto,
   user-first option picks. Classifies simple vs complex.
   Stage-scoped handoffs + Orchestrator card. Artifacts under .my-docs/workflow.
-  Use when the user says run my-plan-flow, start my-plan-flow, run
-  my-workflow (legacy), simple mode, ideate → build → merge, grill / stress-test
-  this plan, or wants the AI-assisted delivery pipeline.
+  Use when the user says run my-dev-flow, start my-dev-flow, run
+  my-plan-flow / my-workflow (legacy), simple mode, ideate → build → merge,
+  grill / stress-test this plan, or wants the AI-assisted delivery pipeline.
 ---
 
-# my-plan-flow
+# my-dev-flow
 
 End-to-end orchestrator. This skill **does not** re-implement most stages. It
 reads and follows each subflow skill in order. **Grill** (design-tree
@@ -50,9 +50,9 @@ Each subflow can also run **alone** when its prerequisites are met.
 
 ## When to run
 
-- **Default trigger:** `run my-plan-flow`, `start my-plan-flow`, `ideate → build → merge`, or any ask to run the delivery pipeline — **classify complexity first**, then pick Mode.
-- **Legacy alias:** `run my-workflow` / `start my-workflow` → same as `my-plan-flow` (do not confuse with `my-code-subflow` Build).
-- **Explicit override:** `run my-plan-flow simple` / `simple mode` → Mode **simple** (Review profile **lite** unless `skip-review`); `run my-plan-flow full` / `full mode` → Mode **full** (Review profile **full**); `skip-review` with simple → Review profile **skip-review**. Do not re-classify when the user already chose Mode.
+- **Default trigger:** `run my-dev-flow`, `start my-dev-flow`, `ideate → build → merge`, or any ask to run the delivery pipeline — **classify complexity first**, then pick Mode.
+- **Legacy alias:** `run my-plan-flow` / `start my-plan-flow` / `run my-workflow` / `start my-workflow` → same as `my-dev-flow` (do not confuse with `my-code-subflow` Build).
+- **Explicit override:** `run my-dev-flow simple` / `simple mode` → Mode **simple** (Review profile **lite** unless `skip-review`); `run my-dev-flow full` / `full mode` → Mode **full** (Review profile **full**); `skip-review` with simple → Review profile **skip-review**. Do not re-classify when the user already chose Mode.
 - **Grill-only:** `grill`, `grill-with-docs`, or `stress-test this plan` → run Step 2g using [grill.md](grill.md) (needs Analyze / idea artifacts).
 
 ## Mode selection (required on trigger)

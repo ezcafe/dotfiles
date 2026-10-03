@@ -1,6 +1,6 @@
 # my-design-review-subflow stages
 
-Stage-scoped handoff: `~/.cursor/skills/my-plan-flow/templates.md` → stage id `api-contract-review`, `db-design-review`, or `design-review`.  
+Stage-scoped handoff: `~/.cursor/skills/my-dev-flow/templates.md` → stage id `api-contract-review`, `db-design-review`, or `design-review`.  
 Log template: same file → “03a-design-review-log.md”.
 
 ---
@@ -22,7 +22,7 @@ Log template: same file → “03a-design-review-log.md”.
 ```
 You are a Senior API designer verifier for my-design-review-subflow. Fresh context only. You did NOT author these design docs. Generation ≠ verification — find contract gaps; do not rewrite 01–04 yourself.
 
-<Stage-scoped handoff for stage id api-contract-review from ~/.cursor/skills/my-plan-flow/templates.md>
+<Stage-scoped handoff for stage id api-contract-review from ~/.cursor/skills/my-dev-flow/templates.md>
 
 Read ~/.cursor/skills/api-and-interface-design/SKILL.md (and reference.md if needed).
 Read 02-analysis.md, 03-design.md (API/DB contracts + sequence), 04-tasks.md, and 02-skim.md if present.
@@ -79,7 +79,7 @@ Return: clean | needs update, and path to 03a-design-review-log.md.
 ```
 You are a Senior Database designer verifier for my-design-review-subflow. Fresh context only. You did NOT author these design docs. Generation ≠ verification — find schema/migration/query gaps; do not rewrite 01–04 yourself.
 
-<Stage-scoped handoff for stage id db-design-review from ~/.cursor/skills/my-plan-flow/templates.md>
+<Stage-scoped handoff for stage id db-design-review from ~/.cursor/skills/my-dev-flow/templates.md>
 
 Read ~/.cursor/skills/database-and-data-model/SKILL.md.
 Read 02-analysis.md, 03-design.md (Database contracts + example queries + sequence), 04-tasks.md, and 02-skim.md if present.
@@ -135,7 +135,7 @@ Return: clean | needs update, and path to 03a-design-review-log.md.
 ```
 You are a Senior Architect verifier for my-design-review-subflow. Fresh context only. You did NOT author these design docs. Generation ≠ verification — find gaps; do not rewrite 01–04 yourself.
 
-<Stage-scoped handoff for design-review from ~/.cursor/skills/my-plan-flow/templates.md>
+<Stage-scoped handoff for design-review from ~/.cursor/skills/my-dev-flow/templates.md>
 
 Read 01-idea.md, 01a-idea-ui-review.md (if present), 02-skim.md (if present), 02-analysis.md, 02b-grill.md (if present), 03-design.md, 04-tasks.md.
 Also read project AGENTS.md / docs/ARCHITECTURE.md / GLOSSARY.md when present.
@@ -202,7 +202,7 @@ Return: clean | needs update, and path to 03a-design-review-log.md.
 
 ---
 
-## Parent loop hint (my-plan-flow)
+## Parent loop hint (my-dev-flow)
 
 ```
 my-design-subflow (Ideation → Gate A → skim → Analyze → Grill → Design; set Has API + Has DB)

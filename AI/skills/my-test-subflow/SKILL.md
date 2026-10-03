@@ -9,10 +9,10 @@ description: >-
 
 # my-test-subflow
 
-Test subflow of [`my-plan-flow`](../my-plan-flow/SKILL.md). Proves the draft
+Test subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). Proves the draft
 is worth reviewing (smoke) and matches requirements before merge (full).
 
-**Details:** [stages.md](stages.md) · templates [`../my-plan-flow/templates.md`](../my-plan-flow/templates.md)
+**Details:** [stages.md](stages.md) · templates [`../my-dev-flow/templates.md`](../my-dev-flow/templates.md)
 
 ## When to run
 
@@ -39,13 +39,13 @@ is worth reviewing (smoke) and matches requirements before merge (full).
 
 ### Model availability
 
-Follow [`my-plan-flow`](../my-plan-flow/SKILL.md) → **Model availability (auto fallback)**.
+Follow [`my-dev-flow`](../my-dev-flow/SKILL.md) → **Model availability (auto fallback)**.
 
 ## Prerequisites
 
 - Draft code exists (after Build / review fixes).
 - Prefer `03-design.md` / `04-tasks.md` for full mode success criteria.
-- Prefer Gate B checked when parent is `my-plan-flow`.
+- Prefer Gate B checked when parent is `my-dev-flow`.
 - Full mode: prefer review lenses clean (`05-review-log.md`) when parent runs full pipeline.
 - Create `06-test-log.md` from templates if missing.
 
@@ -81,7 +81,7 @@ Coverage check (Fast)
 
 ## Exit rule
 
-| Result | Meaning | Next (parent my-plan-flow) |
+| Result | Meaning | Next (parent my-dev-flow) |
 |--------|---------|---------------------------|
 | **smoke-pass** | Build + unit green | `my-review-subflow` (or Gate C if skip-review) |
 | **smoke-fail** | Build or unit red | Fix-from-tests → re-smoke |

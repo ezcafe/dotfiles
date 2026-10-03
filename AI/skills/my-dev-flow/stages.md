@@ -1,6 +1,6 @@
-# my-plan-flow stage index
+# my-dev-flow stage index
 
-`my-plan-flow` is an **orchestrator only**. Stage prompts live in the subflows.
+`my-dev-flow` is an **orchestrator only**. Stage prompts live in the subflows.
 
 **Progress:** Cursor **subagent card** = live running status (no “now running…” chat banners).  
 **After each step (required):** short summary + path; read Result header only (~40 lines); update Orchestrator card.  
@@ -14,7 +14,7 @@
 
 **Parent:** load each subflow `SKILL.md` once per phase; next Task = Orchestrator card + one `stages.md` section. When entering Grill, also load [grill.md](grill.md) once.
 
-**Decision options:** any 2+ choice must use **Decision N** + **Option 1 / Option 2 / …** with What it is / Example / Pros / Cons / Recommendation — see `SKILL.md`. When HITL is **auto** (or agent picks without waiting), apply **user-first pick** (see my-plan-flow **User-first auto picks**).
+**Decision options:** any 2+ choice must use **Decision N** + **Option 1 / Option 2 / …** with What it is / Example / Pros / Cons / Recommendation — see `SKILL.md`. When HITL is **auto** (or agent picks without waiting), apply **user-first pick** (see my-dev-flow **User-first auto picks**).
 
 **Gates:** Gate A (auto) → Gate B (HITL-tiered) → Gate C (**always blocking**). **No Gate A2 / UI concept step.** Legacy: Gate 2-UI/Gate 1 ≈ A; Gate 2 ≈ B; Gate 3 ≈ C.
 
@@ -38,7 +38,7 @@ Parent / main agent (no Task required unless classifying is ambiguous):
 3. Create/update `00-run.md`: Mode, **Review profile**, Complexity, **Has UI** / **Has API** / **Has DB** when known, resolve High/Medium/Fast (**mechanical → Fast** if Medium missing), init **Orchestrator card**, init **HITL Gate B** (refine after Design / before Gate B); set **HITL Gate C: blocking** always.
 4. Chat: one short line — Mode + Review profile + why.
 
-## Order when running full `my-plan-flow`
+## Order when running full `my-dev-flow`
 
 1. **Step 0** — Mode: full; Review profile: full; models + Orchestrator card + HITL defaults
 2. **Step 1** — Ideation (set **Has UI**)
@@ -54,7 +54,7 @@ Parent / main agent (no Task required unless classifying is ambiguous):
 12. **Steps 10–12** — Full test; Fix loop if needed
 13. **Gate C** — **blocking** ask (commit / push / PR / merge) → merge only after explicit yes
 
-## Order when running simple `my-plan-flow`
+## Order when running simple `my-dev-flow`
 
 Starts at **Analyze**. Skip Ideation → Gate A / skim. Review profile **lite** or **skip-review**.
 

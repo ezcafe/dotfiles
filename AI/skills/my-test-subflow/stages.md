@@ -1,6 +1,6 @@
 # my-test-subflow stages
 
-Stage-scoped handoff: `~/.cursor/skills/my-plan-flow/templates.md` → stage id table.  
+Stage-scoped handoff: `~/.cursor/skills/my-dev-flow/templates.md` → stage id table.  
 Test log template: same file → “06-test-log.md”.
 
 ---
@@ -20,7 +20,7 @@ Test log template: same file → “06-test-log.md”.
 ```
 You are the runner for my-test-subflow Smoke (build + unit only). Fresh context only. Do not run e2e. Do not start code review here.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-plan-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
 
 Discover build and unit commands from package.json / project docs.
 
@@ -56,7 +56,7 @@ Return: smoke-pass | smoke-fail, and path to 06-test-log.md.
 ```
 You run lite verification for my-test-subflow. Fresh context only.
 
-<Stage-scoped handoff for test-lite from ~/.cursor/skills/my-plan-flow/templates.md>
+<Stage-scoped handoff for test-lite from ~/.cursor/skills/my-dev-flow/templates.md>
 
 Read 04-tasks.md for required e2e. Run the repo’s unit (if not already smoke-pass) and only e2e that match this change / tasks.
 Do NOT run a coverage Task. Do NOT add broad missing e2e unless 04-tasks explicitly requires a new e2e file.
@@ -79,7 +79,7 @@ Return: Result + short summary + path.
 ```
 You are the verifier for my-test-subflow Coverage check. Generation ≠ verification — you judge gaps; you do not rewrite product features.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-plan-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
 
 Read 03-design.md (success criteria, flows) and 04-tasks.md. Scan the repo for existing e2e tests and how they are run (package.json scripts, playwright/cypress/etc.).
 
@@ -109,7 +109,7 @@ Return: covered count, missing list, e2e command if known.
 ```
 You are the Senior Developer for my-test-subflow Add missing e2e.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-plan-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
 
 Read 06-test-log.md Coverage section and 03-design.md / 04-tasks.md.
 
@@ -140,7 +140,7 @@ If **no e2e stack**: skip this stage; parent marks failure / asks user (see SKIL
 ```
 You are the runner for my-test-subflow Run suite (full).
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-plan-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
 
 Discover commands from package.json / project docs (build, unit test, e2e). Prefer project scripts over ad-hoc commands.
 
@@ -162,7 +162,7 @@ Return: success | failure, and paths to log sections.
 
 ---
 
-## Parent loop hint (my-plan-flow)
+## Parent loop hint (my-dev-flow)
 
 ```
 After Build → Smoke

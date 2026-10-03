@@ -2,7 +2,7 @@
 
 Copy the **Task prompt** for the current stage. Fill bracketed paths. Use simple plain words.
 
-Stage-scoped handoff: see `~/.cursor/skills/my-plan-flow/templates.md` → stage id table (`gate-a`, `skim`, `ui-concept`, `analyze`, `design`, `design-update`, …).
+Stage-scoped handoff: see `~/.cursor/skills/my-dev-flow/templates.md` → stage id table (`gate-a`, `skim`, `ui-concept`, `analyze`, `design`, `design-update`, …).
 
 Parent uses the **resolved** model for that stage’s tier (see `00-run.md`).
 
@@ -33,7 +33,7 @@ Quick-scan the repo first (README, AGENTS.md, related features). Summarize the p
 
 Investigate the question against primary sources (official docs, source code, specs, first-party APIs), not a secondary write-up of them. Follow every claim back to the source that owns it.
 
-Then draft .my-docs/workflow/<slug>/01-idea.md using the template from ~/.cursor/skills/my-plan-flow/templates.md.
+Then draft .my-docs/workflow/<slug>/01-idea.md using the template from ~/.cursor/skills/my-dev-flow/templates.md.
 
 Must include:
 - Problem, User / audience, Outcome, Metric
@@ -69,7 +69,7 @@ Return: short summary + path to 01-idea.md + Has UI value + any blocking questio
 ```
 You are an end user reviewing the product idea for day-to-day usage. Fresh context only — do not assume prior chat. You are NOT the Product Owner and NOT the Architect.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-plan-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
 
 Read only:
 - .my-docs/workflow/<slug>/01-idea.md
@@ -89,7 +89,7 @@ Ignore technical design. Judge whether this idea would work in real daily use.
 
 Also review for: convenience, easy to use, understanding, mobile usability (or n/a), eye reading flow.
 
-Write .my-docs/workflow/<slug>/01a-idea-ui-review.md using the template from ~/.cursor/skills/my-plan-flow/templates.md.
+Write .my-docs/workflow/<slug>/01a-idea-ui-review.md using the template from ~/.cursor/skills/my-dev-flow/templates.md.
 Fill all 80/20 sections and set **80/20 overall pass?** yes/no.
 
 Set Result:
@@ -126,7 +126,7 @@ Return: Result + short summary + path to 01a-idea-ui-review.md.
 ```
 You are the Product Owner updating ideation from the user-role day-to-day review (Gate A). Fresh context only.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-plan-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
 
 Read 01a-idea-ui-review.md (Findings + Fix ask). Read 01-idea.md.
 
@@ -158,13 +158,13 @@ Return: what you updated in 01-idea.md.
 ```
 You are doing a light repo skim for my-design-subflow. Fresh context only. This is NOT full Analyze — constraints and reuse pointers only.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-plan-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
 
 Read 01-idea.md and 01a-idea-ui-review.md (Gate A ok).
 
 Scan the repo for related screens, components, APIs, and hard constraints. Prefer concrete paths.
 
-Write .my-docs/workflow/<slug>/02-skim.md using the template from ~/.cursor/skills/my-plan-flow/templates.md.
+Write .my-docs/workflow/<slug>/02-skim.md using the template from ~/.cursor/skills/my-dev-flow/templates.md.
 
 Must include: project shape (1–3 sentences), related UI paths, related APIs/data, hard constraints, risks if ignored, enough for Analyze/Design?
 
@@ -201,7 +201,7 @@ Return: short summary + path to 02-skim.md.
 ```
 You are the Architect for my-design-subflow Analyze + Q&A. Fresh context only.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-plan-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
 
 Read 01-idea.md (Gate A ok) and 02-skim.md.
 When Has UI, explore how to implement within Gate A 80/20 and existing app chrome; do not invent a conflicting IA.
@@ -228,7 +228,7 @@ Do not write production code. Do not finalize design yet.
 Return: short summary + deep-dive highlights + open questions + Design tree summary + Grill recommended? + Has API recommendation (yes/no) + Has DB recommendation (yes/no).
 ```
 
-**After:** Parent may answer Q&A, sets/refines **Has API** and **Has DB** in `00-run.md` from Analyze return, then **Grill** (or skip per [`my-plan-flow/grill.md`](../my-plan-flow/grill.md) rules), then Design (or pause if blocked).
+**After:** Parent may answer Q&A, sets/refines **Has API** and **Has DB** in `00-run.md` from Analyze return, then **Grill** (or skip per [`my-dev-flow/grill.md`](../my-dev-flow/grill.md) rules), then Design (or pause if blocked).
 
 ---
 
@@ -236,7 +236,7 @@ Return: short summary + deep-dive highlights + open questions + Design tree summ
 
 **When:** After Analyze. Mode **full** — always (unless `02b` already `frontier-empty` and artifacts unchanged). Mode **simple** — when Analyze Design tree has open frontier / unsettled Decisions, or Has API/DB; else skip.
 
-**Rules:** `~/.cursor/skills/my-plan-flow/grill.md` + `documentation-and-adrs`.
+**Rules:** `~/.cursor/skills/my-dev-flow/grill.md` + `documentation-and-adrs`.
 
 **subagent_type:** `generalPurpose`  
 **model:** resolved Medium  
@@ -249,9 +249,9 @@ Return: short summary + deep-dive highlights + open questions + Design tree summ
 **Task prompt:**
 
 ```
-You are grilling the design tree for my-design-subflow. Fresh context only. Follow ~/.cursor/skills/my-plan-flow/grill.md and documentation-and-adrs.
+You are grilling the design tree for my-design-subflow. Fresh context only. Follow ~/.cursor/skills/my-dev-flow/grill.md and documentation-and-adrs.
 
-<Stage-scoped handoff for stage id grill from ~/.cursor/skills/my-plan-flow/templates.md>
+<Stage-scoped handoff for stage id grill from ~/.cursor/skills/my-dev-flow/templates.md>
 
 Read 00-run.md (Mode, HITL Gate B, Has API/DB), 01-idea.md, 02-skim.md (if present), 02-analysis.md (especially Design tree + Blocking questions + Settled decisions).
 Read repo GLOSSARY.md or GLOSSARY-MAP.md if present. Cross-check claims against code when needed — look up facts yourself; do not ask the user for look-up-able facts.
@@ -297,7 +297,7 @@ Return: Result (frontier-empty | needs-round | skipped) + Grill digest (≤4 bul
 ```
 You are the Architect for my-design-subflow Design. Fresh context only.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-plan-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
 
 Read 01-idea.md, 02-skim.md, 02-analysis.md, and 02b-grill.md when present. When Has UI, specify UI in design — align Gate A #1/#2 and existing chrome; **lock Build** to those Design UI specs.
 Honor grill Settled decisions and glossary terms — do not re-open frontier-empty branches without new evidence.
@@ -322,7 +322,7 @@ Return: options summary + Recommendation + Has API (yes/no) + Has DB (yes/no) + 
 ```
 
 **After (standalone):** Prefer design-review → TDD → **Gate B** → Build.  
-**After (parent my-plan-flow):** Parent sets/refines **Has API** and **Has DB** in `00-run.md`. Do **not** Gate B yet — design-review loop (with **API contract review** when Has API; **DB design review** when Has DB), then TDD, then Gate B, then Build.
+**After (parent my-dev-flow):** Parent sets/refines **Has API** and **Has DB** in `00-run.md`. Do **not** Gate B yet — design-review loop (with **API contract review** when Has API; **DB design review** when Has DB), then TDD, then Gate B, then Build.
 
 ---
 
@@ -341,7 +341,7 @@ Return: options summary + Recommendation + Has API (yes/no) + Has DB (yes/no) + 
 ```
 You are the Architect for Update from design review. Fresh context only. Repair only what 03a Fix ask lists; keep Gate A idea. Do not re-litigate Gate A 80/20 unless Fix ask requires it.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-plan-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
 
 Read 03a, 01-idea, 02-skim, 02-analysis, 02b-grill (if present), 03-design, 04-tasks.
 

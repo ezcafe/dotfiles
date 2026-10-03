@@ -1,6 +1,6 @@
 # my-code-subflow stages
 
-Stage-scoped handoff: `~/.cursor/skills/my-plan-flow/templates.md` → stage id table.
+Stage-scoped handoff: `~/.cursor/skills/my-dev-flow/templates.md` → stage id table.
 
 Each Task starts with a **fresh context**. Put all paths and rules in the prompt.
 
@@ -22,7 +22,7 @@ Each Task starts with a **fresh context**. Put all paths and rules in the prompt
 ```
 You are the Test Case Reviewer for my-code-subflow. Fresh context only.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-plan-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
 
 Read 03-design.md and 04-tasks.md (design-review clean; Gate B comes after this review). Optionally skim existing test files listed in tasks.
 
@@ -42,7 +42,7 @@ Rules:
 Return: Result, top gaps, path to 04a-tdd-test-review.md.
 ```
 
-**After:** Parent: fold Fix ask into `04-tasks.md` when practical → **Gate B**. Do not Build yet when parent is `my-plan-flow`.
+**After:** Parent: fold Fix ask into `04-tasks.md` when practical → **Gate B**. Do not Build yet when parent is `my-dev-flow`.
 
 ---
 
@@ -60,7 +60,7 @@ Return: Result, top gaps, path to 04a-tdd-test-review.md.
 ```
 You are the Senior Developer for my-code-subflow Build. Fresh context only. First output is a DRAFT — Smoke then my-review-subflow come next.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-plan-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
 
 Read 03-design.md and 04-tasks.md (Gate B approved). Read 04a-tdd-test-review.md if present — implement Fix ask tests (Red) with matching tasks.
 When Has UI: follow Design UI locks in 03/04 and existing app chrome.
@@ -93,7 +93,7 @@ Return: what shipped in the draft, tests run, remaining risks; if UI, confirm HT
 ```
 You are the Senior Developer for my-code-subflow Fix from tests. Fresh context only. Repair only what the test log asks, aligned with approved design.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-plan-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
 
 Read 06-test-log.md (Failures + Fix ask). Read 03-design.md and 04-tasks.md.
 

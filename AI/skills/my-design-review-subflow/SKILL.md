@@ -11,15 +11,15 @@ description: >-
 
 # my-design-review-subflow
 
-Design verification subflow of [`my-plan-flow`](../my-plan-flow/SKILL.md).
+Design verification subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md).
 Generation ≠ verification: this skill **reviews** design docs; it does **not**
 rewrite them (updates go to [`my-design-subflow`](../my-design-subflow/SKILL.md)).
 
-**Details:** [stages.md](stages.md) · templates [`../my-plan-flow/templates.md`](../my-plan-flow/templates.md)
+**Details:** [stages.md](stages.md) · templates [`../my-dev-flow/templates.md`](../my-dev-flow/templates.md)
 
 ## When to run
 
-`run my-design-review-subflow`, review the design, or when `my-plan-flow` finishes
+`run my-design-review-subflow`, review the design, or when `my-dev-flow` finishes
 the first design pass and before code.
 
 ## Principles
@@ -45,7 +45,7 @@ the first design pass and before code.
 
 ### Model availability
 
-Follow [`my-plan-flow`](../my-plan-flow/SKILL.md) → **Model availability (auto fallback)**.
+Follow [`my-dev-flow`](../my-dev-flow/SKILL.md) → **Model availability (auto fallback)**.
 
 ## Prerequisites
 
@@ -81,7 +81,7 @@ If not clean → hand **Fix ask** to `my-design-subflow` Update mode → parent 
 
 ## Exit
 
-| Result | Next (when parent is my-plan-flow) |
+| Result | Next (when parent is my-dev-flow) |
 |--------|-----------------------------------|
 | **clean** | TDD → Gate B → Build → Smoke → review/test per **Review profile** (full / lite / skip-review); ensure SPM plan includes **api** when Has API and **db** when Has DB |
 | **needs update** | `my-design-subflow` Update → re-run this skill |
@@ -95,7 +95,7 @@ Standalone: on clean say next is TDD → Gate B → Build → Smoke → review/t
 - When both yes: launch both isolated Tasks (parallel OK), then Design review.
 - When **Has API = no**: skip API contract Task; mark 03a API section **skipped**.
 - When **Has DB = no**: skip DB design Task; mark 03a DB section **skipped**.
-- Set Task **`description`** from my-plan-flow map.
+- Set Task **`description`** from my-dev-flow map.
 - Do **not** edit `01`–`04` here — only write `03a`.
 - Do not write production code.
 - Progress = subagent card; parent shows short summary + path for `03a`.

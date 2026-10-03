@@ -4,19 +4,19 @@ description: >-
   Verifies a code draft with adversarial test review then quality, then
   conditional API/DB/security/performance/memory lenses (only when SPM plan
   signals match). Merge findings when 2+ lenses; one Fix round; re-loop until
-  clean. Honors Review profile lite/skip-review from my-plan-flow. Use when the
+  clean. Honors Review profile lite/skip-review from my-dev-flow. Use when the
   user says run my-review-subflow, review the draft, or after my-code-subflow.
 ---
 
 # my-review-subflow
 
-Review + Fix subflow of [`my-plan-flow`](../my-plan-flow/SKILL.md). Generation ≠ verification.
+Review + Fix subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). Generation ≠ verification.
 
-**Details:** [stages.md](stages.md) · templates [`../my-plan-flow/templates.md`](../my-plan-flow/templates.md)
+**Details:** [stages.md](stages.md) · templates [`../my-dev-flow/templates.md`](../my-dev-flow/templates.md)
 
 ## When to run
 
-`run my-review-subflow`, review the draft, or when `my-plan-flow` reaches review.
+`run my-review-subflow`, review the draft, or when `my-dev-flow` reaches review.
 
 ## Principles
 
@@ -33,7 +33,7 @@ Review + Fix subflow of [`my-plan-flow`](../my-plan-flow/SKILL.md). Generation �
 - Re-run only the lenses in SPM plan → merge (if 2+) → Fix until clean (max 3 rounds, then pause).
 - If Fix changed tests/behavior, re-run **Adversarial** once (and Quality if structure changed).
 - Use **stage-scoped handoffs** (`adversarial`, `quality`, `spm-api`, `spm-db`, `spm-*`, `merge-findings`, `fix-review`).
-- Mechanical stages → Fast when Medium unavailable (see my-plan-flow).
+- Mechanical stages → Fast when Medium unavailable (see my-dev-flow).
 - Plain words in the review log.
 
 ## Models
@@ -45,20 +45,20 @@ Review + Fix subflow of [`my-plan-flow`](../my-plan-flow/SKILL.md). Generation �
 
 ### Model availability
 
-Follow [`my-plan-flow`](../my-plan-flow/SKILL.md) → **Model availability (auto fallback)**.  
+Follow [`my-dev-flow`](../my-dev-flow/SKILL.md) → **Model availability (auto fallback)**.  
 Medium → Fast → `inherit`. Fast → `inherit`. Record the resolved slug (and any fallback) in `00-run.md`. Do not stop to ask unless no Task can run.
 
 ## Prerequisites
 
 - Draft code exists (after `my-code-subflow` or equivalent).
-- Prefer Gate B checked in `00-run.md` (required when parent is `my-plan-flow`; legacy: Gate 2).
-- Prefer **smoke-pass** in `06-test-log.md` when parent is `my-plan-flow` (do not review a draft that fails build/unit).
+- Prefer Gate B checked in `00-run.md` (required when parent is `my-dev-flow`; legacy: Gate 2).
+- Prefer **smoke-pass** in `06-test-log.md` when parent is `my-dev-flow` (do not review a draft that fails build/unit).
 - Prefer `03-design.md` / `04-tasks.md` present for intent checks.
 - Create `05-review-log.md` from templates if missing.
 
 If there is no draft to review → **stop** and tell the user to run `my-code-subflow` first.
-If parent is `my-plan-flow` and Gate B is unchecked → **stop** and wait for Gate B.
-If parent is `my-plan-flow` and smoke is not **smoke-pass** → **stop** and run `my-test-subflow` smoke first.
+If parent is `my-dev-flow` and Gate B is unchecked → **stop** and wait for Gate B.
+If parent is `my-dev-flow` and smoke is not **smoke-pass** → **stop** and run `my-test-subflow` smoke first.
 
 ## Pipeline
 
@@ -96,10 +96,10 @@ For behavior findings: Red → Green → Refactor → Verify. Docs/comments only
 - Before lenses: read **SPM plan** from `00-run.md`. If **Has API = yes** and plan omits **api**, add **api**. If **Has DB = yes** and plan omits **db**, add **db**. Launch **only** matching lenses (0–5). Do **not** always launch all five.
 - Wait for launched lenses. Merge findings only if **2+** lenses. Single lens: parent copies into Merged SPM. Do **not** Fix until that is done.
 - Launch **one** Fix Task from the Fix ask only.
-- Stage-scoped handoffs; Task **`description`** from my-plan-flow map.
+- Stage-scoped handoffs; Task **`description`** from my-dev-flow map.
 - Bugbot only if the user asks.
 - Parent: Result header summary + path; update Orchestrator card.
-- When clean: next is `my-test-subflow` **full** (profile full) or **lite** (profile lite), then Gate C (unless parent is `my-plan-flow`).
+- When clean: next is `my-test-subflow` **full** (profile full) or **lite** (profile lite), then Gate C (unless parent is `my-dev-flow`).
 
 ## Skills used
 

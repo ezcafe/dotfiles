@@ -1,4 +1,4 @@
-# Grill (inside my-plan-flow)
+# Grill (inside my-dev-flow)
 
 Design-tree frontier interview + domain modeling. Adapted from
 [mattpocock/skills grill-with-docs](https://github.com/mattpocock/skills/tree/main/skills/engineering/grill-with-docs),
@@ -53,7 +53,7 @@ depend on it.
 ➡️ Recommended: …
 ```
 
-When presenting 2+ choices in chat, also use my-plan-flow **Decision N** shape
+When presenting 2+ choices in chat, also use my-dev-flow **Decision N** shape
 (What / Example / Pros / Cons / Recommendation).
 
 ### Scenario stress-test (required when domain boundaries matter)

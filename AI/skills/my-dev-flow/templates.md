@@ -1,6 +1,6 @@
-# my-plan-flow templates
+# my-dev-flow templates
 
-Shared by `my-plan-flow` and its subflows. Copy into `.my-docs/workflow/<slug>/`. Keep language simple and plain. Lead with short bold labels where helpful.
+Shared by `my-dev-flow` and its subflows. Copy into `.my-docs/workflow/<slug>/`. Keep language simple and plain. Lead with short bold labels where helpful.
 
 ---
 
@@ -40,7 +40,7 @@ Stage: <stage-id>
 Read only the artifacts listed for this stage (do not open others unless a listed file links to them).
 Write only: <write list for stage>
 Use simple plain words. Fresh context — do not assume prior chat or other agents' memory.
-Honor artifact size caps in my-plan-flow/templates.md.
+Honor artifact size caps in my-dev-flow/templates.md.
 ```
 
 ### Stage id → read / write
@@ -116,11 +116,11 @@ If a cap would hide a Critical risk, keep the risk and cut prose elsewhere.
 
 **Status:** ideation | gate-a | skim | analyze | grill | design | design-review | tdd-review | gate-b | build | smoke | review | test | gate-c | done | stopped
 
-**Mode:** full | simple — set after complexity check (or override/resume); see my-plan-flow **Mode selection**
+**Mode:** full | simple — set after complexity check (or override/resume); see my-dev-flow **Mode selection**
 
 **Complexity:** simple | complex — one-line reason (e.g. `simple — clear bug fix` / `complex — new multi-surface feature`)
 
-**Review profile:** full | lite | skip-review — set at Step 0 (see my-plan-flow **Review profile**)
+**Review profile:** full | lite | skip-review — set at Step 0 (see my-dev-flow **Review profile**)
 
 **SPM plan:** none | api | db | security | perf | memory | api+db | api+security | … — set before code review from signals (see **Conditional lenses**). Include **api** when **Has API = yes**. Include **db** when **Has DB = yes**.
 
@@ -149,7 +149,7 @@ If a cap would hide a Critical risk, keep the risk and cut prose elsewhere.
 - **Has UI:** yes | no | unknown — **set in Ideation** (do not wait for Gate A). UI specs go in Design (no UI concept / Gate A2).
 - **Has API:** yes | no | unknown — set when contracts are clear (Analyze/Design or earlier). When yes: isolated **API contract review** at design-review + **api** lens at code review.
 - **Has DB:** yes | no | unknown — set when schema/migrations/persistence queries are clear (Analyze/Design or earlier). When yes: isolated **DB design review** at design-review + **db** lens at code review.
-- **HITL Gate B:** auto | async-notify | blocking — see my-plan-flow **HITL tiers**
+- **HITL Gate B:** auto | async-notify | blocking — see my-dev-flow **HITL tiers**
 - **HITL Gate C:** blocking — **always**. Never auto/async. No commit/push/PR/merge without explicit user yes.
 - **04a:** run | skipped — reason (skipped when no planned test cases):
 
@@ -419,7 +419,7 @@ Concrete updates to `01-idea.md` (section + what to change):
 
 ## 01b-ui-concept.md / ui-refs (REMOVED)
 
-**Do not create** on new runs. UI concept + Gate A2 were removed from my-plan-flow.
+**Do not create** on new runs. UI concept + Gate A2 were removed from my-dev-flow.
 
 When Has UI: put layout/IA/chrome locks in `03-design.md` and acceptance in `04-tasks.md`. Match existing app patterns. Legacy `01b` / `ui-refs` in old slugs may remain on disk; ignore for new pipeline steps.
 
