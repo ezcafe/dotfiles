@@ -5,14 +5,14 @@ Design-tree frontier interview + domain modeling. Adapted from
 [grilling](https://github.com/mattpocock/skills/blob/main/skills/productivity/grilling/SKILL.md), and
 [domain-modeling](https://github.com/mattpocock/skills/blob/main/skills/engineering/domain-modeling/SKILL.md).
 
-**Where it runs:** after Analyze, before Design (`my-design-subflow` Step 2g).
+**Where it runs:** after Analyze, before Design (`my-dev-flow-design` Step 2g).
 May also run alone when the user says `grill`, `grill-with-docs`, or
 `stress-test this plan`.
 
 Also follow [`documentation-and-adrs`](../documentation-and-adrs/SKILL.md) for ADR
-file location and the three-part ADR bar. Artifact template: [templates.md](templates.md)
-→ `02b-grill.md`. Stage prompt: [`../my-design-subflow/stages.md`](../my-design-subflow/stages.md)
-→ **2g. Grill**.
+file location and the three-part ADR bar. Artifact template: [artifacts.md](artifacts.md)
+→ `02b-grill.md`. Stage prompt: [`../my-dev-flow-design/stages.md`](../my-dev-flow-design/stages.md)
+→ **2g. Grill**. Pipeline rules: [stages.md](stages.md).
 
 ## Goal
 
@@ -20,8 +20,9 @@ Reach a **shared understanding** of open design decisions, then capture durable
 **domain language** (glossary) and **hard-to-reverse choices** (sparse ADRs).
 
 **HITL:** Prefer **auto** (user-first picks on recommended answers). Honor
-`00-run.md` **HITL Gate B** when present: `auto` / `async-notify` → settle
-recommendations and continue; `blocking` → post frontier round and wait.
+`00-run.md` **HITL Gate B**: `auto` / `async-notify` → settle recommendations and
+continue (`async-notify` = continue immediately; veto only in the **next user
+message** — see stages.md); `blocking` → post frontier round and wait.
 
 ## Facts vs decisions
 
@@ -53,8 +54,13 @@ depend on it.
 ➡️ Recommended: …
 ```
 
-When presenting 2+ choices in chat, also use my-dev-flow **Decision N** shape
-(What / Example / Pros / Cons / Recommendation).
+**Decision N vs grill Q:**
+
+- In **chat** for multi-option product/tech choices that need the full
+  What / Example / Pros / Cons shape → use my-dev-flow **Decision N**.
+- **Binary** frontier Qs (yes/no or two short labels) may use the grill Q format
+  alone when settled picks are logged in `02b-grill.md`. Do not duplicate both
+  formats for the same Q.
 
 ### Scenario stress-test (required when domain boundaries matter)
 
@@ -113,7 +119,7 @@ On skip: parent Notes `grill skipped — <reason>`; do **not** invent empty thea
 
 ## Outputs (workflow slug)
 
-Write `.my-docs/workflow/<slug>/02b-grill.md` (template in [templates.md](templates.md)).
+Write `.my-docs/workflow/<slug>/02b-grill.md` (template in [artifacts.md](artifacts.md)).
 Optionally update:
 
 - Repo `GLOSSARY.md` (or mapped context glossary)

@@ -1,6 +1,6 @@
-# my-review-subflow stages
+# my-dev-flow-review stages
 
-Stage-scoped handoff: `~/.cursor/skills/my-dev-flow/templates.md` → stage id (`adversarial`, `quality`, `spm-api`, `spm-db`, `spm-security`, `spm-perf`, `spm-memory`, `merge-findings`, `fix-review`).
+Stage-scoped handoff: `~/.cursor/skills/my-dev-flow/handoffs.md` → stage id (`adversarial`, `quality`, `spm-api`, `spm-db`, `spm-security`, `spm-perf`, `spm-memory`, `merge-findings`, `fix-review`).
 
 ---
 
@@ -17,9 +17,9 @@ Stage-scoped handoff: `~/.cursor/skills/my-dev-flow/templates.md` → stage id (
 **Task prompt:**
 
 ```
-You are a Senior Verifier for my-review-subflow Adversarial Test Review. You did NOT write this code. Do not rewrite features unless needed to describe a finding.
+You are a Senior Verifier for my-dev-flow-review Adversarial Test Review. You did NOT write this code. Do not rewrite features unless needed to describe a finding.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/handoffs.md>
 
 Review tests and how they map to 04-tasks.md and the behavior in the draft.
 
@@ -55,30 +55,30 @@ Bugbot only if the user asked.
 **Task prompt:**
 
 ```
-You are a Senior Verifier for my-review-subflow Quality Review. Generation ≠ verification — you did not write this draft.
+You are a Senior Verifier for my-dev-flow-review Quality Review. Generation ≠ verification — you did not write this draft.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/handoffs.md>
 
 Read ~/.cursor/skills/code-review-and-quality/SKILL.md and follow it.
 Review uncommitted / branch changes against 01-idea, 03-design, and 04-tasks.
 When Has UI: also compare draft UI to Design UI specs in 03-design / 04-tasks + Gate A #1/#2 — fail **Major** if shipped look drifts on **size**, **positions**, **texts**, or chrome.
 When 03-design **System design** or **Design patterns used** is not N/A: check draft code honors their Best practices / anti-patterns and does not invent a conflicting shape (Architecture axis). Flag design↔code gaps as Major when clear.
 
-Do NOT deep-review API contracts here when Has API / SPM plan includes api — that is the dedicated API lens. You may note “defer to API lens” for contract-shaped issues.
-Do NOT deep-review schema/migrations/persistence queries here when Has DB / SPM plan includes db — that is the dedicated DB lens. You may note “defer to DB lens” for data-model issues.
+Do NOT deep-review API contracts here when Has API / Lens plan includes api — that is the dedicated API lens. You may note “defer to API lens” for contract-shaped issues.
+Do NOT deep-review schema/migrations/persistence queries here when Has DB / Lens plan includes db — that is the dedicated DB lens. You may note “defer to DB lens” for data-model issues.
 
 Label every finding Critical / Major / Enhancement (Nit/FYI ok).
 Append to 05-review-log.md under “Quality”.
 Do not fix. Return finding table or “Quality review: clean.”
 ```
 
-**If findings:** run **Fix** (lens = quality) → re-run Quality until clean → then Conditional lenses (per SPM plan).
+**If findings:** run **Fix** (lens = quality) → re-run Quality until clean → then Conditional lenses (per Lens plan).
 
 ---
 
 ## 3. Conditional lenses — API / DB / Security / Performance / Memory (Medium|Fast)
 
-**When:** After Quality is clean **and** `00-run.md` **SPM plan** is not `none`. Parent launches **only** lenses listed in SPM plan (parallel when 2+). If plan is `none`, skip section 3–4 and go to test.
+**When:** After Quality is clean **and** `00-run.md` **Lens plan** is not `none`. Parent launches **only** lenses listed in Lens plan (parallel when 2+). If plan is `none`, skip section 3–4 and go to test.
 
 If **Has API = yes** and plan omits **api**, parent adds **api** before launching.
 If **Has DB = yes** and plan omits **db**, parent adds **db** before launching.
@@ -95,22 +95,22 @@ Each lens writes **only** its own file (do not edit `05-review-log.md` here — 
 | Performance | `.my-docs/workflow/<slug>/05-lens-performance.md` |
 | Memory | `.my-docs/workflow/<slug>/05-lens-memory.md` |
 
-Overwrite the lens file each round. Use the lens template in `~/.cursor/skills/my-dev-flow/templates.md` → “05-lens-*.md”.
+Overwrite the lens file each round. Use the lens template in `~/.cursor/skills/my-dev-flow/artifacts.md` → “05-lens-*.md”.
 
 ### 3a. API (required when Has API)
 
 **Skills:** `~/.cursor/skills/api-and-interface-design/SKILL.md` (+ `reference.md` when useful)
 
-**When:** SPM plan includes **api** (always when Has API = yes).
+**When:** Lens plan includes **api** (always when Has API = yes).
 
 **Task description:** `API contract lens`
 
 **Task prompt:**
 
 ```
-You are a Senior Verifier for my-review-subflow API Contract Review. Fresh context only. You run in parallel with other SPM lenses when present — write ONLY 05-lens-api.md; do not edit 05-review-log.md or other lens files. Do not fix code.
+You are a Senior Verifier for my-dev-flow-review API Contract Review. Fresh context only. You run in parallel with other SPM lenses when present — write ONLY 05-lens-api.md; do not edit 05-review-log.md or other lens files. Do not fix code.
 
-<Stage-scoped handoff for stage id spm-api from ~/.cursor/skills/my-dev-flow/templates.md>
+<Stage-scoped handoff for stage id spm-api from ~/.cursor/skills/my-dev-flow/handoffs.md>
 
 Read ~/.cursor/skills/api-and-interface-design/SKILL.md (and reference.md if needed).
 Also read 03-design.md API/DB contracts and the draft route/handler/validator/schema files.
@@ -136,16 +136,16 @@ Return: Result + path to 05-lens-api.md.
 
 **Skills:** `~/.cursor/skills/database-and-data-model/SKILL.md`
 
-**When:** SPM plan includes **db** (always when Has DB = yes).
+**When:** Lens plan includes **db** (always when Has DB = yes).
 
 **Task description:** `Database review`
 
 **Task prompt:**
 
 ```
-You are a Senior Verifier for my-review-subflow Database Review. Fresh context only. You run in parallel with other SPM lenses when present — write ONLY 05-lens-db.md; do not edit 05-review-log.md or other lens files. Do not fix code.
+You are a Senior Verifier for my-dev-flow-review Database Review. Fresh context only. You run in parallel with other SPM lenses when present — write ONLY 05-lens-db.md; do not edit 05-review-log.md or other lens files. Do not fix code.
 
-<Stage-scoped handoff for stage id spm-db from ~/.cursor/skills/my-dev-flow/templates.md>
+<Stage-scoped handoff for stage id spm-db from ~/.cursor/skills/my-dev-flow/handoffs.md>
 
 Read ~/.cursor/skills/database-and-data-model/SKILL.md.
 Also read 03-design.md Database contracts + example queries, 04-tasks.md, and the draft schema / migration / query / server persistence files.
@@ -178,9 +178,9 @@ Return: Result + path to 05-lens-db.md.
 **Task prompt:**
 
 ```
-You are a Senior Verifier for my-review-subflow Security Review. Fresh context only. You run in parallel with other lenses — write ONLY your lens file; do not edit 05-review-log.md or other lens files. Do not fix code.
+You are a Senior Verifier for my-dev-flow-review Security Review. Fresh context only. You run in parallel with other lenses — write ONLY your lens file; do not edit 05-review-log.md or other lens files. Do not fix code.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/handoffs.md>
 
 Read ~/.cursor/skills/security-and-hardening/SKILL.md (including OWASP Top 10 section).
 Follow ~/.cursor/skills-cursor/review-security/SKILL.md to run the security-review subagent on branch changes when you can; otherwise review authz, injection, secrets, untrusted input yourself.
@@ -204,9 +204,9 @@ Return: Result + path to 05-lens-security.md.
 **Task prompt:**
 
 ```
-You are a Senior Verifier for my-review-subflow Performance Review. Fresh context only. You run in parallel with other lenses — write ONLY your lens file; do not edit 05-review-log.md or other lens files. Do not fix code.
+You are a Senior Verifier for my-dev-flow-review Performance Review. Fresh context only. You run in parallel with other lenses — write ONLY your lens file; do not edit 05-review-log.md or other lens files. Do not fix code.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/handoffs.md>
 
 Read ~/.cursor/skills/performance-optimization/SKILL.md.
 If React/Next UI changed, also read ~/.cursor/skills/vercel-react-best-practices/SKILL.md.
@@ -224,9 +224,9 @@ Return: Result + path to 05-lens-performance.md.
 **Task prompt:**
 
 ```
-You are a Senior Verifier for my-review-subflow Memory Review. Fresh context only. You run in parallel with other lenses — write ONLY your lens file; do not edit 05-review-log.md or other lens files. Do not fix code.
+You are a Senior Verifier for my-dev-flow-review Memory Review. Fresh context only. You run in parallel with other lenses — write ONLY your lens file; do not edit 05-review-log.md or other lens files. Do not fix code.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/handoffs.md>
 
 Checklist:
 - Listener / subscription / timer leaks; missing cleanup
@@ -260,9 +260,9 @@ Return: Result + path to 05-lens-memory.md.
 **Task prompt:**
 
 ```
-You are the Findings Arbiter for my-review-subflow. Fresh context only. You did NOT run the lens reviews and you do NOT fix code. Your job: merge the launched lens files into one ranked Fix ask and resolve conflicts.
+You are the Findings Arbiter for my-dev-flow-review. Fresh context only. You did NOT run the lens reviews and you do NOT fix code. Your job: merge the launched lens files into one ranked Fix ask and resolve conflicts.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/handoffs.md>
 
 Read only the lens files that exist for this round (any of):
 - 05-lens-api.md
@@ -319,9 +319,9 @@ Return: Result + count of fix items + path to 05-review-log.md.
 **Task prompt:**
 
 ```
-You are the Senior Developer for my-review-subflow Fix. You fix listed findings only. You do not self-approve — verifiers will re-check.
+You are the Senior Developer for my-dev-flow-review Fix. You fix listed findings only. You do not self-approve — verifiers will re-check.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/handoffs.md>
 
 Mode: <adversarial-tests | quality | merged-spm>
 Findings / Fix ask to apply:
@@ -351,9 +351,9 @@ Return: list of fixes + tests run + whether tests/behavior changed (yes/no).
 Adversarial ⇄ Fix until clean
 → Quality ⇄ Fix until clean
 → Loop (max 3):
-    [API when Has API] ‖ [DB when Has DB] ‖ Security ‖ Performance ‖ Memory  (only lenses in SPM plan)
+    [API when Has API] ‖ [DB when Has DB] ‖ Security ‖ Performance ‖ Memory  (only lenses in Lens plan)
     → Merge findings (if 2+)
     → if clean → done
     → Fix (merged) → optional Adversarial/Quality recheck → repeat
-→ my-test-subflow full|lite
+→ my-dev-flow-test full|lite
 ```

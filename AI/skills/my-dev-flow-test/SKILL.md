@@ -1,24 +1,24 @@
 ---
-name: my-test-subflow
+name: my-dev-flow-test
 description: >-
   Supports smoke mode (build + unit before code review), full mode (coverage,
   missing e2e, build, unit, e2e), and lite mode (targeted e2e after lite review).
-  Use when the user says run my-test-subflow, smoke tests, verify before merge,
-  after Build (smoke), or after my-review-subflow is clean before merge.
+  Use when the user says run my-dev-flow-test, smoke tests, verify before merge,
+  after Build (smoke), or after my-dev-flow-review is clean before merge.
 ---
 
-# my-test-subflow
+# my-dev-flow-test
 
 Test subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). Proves the draft
 is worth reviewing (smoke) and matches requirements before merge (full).
 
-**Details:** [stages.md](stages.md) · templates [`../my-dev-flow/templates.md`](../my-dev-flow/templates.md)
+**Details:** [stages.md](stages.md) · handoffs [`../my-dev-flow/handoffs.md`](../my-dev-flow/handoffs.md) · artifacts [`../my-dev-flow/artifacts.md`](../my-dev-flow/artifacts.md)
 
 ## When to run
 
-- **Smoke:** after Build, **before** review (`run my-test-subflow smoke`, or parent Step 4s). Also last gate before Gate C when Review profile is **skip-review**.
-- **Lite:** after lite review clean (`run my-test-subflow lite`) — targeted e2e only; skip coverage Task and “add missing e2e” unless `04-tasks` requires new e2e.
-- **Full:** after full review clean, before Gate C (`run my-test-subflow`, verify before merge)
+- **Smoke:** after Build, **before** review (`run my-dev-flow-test smoke`, or parent Step 4s). Also last gate before Gate C when Review profile is **skip-review**.
+- **Lite:** after lite review clean (`run my-dev-flow-test lite`) — targeted e2e only; skip coverage Task and “add missing e2e” unless `04-tasks` requires new e2e.
+- **Full:** after full review clean, before Gate C (`run my-dev-flow-test`, verify before merge)
 
 ## Principles
 
@@ -27,7 +27,7 @@ is worth reviewing (smoke) and matches requirements before merge (full).
 - **Full before merge** (profile full) — coverage + e2e + runs; do not skip to Gate C while red.
 - **Use the repo’s commands.** Do not invent a new test stack.
 - **Fill e2e gaps** in full mode only (lite: only if tasks require new e2e).
-- **Generation ≠ verification.** Product fixes go to [`my-code-subflow`](../my-code-subflow/SKILL.md).
+- **Generation ≠ verification.** Product fixes go to [`my-dev-flow-code`](../my-dev-flow-code/SKILL.md).
 - Stage-scoped handoff (`smoke`, `test-full`, `test-lite`, `fix-tests`).
 - Plain words in `06-test-log.md`.
 
@@ -39,7 +39,7 @@ is worth reviewing (smoke) and matches requirements before merge (full).
 
 ### Model availability
 
-Follow [`my-dev-flow`](../my-dev-flow/SKILL.md) → **Model availability (auto fallback)**.
+Follow [`my-dev-flow/stages.md`](../my-dev-flow/stages.md) → **Models**.
 
 ## Prerequisites
 
@@ -83,21 +83,21 @@ Coverage check (Fast)
 
 | Result | Meaning | Next (parent my-dev-flow) |
 |--------|---------|---------------------------|
-| **smoke-pass** | Build + unit green | `my-review-subflow` (or Gate C if skip-review) |
+| **smoke-pass** | Build + unit green | `my-dev-flow-review` (or Gate C if skip-review) |
 | **smoke-fail** | Build or unit red | Fix-from-tests → re-smoke |
-| **success** | Full or lite suite green; no open requirement gaps | Gate C → `my-merge-subflow` |
+| **success** | Full or lite suite green; no open requirement gaps | Gate C → `my-dev-flow-merge` |
 | **failure** | Full suite red or required e2e missing/blocked | Fix-from-tests → re-full |
 
 ## Failure handoff (required)
 
-On **smoke-fail** or **failure**, `06-test-log.md` must include commands, failing tests, short excerpts, and Fix ask for `my-code-subflow`.
+On **smoke-fail** or **failure**, `06-test-log.md` must include commands, failing tests, short excerpts, and Fix ask for `my-dev-flow-code`.
 
 ## Orchestrator rules
 
 - Detect smoke vs full vs lite from parent ask / **Review profile**.
 - One stage at a time; Task **`description`**: `Smoke build and unit` | `Test coverage check` | `Add missing e2e` | `Run build and tests` (lite: skip coverage/add-e2e unless required).
 - Do not merge, push, or open Gate C.
-- Product/unit fixes belong in `my-code-subflow` (except adding missing e2e in full mode).
+- Product/unit fixes belong in `my-dev-flow-code` (except adding missing e2e in full mode).
 - Cap: max **3** test↔fix rounds per mode, then pause.
 
 ## Start checklist

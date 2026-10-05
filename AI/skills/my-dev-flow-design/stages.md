@@ -1,8 +1,8 @@
-# my-design-subflow stages
+# my-dev-flow-design stages
 
 Copy the **Task prompt** for the current stage. Fill bracketed paths. Use simple plain words.
 
-Stage-scoped handoff: see `~/.cursor/skills/my-dev-flow/templates.md` → stage id table (`gate-a`, `skim`, `ui-concept`, `analyze`, `design`, `design-update`, …).
+Stage-scoped handoff: see `~/.cursor/skills/my-dev-flow/handoffs.md` → stage id table (`ideation`, `gate-a`, `skim`, `analyze`, `grill`, `design`, `design-update`, …).
 
 Parent uses the **resolved** model for that stage’s tier (see `00-run.md`).
 
@@ -20,7 +20,7 @@ Parent uses the **resolved** model for that stage’s tier (see `00-run.md`).
 **Task prompt:**
 
 ```
-You are the Product Owner for my-design-subflow Ideation. Fresh context only — do not assume prior chat.
+You are the Product Owner for my-dev-flow-design Ideation. Fresh context only — do not assume prior chat.
 
 Read and follow: ~/.cursor/skills/myplan/SKILL.md (discovery + specify only — no plan/code).
 
@@ -33,19 +33,24 @@ Quick-scan the repo first (README, AGENTS.md, related features). Summarize the p
 
 Investigate the question against primary sources (official docs, source code, specs, first-party APIs), not a secondary write-up of them. Follow every claim back to the source that owns it.
 
-Then draft .my-docs/workflow/<slug>/01-idea.md using the template from ~/.cursor/skills/my-dev-flow/templates.md.
+Then draft .my-docs/workflow/<slug>/01-idea.md using the template from ~/.cursor/skills/my-dev-flow/artifacts.md.
 
 Must include:
-- Problem, User / audience, Outcome, Metric
+- **Problem map (diagnose before framing):**
+  - Mode **full:** Step 1 three WHAT branches (happening / missing-wrong / consequences, 3–5 each); Step 2 surface vs root + **Core problem** one sentence; visual text mind map with ★ top priority
+  - Mode **simple:** stub OK — Core problem one line + `N/A — root cause clear`, or 3–5 bullets total
+- Problem (one-line restatement of Core problem), User / audience, Outcome (align with ★), Metric
 - **Has UI:** yes | no (required — parent will copy into 00-run.md before Gate A)
 - Copy/token-only? UI notes for Design?
 - 80/20 UI (if UI): main user goals; vital few; Important info/action #1 and #2 always visible with secondary in menus/expand/modal; top journey; sensible defaults; biggest usability risks first (or `N/A — no UI`)
 - Non-goals, Assumptions to attack, Success criteria, Open questions
 - **Sources (primary):** paths / URLs / APIs that own each material claim (not blog summaries of those sources)
 
+Diagnose before Outcome — do not jump to solution framing until Core problem is written.
 Ask blocking questions only if the idea cannot be reviewed without an answer. Prefer writing Open questions into 01-idea.md and continuing to Gate A.
 
 Do not write code. Do not write the technical design yet.
+Do not invent Solution branches here — those belong in Analyze.
 Do not treat secondary write-ups (blogs, Stack Overflow, AI summaries of docs) as the authority when a primary source exists.
 Return: short summary + path to 01-idea.md + Has UI value + any blocking questions (or none).
 ```
@@ -69,12 +74,17 @@ Return: short summary + path to 01-idea.md + Has UI value + any blocking questio
 ```
 You are an end user reviewing the product idea for day-to-day usage. Fresh context only — do not assume prior chat. You are NOT the Product Owner and NOT the Architect.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/handoffs.md>
 
 Read only:
 - .my-docs/workflow/<slug>/01-idea.md
 
 Ignore technical design. Judge whether this idea would work in real daily use.
+
+Also check **Problem map / Core problem** (product clarity, not engineering):
+- Is the **Core problem** one clear sentence a real user would recognize?
+- Does Outcome match the ★ top priority (when present)?
+- Mode full: if Problem map is missing or Core problem is vague → Result **needs update** (Major).
 
 **80/20 UI rule (required when the idea has UI)** — review and fill every section in the 01a template:
 
@@ -89,7 +99,7 @@ Ignore technical design. Judge whether this idea would work in real daily use.
 
 Also review for: convenience, easy to use, understanding, mobile usability (or n/a), eye reading flow.
 
-Write .my-docs/workflow/<slug>/01a-idea-ui-review.md using the template from ~/.cursor/skills/my-dev-flow/templates.md.
+Write .my-docs/workflow/<slug>/01a-idea-ui-review.md using the template from ~/.cursor/skills/my-dev-flow/artifacts.md.
 Fill all 80/20 sections and set **80/20 overall pass?** yes/no.
 
 Set Result:
@@ -126,7 +136,7 @@ Return: Result + short summary + path to 01a-idea-ui-review.md.
 ```
 You are the Product Owner updating ideation from the user-role day-to-day review (Gate A). Fresh context only.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/handoffs.md>
 
 Read 01a-idea-ui-review.md (Findings + Fix ask). Read 01-idea.md.
 
@@ -156,15 +166,15 @@ Return: what you updated in 01-idea.md.
 **Task prompt:**
 
 ```
-You are doing a light repo skim for my-design-subflow. Fresh context only. This is NOT full Analyze — constraints and reuse pointers only.
+You are doing a light repo skim for my-dev-flow-design. Fresh context only. This is NOT full Analyze — constraints and reuse pointers only.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/handoffs.md>
 
 Read 01-idea.md and 01a-idea-ui-review.md (Gate A ok).
 
 Scan the repo for related screens, components, APIs, and hard constraints. Prefer concrete paths.
 
-Write .my-docs/workflow/<slug>/02-skim.md using the template from ~/.cursor/skills/my-dev-flow/templates.md.
+Write .my-docs/workflow/<slug>/02-skim.md using the template from ~/.cursor/skills/my-dev-flow/artifacts.md.
 
 Must include: project shape (1–3 sentences), related UI paths, related APIs/data, hard constraints, risks if ignored, enough for Analyze/Design?
 
@@ -174,7 +184,7 @@ Return: short summary + path to 02-skim.md.
 
 **After:** Parent continues:
 
-- Proceed to Analyze after skim (no UI concept / Gate A2).
+- Proceed to Analyze after skim (UI specs come later in Design).
 
 ---
 
@@ -190,18 +200,19 @@ Return: short summary + path to 02-skim.md.
 
 **Mandatory deep dive** (feature + each major solution piece; ask user when unclear):
 
-1. **What is this?**
+1. **What is this?** (align with Core problem)
 2. **Why do we need this?**
 3. **How to do this?** Other ways? Best practices?
+4. **Solution branches** from Core problem: Quick wins / Systemic / Creative — Mode full required; Mode simple stub OK. Mark ★ priority; map to Design.
 
-**Spike (optional):** throwaway exploration only — same three questions; record findings in `02-analysis.md` Spike notes. Do not ship spike code.
+**Spike (optional):** throwaway exploration only — same What/Why/How; record findings in `02-analysis.md` Spike notes. Do not ship spike code.
 
 **Task prompt:**
 
 ```
-You are the Architect for my-design-subflow Analyze + Q&A. Fresh context only.
+You are the Architect for my-dev-flow-design Analyze + Q&A. Fresh context only.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/handoffs.md>
 
 Read 01-idea.md (Gate A ok) and 02-skim.md.
 When Has UI, explore how to implement within Gate A 80/20 and existing app chrome; do not invent a conflicting IA.
@@ -210,15 +221,21 @@ Explore the codebase for related patterns, APIs, schemas, and UI. Expand skim �
 If front-end work, read ~/.cursor/skills/dev-decision-routing/SKILL.md.
 
 Deep dive required — for the overall change and each major solution piece, fill in 02-analysis.md:
-1. What is this? (plain words)
-2. Why do we need this? (outcome; cost of skipping)
+1. What is this? (plain words) — align with 01-idea Core problem / Problem map
+2. Why do we need this? (outcome; cost of skipping) — use Consequences from Problem map when present
 3. How to do this? List other ways. Note best practices (repo patterns first, then industry).
+Also fill **Solution branches** (from Core problem):
+- Branch 1 Quick wins (low effort, immediate)
+- Branch 2 Systemic fixes (process / preventative / structural)
+- Branch 3 Creative / lateral options
+Mark ★ priority branch for this pass. Map branches to Design (full: Option 1/2 from systemic/creative; simple: one recommended; quick wins → early tasks or Non-goals if deferred).
+Mode simple: one recommended branch + ≤2-line note on the other two (or `N/A — single clear path`).
 If 2+ real approaches, use Decision N Option shape (What / Example / Pros / Cons / Recommendation).
 Ask the user when any of these are unclear — do not guess.
 
 Optional spike: throwaway exploration only to reduce uncertainty. Same What/Why/How before and after. Write Spike notes into 02-analysis.md. Do not leave findings only in chat. Do not treat spike as production Build.
 
-Write 02-analysis.md (template) including Deep dive, **Design tree (frontier)** (Settled / Open frontier / Blocked), **Reusable patterns**, **System shape candidates**, and optional Spike notes.
+Write 02-analysis.md (template) including Deep dive (+ Solution branches), **Design tree (frontier)** (Settled / Open frontier / Blocked), **Reusable patterns**, **System shape candidates**, and optional Spike notes.
 Ask: “Are the instructions and reference files clear enough to design? Any gaps in What / Why / How?”
 
 Also state whether this change touches public APIs / contracts (**Has API** yes/no) and whether it touches schema / migrations / persistence queries (**Has DB** yes/no) so the parent can set 00-run.md.
@@ -249,9 +266,9 @@ Return: short summary + deep-dive highlights + open questions + Design tree summ
 **Task prompt:**
 
 ```
-You are grilling the design tree for my-design-subflow. Fresh context only. Follow ~/.cursor/skills/my-dev-flow/grill.md and documentation-and-adrs.
+You are grilling the design tree for my-dev-flow-design. Fresh context only. Follow ~/.cursor/skills/my-dev-flow/grill.md and documentation-and-adrs.
 
-<Stage-scoped handoff for stage id grill from ~/.cursor/skills/my-dev-flow/templates.md>
+<Stage-scoped handoff for stage id grill from ~/.cursor/skills/my-dev-flow/handoffs.md>
 
 Read 00-run.md (Mode, HITL Gate B, Has API/DB), 01-idea.md, 02-skim.md (if present), 02-analysis.md (especially Design tree + Blocking questions + Settled decisions).
 Read repo GLOSSARY.md or GLOSSARY-MAP.md if present. Cross-check claims against code when needed — look up facts yourself; do not ask the user for look-up-able facts.
@@ -295,13 +312,13 @@ Return: Result (frontier-empty | needs-round | skipped) + Grill digest (≤4 bul
 **Task prompt:**
 
 ```
-You are the Architect for my-design-subflow Design. Fresh context only.
+You are the Architect for my-dev-flow-design Design. Fresh context only.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/handoffs.md>
 
 Read 01-idea.md, 02-skim.md, 02-analysis.md, and 02b-grill.md when present. When Has UI, specify UI in design — align Gate A #1/#2 and existing chrome; **lock Build** to those Design UI specs.
 Honor grill Settled decisions and glossary terms — do not re-open frontier-empty branches without new evidence.
-Build on analysis Deep dive (What / Why / How + alternatives + best practices). Design Decision options should reflect those alternatives unless settled in analysis or grill.
+Build on analysis Deep dive (What / Why / How + **Solution branches** + alternatives + best practices). Design Decision options should reflect Solution branches (systemic / creative) and analysis alternatives unless settled in analysis or grill. Quick wins → early tasks and/or Non-goals if deferred. Honor `01-idea` Core problem and ★ priority.
 Follow myplan plan, planning-and-task-breakdown, documentation-and-adrs, api-and-interface-design if needed, database-and-data-model if DB, security-and-hardening (OWASP required), UI skills + DESIGN_GUIDE when UI.
 If grill wrote an ADR path, link it in 03-design Domain / ADR notes; if ADR skipped with reason, keep that note.
 
@@ -341,7 +358,7 @@ Return: options summary + Recommendation + Has API (yes/no) + Has DB (yes/no) + 
 ```
 You are the Architect for Update from design review. Fresh context only. Repair only what 03a Fix ask lists; keep Gate A idea. Do not re-litigate Gate A 80/20 unless Fix ask requires it.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/handoffs.md>
 
 Read 03a, 01-idea, 02-skim, 02-analysis, 02b-grill (if present), 03-design, 04-tasks.
 
@@ -356,7 +373,7 @@ Rules:
 Return: what you updated, which files.
 ```
 
-**After:** Parent re-runs `my-design-review-subflow`.
+**After:** Parent re-runs `my-dev-flow-design-review`.
 
 ---
 
@@ -366,11 +383,13 @@ Before Analyze and Design:
 
 > Are the instructions, dependencies, and reference files clear enough to proceed?
 
-Before Grill / Design, also confirm `02-analysis.md` Deep dive answers (or user-confirmed open questions for):
+Before Grill / Design, also confirm:
 
-1. **What is this?**
-2. **Why do we need this?**
-3. **How to do this?** (other ways + best practices)
+- `01-idea.md` **Problem map** — Mode full: Steps 1–2 + mind map + Core problem present; Mode simple: stub or Core problem line OK
+- `02-analysis.md` Deep dive answers (or user-confirmed open questions for):
+  1. **What is this?**
+  2. **Why do we need this?**
+  3. **How to do this?** (other ways + best practices + **Solution branches** when Mode full)
 
 Before Design, confirm Grill is **frontier-empty** or **skipped** (see `02b-grill.md` / Notes). Do not start Design on `needs-round`.
 

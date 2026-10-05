@@ -1,6 +1,6 @@
-# my-code-subflow stages
+# my-dev-flow-code stages
 
-Stage-scoped handoff: `~/.cursor/skills/my-dev-flow/templates.md` → stage id table.
+Stage-scoped handoff: `~/.cursor/skills/my-dev-flow/handoffs.md` → stage id table.
 
 Each Task starts with a **fresh context**. Put all paths and rules in the prompt.
 
@@ -20,9 +20,9 @@ Each Task starts with a **fresh context**. Put all paths and rules in the prompt
 **Task prompt:**
 
 ```
-You are the Test Case Reviewer for my-code-subflow. Fresh context only.
+You are the Test Case Reviewer for my-dev-flow-code. Fresh context only.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/handoffs.md>
 
 Read 03-design.md and 04-tasks.md (design-review clean; Gate B comes after this review). Optionally skim existing test files listed in tasks.
 
@@ -58,9 +58,9 @@ Return: Result, top gaps, path to 04a-tdd-test-review.md.
 **Task prompt:**
 
 ```
-You are the Senior Developer for my-code-subflow Build. Fresh context only. First output is a DRAFT — Smoke then my-review-subflow come next.
+You are the Senior Developer for my-dev-flow-code Build. Fresh context only. First output is a DRAFT — Smoke then my-dev-flow-review come next.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/handoffs.md>
 
 Read 03-design.md and 04-tasks.md (Gate B approved). Read 04a-tdd-test-review.md if present — implement Fix ask tests (Red) with matching tasks.
 When Has UI: follow Design UI locks in 03/04 and existing app chrome.
@@ -91,9 +91,9 @@ Return: what shipped in the draft, tests run, remaining risks; if UI, confirm HT
 **Task prompt:**
 
 ```
-You are the Senior Developer for my-code-subflow Fix from tests. Fresh context only. Repair only what the test log asks, aligned with approved design.
+You are the Senior Developer for my-dev-flow-code Fix from tests. Fresh context only. Repair only what the test log asks, aligned with approved design.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/handoffs.md>
 
 Read 06-test-log.md (Failures + Fix ask). Read 03-design.md and 04-tasks.md.
 
@@ -102,7 +102,7 @@ Rules:
 - TDD: Red → Green → Refactor → Verify.
 - Update skeletons if you change UI layout.
 - Append Round notes on 06-test-log.md.
-- Do not merge or push. Do not `git commit` unless the user explicitly asked for a commit. Parent will re-run my-test-subflow (smoke or full).
+- Do not merge or push. Do not `git commit` unless the user explicitly asked for a commit. Parent will re-run my-dev-flow-test (smoke or full).
 
 Return: what you fixed, tests run, anything still out of scope.
 ```

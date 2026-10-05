@@ -1,13 +1,13 @@
-# my-test-subflow stages
+# my-dev-flow-test stages
 
-Stage-scoped handoff: `~/.cursor/skills/my-dev-flow/templates.md` → stage id table.  
+Stage-scoped handoff: `~/.cursor/skills/my-dev-flow/handoffs.md` → stage id table.  
 Test log template: same file → “06-test-log.md”.
 
 ---
 
 ## Smoke — build + unit only — Fast
 
-**When:** After Build; **before** `my-review-subflow`. Parent Step 4s / `run my-test-subflow smoke`.
+**When:** After Build; **before** `my-dev-flow-review`. Parent Step 4s / `run my-dev-flow-test smoke`.
 
 **subagent_type:** `generalPurpose`  
 **model:** resolved Fast  
@@ -18,9 +18,9 @@ Test log template: same file → “06-test-log.md”.
 **Task prompt:**
 
 ```
-You are the runner for my-test-subflow Smoke (build + unit only). Fresh context only. Do not run e2e. Do not start code review here.
+You are the runner for my-dev-flow-test Smoke (build + unit only). Fresh context only. Do not run e2e. Do not start code review here.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/handoffs.md>
 
 Discover build and unit commands from package.json / project docs.
 
@@ -31,14 +31,14 @@ Run in order:
 Rules:
 - Update 06-test-log.md → Smoke section + Mode last run: smoke.
 - Result = smoke-pass only if build + unit both green.
-- Otherwise Result = smoke-fail and fill Fix ask for my-code-subflow.
+- Otherwise Result = smoke-fail and fill Fix ask for my-dev-flow-code.
 - Do not fix product code. Do not merge or push.
 - Simple plain words.
 
 Return: smoke-pass | smoke-fail, and path to 06-test-log.md.
 ```
 
-**After:** Parent: smoke-pass → `my-review-subflow`. smoke-fail → Fix-from-tests → re-smoke.
+**After:** Parent: smoke-pass → `my-dev-flow-review`. smoke-fail → Fix-from-tests → re-smoke.
 
 ---
 
@@ -54,9 +54,9 @@ Return: smoke-pass | smoke-fail, and path to 06-test-log.md.
 **Task prompt:**
 
 ```
-You run lite verification for my-test-subflow. Fresh context only.
+You run lite verification for my-dev-flow-test. Fresh context only.
 
-<Stage-scoped handoff for test-lite from ~/.cursor/skills/my-dev-flow/templates.md>
+<Stage-scoped handoff for test-lite from ~/.cursor/skills/my-dev-flow/handoffs.md>
 
 Read 04-tasks.md for required e2e. Run the repo’s unit (if not already smoke-pass) and only e2e that match this change / tasks.
 Do NOT run a coverage Task. Do NOT add broad missing e2e unless 04-tasks explicitly requires a new e2e file.
@@ -77,9 +77,9 @@ Return: Result + short summary + path.
 **Task prompt:**
 
 ```
-You are the verifier for my-test-subflow Coverage check. Generation ≠ verification — you judge gaps; you do not rewrite product features.
+You are the verifier for my-dev-flow-test Coverage check. Generation ≠ verification — you judge gaps; you do not rewrite product features.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/handoffs.md>
 
 Read 03-design.md (success criteria, flows) and 04-tasks.md. Scan the repo for existing e2e tests and how they are run (package.json scripts, playwright/cypress/etc.).
 
@@ -107,9 +107,9 @@ Return: covered count, missing list, e2e command if known.
 **Task prompt:**
 
 ```
-You are the Senior Developer for my-test-subflow Add missing e2e.
+You are the Senior Developer for my-dev-flow-test Add missing e2e.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/handoffs.md>
 
 Read 06-test-log.md Coverage section and 03-design.md / 04-tasks.md.
 
@@ -138,9 +138,9 @@ If **no e2e stack**: skip this stage; parent marks failure / asks user (see SKIL
 **Task prompt:**
 
 ```
-You are the runner for my-test-subflow Run suite (full).
+You are the runner for my-dev-flow-test Run suite (full).
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/templates.md>
+<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/handoffs.md>
 
 Discover commands from package.json / project docs (build, unit test, e2e). Prefer project scripts over ad-hoc commands.
 
@@ -153,7 +153,7 @@ Rules:
 - Capture exit codes and short failure excerpts (trim huge logs).
 - Update 06-test-log.md → Runs + Result. Mode last run: full.
 - Result = success only if build + unit + e2e all green AND Coverage has no open MISSING/blocked required gaps.
-- Otherwise Result = failure and fill “Fix ask for my-code-subflow”.
+- Otherwise Result = failure and fill “Fix ask for my-dev-flow-code”.
 - Do not fix product code in this stage. Do not merge or push.
 - Simple plain words.
 
@@ -166,10 +166,10 @@ Return: success | failure, and paths to log sections.
 
 ```
 After Build → Smoke
-  On smoke-fail → my-code-subflow Fix → re-smoke
-  On smoke-pass → my-review-subflow
+  On smoke-fail → my-dev-flow-code Fix → re-smoke
+  On smoke-pass → my-dev-flow-review
 After review clean → Full test
-  On failure → my-code-subflow Fix → re-full
-  On success → Gate C → my-merge-subflow
+  On failure → my-dev-flow-code Fix → re-full
+  On success → Gate C → my-dev-flow-merge
 After 3 test↔code rounds per mode → pause and ask the user.
 ```

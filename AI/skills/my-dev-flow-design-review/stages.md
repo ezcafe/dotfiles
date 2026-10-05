@@ -1,6 +1,6 @@
-# my-design-review-subflow stages
+# my-dev-flow-design-review stages
 
-Stage-scoped handoff: `~/.cursor/skills/my-dev-flow/templates.md` → stage id `api-contract-review`, `db-design-review`, or `design-review`.  
+Stage-scoped handoff: `~/.cursor/skills/my-dev-flow/handoffs.md` → stage id `api-contract-review`, `db-design-review`, or `design-review`.  
 Log template: same file → “03a-design-review-log.md”.
 
 ---
@@ -20,9 +20,9 @@ Log template: same file → “03a-design-review-log.md”.
 **Task prompt:**
 
 ```
-You are a Senior API designer verifier for my-design-review-subflow. Fresh context only. You did NOT author these design docs. Generation ≠ verification — find contract gaps; do not rewrite 01–04 yourself.
+You are a Senior API designer verifier for my-dev-flow-design-review. Fresh context only. You did NOT author these design docs. Generation ≠ verification — find contract gaps; do not rewrite 01–04 yourself.
 
-<Stage-scoped handoff for stage id api-contract-review from ~/.cursor/skills/my-dev-flow/templates.md>
+<Stage-scoped handoff for stage id api-contract-review from ~/.cursor/skills/my-dev-flow/handoffs.md>
 
 Read ~/.cursor/skills/api-and-interface-design/SKILL.md (and reference.md if needed).
 Read 02-analysis.md, 03-design.md (API/DB contracts + sequence), 04-tasks.md, and 02-skim.md if present.
@@ -45,7 +45,7 @@ Write/update ONLY the “API contract review” section in 03a-design-review-log
 - Result: clean | needs update
 - Findings table (Area: contracts / practice)
 - Short API checklist notes
-- Contribute numbered Fix ask items for my-design-subflow (API-related only)
+- Contribute numbered Fix ask items for my-dev-flow-design (API-related only)
 
 Rules:
 - Clean only if zero Critical, Major, and Enhancement in this section.
@@ -77,9 +77,9 @@ Return: clean | needs update, and path to 03a-design-review-log.md.
 **Task prompt:**
 
 ```
-You are a Senior Database designer verifier for my-design-review-subflow. Fresh context only. You did NOT author these design docs. Generation ≠ verification — find schema/migration/query gaps; do not rewrite 01–04 yourself.
+You are a Senior Database designer verifier for my-dev-flow-design-review. Fresh context only. You did NOT author these design docs. Generation ≠ verification — find schema/migration/query gaps; do not rewrite 01–04 yourself.
 
-<Stage-scoped handoff for stage id db-design-review from ~/.cursor/skills/my-dev-flow/templates.md>
+<Stage-scoped handoff for stage id db-design-review from ~/.cursor/skills/my-dev-flow/handoffs.md>
 
 Read ~/.cursor/skills/database-and-data-model/SKILL.md.
 Read 02-analysis.md, 03-design.md (Database contracts + example queries + sequence), 04-tasks.md, and 02-skim.md if present.
@@ -103,7 +103,7 @@ Write/update ONLY the “DB design review” section in 03a-design-review-log.md
 - Result: clean | needs update
 - Findings table (Area: schema / migration / query / ownership / practice)
 - Short DB checklist notes
-- Contribute numbered Fix ask items for my-design-subflow (DB-related only)
+- Contribute numbered Fix ask items for my-dev-flow-design (DB-related only)
 
 Rules:
 - Clean only if zero Critical, Major, and Enhancement in this section.
@@ -133,9 +133,9 @@ Return: clean | needs update, and path to 03a-design-review-log.md.
 **Task prompt:**
 
 ```
-You are a Senior Architect verifier for my-design-review-subflow. Fresh context only. You did NOT author these design docs. Generation ≠ verification — find gaps; do not rewrite 01–04 yourself.
+You are a Senior Architect verifier for my-dev-flow-design-review. Fresh context only. You did NOT author these design docs. Generation ≠ verification — find gaps; do not rewrite 01–04 yourself.
 
-<Stage-scoped handoff for design-review from ~/.cursor/skills/my-dev-flow/templates.md>
+<Stage-scoped handoff for design-review from ~/.cursor/skills/my-dev-flow/handoffs.md>
 
 Read 01-idea.md, 01a-idea-ui-review.md (if present), 02-skim.md (if present), 02-analysis.md, 02b-grill.md (if present), 03-design.md, 04-tasks.md.
 Also read project AGENTS.md / docs/ARCHITECTURE.md / GLOSSARY.md when present.
@@ -149,7 +149,8 @@ Review against real-world best practices. Check at least:
 
 Gaps / clarity
 - Missing success criteria, non-goals, or open questions that still block build
-- **Analyze deep dive missing or thin** — `02-analysis.md` must answer What / Why / How (other ways + best practices) for overall change and major solution pieces; fail Major if skipped or hand-wavy
+- **Problem map missing or thin** — Mode **full:** `01-idea.md` must have Steps 1–2 (happening / missing / consequences → surface vs root → Core problem one sentence) + mind map with ★ priority; fail Major if skipped or hand-wavy. Mode **simple:** Core problem line or stub OK
+- **Analyze deep dive missing or thin** — `02-analysis.md` must answer What / Why / How (other ways + best practices) for overall change and major solution pieces; Mode **full** also requires **Solution branches** (Quick wins / Systemic / Creative) tied to Core problem; fail Major if skipped or hand-wavy
 - **Grill** — Mode full: `02b-grill.md` should be frontier-empty (or explicitly skipped with reason in Notes). Fail **Major** if Build-critical open frontier remains, or Design re-opens Settled grill decisions without new evidence. Mode simple: ok if grill skipped when frontier was empty.
 - Spike notes (if any) must not contradict deep dive without explanation; spike must not be treated as shipped design without Design update
 - Vague contracts (API/DB) or missing error / auth / ownership — if Has API and API section already reviewed, note “see API contract review”; if Has DB and DB section already reviewed, note “see DB design review”
@@ -164,8 +165,8 @@ Gaps / clarity
 Correctness / fit
 - Conflicts with repo patterns, system architecture, or analysis reference files
 - System design / Design patterns **Best practices** ignored by tasks (tasks contradict taught practices) → Major
-- Design options ignore analysis alternatives without reason (Mode simple: one option + short rejected alternative is OK)
-- Over-building vs idea outcome; under-specified failure modes
+- Design options ignore analysis Solution branches / alternatives without reason (Mode simple: one option + short rejected alternative is OK)
+- Over-building vs idea outcome / Core problem; under-specified failure modes
 - Data model / indexes / uniques that will hurt later — if Has DB and DB section reviewed, note “see DB design review” instead of duplicating
 
 UI / UX / mobile (when UI is in scope)
@@ -185,7 +186,7 @@ Write 03a-design-review-log.md:
 - Overall Result: clean | needs update — **clean only if** API section is clean|skipped AND DB section is clean|skipped AND this review has zero Critical/Major/Enhancement
 - Findings table: Severity, Area, Finding, Suggestion
   Area tags may include: idea / ui / skim / analysis / grill / design / tasks / contracts / diagram / system-design / pattern / ui-ux / security-owasp / practice / api-contract / db-design / glossary-adr
-- Fix ask for my-design-subflow: numbered, actionable (merge with any open API / DB Fix ask items)
+- Fix ask for my-dev-flow-design: numbered, actionable (merge with any open API / DB Fix ask items)
 - Round notes
 
 Rules:
@@ -196,26 +197,26 @@ Rules:
 Return: clean | needs update, and path to 03a-design-review-log.md.
 ```
 
-**If needs update:** parent runs `my-design-subflow` Update, then **re-runs** from API contract review (when Has API) and/or DB design review (when Has DB), then this stage.
+**If needs update:** parent runs `my-dev-flow-design` Update, then **re-runs** from API contract review (when Has API) and/or DB design review (when Has DB), then this stage.
 
-**If clean:** parent continues (TDD → Gate B → Build → Smoke → review/test per Review profile). Ensure **SPM plan** will include **api** when Has API and **db** when Has DB.
+**If clean:** parent continues (TDD → Gate B → Build → Smoke → review/test per Review profile). Ensure **Lens plan** will include **api** when Has API and **db** when Has DB.
 
 ---
 
 ## Parent loop hint (my-dev-flow)
 
 ```
-my-design-subflow (Ideation → Gate A → skim → Analyze → Grill → Design; set Has API + Has DB)
-→ my-design-review-subflow
+my-dev-flow-design (Ideation → Gate A → skim → Analyze → Grill → Design; set Has API + Has DB)
+→ my-dev-flow-design-review
    → if Has API: API contract review Task
    → if Has DB: DB design review Task
    → Design review Task
 → if needs update → Update → re-review (max 3)
-→ my-code-subflow (TDD review only)
+→ my-dev-flow-code (TDD review only)
 → Gate B
-→ my-code-subflow (Build)
-→ my-test-subflow (Smoke)
-→ my-review-subflow (include api lens when Has API; db lens when Has DB)
-→ my-test-subflow (Full|lite)
+→ my-dev-flow-code (Build)
+→ my-dev-flow-test (Smoke)
+→ my-dev-flow-review (include api lens when Has API; db lens when Has DB)
+→ my-dev-flow-test (Full|lite)
 → Gate C → merge
 ```

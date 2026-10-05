@@ -1,25 +1,25 @@
 ---
-name: my-design-review-subflow
+name: my-dev-flow-design-review
 description: >-
   Reviews design artifacts for gaps and issues against real-world best practices,
-  then hands findings to my-design-subflow for updates. When Has API, runs an
+  then hands findings to my-dev-flow-design for updates. When Has API, runs an
   isolated API contract review Task first. When Has DB, runs an isolated DB
   design review Task. Checks UI alignment with Gate A / Design UI specs (does not
-  re-litigate 80/20). Use when the user says run my-design-review-subflow, review
-  the design, or after my-design-subflow before my-code-subflow.
+  re-litigate 80/20). Use when the user says run my-dev-flow-design-review, review
+  the design, or after my-dev-flow-design before my-dev-flow-code.
 ---
 
-# my-design-review-subflow
+# my-dev-flow-design-review
 
 Design verification subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md).
 Generation ≠ verification: this skill **reviews** design docs; it does **not**
-rewrite them (updates go to [`my-design-subflow`](../my-design-subflow/SKILL.md)).
+rewrite them (updates go to [`my-dev-flow-design`](../my-dev-flow-design/SKILL.md)).
 
-**Details:** [stages.md](stages.md) · templates [`../my-dev-flow/templates.md`](../my-dev-flow/templates.md)
+**Details:** [stages.md](stages.md) · handoffs [`../my-dev-flow/handoffs.md`](../my-dev-flow/handoffs.md) · artifacts [`../my-dev-flow/artifacts.md`](../my-dev-flow/artifacts.md)
 
 ## When to run
 
-`run my-design-review-subflow`, review the design, or when `my-dev-flow` finishes
+`run my-dev-flow-design-review`, review the design, or when `my-dev-flow` finishes
 the first design pass and before code.
 
 ## Principles
@@ -28,12 +28,13 @@ the first design pass and before code.
 - **Has API → isolated API contract review:** When `00-run.md` **Has API = yes**, launch a **separate** Task (fresh context) that reviews API contracts against [`api-and-interface-design`](../api-and-interface-design/SKILL.md). Do not rely on the general design-review agent alone for deep API contract checks.
 - **Has DB → isolated DB design review:** When `00-run.md` **Has DB = yes**, launch a **separate** Task (fresh context) that reviews schema/migrations/queries against [`database-and-data-model`](../database-and-data-model/SKILL.md). Do not rely on the general design-review agent alone for deep DB checks.
 - Check against **real-world best practices** for this stack — plain words.
-- **Analyze deep dive:** fail Major if `02-analysis.md` skips or hand-waves What / Why / How (other ways + best practices).
+- **Analyze deep dive:** fail Major if `02-analysis.md` skips or hand-waves What / Why / How (other ways + best practices). Mode **full:** also fail Major if **Solution branches** (Quick wins / Systemic / Creative) missing or hand-wavy.
+- **Problem map:** Mode **full:** fail Major if `01-idea.md` lacks Problem map Steps 1–2 + Core problem (one sentence), or mind map has no ★ priority. Mode **simple:** Core problem line or stub OK.
 - **Grill:** Mode full expects `02b-grill.md` frontier-empty (or skip with reason). Fail Major if Design re-opens Settled grill locks without new evidence, or Build-critical frontier was never closed.
 - **Security:** require OWASP Top 10 coverage in `03-design.md`.
 - **UI/UX:** when Has UI, require mobile-friendly + a11y basics; **fail on drift** from Gate A #1/#2 or Design UI specs; fail **Major** if Design/tasks lack clear UI locks when Has UI.
 - **Do not re-litigate Gate A 80/20** — if Gate A was ok, check **alignment** with `01a` / Design only (unless design clearly abandoned #1/#2).
-- **No Gate A2 / ui-refs:** do not require `01b` or HTML look refs; legacy files are ignored.
+- **Legacy UI look artifacts:** do not require them — see [`LEGACY.md`](../my-dev-flow/LEGACY.md).
 - Writers do not self-approve: after design updates, **re-run** until clean.
 - Plain words in `03a-design-review-log.md`.
 
@@ -41,11 +42,11 @@ the first design pass and before code.
 
 | Tier | Stages | Preferred slug |
 |------|--------|----------------|
-| **Medium** | API contract review; DB design review; Design review | `gpt-5.6-sol-medium` |
+| **Medium** | API contract review; DB design review; Design review | `claude-opus-5-5-medium` |
 
 ### Model availability
 
-Follow [`my-dev-flow`](../my-dev-flow/SKILL.md) → **Model availability (auto fallback)**.
+Follow [`my-dev-flow/stages.md`](../my-dev-flow/stages.md) → **Models**.
 
 ## Prerequisites
 
@@ -53,9 +54,9 @@ Follow [`my-dev-flow`](../my-dev-flow/SKILL.md) → **Model availability (auto f
 - Prefer Gate A checked; Chosen design filled or Recommendation clear (user-first).
 - Prefer `02-skim.md` when present (full mode always; simple if already written).
 - Prefer **Has API** and **Has DB** set in `00-run.md` (yes/no). If unknown and `03-design.md` has API contracts, treat Has API as **yes**. If unknown and Database contracts / migrations are in scope, treat Has DB as **yes**.
-- Create `03a-design-review-log.md` from templates if missing.
+- Create `03a-design-review-log.md` from [`artifacts.md`](../my-dev-flow/artifacts.md) if missing.
 
-If design docs are missing → **stop** and tell the user to run `my-design-subflow` first.
+If design docs are missing → **stop** and tell the user to run `my-dev-flow-design` first.
 
 ## Pipeline
 
@@ -77,14 +78,14 @@ Findings: **Critical** / **Major** / **Enhancement** (nits/FYI do not block).
 
 **Clean** = zero Critical, Major, and Enhancement across API contract review (when run), DB design review (when run), and design review.
 
-If not clean → hand **Fix ask** to `my-design-subflow` Update mode → parent re-runs this workflow.
+If not clean → hand **Fix ask** to `my-dev-flow-design` Update mode → parent re-runs this workflow.
 
 ## Exit
 
 | Result | Next (when parent is my-dev-flow) |
 |--------|-----------------------------------|
-| **clean** | TDD → Gate B → Build → Smoke → review/test per **Review profile** (full / lite / skip-review); ensure SPM plan includes **api** when Has API and **db** when Has DB |
-| **needs update** | `my-design-subflow` Update → re-run this skill |
+| **clean** | TDD → Gate B → Build → Smoke → review/test per **Review profile** (full / lite / skip-review); ensure Lens plan includes **api** when Has API and **db** when Has DB |
+| **needs update** | `my-dev-flow-design` Update → re-run this skill |
 
 Standalone: on clean say next is TDD → Gate B → Build → Smoke → review/test per Review profile.
 

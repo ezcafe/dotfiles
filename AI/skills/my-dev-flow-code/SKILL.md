@@ -1,28 +1,28 @@
 ---
-name: my-code-subflow
+name: my-dev-flow-code
 description: >-
   Optionally reviews planned TDD test cases before Gate B when 04-tasks lists
   real tests to create; then builds approved design tasks with TDD after Gate B
-  using a fast model. Also fixes failures from my-test-subflow when
+  using a fast model. Also fixes failures from my-dev-flow-test when
   06-test-log.md reports smoke-fail or failure. Produces a draft only — no merge
-  or self-approval. Use when the user says run my-code-subflow, build from
+  or self-approval. Use when the user says run my-dev-flow-code, build from
   design, fix from test failures, TDD test-case review, or after
-  my-design-review-subflow is clean / Gate B is approved.
+  my-dev-flow-design-review is clean / Gate B is approved.
 ---
 
-# my-code-subflow
+# my-dev-flow-code
 
 Build subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md).
 
 - **TDD test-case review** runs **before Gate B** only when `04-tasks.md` has planned test cases.
 - **Build** runs **after Gate B** and produces a **draft** (then Smoke → review).
-- **Fix-from-tests** repairs [`my-test-subflow`](../my-test-subflow/SKILL.md) smoke or full failures.
+- **Fix-from-tests** repairs [`my-dev-flow-test`](../my-dev-flow-test/SKILL.md) smoke or full failures.
 
-**Details:** [stages.md](stages.md) · templates [`../my-dev-flow/templates.md`](../my-dev-flow/templates.md)
+**Details:** [stages.md](stages.md) · handoffs [`../my-dev-flow/handoffs.md`](../my-dev-flow/handoffs.md) · artifacts [`../my-dev-flow/artifacts.md`](../my-dev-flow/artifacts.md)
 
 ## When to run
 
-`run my-code-subflow`, build from design, TDD test-case review, fix from test failures, or when
+`run my-dev-flow-code`, build from design, TDD test-case review, fix from test failures, or when
 `my-dev-flow` reaches Step 4a (before Gate B), Step 4 Build (after Gate B), or Test↔Code loop.
 
 ## Principles
@@ -40,12 +40,12 @@ Build subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md).
 
 | Tier | Stages | Preferred slug |
 |------|--------|----------------|
-| **Medium** | TDD test-case review when run (→ Fast if Medium unavailable) | `gpt-5.6-sol-medium` |
+| **Medium** | TDD test-case review when run (→ Fast if Medium unavailable) | `claude-opus-5-5-medium` |
 | **Fast** | Build; Fix from tests | `composer-2.5-fast` |
 
 ### Model availability
 
-Follow [`my-dev-flow`](../my-dev-flow/SKILL.md) → **Model availability (auto fallback)**.
+Follow [`my-dev-flow/stages.md`](../my-dev-flow/stages.md) → **Models**.
 
 ## Prerequisites
 
@@ -100,7 +100,7 @@ When parent runs `my-dev-flow`, it calls this skill for TDD review only when nee
 - Detect mode: no planned tests → skip TDD review; TDD review only / Step 4a → stop before Build; `06-test-log` failure → fix-from-tests; else Build (require Gate B when parent is my-dev-flow).
 - Fresh Task per stage.
 - After **TDD review or skip**: next is **Gate B** (parent HITL).
-- After **Build**: next is Smoke (`my-test-subflow` smoke), then `my-review-subflow` (unless parent orchestrates).
+- After **Build**: next is Smoke (`my-dev-flow-test` smoke), then `my-dev-flow-review` (unless parent orchestrates).
 - After **Fix-from-tests**: re-run the same test mode (smoke or full).
 
 ## Start checklist

@@ -1,22 +1,22 @@
 ---
-name: my-merge-subflow
+name: my-dev-flow-merge
 description: >-
   After explicit user Gate C approval, commits (if approved), pushes the branch,
   opens a PR, then merges. Never commit or push without that yes. Use when the
-  user says run my-merge-subflow, merge the workflow, or after my-test-subflow
+  user says run my-dev-flow-merge, merge the workflow, or after my-dev-flow-test
   full succeeds.
 ---
 
-# my-merge-subflow
+# my-dev-flow-merge
 
 Merge subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). Human owns top risks.
 
-**Details:** [stages.md](stages.md) · PR body in [`../my-dev-flow/templates.md`](../my-dev-flow/templates.md)
+**Details:** [stages.md](stages.md) · PR body in [`../my-dev-flow/artifacts.md`](../my-dev-flow/artifacts.md)
 
 ## When to run
 
-`run my-merge-subflow`, merge the workflow, or when `my-dev-flow` reaches merge
-after **my-test-subflow** success.
+`run my-dev-flow-merge`, merge the workflow, or when `my-dev-flow` reaches merge
+after **my-dev-flow-test** success.
 
 ## Principles
 
@@ -34,13 +34,13 @@ after **my-test-subflow** success.
 
 ### Model availability
 
-Follow [`my-dev-flow`](../my-dev-flow/SKILL.md) → **Model availability (auto fallback)**.  
+Follow [`my-dev-flow/stages.md`](../my-dev-flow/stages.md) → **Models**.  
 Fast → `inherit`. Record the resolved slug (and any fallback) in `00-run.md`. Do not stop to ask unless no Task can run.
 
 ## Prerequisites
 
-- Prefer `06-test-log.md` Result **success** (full mode). If not success: **stop** and tell the user to run `my-test-subflow` full (or fix via `my-code-subflow`). Only continue without green tests if the user **explicitly overrides**.
-- Prefer all `my-review-subflow` lenses clean (check `05-review-log.md`). If not clean: **warn** and only continue if the user explicitly overrides.
+- Prefer `06-test-log.md` Result **success** (full mode). If not success: **stop** and tell the user to run `my-dev-flow-test` full (or fix via `my-dev-flow-code`). Only continue without green tests if the user **explicitly overrides**.
+- Prefer all `my-dev-flow-review` lenses clean (check `05-review-log.md`). If not clean: **warn** and only continue if the user explicitly overrides.
 - **Gate C** — user confirms **commit** (if needed), **push**, **PR**, and **merge** (or a subset they name). No git/remote actions before this.
 
 Reject Gate C → stop. Silence / “continue pipeline” / Gate B auto ≠ approval.

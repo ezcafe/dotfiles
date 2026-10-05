@@ -19,7 +19,13 @@ Cursor-optimized adaptations of [addyosmani/agent-skills](https://github.com/add
 
 | Skill | Role |
 |-------|------|
-| [my-dev-flow](my-dev-flow/SKILL.md) | Full delivery pipeline; includes [grill.md](my-dev-flow/grill.md) (design-tree frontier + glossary/ADR) |
+| [my-dev-flow](my-dev-flow/SKILL.md) | Full delivery pipeline; canonical order in [stages.md](my-dev-flow/stages.md); [grill.md](my-dev-flow/grill.md); handoffs/artifacts split |
+| [my-dev-flow-design](my-dev-flow-design/SKILL.md) | Design phase (Ideation → Grill → Design) |
+| [my-dev-flow-design-review](my-dev-flow-design-review/SKILL.md) | Design verification (+ isolated API/DB reviews) |
+| [my-dev-flow-code](my-dev-flow-code/SKILL.md) | TDD review + Build / fix-from-tests |
+| [my-dev-flow-test](my-dev-flow-test/SKILL.md) | Smoke / full / lite tests |
+| [my-dev-flow-review](my-dev-flow-review/SKILL.md) | Code review lenses |
+| [my-dev-flow-merge](my-dev-flow-merge/SKILL.md) | Gate C → commit / push / PR / merge |
 | [myplan](myplan/SKILL.md) | Discovery → spec → plan (use *before* task breakdown) |
 | [vercel-react-best-practices](vercel-react-best-practices/SKILL.md) | React/Next performance rule catalog |
 | [clean-minimal-ui](clean-minimal-ui/SKILL.md) | Visual tokens and clean-minimal styling |

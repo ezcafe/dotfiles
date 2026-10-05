@@ -1,27 +1,27 @@
 ---
-name: my-design-subflow
+name: my-dev-flow-design
 description: >-
-  Runs Ideation (set Has UI) → Gate A day-to-day auto-approve → light repo skim
-  → Analyze → Grill (design tree + glossary/ADR; auto-settle by default) →
-  Design. No UI concept step and no Gate A2. Gate B comes later (after
-  design-review + optional TDD test-case review). Also updates design docs from
-  my-design-review-subflow findings. Writes framing, skim, analysis, grill,
-  design options (two in full; one in simple), system design + design-patterns
-  teach sections, sequence diagrams, API/database contracts, and TDD-ready
-  tasks under .my-docs/workflow. Use when the user says run my-design-subflow,
-  design-only workflow, update design from review, or after
-  my-design-review-subflow.
+  Runs Ideation (set Has UI; Problem map diagnose-before-framing) → Gate A
+  day-to-day auto-approve → light repo skim → Analyze (What/Why/How +
+  Solution branches) → Grill (design tree + glossary/ADR; auto-settle by
+  default) → Design. Gate B comes later (after design-review + optional TDD
+  test-case review). Also updates design docs from my-dev-flow-design-review
+  findings. Writes framing, skim, analysis, grill, design options (two in full;
+  one in simple), system design + design-patterns teach sections, sequence
+  diagrams, API/database contracts, and TDD-ready tasks under .my-docs/workflow.
+  Use when the user says run my-dev-flow-design, design-only workflow, update
+  design from review, or after my-dev-flow-design-review.
 ---
 
-# my-design-subflow
+# my-dev-flow-design
 
 Design-only subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). No production code.
 
-**Details:** [stages.md](stages.md) · shared templates [`../my-dev-flow/templates.md`](../my-dev-flow/templates.md)
+**Details:** [stages.md](stages.md) · handoffs [`../my-dev-flow/handoffs.md`](../my-dev-flow/handoffs.md) · artifacts [`../my-dev-flow/artifacts.md`](../my-dev-flow/artifacts.md)
 
 ## When to run
 
-`run my-design-subflow`, design-only, update design from review, or when `my-dev-flow`
+`run my-dev-flow-design`, design-only, update design from review, or when `my-dev-flow`
 reaches the design phase / design↔review loop.
 
 ## Principles
@@ -31,23 +31,24 @@ reaches the design phase / design↔review loop.
 - **Design options:** Mode **full** → two plausible designs + tradeoffs; Mode **simple** → one recommended design + ≤3-line rejected alternative (full Option 1/2 only if 2+ approaches still unsettled). Decision options shape when 2+ options — see [`my-dev-flow`](../my-dev-flow/SKILL.md).
 - **User-first picks:** When recommending / auto-picking an option, stand in the user’s shoes — day-to-day user value first, then system convenience. Record rationale when parent HITL is auto.
 - **Sequence diagram** + **API/DB contracts** + **example queries** required in `03-design.md`.
-- **System design (required heading in `03-design.md`):** Teach runtime shape when architecture matters. **Triggers:** Has API or Has DB → Overview required (not N/A); Mode full + new boundary/data-flow → Overview required; simple copy/token → prefer N/A. Ownership: runtime/boundaries only (not code patterns). Anti-dupe: point to sequence/contracts/OWASP — do not restate. Budgets: Overview ≤ ~12 bullets; ≤3 Concept N. See templates → **System design** (incl. mini example).
-- **Design patterns used (required heading in `03-design.md`):** Teach code/module patterns when they matter. Prefer repo patterns; invent-new when a repo pattern exists is a design-review fail. Ownership: code structure only. Budgets: ≤3 patterns; ≤ ~8 lines each. See templates → **Design patterns used** (incl. mini example).
+- **System design (required heading in `03-design.md`):** Teach runtime shape when architecture matters. **Triggers:** Has API or Has DB → Overview required (not N/A); Mode full + new boundary/data-flow → Overview required; simple copy/token → prefer N/A. Ownership: runtime/boundaries only (not code patterns). Anti-dupe: point to sequence/contracts/OWASP — do not restate. Budgets: Overview ≤ ~12 bullets; ≤3 Concept N. See artifacts → **System design**.
+- **Design patterns used (required heading in `03-design.md`):** Teach code/module patterns when they matter. Prefer repo patterns; invent-new when a repo pattern exists is a design-review fail. Ownership: code structure only. Budgets: ≤3 patterns; ≤ ~8 lines each. See artifacts → **Design patterns used**.
 - **Has UI early:** Ideation sets Has UI in `00-run.md`.
 - **Primary sources in Ideation:** Investigate the question against primary sources (official docs, source code, specs, first-party APIs), not a secondary write-up of them. Follow every claim back to the source that owns it. Record those sources in `01-idea.md`.
-- **No UI concept / Gate A2:** Do **not** write `01b-ui-concept.md` or `ui-refs/` look gates. When Has UI, put layout/IA/chrome in `03-design.md` + acceptance in `04-tasks.md`; match existing app patterns and Gate A 80/20.
+- **UI in Design:** When Has UI, put layout/IA/chrome in `03-design.md` + acceptance in `04-tasks.md`; match existing app patterns and Gate A 80/20. Removed UI-concept step — see [`LEGACY.md`](../my-dev-flow/LEGACY.md).
 - **Has API:** Set/refine in `00-run.md` during Analyze or Design when public contracts change (`yes` / `no`). When **yes**, design-review runs an isolated **API contract review** Task; code review includes the **api** lens.
 - **Has DB:** Set/refine in `00-run.md` during Analyze or Design when schema, migrations, or persistence queries change (`yes` / `no`). When **yes**, design-review runs an isolated **DB design review** Task; code review includes the **db** lens.
 - **Gate A after Ideation:** user-role day-to-day + 80/20 → `01a`. Auto-approve when ok.
 - **Light skim after Gate A:** `02-skim.md` constraints before Analyze.
 - **Grill after Analyze (before Design):** follow [`my-dev-flow/grill.md`](../my-dev-flow/grill.md) — design-tree frontier + glossary/ADR. Mode **full** always (unless already frontier-empty). Mode **simple** when frontier open or Has API/DB; else skip. Prefer **auto** user-first settle (HITL Gate B). Do not start Design on `needs-round`.
 - Analyze/Design must not abandon Gate A #1/#2. Design review checks **alignment**, not re-litigation of Gate A 80/20. Design honors grill Settled decisions.
+- **Diagnose before design:** Ideation fills **Problem map** (3 WHAT branches → Core problem → mind map with ★) before Outcome. Mode **full** required; Mode **simple** stub OK.
 - **Analyze + spike deep dive (required):** For the feature and each major solution piece, answer in `02-analysis.md` (ask the user when unclear):
-  1. **What is this?**
+  1. **What is this?** (align with Core problem)
   2. **Why do we need this?**
-  3. **How to do this?** Other ways? Best practices?
+  3. **How to do this?** Other ways? Best practices? Plus **Solution branches** (Quick wins / Systemic / Creative) from Core problem — Mode full required; Mode simple stub OK.
   Optional **spikes** (throwaway exploration only) during Analyze must use the same three questions and write findings into `02-analysis.md`. No production code in this skill.
-- **UI / UX / mobile** + **OWASP** as in templates / security-and-hardening (in Design when Has UI).
+- **UI / UX / mobile** + **OWASP** as in artifacts / security-and-hardening (in Design when Has UI).
 - When updating from review: **only** address `03a` Fix ask; stay aligned with Gate A idea.
 - Plain words in all docs.
 
@@ -55,12 +56,12 @@ reaches the design phase / design↔review loop.
 
 | Tier | Stages | Preferred slug |
 |------|--------|----------------|
-| **Medium** | Ideation; Gate A; Ideation update; Light skim; Grill | `gpt-5.6-sol-medium` |
-| **High** | Analyze; Design; Update from design review | `claude-opus-5-thinking-high` |
+| **Medium** | Ideation; Gate A; Ideation update; Light skim; Grill | `claude-opus-5-5-medium` |
+| **High** | Analyze; Design; Update from design review | `claude-sonnet-5-5-high` |
 
 ### Model availability
 
-Follow [`my-dev-flow`](../my-dev-flow/SKILL.md) → **Model availability (auto fallback)**.  
+Follow [`my-dev-flow/stages.md`](../my-dev-flow/stages.md) → **Models** (usage-limit: wait 5s → retry → **inherit** → main-thread for that stage).  
 Record resolved slug in `00-run.md`. Do not stop to ask unless no Task can run.
 
 ## Gates
@@ -117,7 +118,7 @@ If neither mode’s files are ready → **stop**.
 - `02-skim.md` (full; may already exist in simple)
 - `02-analysis.md`, `02b-grill.md` (or skip note in `00-run.md`), `03-design.md`, `04-tasks.md`
 
-Do **not** output `01b-ui-concept.md` or `ui-refs/` for look approval.
+Do **not** create removed UI-concept artifacts — see [`LEGACY.md`](../my-dev-flow/LEGACY.md).
 
 ## Orchestrator rules
 
@@ -136,10 +137,10 @@ Do **not** output `01b-ui-concept.md` or `ui-refs/` for look approval.
 
 | Stage | Skills |
 |-------|--------|
-| Ideation | `myplan` (discovery + specify) |
+| Ideation | `myplan` (discovery + specify); **Problem map** before Outcome |
 | Gate A | none — user-role review of `01-idea.md` |
 | Light skim | explore / quick repo scan |
-| Analyze | explore; `dev-decision-routing` if front-end; honor skim; **What/Why/How deep dive** (+ optional spike notes); Design tree stub |
+| Analyze | explore; `dev-decision-routing` if front-end; honor skim; **What/Why/How deep dive** + **Solution branches** (+ optional spike notes); Design tree stub |
 | Grill | [`my-dev-flow/grill.md`](../my-dev-flow/grill.md); `documentation-and-adrs` (glossary + sparse ADR) |
 | Design / Update | `myplan` plan; `planning-and-task-breakdown`; `documentation-and-adrs`; `api-and-interface-design`; `security-and-hardening`; when Has UI: `clean-minimal-ui` + `frontend-ui-engineering` + DESIGN_GUIDE — lock Build to Design UI specs + existing chrome; honor `02b-grill` |
 
