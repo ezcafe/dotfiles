@@ -9,7 +9,9 @@ This file is the **source of truth** for pipeline order, Mode, HITL, lenses, mod
 **File also:** Run log + Last stage + Orchestrator card.  
 **Chat OK:** post-step summary + path, human gates, Decision N, stop, finish.  
 **Subagent context:** every Task starts fresh — [handoffs.md](handoffs.md) stage id only.  
-**Legacy removals:** [LEGACY.md](LEGACY.md).
+**Legacy removals:** [LEGACY.md](LEGACY.md).  
+**Severity exit:** [severity.md](severity.md) (Critical/Major block clean; defer Enhancement).  
+**Skill paths:** [skills-path.md](skills-path.md) (`{my-dev-flow}` placeholders in Task prompts).
 
 | Phase | Skill | Stages file |
 |-------|--------|-------------|
@@ -52,7 +54,7 @@ Parent / main agent (no Task unless classifying is ambiguous):
 
 1. **Overrides:** resume keeps Mode + Review profile; user said `simple` / `full` / `skip-review` → that Mode/profile.
 2. Else **classify** (table below + cheap path matrix). Ambiguous → Decision N.
-3. Create slug `YYYYMMDD-feature-x`; write `00-run.md` from [artifacts.md](artifacts.md): Mode, Review profile, Complexity, Has UI/API/DB when known, resolve models, Orchestrator card, HITL Gate B (refine after Design), **HITL Gate C: blocking**.
+3. Create slug `YYYYMMDD-feature-x`; write `00-run.md` from [artifacts/00-run.md](artifacts/00-run.md): Mode, Review profile, Complexity, Has UI/API/DB when known, resolve models, Orchestrator card, HITL Gate B (refine after Design), **HITL Gate C: blocking**.
 4. Chat one line: Mode + Review profile + why.
 
 ### Mode selection
@@ -100,6 +102,31 @@ If scope grows (Has API/DB flips to **yes**, auth/PII appears, multi-surface UX,
 
 **Git / remote (hard):** no `git commit` / `git push` / `gh pr create` / `gh pr merge` without explicit yes naming each action. Reject / silence at Gate C → stop. Gate B auto ≠ commit approval.
 
+**async-notify example:** Gate B posts digest + auto-pick “Option 1 — ship thin API first”; pipeline continues to Build. User’s **next** message says “stop — use Option 2 instead” → Status `stopped` or re-open Gate B with veto; a later message that only says “looks good” is **not** a veto if the pipeline already moved on.
+
+**Gate C test bar (before merge subflow):**
+
+| Review profile | `06-test-log.md` Result required |
+|----------------|----------------------------------|
+| **skip-review** | **smoke-pass** (no full/lite suite) |
+| **lite** | **success** after lite run |
+| **full** | **success** after full run |
+
+Explicit user override may waive green tests; log override in Notes.
+
+---
+
+## Resume (mid-run)
+
+When the user says **resume** / continues an existing slug:
+
+1. Read `00-run.md` only: **Status**, **Last stage**, **Orchestrator card**, checked **Gates**, **Review profile**, **Mode**.
+2. Do **not** re-classify Mode unless the user asked to reclassify or scope changed (Decision N).
+3. Do **not** redo completed gates unless artifacts for that gate changed (e.g. new Fix ask after design-review).
+4. Next step = first incomplete row in **Full/Simple pipeline order** below, or the card’s **Next step** if it matches.
+5. Load **one** subflow `SKILL.md` for the current phase only; Task prompt = handoffs row + subflow `stages.md` section.
+6. If Status is `stopped`, require a new user Decision before continuing.
+
 ---
 
 ## Has API / Has DB (force yes|no before design-review)
@@ -119,9 +146,9 @@ Independent flags. Skills: [`api-and-interface-design`](../api-and-interface-des
 
 ---
 
-## Conditional lenses / Lens plan (alias: SPM plan)
+## Conditional lenses / Lens plan
 
-Before code review, set **Lens plan** in `00-run.md` (field alias **SPM plan** OK). Launch only matching lenses.
+Before code review, set **Lens plan** in `00-run.md`. Launch only matching lenses. (Legacy field name **SPM plan** — see [LEGACY.md](LEGACY.md).)
 
 | Lens | Launch when |
 |------|-------------|
@@ -249,7 +276,7 @@ After every stage: Result header only → **≤5 lines** summary + path → upda
 | 2 Analyze | `02-analysis.md` |
 | 2g Grill | `02b-grill.md` or skip note |
 | 3 Design | `03-design.md` + `04-tasks.md` |
-| Design review / API / DB | `03a-design-review-log.md` |
+| Design review / API / DB | `03a-design-review-log.md` + `03a-api-contract-review.md` + `03a-db-design-review.md` when flagged |
 | 4a | `04a-tdd-test-review.md` or skip note |
 | Gate B | digest + HITL |
 | 4 Build | key paths |
@@ -277,6 +304,7 @@ After every stage: Result header only → **≤5 lines** summary + path → upda
 | 4 | `Build with TDD` |
 | Smoke | `Smoke build and unit` |
 | 5 | `Adversarial test review` |
+| 5-lite | `Lite combined review` (optional — profile lite, Lens plan none or one) |
 | 6 | `Quality review` |
 | 7 | `Security review` |
 | 8 | `Performance review` |

@@ -10,7 +10,7 @@ These steps and artifacts were **removed**. New runs ignore them.
 
 **Resume old runs:** treat Gate A2 / `01b` / `ui-refs` as skipped/N/A. Do not re-open them.
 
-**Aliases (still valid):** Gate 1 + Gate 2-UI ≈ Gate A; Gate 2 ≈ Gate B; Gate 3 ≈ Gate C; **SPM plan** ≈ **Lens plan**.
+**Aliases (still valid):** Gate 1 + Gate 2-UI ≈ Gate A; Gate 2 ≈ Gate B; Gate 3 ≈ Gate C; **SPM plan** ≈ **Lens plan** (prefer **Lens plan** in new docs); stage ids `spm-api` … `spm-memory` ≈ lens Tasks (prefer **Lens plan** wording in chat); **Merged SPM** ≈ **Merged lenses** in `05-review-log.md`.
 
 ## Renamed subflow skills
 

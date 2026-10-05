@@ -18,7 +18,7 @@ Build subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md).
 - **Build** runs **after Gate B** and produces a **draft** (then Smoke → review).
 - **Fix-from-tests** repairs [`my-dev-flow-test`](../my-dev-flow-test/SKILL.md) smoke or full failures.
 
-**Details:** [stages.md](stages.md) · handoffs [`../my-dev-flow/handoffs.md`](../my-dev-flow/handoffs.md) · artifacts [`../my-dev-flow/artifacts.md`](../my-dev-flow/artifacts.md)
+**Details:** [stages.md](stages.md) · handoffs [`../my-dev-flow/handoffs.md`](../my-dev-flow/handoffs.md) · templates [`../my-dev-flow/artifacts/INDEX.md`](../my-dev-flow/artifacts/INDEX.md)
 
 ## When to run
 
@@ -38,14 +38,7 @@ Build subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md).
 
 ## Models
 
-| Tier | Stages | Preferred slug |
-|------|--------|----------------|
-| **Medium** | TDD test-case review when run (→ Fast if Medium unavailable) | `claude-opus-5-5-medium` |
-| **Fast** | Build; Fix from tests | `composer-2.5-fast` |
-
-### Model availability
-
-Follow [`my-dev-flow/stages.md`](../my-dev-flow/stages.md) → **Models**.
+Follow [`my-dev-flow/stages.md`](../my-dev-flow/stages.md) → **Models** (TDD review = mechanical; Build/Fix = Fast).
 
 ## Prerequisites
 

@@ -31,8 +31,9 @@ design-heavy, never ship first draft, generation ≠ verification.
 | [SKILL.md](SKILL.md) | Thin orchestrator — when to run, non-negotiables, subflow index |
 | [stages.md](stages.md) | Canonical pipeline · Mode · HITL · lenses · models · progress |
 | [handoffs.md](handoffs.md) | Stage-scoped handoffs · Decision shape · size caps |
-| [artifacts.md](artifacts.md) | Artifact body templates |
-| [templates.md](templates.md) | Index → handoffs + artifacts + LEGACY |
+| [artifacts/INDEX.md](artifacts/INDEX.md) | Split artifact templates (one file per stage) |
+| [severity.md](severity.md) | Critical/Major vs Enhancement exit rules |
+| [skills-path.md](skills-path.md) | Resolve `{my-dev-flow}` and sibling skills |
 | [grill.md](grill.md) | Grill (frontier + glossary/ADR) |
 | [LEGACY.md](LEGACY.md) | Removed Gate A2 / `01b` / `ui-refs` |
 
@@ -72,7 +73,7 @@ Each subflow can run **alone** when its prerequisites are met.
 ## Start (Step 0)
 
 1. **Classify** simple vs full unless resume or user named Mode → stages.md **Mode selection**. Ambiguous → Decision N.
-2. Pick slug `YYYYMMDD-feature-x` (UTC date + kebab feature). Create `.my-docs/workflow/<slug>/` from [artifacts.md](artifacts.md).
+2. Pick slug `YYYYMMDD-feature-x` (UTC date + kebab feature). Seed `00-run.md` from [artifacts/00-run.md](artifacts/00-run.md).
 3. Resolve High / Medium / Fast from Task allowlist → `00-run.md` (stages.md **Models**). Set Mode, Review profile, HITL Gate B, **HITL Gate C: blocking**, Orchestrator card.
 4. Chat one line: Mode + Review profile + why.
 5. Mode **simple** without `01-idea.md` → bootstrap thin idea; note skipped early gates. Do not invent legacy UI-concept artifacts.
@@ -84,7 +85,7 @@ Each subflow can run **alone** when its prerequisites are met.
 |------|------|
 | Next step | `00-run.md` Orchestrator card + **one** stages.md section |
 | Task prompt | handoffs.md row for stage id + that stage’s stages.md rules |
-| New artifact body | matching section in artifacts.md only |
+| New artifact body | one file under [artifacts/](artifacts/INDEX.md) only |
 | Grill | grill.md (once when entering Grill) |
 | Phase entry | that subflow `SKILL.md` once |
 

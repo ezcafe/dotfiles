@@ -12,7 +12,7 @@ description: >-
 Test subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). Proves the draft
 is worth reviewing (smoke) and matches requirements before merge (full).
 
-**Details:** [stages.md](stages.md) · handoffs [`../my-dev-flow/handoffs.md`](../my-dev-flow/handoffs.md) · artifacts [`../my-dev-flow/artifacts.md`](../my-dev-flow/artifacts.md)
+**Details:** [stages.md](stages.md) · handoffs [`../my-dev-flow/handoffs.md`](../my-dev-flow/handoffs.md) · templates [`../my-dev-flow/artifacts/INDEX.md`](../my-dev-flow/artifacts/INDEX.md)
 
 ## When to run
 
@@ -33,13 +33,7 @@ is worth reviewing (smoke) and matches requirements before merge (full).
 
 ## Models
 
-| Tier | Stages | Preferred slug |
-|------|--------|----------------|
-| **Fast** | Smoke; Coverage; Add e2e; Full run suite | `composer-2.5-fast` |
-
-### Model availability
-
-Follow [`my-dev-flow/stages.md`](../my-dev-flow/stages.md) → **Models**.
+Follow [`my-dev-flow/stages.md`](../my-dev-flow/stages.md) → **Models** (all test stages = Fast).
 
 ## Prerequisites
 

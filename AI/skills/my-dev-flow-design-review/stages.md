@@ -1,7 +1,7 @@
 # my-dev-flow-design-review stages
 
-Stage-scoped handoff: `~/.cursor/skills/my-dev-flow/handoffs.md` → stage id `api-contract-review`, `db-design-review`, or `design-review`.  
-Log template: same file → “03a-design-review-log.md”.
+Stage-scoped handoff: `{my-dev-flow}/handoffs.md` → stage id `api-contract-review`, `db-design-review`, or `design-review`. Resolve paths per `{my-dev-flow}/skills-path.md`.  
+Templates: `{my-dev-flow}/artifacts/03a-api-contract-review.md`, `03a-db-design-review.md`, `03a-design-review-log.md`. Severity: `{my-dev-flow}/severity.md`.
 
 ---
 
@@ -15,16 +15,16 @@ Log template: same file → “03a-design-review-log.md”.
 **model:** resolved Medium (Fast if Medium unavailable)  
 **Task description:** `API contract review`
 
-**Done when:** `03a-design-review-log.md` → **API contract review** section has Result **clean** or **needs update** with findings. Overall round stays **needs update** if this section is not clean.
+**Done when:** `03a-api-contract-review.md` has Result **clean** or **needs update**. Overall round stays **needs update** if this file is not clean.
 
 **Task prompt:**
 
 ```
 You are a Senior API designer verifier for my-dev-flow-design-review. Fresh context only. You did NOT author these design docs. Generation ≠ verification — find contract gaps; do not rewrite 01–04 yourself.
 
-<Stage-scoped handoff for stage id api-contract-review from ~/.cursor/skills/my-dev-flow/handoffs.md>
+<Stage-scoped handoff for stage id api-contract-review from {my-dev-flow}/handoffs.md>
 
-Read ~/.cursor/skills/api-and-interface-design/SKILL.md (and reference.md if needed).
+Read {api-and-interface-design}/SKILL.md (and reference.md if needed).
 Read 02-analysis.md, 03-design.md (API/DB contracts + sequence), 04-tasks.md, and 02-skim.md if present.
 Also read project AGENTS.md / docs/ARCHITECTURE.md / existing route patterns when present.
 
@@ -41,24 +41,20 @@ Review API contracts against best practices:
 - Sequence diagram covers main path + key failure returns for APIs in scope
 - Tasks include acceptance that would catch contract mistakes
 
-Write/update ONLY the “API contract review” section in 03a-design-review-log.md:
-- Result: clean | needs update
-- Findings table (Area: contracts / practice)
-- Short API checklist notes
-- Contribute numbered Fix ask items for my-dev-flow-design (API-related only)
+Write/update ONLY 03a-api-contract-review.md (template: {my-dev-flow}/artifacts/03a-api-contract-review.md).
 
 Rules:
-- Clean only if zero Critical, Major, and Enhancement in this section.
+- Clean only if zero Critical and Major ({my-dev-flow}/severity.md). Defer Enhancement to Round notes.
 - Simple plain words.
-- Do not edit 01–04. Do not write production code.
+- Do not edit 01–04 or 03a-design-review-log.md. Do not write production code.
 - Do not run the general design review or DB design review — those are separate Tasks.
 
-Return: clean | needs update, and path to 03a-design-review-log.md.
+Return: clean | needs update, and path to 03a-api-contract-review.md.
 ```
 
 **If needs update:** parent may run design Update for API Fix ask items, then re-run this stage before or with general design review.
 
-**If Has API = no:** skip this stage; set API section Result to **skipped**.
+**If Has API = no:** skip this stage; do not create `03a-api-contract-review.md` or set Result **skipped** in Notes.
 
 ---
 
@@ -72,16 +68,16 @@ Return: clean | needs update, and path to 03a-design-review-log.md.
 **model:** resolved Medium (Fast if Medium unavailable)  
 **Task description:** `DB design review`
 
-**Done when:** `03a-design-review-log.md` → **DB design review** section has Result **clean** or **needs update** with findings. Overall round stays **needs update** if this section is not clean.
+**Done when:** `03a-db-design-review.md` has Result **clean** or **needs update**. Overall round stays **needs update** if this file is not clean.
 
 **Task prompt:**
 
 ```
 You are a Senior Database designer verifier for my-dev-flow-design-review. Fresh context only. You did NOT author these design docs. Generation ≠ verification — find schema/migration/query gaps; do not rewrite 01–04 yourself.
 
-<Stage-scoped handoff for stage id db-design-review from ~/.cursor/skills/my-dev-flow/handoffs.md>
+<Stage-scoped handoff for stage id db-design-review from {my-dev-flow}/handoffs.md>
 
-Read ~/.cursor/skills/database-and-data-model/SKILL.md.
+Read {database-and-data-model}/SKILL.md.
 Read 02-analysis.md, 03-design.md (Database contracts + example queries + sequence), 04-tasks.md, and 02-skim.md if present.
 Also read project AGENTS.md (Database / Drizzle section when present), docs/ARCHITECTURE.md, and existing db/schema + migration patterns when present.
 
@@ -99,24 +95,20 @@ Review database design against best practices:
 - Tasks include acceptance that would catch missing migration, wrong nullability, or missing unique
 - Sequence diagram covers main DB reads/writes + key failure returns when DB is in scope
 
-Write/update ONLY the “DB design review” section in 03a-design-review-log.md:
-- Result: clean | needs update
-- Findings table (Area: schema / migration / query / ownership / practice)
-- Short DB checklist notes
-- Contribute numbered Fix ask items for my-dev-flow-design (DB-related only)
+Write/update ONLY 03a-db-design-review.md (template: {my-dev-flow}/artifacts/03a-db-design-review.md).
 
 Rules:
-- Clean only if zero Critical, Major, and Enhancement in this section.
+- Clean only if zero Critical and Major ({my-dev-flow}/severity.md). Defer Enhancement to Round notes.
 - Simple plain words.
-- Do not edit 01–04. Do not write production code.
+- Do not edit 01–04 or 03a-design-review-log.md. Do not write production code.
 - Do not run the general design review or API contract review — those are separate Tasks.
 
-Return: clean | needs update, and path to 03a-design-review-log.md.
+Return: clean | needs update, and path to 03a-db-design-review.md.
 ```
 
 **If needs update:** parent may run design Update for DB Fix ask items, then re-run this stage before or with general design review.
 
-**If Has DB = no:** skip this stage; set DB section Result to **skipped**.
+**If Has DB = no:** skip this stage; do not create `03a-db-design-review.md` or set Result **skipped** in Notes.
 
 ---
 
@@ -128,22 +120,22 @@ Return: clean | needs update, and path to 03a-design-review-log.md.
 **model:** resolved Medium  
 **Task description:** `Design review`
 
-**Done when:** `03a-design-review-log.md` has overall Result **clean** or **needs update** with a concrete Fix ask. When Has API, overall clean requires API section already **clean**. When Has DB, overall clean requires DB section already **clean**.
+**Done when:** `03a-design-review-log.md` has overall Result **clean** or **needs update**. When Has API, `03a-api-contract-review.md` must be **clean** first. When Has DB, `03a-db-design-review.md` must be **clean** first.
 
 **Task prompt:**
 
 ```
 You are a Senior Architect verifier for my-dev-flow-design-review. Fresh context only. You did NOT author these design docs. Generation ≠ verification — find gaps; do not rewrite 01–04 yourself.
 
-<Stage-scoped handoff for design-review from ~/.cursor/skills/my-dev-flow/handoffs.md>
+<Stage-scoped handoff for design-review from {my-dev-flow}/handoffs.md>
 
 Read 01-idea.md, 01a-idea-ui-review.md (if present), 02-skim.md (if present), 02-analysis.md, 02b-grill.md (if present), 03-design.md, 04-tasks.md.
 Also read project AGENTS.md / docs/ARCHITECTURE.md / GLOSSARY.md when present.
 Follow useful bits from myplan, planning-and-task-breakdown, documentation-and-adrs, security-and-hardening (OWASP required), and UI skills when UI.
 
-If Has API = yes: an isolated API contract review Task already filled the “API contract review” section. Do NOT deep-re-review API contracts; you may flag only obvious cross-cutting gaps (e.g. tasks missing API acceptance) and must not clear an unclean API section.
+If Has API = yes: read `03a-api-contract-review.md`. Do NOT deep-re-review API contracts; flag only cross-cutting gaps (e.g. tasks missing API acceptance). If that file is **needs update**, overall Result stays **needs update**.
 
-If Has DB = yes: an isolated DB design review Task already filled the “DB design review” section. Do NOT deep-re-review schema/migrations/queries; you may flag only obvious cross-cutting gaps (e.g. tasks missing migration acceptance) and must not clear an unclean DB section.
+If Has DB = yes: read `03a-db-design-review.md`. Do NOT deep-re-review schema/migrations/queries; flag only cross-cutting gaps. If that file is **needs update**, overall Result stays **needs update**.
 
 Review against real-world best practices. Check at least:
 
@@ -175,22 +167,23 @@ UI / UX / mobile (when UI is in scope)
 - When Has UI: fail Major if Design/tasks lack clear UI locks for Build
 - Loading / empty / error / success; skeleton parity; mobile ≥44px; no hover-only; a11y basics
 
-Security / OWASP (always)
-- Trust boundaries + abuse cases; OWASP Top 10 table complete
+Security / OWASP (design — light pass)
+- Trust boundaries + abuse cases; OWASP table in `03-design.md` covers **design-time** risks (not code audit)
+- Do not duplicate the full OWASP grid — spot gaps only; code OWASP is the **security lens** after Build
 - Primary reference: https://owasp.org/Top10/
 
 Improvements
 - Concrete, practical suggestions
 
-Write 03a-design-review-log.md:
-- Overall Result: clean | needs update — **clean only if** API section is clean|skipped AND DB section is clean|skipped AND this review has zero Critical/Major/Enhancement
+Write 03a-design-review-log.md (template: {my-dev-flow}/artifacts/03a-design-review-log.md):
+- Overall Result: clean | needs update — **clean only if** API/DB isolated files are clean|skipped AND zero Critical/Major in this log ({my-dev-flow}/severity.md)
 - Findings table: Severity, Area, Finding, Suggestion
-  Area tags may include: idea / ui / skim / analysis / grill / design / tasks / contracts / diagram / system-design / pattern / ui-ux / security-owasp / practice / api-contract / db-design / glossary-adr
-- Fix ask for my-dev-flow-design: numbered, actionable (merge with any open API / DB Fix ask items)
+- Fix ask for my-dev-flow-design: Critical/Major only; merge pointers to API/DB Fix ask files when those are open
+- **Deferred Enhancements:** optional bullet list (do not block clean)
 - Round notes
 
 Rules:
-- Clean only if zero Critical, Major, and Enhancement (including API section when Has API and DB section when Has DB).
+- Clean only if zero Critical and Major (Enhancements → Deferred).
 - Simple plain words.
 - Do not edit 01–04. Do not write production code.
 

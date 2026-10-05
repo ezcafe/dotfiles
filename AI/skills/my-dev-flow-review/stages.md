@@ -1,6 +1,6 @@
 # my-dev-flow-review stages
 
-Stage-scoped handoff: `~/.cursor/skills/my-dev-flow/handoffs.md` → stage id (`adversarial`, `quality`, `spm-api`, `spm-db`, `spm-security`, `spm-perf`, `spm-memory`, `merge-findings`, `fix-review`).
+Stage-scoped handoff: `{my-dev-flow}/handoffs.md` → stage id (`adversarial`, `quality`, `spm-api`, `spm-db`, `spm-security`, `spm-perf`, `spm-memory`, `merge-findings`, `fix-review`).
 
 ---
 
@@ -12,14 +12,14 @@ Stage-scoped handoff: `~/.cursor/skills/my-dev-flow/handoffs.md` → stage id (`
 **model:** resolved Medium  
 **Task description:** `Adversarial test review`
 
-**Done when:** zero Critical/Major/Enhancement on test quality.
+**Done when:** zero Critical/Major on test quality.
 
 **Task prompt:**
 
 ```
 You are a Senior Verifier for my-dev-flow-review Adversarial Test Review. You did NOT write this code. Do not rewrite features unless needed to describe a finding.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/handoffs.md>
+<Stage-scoped handoff for this stage id from {my-dev-flow}/handoffs.md>
 
 Review tests and how they map to 04-tasks.md and the behavior in the draft.
 
@@ -43,23 +43,23 @@ Return: finding table or clean status.
 
 ## 2. Quality review (Verifier) — Medium
 
-**Skills:** `~/.cursor/skills/code-review-and-quality/SKILL.md`  
+**Skills:** `{code-review-and-quality}/SKILL.md`  
 Bugbot only if the user asked.
 
 **subagent_type:** `generalPurpose`  
 **model:** resolved Medium  
 **Task description:** `Quality review`
 
-**Done when:** zero Critical/Major/Enhancement for Quality.
+**Done when:** zero Critical/Major for Quality.
 
 **Task prompt:**
 
 ```
 You are a Senior Verifier for my-dev-flow-review Quality Review. Generation ≠ verification — you did not write this draft.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/handoffs.md>
+<Stage-scoped handoff for this stage id from {my-dev-flow}/handoffs.md>
 
-Read ~/.cursor/skills/code-review-and-quality/SKILL.md and follow it.
+Read {code-review-and-quality}/SKILL.md and follow it.
 Review uncommitted / branch changes against 01-idea, 03-design, and 04-tasks.
 When Has UI: also compare draft UI to Design UI specs in 03-design / 04-tasks + Gate A #1/#2 — fail **Major** if shipped look drifts on **size**, **positions**, **texts**, or chrome.
 When 03-design **System design** or **Design patterns used** is not N/A: check draft code honors their Best practices / anti-patterns and does not invent a conflicting shape (Architecture axis). Flag design↔code gaps as Major when clear.
@@ -83,7 +83,7 @@ Do not fix. Return finding table or “Quality review: clean.”
 If **Has API = yes** and plan omits **api**, parent adds **api** before launching.
 If **Has DB = yes** and plan omits **db**, parent adds **db** before launching.
 
-Wait for launched lenses. Merge findings only if **2+** lenses; if **1** lens, parent copies into Merged SPM (no Merge Task).
+Wait for launched lenses. Merge findings only if **2+** lenses; if **1** lens, parent copies into Merged lenses (no Merge Task).
 
 Each lens writes **only** its own file (do not edit `05-review-log.md` here — avoids parallel write races):
 
@@ -95,11 +95,11 @@ Each lens writes **only** its own file (do not edit `05-review-log.md` here — 
 | Performance | `.my-docs/workflow/<slug>/05-lens-performance.md` |
 | Memory | `.my-docs/workflow/<slug>/05-lens-memory.md` |
 
-Overwrite the lens file each round. Use the lens template in `~/.cursor/skills/my-dev-flow/artifacts.md` → “05-lens-*.md”.
+Overwrite the lens file each round. Use the lens template in `{my-dev-flow}/artifacts/INDEX.md` → “05-lens-*.md”.
 
 ### 3a. API (required when Has API)
 
-**Skills:** `~/.cursor/skills/api-and-interface-design/SKILL.md` (+ `reference.md` when useful)
+**Skills:** `{api-and-interface-design}/SKILL.md` (+ `reference.md` when useful)
 
 **When:** Lens plan includes **api** (always when Has API = yes).
 
@@ -110,9 +110,9 @@ Overwrite the lens file each round. Use the lens template in `~/.cursor/skills/m
 ```
 You are a Senior Verifier for my-dev-flow-review API Contract Review. Fresh context only. You run in parallel with other SPM lenses when present — write ONLY 05-lens-api.md; do not edit 05-review-log.md or other lens files. Do not fix code.
 
-<Stage-scoped handoff for stage id spm-api from ~/.cursor/skills/my-dev-flow/handoffs.md>
+<Stage-scoped handoff for stage id spm-api from {my-dev-flow}/handoffs.md>
 
-Read ~/.cursor/skills/api-and-interface-design/SKILL.md (and reference.md if needed).
+Read {api-and-interface-design}/SKILL.md (and reference.md if needed).
 Also read 03-design.md API/DB contracts and the draft route/handler/validator/schema files.
 
 Review that public APIs follow best practices and match the design contracts:
@@ -134,7 +134,7 @@ Return: Result + path to 05-lens-api.md.
 
 ### 3a2. DB (required when Has DB)
 
-**Skills:** `~/.cursor/skills/database-and-data-model/SKILL.md`
+**Skills:** `{database-and-data-model}/SKILL.md`
 
 **When:** Lens plan includes **db** (always when Has DB = yes).
 
@@ -145,9 +145,9 @@ Return: Result + path to 05-lens-api.md.
 ```
 You are a Senior Verifier for my-dev-flow-review Database Review. Fresh context only. You run in parallel with other SPM lenses when present — write ONLY 05-lens-db.md; do not edit 05-review-log.md or other lens files. Do not fix code.
 
-<Stage-scoped handoff for stage id spm-db from ~/.cursor/skills/my-dev-flow/handoffs.md>
+<Stage-scoped handoff for stage id spm-db from {my-dev-flow}/handoffs.md>
 
-Read ~/.cursor/skills/database-and-data-model/SKILL.md.
+Read {database-and-data-model}/SKILL.md.
 Also read 03-design.md Database contracts + example queries, 04-tasks.md, and the draft schema / migration / query / server persistence files.
 Also read project AGENTS.md Database / Drizzle section when present.
 
@@ -170,8 +170,8 @@ Return: Result + path to 05-lens-db.md.
 
 ### 3b. Security
 
-**Skills:** `~/.cursor/skills/security-and-hardening/SKILL.md`  
-`~/.cursor/skills-cursor/review-security/SKILL.md` when appropriate.
+**Skills:** `{security-and-hardening}/SKILL.md`  
+`{review-security}/SKILL.md` when appropriate.
 
 **Task description:** `Security review`
 
@@ -180,14 +180,14 @@ Return: Result + path to 05-lens-db.md.
 ```
 You are a Senior Verifier for my-dev-flow-review Security Review. Fresh context only. You run in parallel with other lenses — write ONLY your lens file; do not edit 05-review-log.md or other lens files. Do not fix code.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/handoffs.md>
+<Stage-scoped handoff for this stage id from {my-dev-flow}/handoffs.md>
 
-Read ~/.cursor/skills/security-and-hardening/SKILL.md (including OWASP Top 10 section).
-Follow ~/.cursor/skills-cursor/review-security/SKILL.md to run the security-review subagent on branch changes when you can; otherwise review authz, injection, secrets, untrusted input yourself.
+Read {security-and-hardening}/SKILL.md (including OWASP Top 10 section).
+Follow {review-security}/SKILL.md to run the security-review subagent on branch changes when you can; otherwise review authz, injection, secrets, untrusted input yourself.
 
 Required: check the change against OWASP Top 10 (A01–A10). For each category mark pass / fail / N/A with a short note. Failures become Critical or Major findings. Primary source: https://owasp.org/Top10/
 
-Also compare against 03-design.md Security / OWASP section when present — flag design↔code gaps.
+Design `03-design.md` OWASP is design-time only; this lens is the **code** OWASP pass (full A01–A10 on the draft). Compare trust boundaries / abuse cases — flag design↔code gaps as Major.
 
 Write .my-docs/workflow/<slug>/05-lens-security.md using the lens template (Lens: security).
 Include findings table + OWASP mini-table. Set Result: clean | has findings.
@@ -196,7 +196,7 @@ Return: Result + path to 05-lens-security.md.
 
 ### 3c. Performance
 
-**Skills:** `~/.cursor/skills/performance-optimization/SKILL.md`  
+**Skills:** `{performance-optimization}/SKILL.md`  
 + `vercel-react-best-practices` if React/Next.
 
 **Task description:** `Performance review`
@@ -206,10 +206,10 @@ Return: Result + path to 05-lens-security.md.
 ```
 You are a Senior Verifier for my-dev-flow-review Performance Review. Fresh context only. You run in parallel with other lenses — write ONLY your lens file; do not edit 05-review-log.md or other lens files. Do not fix code.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/handoffs.md>
+<Stage-scoped handoff for this stage id from {my-dev-flow}/handoffs.md>
 
-Read ~/.cursor/skills/performance-optimization/SKILL.md.
-If React/Next UI changed, also read ~/.cursor/skills/vercel-react-best-practices/SKILL.md.
+Read {performance-optimization}/SKILL.md.
+If React/Next UI changed, also read {vercel-react-best-practices}/SKILL.md.
 
 Look for N+1, unbounded fetches, missing pagination, waterfalls, hot-path waste, bundle bloat.
 Write .my-docs/workflow/<slug>/05-lens-performance.md using the lens template (Lens: performance).
@@ -226,7 +226,7 @@ Return: Result + path to 05-lens-performance.md.
 ```
 You are a Senior Verifier for my-dev-flow-review Memory Review. Fresh context only. You run in parallel with other lenses — write ONLY your lens file; do not edit 05-review-log.md or other lens files. Do not fix code.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/handoffs.md>
+<Stage-scoped handoff for this stage id from {my-dev-flow}/handoffs.md>
 
 Checklist:
 - Listener / subscription / timer leaks; missing cleanup
@@ -255,14 +255,14 @@ Return: Result + path to 05-lens-memory.md.
 **model:** resolved Medium  
 **Task description:** `Merge review findings`
 
-**Done when:** `05-review-log.md` → **Merged SPM** section updated with Result **clean** | **needs fix** and a concrete Fix ask (or empty if clean).
+**Done when:** `05-review-log.md` → **Merged lenses** section updated with Result **clean** | **needs fix** and a concrete Fix ask (or empty if clean).
 
 **Task prompt:**
 
 ```
 You are the Findings Arbiter for my-dev-flow-review. Fresh context only. You did NOT run the lens reviews and you do NOT fix code. Your job: merge the launched lens files into one ranked Fix ask and resolve conflicts.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/handoffs.md>
+<Stage-scoped handoff for this stage id from {my-dev-flow}/handoffs.md>
 
 Read only the lens files that exist for this round (any of):
 - 05-lens-api.md
@@ -270,7 +270,7 @@ Read only the lens files that exist for this round (any of):
 - 05-lens-security.md
 - 05-lens-performance.md
 - 05-lens-memory.md
-Also read 05-review-log.md (prior Merged SPM / Fix notes if any).
+Also read 05-review-log.md (prior Merged lenses / Fix notes if any).
 Optionally skim 03-design.md if a conflict needs product intent.
 
 Rules for merging:
@@ -282,9 +282,9 @@ Rules for merging:
 3. Drop or demote to Nit/FYI: vague nits, speculative micro-opts without evidence, duplicates
 4. Rank remaining Fix ask: Critical → Major → Enhancement
 5. Result = **clean** only if no open Critical, Major, or Enhancement remain after merge
-6. Result = **needs fix** if any Critical/Major/Enhancement remain — write numbered Fix ask (what to change, which files, which lens ids)
+6. Result = **needs fix** if any Critical/Major remain — write numbered Fix ask (what to change, which files, which lens ids)
 
-Write/update 05-review-log.md section “Merged SPM” using the template shape:
+Write/update 05-review-log.md section “Merged lenses” using the template shape:
 - Round number
 - Result: clean | needs fix
 - Winners table (Severity, Sources, Finding, Decision) — Sources may include api/db/security/perf/memory
@@ -321,7 +321,7 @@ Return: Result + count of fix items + path to 05-review-log.md.
 ```
 You are the Senior Developer for my-dev-flow-review Fix. You fix listed findings only. You do not self-approve — verifiers will re-check.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/handoffs.md>
+<Stage-scoped handoff for this stage id from {my-dev-flow}/handoffs.md>
 
 Mode: <adversarial-tests | quality | merged-spm>
 Findings / Fix ask to apply:
@@ -332,7 +332,7 @@ Rules:
 - Pure docs/comments: note “TDD skipped — no behavior” in 05-review-log.md.
 - Use existing test stack. Do not expand scope.
 - Update 05-review-log.md Fix notes with what you fixed.
-- For merged-spm: only apply the Merged SPM Fix ask winners — do not revive deferred losers unless needed for a winner.
+- For merged-spm: only apply the Merged lenses Fix ask winners — do not revive deferred losers unless needed for a winner.
 
 Return: list of fixes + tests run + whether tests/behavior changed (yes/no).
 ```

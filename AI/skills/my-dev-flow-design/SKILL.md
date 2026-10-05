@@ -17,7 +17,7 @@ description: >-
 
 Design-only subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). No production code.
 
-**Details:** [stages.md](stages.md) · handoffs [`../my-dev-flow/handoffs.md`](../my-dev-flow/handoffs.md) · artifacts [`../my-dev-flow/artifacts.md`](../my-dev-flow/artifacts.md)
+**Details:** [stages.md](stages.md) · handoffs [`../my-dev-flow/handoffs.md`](../my-dev-flow/handoffs.md) · templates [`../my-dev-flow/artifacts/INDEX.md`](../my-dev-flow/artifacts/INDEX.md)
 
 ## When to run
 
@@ -54,15 +54,7 @@ reaches the design phase / design↔review loop.
 
 ## Models
 
-| Tier | Stages | Preferred slug |
-|------|--------|----------------|
-| **Medium** | Ideation; Gate A; Ideation update; Light skim; Grill | `claude-opus-5-5-medium` |
-| **High** | Analyze; Design; Update from design review | `claude-sonnet-5-5-high` |
-
-### Model availability
-
-Follow [`my-dev-flow/stages.md`](../my-dev-flow/stages.md) → **Models** (usage-limit: wait 5s → retry → **inherit** → main-thread for that stage).  
-Record resolved slug in `00-run.md`. Do not stop to ask unless no Task can run.
+Resolve tiers in `00-run.md`. Follow [`my-dev-flow/stages.md`](../my-dev-flow/stages.md) → **Models** (usage-limit: wait 5s → retry → **inherit** → main-thread for that stage).
 
 ## Gates
 

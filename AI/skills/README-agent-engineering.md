@@ -19,7 +19,7 @@ Cursor-optimized adaptations of [addyosmani/agent-skills](https://github.com/add
 
 | Skill | Role |
 |-------|------|
-| [my-dev-flow](my-dev-flow/SKILL.md) | Full delivery pipeline; canonical order in [stages.md](my-dev-flow/stages.md); [grill.md](my-dev-flow/grill.md); handoffs/artifacts split |
+| [my-dev-flow](my-dev-flow/SKILL.md) | Full delivery pipeline; [stages.md](my-dev-flow/stages.md); [severity.md](my-dev-flow/severity.md); [artifacts/INDEX.md](my-dev-flow/artifacts/INDEX.md) |
 | [my-dev-flow-design](my-dev-flow-design/SKILL.md) | Design phase (Ideation → Grill → Design) |
 | [my-dev-flow-design-review](my-dev-flow-design-review/SKILL.md) | Design verification (+ isolated API/DB reviews) |
 | [my-dev-flow-code](my-dev-flow-code/SKILL.md) | TDD review + Build / fix-from-tests |

@@ -10,7 +10,7 @@ May also run alone when the user says `grill`, `grill-with-docs`, or
 `stress-test this plan`.
 
 Also follow [`documentation-and-adrs`](../documentation-and-adrs/SKILL.md) for ADR
-file location and the three-part ADR bar. Artifact template: [artifacts.md](artifacts.md)
+file location and the three-part ADR bar. Artifact template: [artifacts/02b-grill.md](artifacts/02b-grill.md)
 → `02b-grill.md`. Stage prompt: [`../my-dev-flow-design/stages.md`](../my-dev-flow-design/stages.md)
 → **2g. Grill**. Pipeline rules: [stages.md](stages.md).
 
@@ -119,7 +119,7 @@ On skip: parent Notes `grill skipped — <reason>`; do **not** invent empty thea
 
 ## Outputs (workflow slug)
 
-Write `.my-docs/workflow/<slug>/02b-grill.md` (template in [artifacts.md](artifacts.md)).
+Write `.my-docs/workflow/<slug>/02b-grill.md` (template in [artifacts/02b-grill.md](artifacts/02b-grill.md)).
 Optionally update:
 
 - Repo `GLOSSARY.md` (or mapped context glossary)

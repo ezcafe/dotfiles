@@ -15,7 +15,7 @@ Design verification subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md).
 Generation ≠ verification: this skill **reviews** design docs; it does **not**
 rewrite them (updates go to [`my-dev-flow-design`](../my-dev-flow-design/SKILL.md)).
 
-**Details:** [stages.md](stages.md) · handoffs [`../my-dev-flow/handoffs.md`](../my-dev-flow/handoffs.md) · artifacts [`../my-dev-flow/artifacts.md`](../my-dev-flow/artifacts.md)
+**Details:** [stages.md](stages.md) · handoffs [`../my-dev-flow/handoffs.md`](../my-dev-flow/handoffs.md) · templates [`../my-dev-flow/artifacts/INDEX.md`](../my-dev-flow/artifacts/INDEX.md) · severity [`../my-dev-flow/severity.md`](../my-dev-flow/severity.md)
 
 ## When to run
 
@@ -36,17 +36,12 @@ the first design pass and before code.
 - **Do not re-litigate Gate A 80/20** — if Gate A was ok, check **alignment** with `01a` / Design only (unless design clearly abandoned #1/#2).
 - **Legacy UI look artifacts:** do not require them — see [`LEGACY.md`](../my-dev-flow/LEGACY.md).
 - Writers do not self-approve: after design updates, **re-run** until clean.
-- Plain words in `03a-design-review-log.md`.
+- Plain words in `03a-design-review-log.md` (+ `03a-api-contract-review.md` / `03a-db-design-review.md` when flagged).
+- **Severity:** [`../my-dev-flow/severity.md`](../my-dev-flow/severity.md) — clean = zero Critical/Major.
 
 ## Models
 
-| Tier | Stages | Preferred slug |
-|------|--------|----------------|
-| **Medium** | API contract review; DB design review; Design review | `claude-opus-5-5-medium` |
-
-### Model availability
-
-Follow [`my-dev-flow/stages.md`](../my-dev-flow/stages.md) → **Models**.
+Resolve tiers once in `00-run.md`. Follow [`my-dev-flow/stages.md`](../my-dev-flow/stages.md) → **Models** (API/DB/design-review = mechanical → Fast when Medium missing).
 
 ## Prerequisites
 
@@ -54,7 +49,7 @@ Follow [`my-dev-flow/stages.md`](../my-dev-flow/stages.md) → **Models**.
 - Prefer Gate A checked; Chosen design filled or Recommendation clear (user-first).
 - Prefer `02-skim.md` when present (full mode always; simple if already written).
 - Prefer **Has API** and **Has DB** set in `00-run.md` (yes/no). If unknown and `03-design.md` has API contracts, treat Has API as **yes**. If unknown and Database contracts / migrations are in scope, treat Has DB as **yes**.
-- Create `03a-design-review-log.md` from [`artifacts.md`](../my-dev-flow/artifacts.md) if missing.
+- Create review artifacts from [`../my-dev-flow/artifacts/INDEX.md`](../my-dev-flow/artifacts/INDEX.md) if missing (`03a-*`).
 
 If design docs are missing → **stop** and tell the user to run `my-dev-flow-design` first.
 
@@ -62,21 +57,20 @@ If design docs are missing → **stop** and tell the user to run `my-dev-flow-de
 
 ```
 if Has API = yes:
-  API contract review (Medium|Fast) → write 03a “API contract review” section
-  if needs update → Fix ask → design Update → re-run from API contract review
+  API contract review (Medium|Fast) → 03a-api-contract-review.md
 if Has DB = yes:
-  DB design review (Medium|Fast) → write 03a “DB design review” section
-  if needs update → Fix ask → design Update → re-run from DB design review
-→ Design review (Medium|Fast) → Result: clean | needs update
+  DB design review (Medium|Fast) → 03a-db-design-review.md
+(parallel OK when both yes)
+→ Design review (Medium|Fast) → 03a-design-review-log.md
 ```
 
-API and DB isolated Tasks may run **in parallel** when both flags are yes. Overall **clean** only when API section is clean|skipped, DB section is clean|skipped, **and** general design review is clean.
+Overall **clean** only when API file is clean|skipped, DB file is clean|skipped, **and** general design review is clean.
 
 ## Severity exit rule
 
-Findings: **Critical** / **Major** / **Enhancement** (nits/FYI do not block).
+Findings: **Critical** / **Major** / **Enhancement** / Nit. See [`../my-dev-flow/severity.md`](../my-dev-flow/severity.md).
 
-**Clean** = zero Critical, Major, and Enhancement across API contract review (when run), DB design review (when run), and design review.
+**Clean** = zero Critical and Major across API contract review (when run), DB design review (when run), and general design review. Enhancements defer to Notes / Deferred.
 
 If not clean → hand **Fix ask** to `my-dev-flow-design` Update mode → parent re-runs this workflow.
 
@@ -97,7 +91,7 @@ Standalone: on clean say next is TDD → Gate B → Build → Smoke → review/t
 - When **Has API = no**: skip API contract Task; mark 03a API section **skipped**.
 - When **Has DB = no**: skip DB design Task; mark 03a DB section **skipped**.
 - Set Task **`description`** from my-dev-flow map.
-- Do **not** edit `01`–`04` here — only write `03a`.
+- Do **not** edit `01`–`04` here — only write `03a-*` review files.
 - Do not write production code.
 - Progress = subagent card; parent shows short summary + path for `03a`.
 - Cap: max **3** design↔review rounds, then pause.

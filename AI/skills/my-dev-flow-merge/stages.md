@@ -1,6 +1,6 @@
 # my-dev-flow-merge stages
 
-Stage-scoped handoff: `~/.cursor/skills/my-dev-flow/handoffs.md` → stage id table.  
+Stage-scoped handoff: `{my-dev-flow}/handoffs.md` → stage id table.  
 PR body template: same file → “PR body (Merge)”.
 
 ---
@@ -17,7 +17,7 @@ PR body template: same file → “PR body (Merge)”.
 ```
 You are the Senior Developer for my-dev-flow-merge Merge.
 
-<Stage-scoped handoff for this stage id from ~/.cursor/skills/my-dev-flow/handoffs.md>
+<Stage-scoped handoff for this stage id from {my-dev-flow}/handoffs.md>
 
 All review lenses are clean (or user explicitly overrode after warning). User approved Gate C (legacy Gate 3) with an explicit yes for the actions listed below.
 
@@ -33,7 +33,7 @@ Approved actions (parent fills from Gate C answer): commit | push | pr | merge
    - Summary (1–3 bullets)
    - Risk checklist (top risks from 05-review-log.md / design)
    - Test plan (commands from 06-test-log.md Runs + Smoke + manual checks)
-   Use the PR block from ~/.cursor/skills/my-dev-flow/artifacts.md.
+   Use the PR block from {my-dev-flow}/artifacts/INDEX.md.
 4. If merge approved: merge with gh pr merge. If only “prepare PR” / “PR only”, stop after PR create.
 
 Return: what ran, PR URL (if any), and merge result (or stop reason).
