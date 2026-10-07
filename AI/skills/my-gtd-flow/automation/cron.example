@@ -1,0 +1,14 @@
+# Lazy GTD cron — edit YOU / paths. Install: crontab -e
+#
+# Hourly: pull Apple Calendar (read-only). Manual backup: gtd-pull.sh / .gtd-pull
+# Morning: optional one-shot plan is NOT required if you run .gtd-morning yourself.
+# Sync is interactive (ask after plan) — do not auto-sync here unless you want it.
+
+SHELL=/bin/bash
+PATH=/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin
+GTD_HOME=/Users/YOU/.my-gtd
+GTD_SCRIPTS=/Users/YOU/dotfiles/AI/skills/my-gtd-flow/scripts
+
+# Hourly meeting pull from remembered choices (weekdays 09:00–17:00)
+# Set calendar via: gtd-setup-ui.sh  (apple | outlook | both | none)
+0 9-17 * * 1-5 cd $GTD_HOME && $GTD_SCRIPTS/gtd-pull.sh >> logs/cron-pull.log 2>&1

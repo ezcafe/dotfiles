@@ -1,4 +1,5 @@
 # ========
+. ~/dotfiles/AI/skills/my-gtd-flow/aliases
 . ~/dotfiles/bash/setup
 # . ~/dotfiles/fzf/setup
 . ~/dotfiles/git/setup

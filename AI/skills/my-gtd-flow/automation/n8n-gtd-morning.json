@@ -1,0 +1,39 @@
+{
+  "name": "GTD hourly pull (no sync)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9-17 * * 1-5"
+            }
+          ]
+        }
+      },
+      "name": "Weekday hourly",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "command": "=/Users/YOU/dotfiles/AI/skills/my-gtd-flow/scripts/gtd-pull.sh"
+      },
+      "name": "Pull meetings (remembered sources)",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [520, 300]
+    }
+  ],
+  "connections": {
+    "Weekday hourly": {
+      "main": [[{ "node": "Pull meetings (remembered sources)", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "2",
+  "notes": "No sync node — sync only via interactive .gtd-morning / .gtd-ask-sync after user types y."
+}

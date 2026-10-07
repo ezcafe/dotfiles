@@ -1,0 +1,9 @@
+# Hourly calendar pull only — no sync (sync requires interactive approval).
+SHELL=/bin/bash
+PATH=/usr/local/bin:/opt/homebrew/bin:/Users/YOU/.local/bin:/usr/bin:/bin
+GTD_HOME=/Users/YOU/.my-gtd
+GTD_SCRIPTS=/Users/YOU/dotfiles/AI/skills/my-gtd-flow/scripts
+GTD_AGENT_MODEL=inherit
+GTD_AGENT_FAST=composer-2.5-fast
+
+0 9-17 * * 1-5 cd $GTD_HOME && GTD_AGENT_MODEL=$GTD_AGENT_MODEL GTD_AGENT_FAST=$GTD_AGENT_FAST $GTD_SCRIPTS/gtd-pull.sh >> logs/cron-pull.log 2>&1

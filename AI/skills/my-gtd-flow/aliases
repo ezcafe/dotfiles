@@ -1,0 +1,24 @@
+# my-gtd-flow shell aliases — paste into ~/.zshrc (or source this file).
+# Requires: scripts on PATH (see SETUP-LAZY.md § PATH) and Cursor `agent` CLI.
+#
+# Model: prefer inherit (session default). Else fast.
+#   export GTD_AGENT_MODEL=inherit          # default — omit --model
+#   export GTD_AGENT_MODEL=composer-2.5-fast  # force a fast slug
+#   export GTD_AGENT_FAST=composer-2.5-fast   # fallback if inherit fails
+
+: "${GTD_AGENT_MODEL:=inherit}"
+: "${GTD_AGENT_FAST:=composer-2.5-fast}"
+
+# --- mechanical (no AI) ---
+alias .gtd-capture='gtd-capture.sh'
+alias .gtd-plan='gtd-plan.sh'              # clarify → plan → sprint → ask sync (approve to sync)
+alias .gtd-morning='gtd-morning.sh'        # plan → sprint → ask sync (approve to sync)
+alias .gtd-sprint='gtd-sprint.sh'
+alias .gtd-pull='gtd-pull.sh'
+alias .gtd-sync='gtd-ask-sync.sh'          # always asks — never silent sync
+alias .gtd-setup='gtd-setup-ui.sh'
+
+# --- Cursor agent (inherit → fast fallback via gtd-agent.sh) ---
+alias .gtd='gtd-agent.sh -p --force'
+alias .gtd-now='gtd-agent.sh -p -- "my-gtd-flow: from ~/.my-gtd/today.json and current local time, what is my current or next block? One line."'
+alias .gtd-review='gtd-agent.sh -- "my-gtd-flow daily review per DAILY-LAZY.md. Ask what finished; update tasks.json; skip optional meetings I say; print tomorrow top 3. Do not sync unless I explicitly approve. Keep answers short."'

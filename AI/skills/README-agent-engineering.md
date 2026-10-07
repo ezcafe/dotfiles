@@ -26,6 +26,7 @@ Cursor-optimized adaptations of [addyosmani/agent-skills](https://github.com/add
 | [my-dev-flow-test](my-dev-flow-test/SKILL.md) | Smoke / full / lite tests |
 | [my-dev-flow-review](my-dev-flow-review/SKILL.md) | Code review lenses |
 | [my-dev-flow-merge](my-dev-flow-merge/SKILL.md) | Gate C → commit / push / PR / merge |
+| [my-gtd-flow](my-gtd-flow/SKILL.md) | Lazy GTD: GitHub Projects / Reminders, Calendar / Outlook, 9–5 plan |
 | [myplan](myplan/SKILL.md) | Discovery → spec → plan (use *before* task breakdown) |
 | [vercel-react-best-practices](vercel-react-best-practices/SKILL.md) | React/Next performance rule catalog |
 | [clean-minimal-ui](clean-minimal-ui/SKILL.md) | Visual tokens and clean-minimal styling |

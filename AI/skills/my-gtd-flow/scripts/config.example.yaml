@@ -1,0 +1,44 @@
+timezone: local
+work:
+  start: "09:00"
+  end: "17:00"
+  break_start: "11:30"
+  break_end: "13:00"
+  allow_meetings_during_break: true
+# Remembered by gtd-setup-ui.sh (task UI + calendar). Scripts honor these.
+choices:
+  task_ui: none          # github | reminders | both | none
+  calendar_source: none  # apple | outlook | both | none
+adapters:
+  github:
+    enabled: false
+    owner: YOUR_GITHUB_USER
+    project_number: 1
+    status_field: Status
+    inbox_status: Inbox
+  reminders:
+    enabled: false
+    list_name: GTD Today
+    lists:
+      inbox: GTD Inbox
+      today: GTD Today
+      next: GTD Next
+      waiting: GTD Waiting
+      someday: GTD Someday
+  calendar:
+    enabled: false
+    apple: false
+    outlook: false
+    source: none          # apple | outlook | both | none
+    calendars: ["Calendar"]
+planning:
+  default_duration_minutes: 30
+  multiday_default_chunk_minutes: 120
+  end_of_day_buffer_minutes: 15
+  schedule_optional: false
+rules:
+  meeting_title_patterns:
+    - match: "(?i)optional"
+      type: optional
+    - match: "(?i)FYI|info only"
+      type: info_only
