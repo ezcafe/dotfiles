@@ -10,19 +10,16 @@
 : "${GTD_AGENT_FAST:=composer-2.5-fast}"
 
 # --- mechanical (no AI) ---
-# Long + short (day-to-day shorts: capt / morn / pln / spr / pul / syn)
+# Long + short (day-to-day shorts: cap / mor / spr / rev)
 alias .gtd-capture='gtd-capture.sh'
-alias .gtd-capt='gtd-capture.sh'
+alias .gtd-cap='gtd-capture.sh'
 alias .gtd-plan='gtd-plan.sh'              # clarify → plan → sprint → ask sync (approve to sync)
-alias .gtd-pln='gtd-plan.sh'
 alias .gtd-morning='gtd-morning.sh'        # plan → sprint → ask sync (approve to sync)
-alias .gtd-morn='gtd-morning.sh'
+alias .gtd-mor='gtd-morning.sh'
 alias .gtd-sprint='gtd-sprint.sh'
 alias .gtd-spr='gtd-sprint.sh'
 alias .gtd-pull='gtd-pull.sh'
-alias .gtd-pul='gtd-pull.sh'
 alias .gtd-sync='gtd-ask-sync.sh'          # always asks — never silent sync
-alias .gtd-syn='gtd-ask-sync.sh'
 alias .gtd-setup='gtd-setup-ui.sh'
 
 # --- Cursor agent (inherit → fast fallback via gtd-agent.sh) ---

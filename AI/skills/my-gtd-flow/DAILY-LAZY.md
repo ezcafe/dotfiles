@@ -1,6 +1,6 @@
 # Daily use (lazy)
 
-Aliases: `.gtd-capture` / `.gtd-capt`, `.gtd-morning` / `.gtd-morn`, `.gtd-plan` / `.gtd-pln`, `.gtd-sprint` / `.gtd-spr`, `.gtd-pull` / `.gtd-pul`, `.gtd-sync` / `.gtd-syn`, `.gtd-review` / `.gtd-rev`, plus `.gtd-setup`, `.gtd`, `.gtd-now`.
+Aliases: `.gtd-capture` / `.gtd-cap`, `.gtd-morning` / `.gtd-mor`, `.gtd-plan`, `.gtd-sprint` / `.gtd-spr`, `.gtd-pull`, `.gtd-sync`, `.gtd-review` / `.gtd-rev`, plus `.gtd-setup`, `.gtd`, `.gtd-now`.
 
 First-time: [SETUP-LAZY.md](SETUP-LAZY.md) → `.gtd-setup` (asks GitHub/Reminders/Both/None + Outlook/Apple/Both/None; remembers).  
 Change later: `.gtd-setup --reask`  

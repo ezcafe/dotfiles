@@ -126,7 +126,7 @@ ln -sf /Users/ptquang86/dotfiles/AI/skills/my-gtd-flow/scripts/gtd-*.sh ~/.my-gt
 cat /Users/ptquang86/dotfiles/AI/skills/my-gtd-flow/aliases >> ~/.zshrc
 ```
 
-Useful aliases (all start with `.gtd`): `.gtd-setup`, `.gtd-morning` / `.gtd-morn`, `.gtd-capture` / `.gtd-capt`, `.gtd-plan` / `.gtd-pln`, `.gtd-pull` / `.gtd-pul`, `.gtd-sync` / `.gtd-syn`, `.gtd-review` / `.gtd-rev`, … See [aliases](aliases).
+Useful aliases (all start with `.gtd`): `.gtd-setup`, `.gtd-morning` / `.gtd-mor`, `.gtd-capture` / `.gtd-cap`, `.gtd-plan`, `.gtd-sprint` / `.gtd-spr`, `.gtd-pull`, `.gtd-sync`, `.gtd-review` / `.gtd-rev`, … See [aliases](aliases).
 
 Agent model: prefer **inherit** (`GTD_AGENT_MODEL=inherit`); fallback fast via `GTD_AGENT_FAST=composer-2.5-fast`.
 
