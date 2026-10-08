@@ -7,7 +7,9 @@ All files under `~/.my-gtd/`. UTF-8 JSON. Validate before write.
 ```yaml
 timezone: America/Los_Angeles  # example — use local
 work:
-  start: "09:00"
+  plan_start: "09:00"   # GTD morning plan window
+  plan_end: "09:30"
+  start: "09:30"        # task blocks begin here
   end: "17:00"
   break_start: "11:30"
   break_end: "13:00"

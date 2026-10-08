@@ -15,7 +15,7 @@ gh auth login
 gh auth refresh -s project   # if project scope missing
 ```
 
-Without PyYAML, scripts still run with built-in work hours (9–5, lunch 11:30–1).
+Without PyYAML, scripts still run with built-in work hours (09:30–17:00 task blocks; 09:00–09:30 GTD plan; lunch 11:30–1).
 
 ## 1. Install skill in Cursor
 
@@ -123,10 +123,10 @@ adapters:
 echo 'export PATH="$HOME/.my-gtd/bin:$PATH"' >> ~/.zshrc
 mkdir -p ~/.my-gtd/bin
 ln -sf /Users/ptquang86/dotfiles/AI/skills/my-gtd-flow/scripts/gtd-*.sh ~/.my-gtd/bin/
-cat /Users/ptquang86/dotfiles/AI/skills/my-gtd-flow/aliases.example >> ~/.zshrc
+cat /Users/ptquang86/dotfiles/AI/skills/my-gtd-flow/aliases >> ~/.zshrc
 ```
 
-Useful aliases (all start with `.gtd`): `.gtd-setup`, `.gtd-morning`, `.gtd-capture`, `.gtd-plan`, `.gtd-pull`, `.gtd-sync`, `.gtd-review`, … See [aliases.example](aliases.example).
+Useful aliases (all start with `.gtd`): `.gtd-setup`, `.gtd-morning` / `.gtd-morn`, `.gtd-capture` / `.gtd-capt`, `.gtd-plan` / `.gtd-pln`, `.gtd-pull` / `.gtd-pul`, `.gtd-sync` / `.gtd-syn`, `.gtd-review` / `.gtd-rev`, … See [aliases](aliases).
 
 Agent model: prefer **inherit** (`GTD_AGENT_MODEL=inherit`); fallback fast via `GTD_AGENT_FAST=composer-2.5-fast`.
 
@@ -151,7 +151,7 @@ gtd-clarify.sh
 gtd-plan-day.sh
 ```
 
-You should see a plan 09:00–17:00 with lunch gap. Delete the test task from `~/.my-gtd/tasks.json` when done.
+You should see GTD plan 09:00–09:30, then task blocks 09:30–17:00 with lunch gap. Delete the test task from `~/.my-gtd/tasks.json` when done.
 
 ## Troubleshooting
 

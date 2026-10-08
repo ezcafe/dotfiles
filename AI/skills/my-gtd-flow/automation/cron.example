@@ -9,6 +9,6 @@ PATH=/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin
 GTD_HOME=/Users/YOU/.my-gtd
 GTD_SCRIPTS=/Users/YOU/dotfiles/AI/skills/my-gtd-flow/scripts
 
-# Hourly meeting pull from remembered choices (weekdays 09:00–17:00)
+# Hourly meeting pull from remembered choices (weekdays; tasks 09:30–17:00)
 # Set calendar via: gtd-setup-ui.sh  (apple | outlook | both | none)
 0 9-17 * * 1-5 cd $GTD_HOME && $GTD_SCRIPTS/gtd-pull.sh >> logs/cron-pull.log 2>&1

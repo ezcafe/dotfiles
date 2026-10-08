@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Build today.json from meetings + tasks (9–17, lunch 11:30–13:00)."""
+"""Build today.json from meetings + tasks (09:30–17:00, lunch 11:30–13:00).
+
+09:00–09:30 is reserved for GTD plan (.gtd-morning); task blocks start at work.start.
+"""
 from __future__ import annotations
 
 import json
@@ -7,6 +10,15 @@ import sys
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
 from typing import List, Tuple
+
+DEFAULT_WORK = {
+    "plan_start": "09:00",
+    "plan_end": "09:30",
+    "start": "09:30",
+    "end": "17:00",
+    "break_start": "11:30",
+    "break_end": "13:00",
+}
 
 
 def parse_hm(s: str) -> time:
@@ -18,12 +30,7 @@ def load_yaml_config(home: Path) -> dict:
     path = home / "config.yaml"
     if not path.exists():
         return {
-            "work": {
-                "start": "09:00",
-                "end": "17:00",
-                "break_start": "11:30",
-                "break_end": "13:00",
-            },
+            "work": dict(DEFAULT_WORK),
             "planning": {"end_of_day_buffer_minutes": 15},
         }
     try:
@@ -32,12 +39,7 @@ def load_yaml_config(home: Path) -> dict:
         return yaml.safe_load(path.read_text()) or {}
     except ImportError:
         return {
-            "work": {
-                "start": "09:00",
-                "end": "17:00",
-                "break_start": "11:30",
-                "break_end": "13:00",
-            },
+            "work": dict(DEFAULT_WORK),
             "planning": {"end_of_day_buffer_minutes": 15},
         }
 
@@ -83,15 +85,19 @@ def main() -> None:
     planning = cfg.get("planning") or {}
     buffer_min = int(planning.get("end_of_day_buffer_minutes", 15))
 
-    w_start = parse_hm(work.get("start", "09:00"))
-    w_end = parse_hm(work.get("end", "17:00"))
-    br_start = parse_hm(work.get("break_start", "11:30"))
-    br_end = parse_hm(work.get("break_end", "13:00"))
+    w_start = parse_hm(work.get("start", DEFAULT_WORK["start"]))
+    w_end = parse_hm(work.get("end", DEFAULT_WORK["end"]))
+    br_start = parse_hm(work.get("break_start", DEFAULT_WORK["break_start"]))
+    br_end = parse_hm(work.get("break_end", DEFAULT_WORK["break_end"]))
+    p_start = parse_hm(work.get("plan_start", DEFAULT_WORK["plan_start"]))
+    p_end = parse_hm(work.get("plan_end", DEFAULT_WORK["plan_end"]))
 
     day_start = datetime.combine(today, w_start)
     day_end = datetime.combine(today, w_end)
     break_start = datetime.combine(today, br_start)
     break_end = datetime.combine(today, br_end)
+    plan_start = datetime.combine(today, p_start)
+    plan_end = datetime.combine(today, p_end)
 
     meetings_path = home / "meetings.json"
     tasks_path = home / "tasks.json"
@@ -99,6 +105,19 @@ def main() -> None:
     tasks = json.loads(tasks_path.read_text()) if tasks_path.exists() else {"tasks": []}
 
     blocks = []
+    # Reserve 09:00–09:30 (or config plan_*) for GTD morning plan — not task time
+    if plan_end > plan_start:
+        blocks.append(
+            {
+                "kind": "plan",
+                "ref_id": None,
+                "title": "GTD plan",
+                "start": plan_start.isoformat(),
+                "end": plan_end.isoformat(),
+                "note": "morning",
+            }
+        )
+
     free = [(day_start, day_end)]
 
     for m in meetings.get("meetings", []):

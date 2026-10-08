@@ -10,10 +10,11 @@ Implements plan-day logic used by `scripts/gtd-plan-day.sh` (Python).
 
 ## Free block algorithm
 
-1. Start with `[work.start, work.end)`.
-2. Subtract break `[break_start, break_end)` for **task** placement only.
-3. Subtract each non-skipped meeting (all types occupy time on calendar).
-4. Merge adjacent free intervals.
+1. Emit a fixed **plan** block `[plan_start, plan_end)` (default 09:00–09:30) — GTD morning only; not task time.
+2. Start free intervals with `[work.start, work.end)` (default **09:30**–17:00).
+3. Subtract break `[break_start, break_end)` for **task** placement only.
+4. Subtract each non-skipped meeting (all types occupy time on calendar).
+5. Merge adjacent free intervals.
 
 ## Placement
 
@@ -39,7 +40,7 @@ Implements plan-day logic used by `scripts/gtd-plan-day.sh` (Python).
 Write `today.json` and print human summary:
 
 ```text
-09:00–09:30  Team standup (required)
+09:00–09:30  GTD plan (plan)
 09:30–11:30  Fix login timeout (2h)
 11:30–13:00  — break —
 13:00–13:30  Email batch (30m)

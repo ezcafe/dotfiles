@@ -2,7 +2,7 @@
 name: my-gtd-flow
 description: >-
   GTD task manager for lazy daily use: capture with minimal input, plan work
-  blocks 9AM–5PM (lunch 11:30–1PM), sync to GitHub Projects (gh) and/or Apple
+  blocks 9:30AM–5PM (09:00–09:30 GTD plan; lunch 11:30–1PM), sync to GitHub Projects (gh) and/or Apple
   Reminders, ingest meetings from Microsoft Outlook (Playwright in default
   browser) or Apple Calendar (read-only — never create/edit/delete calendar
   events). Multiday tasks split into 1/2/4h blocks. Use when the user says run
@@ -27,7 +27,7 @@ GTD for people who skip forms. **One inbox, smart defaults, automation first.**
 | [outlook-playwright.md](outlook-playwright.md) | Outlook web pull (read-only) |
 | [schedule-engine.md](schedule-engine.md) | Planner rules |
 | [automation/README.md](automation/README.md) | Hourly pull cron + agent-cron |
-| [aliases.example](aliases.example) | `.gtd-*` aliases |
+| [aliases](aliases) | `.gtd-*` aliases (+ short day-to-day) |
 
 **Scripts:** `{skill}/scripts/`
 
@@ -70,7 +70,7 @@ GTD for people who skip forms. **One inbox, smart defaults, automation first.**
 
 ## Non-negotiables
 
-- Work **09:00–17:00**; no task blocks **11:30–13:00**.
+- **09:00–09:30** GTD plan; task blocks **09:30–17:00**; no task blocks **11:30–13:00**.
 - Durations: **5m, 30m, 1h, 2h, 4h**, or multiday chunks **1h/2h/4h**.
 - Meeting types: **required** / **optional** / **info_only**.
 - **Never update Outlook or Apple Calendar.**

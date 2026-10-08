@@ -1,6 +1,9 @@
 timezone: local
 work:
-  start: "09:00"
+  # 09:00–09:30 = GTD plan (.gtd-morning); task blocks start at start
+  plan_start: "09:00"
+  plan_end: "09:30"
+  start: "09:30"
   end: "17:00"
   break_start: "11:30"
   break_end: "13:00"

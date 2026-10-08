@@ -39,7 +39,8 @@ Created by `gtd-setup-ui.sh` — see [SETUP-LAZY.md](SETUP-LAZY.md).
 
 ## Working hours
 
-- **Work:** 09:00–17:00 (local timezone in `config.yaml`)
+- **GTD plan:** 09:00–09:30 — `.gtd-morning` / clarify + plan + sprint (config: `work.plan_start` / `work.plan_end`)
+- **Task blocks:** 09:30–17:00 (local timezone in `config.yaml`; `work.start` / `work.end`)
 - **Break:** 11:30–13:00 — no new task blocks; meetings may still appear (user choice in config: `allow_meetings_during_break`, default `true`)
 
 ## Lazy capture grammar

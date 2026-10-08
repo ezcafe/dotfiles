@@ -1,6 +1,6 @@
 # Daily use (lazy)
 
-Aliases: `.gtd-capture`, `.gtd-morning`, `.gtd-plan`, `.gtd-sprint`, `.gtd-pull`, `.gtd-sync`, `.gtd-setup`, `.gtd`, `.gtd-now`, `.gtd-review`.
+Aliases: `.gtd-capture` / `.gtd-capt`, `.gtd-morning` / `.gtd-morn`, `.gtd-plan` / `.gtd-pln`, `.gtd-sprint` / `.gtd-spr`, `.gtd-pull` / `.gtd-pul`, `.gtd-sync` / `.gtd-syn`, `.gtd-review` / `.gtd-rev`, plus `.gtd-setup`, `.gtd`, `.gtd-now`.
 
 First-time: [SETUP-LAZY.md](SETUP-LAZY.md) → `.gtd-setup` (asks GitHub/Reminders/Both/None + Outlook/Apple/Both/None; remembers).  
 Change later: `.gtd-setup --reask`  
@@ -8,7 +8,9 @@ Hourly meetings: [automation/cron.example](automation/cron.example) runs `.gtd-p
 Agent model: **inherit** by default; falls back to fast (`GTD_AGENT_FAST=composer-2.5-fast`).  
 **Sync only when you type `y`** after plan / `.gtd-sync` — never automatic.
 
-## Morning — one command
+## Morning — 09:00–09:30 (GTD plan)
+
+Run this in the plan window. Task blocks start at **09:30**.
 
 ```bash
 .gtd-capture "optional brain dump 30m"
