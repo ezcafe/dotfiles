@@ -34,7 +34,7 @@ For **Understand Anything**, point `/understand-knowledge` at the vault root aft
 ## How to answer from this wiki
 
 1. Pick project(s) from INDEX.md
-2. Read index.md + matching pages
+2. Read Architecture + Solution design + Glossary as needed
 3. Cite page paths when stating facts from the wiki
 4. If missing, say so — do not invent wiki content
 ```

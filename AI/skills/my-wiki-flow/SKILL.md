@@ -30,7 +30,7 @@ second-brain levels. Human stays in the loop on distill/update.
 | [ai-context.md](ai-context.md) | How agents load / query wiki context |
 | [philosophy.md](philosophy.md) | Condensed second-brain principles |
 | [content-contract.md](content-contract.md) | Frontmatter, claims, lint rules |
-| [project-structure.md](project-structure.md) | Pages, H2s, profiles, feature discovery |
+| [project-structure.md](project-structure.md) | Pages, H2s, feature discovery |
 | [aliases](aliases) | `.wiki-*` shell aliases |
 
 **Scripts:** `{skill}/scripts/`
@@ -82,7 +82,7 @@ second-brain levels. Human stays in the loop on distill/update.
 | `scripts/wiki-build.py` / `.sh` | Markdown → HTML + Pagefind |
 | `scripts/wiki-serve.sh` | Serve `site/` |
 | `scripts/wiki-ingest-url.py` | URL → inbox/raw draft |
-| `scripts/wiki-scaffold-project.sh` | Canonical pages (`--lite` / `--full`) |
+| `scripts/wiki-scaffold-project.sh` | Canonical pages (Architecture, Solution design, Glossary) |
 | `scripts/wiki-add-feature.sh` | Feature solution-design page |
 | `scripts/wiki-lint.py` | Structure / diagram / claims / SHA lint |
 | `scripts/wiki-sync-github.sh` | Dry-run / `--push` GitHub wiki export |

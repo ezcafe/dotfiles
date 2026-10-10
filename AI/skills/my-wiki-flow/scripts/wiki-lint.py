@@ -23,32 +23,18 @@ VALIDATED_RE = re.compile(
 CLAIMS_FM_RE = re.compile(r"^claims:\s*\[(.*?)\]\s*$", re.M | re.S)
 
 CANONICAL = (
-    "index.md",
-    "quick-start.md",
     "architecture.md",
     "solution-design.md",
     "glossary.md",
 )
-LITE_CANONICAL = ("index.md", "quick-start.md")
-OBSOLETE = ("tips-and-tricks.md", "design-guide.md")
+OBSOLETE = (
+    "index.md",
+    "quick-start.md",
+    "tips-and-tricks.md",
+    "design-guide.md",
+)
 
 REQUIRED_H2 = {
-    "index.md": [
-        "Purpose",
-        "Scope",
-        "Key capabilities",
-        "System context diagram",
-        "Technology summary",
-        "Key links",
-    ],
-    "quick-start.md": [
-        "Prerequisites",
-        "Setup",
-        "Run locally",
-        "Verify",
-        "Common setup issues",
-        "Next steps",
-    ],
     "architecture.md": [
         "Purpose and quality goals",
         "Building block view",
@@ -207,27 +193,14 @@ def resolve_workspace(cfg: dict, slug: str, root: Path) -> Path | None:
             return expand_root(str(ws))
     if isinstance(entry, str) and entry:
         return expand_root(entry)
-    # fallback: validated_against path from index.md
-    index = root / "projects" / slug / "index.md"
-    if index.is_file():
-        text = index.read_text(encoding="utf-8")
+    # fallback: validated_against path from architecture.md
+    arch = root / "projects" / slug / "architecture.md"
+    if arch.is_file():
+        text = arch.read_text(encoding="utf-8")
         m = VALIDATED_RE.search(text)
         if m:
             return expand_root(m.group(1))
     return None
-
-
-def project_profile(proj_dir: Path, cfg: dict, slug: str) -> str:
-    projects = cfg.get("projects") or {}
-    entry = projects.get(slug) if isinstance(projects, dict) else None
-    if isinstance(entry, dict) and entry.get("profile") in ("lite", "full"):
-        return str(entry["profile"])
-    # Infer lite: missing architecture + solution-design + glossary
-    has_arch = (proj_dir / "architecture.md").is_file()
-    has_sd = (proj_dir / "solution-design.md").is_file()
-    if not has_arch and not has_sd:
-        return "lite"
-    return "full"
 
 
 def check_required_h2(body: str, required: list[str], path: str, result: LintResult) -> None:
@@ -565,22 +538,19 @@ def lint_project(
     proj = root / "projects" / slug
     if not proj.is_dir():
         return
-    profile = project_profile(proj, cfg, slug)
-    required_pages = LITE_CANONICAL if profile == "lite" else CANONICAL
-
     for name in OBSOLETE:
         if (proj / name).is_file():
             result.add("error", f"projects/{slug}/{name}", "Obsolete page — remove")
 
-    for name in required_pages:
+    for name in CANONICAL:
         p = proj / name
         rel = f"projects/{slug}/{name}"
         if not p.is_file():
-            result.add("error", rel, f"Missing canonical page (profile={profile})")
+            result.add("error", rel, "Missing canonical page")
             continue
         text = p.read_text(encoding="utf-8")
         meta, body = parse_frontmatter(text)
-        if not meta.get("validated_against") and profile == "full":
+        if not meta.get("validated_against"):
             result.add("warn", rel, "Missing validated_against frontmatter")
         if name in REQUIRED_H2 and REQUIRED_H2[name]:
             check_required_h2(body, REQUIRED_H2[name], rel, result)
@@ -615,9 +585,9 @@ def lint_project(
     ws = resolve_workspace(cfg, slug, root)
     if ws:
         head = git_short_sha(ws)
-        index = proj / "index.md"
-        if head and index.is_file():
-            text = index.read_text(encoding="utf-8")
+        arch = proj / "architecture.md"
+        if head and arch.is_file():
+            text = arch.read_text(encoding="utf-8")
             m = VALIDATED_RE.search(text)
             if m:
                 recorded = m.group(2)
@@ -626,7 +596,7 @@ def lint_project(
                 ) and not recorded.startswith(head):
                     result.add(
                         "warn",
-                        f"projects/{slug}/index.md",
+                        f"projects/{slug}/architecture.md",
                         f"Stale validated_against SHA {recorded} vs HEAD {head}",
                     )
 
@@ -645,7 +615,8 @@ def lint_orphans(root: Path, pages: list[Path], result: LintResult) -> None:
     for p in pages:
         if "projects" not in p.parts:
             continue
-        if p.name == "index.md":
+        # Canonical top pages are linked from root index on build; skip orphan noise
+        if p.name in CANONICAL:
             continue
         rel = p.relative_to(root).with_suffix("").as_posix().lower()
         stem = p.stem.lower()

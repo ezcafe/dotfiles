@@ -24,4 +24,5 @@ Define project-specific terms only. Avoid general industry definitions unless th
 
 ## See also
 
-- [[projects/PROJECT_SLUG/index|Overview]]
+- [[projects/PROJECT_SLUG/architecture|Architecture]]
+- [[projects/PROJECT_SLUG/solution-design|Solution design]]

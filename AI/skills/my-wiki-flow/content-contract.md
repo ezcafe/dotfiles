@@ -7,7 +7,7 @@ and uses the fixed project layout from [project-structure.md](project-structure.
 (Trail of Bits–style progressive disclosure: [trailofbits/skills](https://github.com/trailofbits/skills)).
 
 **This file owns:** layers, frontmatter, claims, lint checklist, and “must not”.  
-**project-structure.md owns:** page set, H2 titles, diagram types, feature discovery, profiles.
+**project-structure.md owns:** page set, H2 titles, diagram types, feature discovery.
 
 ## Three layers (Karpathy)
 
@@ -21,11 +21,11 @@ Root `index.md`, `log.md`, `AGENTS.md` are infrastructure — not articles.
 
 ## Project pages
 
-Canonical set, profiles (`full` / `lite`), and required H2s:
-**[project-structure.md](project-structure.md)**. Scaffold:
-`wiki-scaffold-project.sh`. Features: `wiki-add-feature.sh`.
+Canonical set and required H2s: **[project-structure.md](project-structure.md)**.
+Scaffold: `wiki-scaffold-project.sh`. Features: `wiki-add-feature.sh`.
 
-No Tips and tricks or Design guide pages.
+Only: Architecture, Solution design (+ features), Glossary.
+No Overview, Quick start, Tips and tricks, or Design guide pages.
 
 ## Root catalog — `index.md`
 
@@ -34,9 +34,9 @@ No Tips and tricks or Design guide pages.
 
 ## {Project name}
 
-- [[projects/{slug}/index|Overview]] — …
-- [[projects/{slug}/quick-start|Quick start]] — …
-# full profile also lists Architecture, Solution design, Glossary
+- [[projects/{slug}/architecture|Architecture]] — …
+- [[projects/{slug}/solution-design|Solution design]] — …
+- [[projects/{slug}/glossary|Glossary]] — …
 ```
 
 ## Chronology — `log.md`
@@ -72,8 +72,8 @@ nav_group:            # optional; feature pages only
 ## Article body conventions
 
 - Required H2s: project-structure (do not rename).
-- Prefer GFM tables for contracts, env vars, glossaries, setup issues.
-- Mermaid types: project-structure (Architecture / Sequence / context).
+- Prefer GFM tables for contracts, env vars, glossaries.
+- Mermaid types: project-structure (Architecture / Sequence).
 - Link canonical schema/code files; do not duplicate full contracts.
 - End with **Key claims** (each tied to a `workspace:` path) and **See also**.
 - Do not put escaped `\|` in table cells for wikilink aliases — use `[[path]]`.
@@ -92,8 +92,8 @@ Prefer automated: `wiki-lint.py [--project slug]`.
 
 Manual / agent checklist (same rules):
 
-1. Missing canonical pages for profile → scaffold, then fill.
-2. Stray tips-and-tricks / design-guide → remove.
+1. Missing canonical pages → scaffold, then fill.
+2. Stray overview / quick-start / tips-and-tricks / design-guide → remove.
 3. Missing required H2s → add and fill from code.
 4. Architecture without Building block (`C4Container`/`C4Component`) or Interaction (`C4Dynamic`, or flowchart + `C4Dynamic unavailable`) → fix.
 5. Feature without `sequenceDiagram` → fix; Scope needs Business requirements; API Spec summary always; full field tables + curl only when Owns contract? = yes (arrays ≥1 item).
@@ -101,7 +101,7 @@ Manual / agent checklist (same rules):
 7. Claims citing only README/docs without code path → reject.
 8. Stale `validated_against` vs HEAD → re-validate (`update` stage).
 9. Frontmatter `claims` entries missing from Key claims → align.
-10. Orphans / broken wikilinks → fix or link from hub/index.
+10. Orphans / broken wikilinks → fix or link from hub/root index.
 11. Append `log.md`.
 
 ## What agents must not do
@@ -116,6 +116,7 @@ Manual / agent checklist (same rules):
 - When Owns contract? = no: ship without Spec summary and a `workspace:` canonical link.
 - Duplicate full API schemas into every feature when a canonical code file exists.
 - Create unbounded feature pages without user-confirmed discovery list.
+- Create Overview (`index.md`) or Quick start pages under a project.
 
 ## References
 

@@ -14,56 +14,22 @@ Operations: [stages.md](stages.md).
 
 ```text
 projects/{slug}/
-  index.md                 # 1. Overview
-  quick-start.md           # 2. Quick start (task-oriented)
-  architecture.md          # 3. full profile
-  solution-design.md       # 4. full — hub
+  architecture.md          # 1. Architecture
+  solution-design.md       # 2. Solution design hub
   solution-design/         #    one page per feature
     {feature-slug}.md
-  glossary.md              # 5. full profile
+  glossary.md              # 3. Glossary
   references/              # overflow (article.template.md)
 ```
 
-Scaffold: `wiki-scaffold-project.sh {slug} [workspace] [--lite|--full]`  
+Scaffold: `wiki-scaffold-project.sh {slug} [workspace]`  
 Feature page: `wiki-add-feature.sh {slug} {feature} [master-feature]`
-
-## Profiles
-
-| Profile | Pages | When |
-|---------|-------|------|
-| `full` (default) | All five + features | Multi-module apps, APIs, systems you maintain |
-| `lite` | Overview + Quick start only | Small tools, scripts, early capture |
-
-Store `profile` under `config.yaml` → `projects.{slug}.profile`. Expand lite → full
-by re-running scaffold with `--full` (creates missing pages only).
 
 ## Page roles and required sections
 
 Agents **must** use these H2 headings (exact titles). Do not invent alternate top-level names.
 
-### 1. Overview — `index.md`
-
-| Section | Content |
-|---------|---------|
-| Purpose | What the project does and who it serves |
-| Scope | What is included and excluded |
-| Key capabilities | Short list of major features |
-| System context diagram | Users, this system, external systems (**Mermaid** `flowchart` or `C4Context`) |
-| Technology summary | Only main technologies and platforms |
-| Key links | Quick start, Architecture (if full), Solution design (if full), repository |
-
-### 2. Quick start — `quick-start.md`
-
-| Section | Content |
-|---------|---------|
-| Prerequisites | Tools, versions, accounts, permissions |
-| Setup | Numbered install/configure steps |
-| Run locally | Exact commands and expected result |
-| Verify | Quick check that setup succeeded |
-| Common setup issues | Symptom / fix table |
-| Next steps | Links to Architecture / solution designs (if full) |
-
-### 3. Architecture — `architecture.md` (full only)
+### 1. Architecture — `architecture.md`
 
 Project-wide only. **No** feature sequence diagrams.
 
@@ -79,7 +45,7 @@ Project-wide only. **No** feature sequence diagrams.
 | Key decisions and constraints | ADR-lite: Status, Date, Summary, Consequences |
 | Related solution designs | Links to feature pages |
 
-### 4. Solution design — hub + features (full only)
+### 2. Solution design — hub + features
 
 **Hub** (`solution-design.md`): master feature index (Owner + Status columns).
 Optional frontmatter `nav_group:` / `master_feature:` groups features in the HTML sidebar.
@@ -100,7 +66,7 @@ Optional frontmatter `nav_group:` / `master_feature:` groups features in the HTM
 | Testing and rollout | Separate lists: Key tests / Release / Rollback |
 | Decisions and open questions | Decisions / open items |
 
-### 5. Glossary — `glossary.md` (full only)
+### 3. Glossary — `glossary.md`
 
 | Term | Definition | Related link |
 |------|------------|--------------|
@@ -140,7 +106,6 @@ After confirmation: `wiki-add-feature.sh` for each; fill from code; link from hu
 
 ## Diagrams and tables
 
-- Overview: `flowchart` or `C4Context` (system context).
 - Architecture building blocks: **`C4Container`** or **`C4Component`**.
 - Architecture interaction: **`C4Dynamic`** (or flowchart with `C4Dynamic unavailable`).
 - Features: **`sequenceDiagram` only** (prefer `alt`/`opt` for errors).
@@ -151,10 +116,11 @@ After confirmation: `wiki-add-feature.sh` for each; fill from code; link from hu
 
 Mermaid C4 packs **4 shapes per row by default**, which overlaps labels on Interaction diagrams.
 
-1. Interaction: prefer **`flowchart TB`** + phrase `C4Dynamic unavailable` when there are return paths or >3 participants (Mermaid C4Dynamic often overlaps).
-2. If using `C4Dynamic`: **required** `UpdateLayoutConfig($c4ShapeInRow="1")`; no reverse Rel on the same vertical stack; short labels + `UpdateRelStyle` offsets.
-3. Building blocks: `UpdateLayoutConfig($c4ShapeInRow="2"|`"3")`; group many externals into one `System_Ext` when possible.
-4. Colors: grayscale only — do not add `UpdateElementStyle` / `classDef` accent fills.
+1. Interaction (`C4Dynamic`): `UpdateLayoutConfig($c4ShapeInRow="1")` — one box per row (top → bottom).
+2. Building blocks: `UpdateLayoutConfig($c4ShapeInRow="2"|`"3")` so boxes are not cramped.
+3. Short edge labels; use `UpdateRelStyle(..., $offsetX, $offsetY)` when labels sit on boxes.
+4. Colors: standard C4-PlantUML palette (Person `#08427B`, Container `#438DD5`, DB `#2E6295`, External `#999999`, white text) — do not invent rainbow fills.
+5. If C4Dynamic still overlaps: flowchart TB fallback + phrase `C4Dynamic unavailable`.
 
 ## Content anti-patterns
 
@@ -162,3 +128,4 @@ Mermaid C4 packs **4 shapes per row by default**, which overlaps labels on Inter
 - Copy Architecture cross-cutting into every feature (use Cross-cutting deltas).
 - Leave agent instructional essays on distilled pages (keep fill rules in AGENTS / this file).
 - Force full API field tables when the feature only consumes an API (`Owns contract?` = `no`).
+- Create Overview (`index.md`) or Quick start pages — remove them; they are obsolete.

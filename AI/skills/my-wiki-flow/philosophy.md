@@ -25,7 +25,7 @@ Sources:
 4. **Stay in the loop** — AI drafts; you approve distill/update on meaningful changes.
 5. **Do not outsource understanding** — wiki pages teach *you*; summaries are not a substitute for judgment.
 6. **Code over repo docs** — project wiki describes what the code does; distill from sources/handlers/schemas/config/tests, not from README or `docs/**`.
-7. **Start at a level you will maintain** — use **lite** profile for small tools; full five pages when needed; RAG/graph later only if asked.
+7. **Start at a level you will maintain** — Architecture + Solution design + Glossary per project; RAG/graph later only if asked.
 8. **Capture first, perfect later** — inbox is valid; structure emerges.
 9. **Lint and incremental update** — health-check with `wiki-lint.py`; refresh from git diffs (`update`) instead of rewriting everything.
 

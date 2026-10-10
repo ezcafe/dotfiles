@@ -13,12 +13,10 @@ Default root: `~/Documents/my-wiki`
   inbox/                # uncategorized captures (CODE Capture)
   projects/             # PRIMARY nav grouping
     {project-slug}/
-      index.md              # 1 Overview
-      quick-start.md        # 2 Task-oriented setup
-      architecture.md       # 3 full profile only
-      solution-design.md    # 4 full profile — feature hub
+      architecture.md       # 1 Architecture
+      solution-design.md    # 2 Solution design hub
       solution-design/      #    one page per feature
-      glossary.md           # 5 full profile
+      glossary.md           # 3 Glossary
       references/           # overflow only (use article.template.md)
   ai/
     INDEX.md            # machine + human catalog (project → pages)
@@ -70,18 +68,15 @@ nav:
 projects:
   my-app:
     workspace: /absolute/path/to/my-app
-    profile: full   # full | lite
 ```
 
 `wiki-scaffold-project.sh` upserts `projects.{slug}`. Lint and incremental update
 resolve the workspace from this map.
 
-## Profiles
+## Canonical project pages
 
-| Profile | Pages |
-|---------|--------|
-| `full` (default) | Overview, Quick start, Architecture, Solution design (+ features), Glossary |
-| `lite` | Overview + Quick start only — expand later with `--full` |
+Every project has: **Architecture**, **Solution design** (+ feature pages), **Glossary**.
+No Overview or Quick start pages.
 
 ## GitHub wiki layout note
 

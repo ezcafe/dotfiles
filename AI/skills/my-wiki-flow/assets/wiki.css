@@ -1,7 +1,7 @@
 /* my-wiki-flow — MediaWiki Vector / ArchWiki palette and layout */
 
 :root {
-  /* Neutral / grayscale only (no accent chrome) */
+  /* Chrome stays neutral; color is for attention callouts only (ArchWiki boxes) */
   --wiki-bg: #f8f9fa;
   --wiki-surface: #ffffff;
   --wiki-text: #202122;
@@ -20,9 +20,14 @@
   --wiki-code-bg: #f8f9fa;
   --wiki-pre-border: #a2a9b1;
   --wiki-table-head: #eaecf0;
-  /* Callouts share the same neutral box */
-  --wiki-callout-bg: #eaecf0;
-  --wiki-callout-border: #72777d;
+  /* ArchWiki Note / Tip / Warning — see https://wiki.archlinux.org/title/Help:Template */
+  --wiki-note-bg: #dff5ff;
+  --wiki-note-border: #1488c6;
+  --wiki-tip-bg: #e4ffaf;
+  --wiki-tip-border: #6d9f00;
+  --wiki-warning-bg: #ffb31c;
+  --wiki-warning-border: #c47a00;
+  --wiki-mark: #ffe066;
   --wiki-header-h: 3.5rem;
   --wiki-nav-w: 15.5rem;
   --wiki-font: sans-serif;
@@ -91,7 +96,7 @@ a:active {
   --pf-border: var(--wiki-border);
   --pf-border-focus: var(--wiki-border);
   --pf-hover: rgba(0, 0, 0, 0.03);
-  --pf-mark: var(--wiki-muted);
+  --pf-mark: var(--wiki-mark);
   --pf-font: var(--wiki-font);
   --pf-border-radius: 2px;
   --pf-input-font-size: 1rem;
@@ -539,17 +544,40 @@ a:active {
   color: var(--wiki-text);
 }
 
-.wiki-callout.note,
-.wiki-callout.tip,
+.wiki-callout.note {
+  background: var(--wiki-note-bg);
+  border-color: #a3d4ef;
+  border-left-color: var(--wiki-note-border);
+}
+
+.wiki-callout.tip {
+  background: var(--wiki-tip-bg);
+  border-color: #c6e08a;
+  border-left-color: var(--wiki-tip-border);
+}
+
 .wiki-callout.warning {
-  background: var(--wiki-callout-bg);
-  border-color: var(--wiki-border-subtle);
-  border-left-color: var(--wiki-callout-border);
+  background: var(--wiki-warning-bg);
+  border-color: #e09a18;
+  border-left-color: var(--wiki-warning-border);
+  color: #202122;
 }
 
 .wiki-callout .label {
   font-weight: 700;
   margin-right: 0.35rem;
+}
+
+.wiki-callout.note .label {
+  color: var(--wiki-note-border);
+}
+
+.wiki-callout.tip .label {
+  color: var(--wiki-tip-border);
+}
+
+.wiki-callout.warning .label {
+  color: #8a5500;
 }
 
 /* GFM tables */

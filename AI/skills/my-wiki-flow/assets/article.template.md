@@ -13,8 +13,8 @@ claims: []
 # Page title
 
 **When to use this file:** overflow notes under `projects/{slug}/references/` only
-(long dumps, catalogs). Prefer the five canonical templates in
-`assets/project-pages/` for Overview → Glossary, and
+(long dumps, catalogs). Prefer the canonical templates in
+`assets/project-pages/` (Architecture, Solution design, Glossary) and
 `solution-design-feature.md` for features.
 
 ## Content
@@ -27,4 +27,4 @@ Use GFM tables and Mermaid where the page role requires them (see project-struct
 
 ## See also
 
-- [[projects/project-slug/index|Overview]]
+- [[projects/project-slug/architecture|Architecture]]

@@ -37,7 +37,7 @@ Every generated page includes:
 2. **Nav** — projects as groups; canonical page order; nested features.
 3. **In-page TOC** from `h2`/`h3`.
 4. **Article** with tables + zoomable Mermaid.
-5. Link to project overview and site home.
+5. Link to project Architecture and site home.
 
 ## Performance targets
 

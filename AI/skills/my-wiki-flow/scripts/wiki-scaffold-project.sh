@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Scaffold canonical project pages under projects/{slug}/.
-# Usage: wiki-scaffold-project.sh <slug> [workspace-path] [--lite]
+# Usage: wiki-scaffold-project.sh <slug> [workspace-path]
 set -euo pipefail
 
 ROOT="${WIKI_ROOT:-$HOME/Documents/my-wiki}"
@@ -10,12 +10,12 @@ TEMPLATES="$SKILL_DIR/assets/project-pages"
 
 SLUG=""
 REPO_PATH="."
-PROFILE="full"
 
 for arg in "$@"; do
   case "$arg" in
-    --lite) PROFILE="lite" ;;
-    --full) PROFILE="full" ;;
+    --lite|--full)
+      echo "Note: profiles removed; scaffolding Architecture + Solution design + Glossary" >&2
+      ;;
     -*)
       echo "Unknown flag: $arg" >&2
       exit 1
@@ -31,8 +31,8 @@ for arg in "$@"; do
 done
 
 if [[ -z "$SLUG" ]]; then
-  echo "Usage: wiki-scaffold-project.sh <project-slug> [workspace-path] [--lite|--full]"
-  echo "  --lite  Only Overview + Quick start (expand later with --full or re-scaffold)"
+  echo "Usage: wiki-scaffold-project.sh <project-slug> [workspace-path]"
+  echo "  Creates: architecture.md, solution-design.md, glossary.md"
   exit 1
 fi
 
@@ -48,11 +48,7 @@ ABS_REPO="$(cd "$REPO_PATH" 2>/dev/null && pwd || echo "$REPO_PATH")"
 
 mkdir -p "$DEST/solution-design" "$DEST/references"
 
-if [[ "$PROFILE" == "lite" ]]; then
-  PAGES=(index.md quick-start.md)
-else
-  PAGES=(index.md quick-start.md architecture.md solution-design.md glossary.md)
-fi
+PAGES=(architecture.md solution-design.md glossary.md)
 
 for page in "${PAGES[@]}"; do
   out="$DEST/$page"
@@ -70,23 +66,19 @@ for page in "${PAGES[@]}"; do
 done
 
 # Remove obsolete pages from older scaffolds
-for obsolete in tips-and-tricks.md design-guide.md; do
+for obsolete in index.md quick-start.md tips-and-tricks.md design-guide.md; do
   if [[ -f "$DEST/$obsolete" ]]; then
     rm -f "$DEST/$obsolete"
     echo "removed obsolete: $DEST/$obsolete"
   fi
 done
 
-python3 "$SCRIPT_DIR/_wiki_config.py" upsert-project "$ROOT/config.yaml" "$SLUG" "$ABS_REPO" "$PROFILE"
+python3 "$SCRIPT_DIR/_wiki_config.py" upsert-project "$ROOT/config.yaml" "$SLUG" "$ABS_REPO" "full"
 
 if [[ -f "$ROOT/log.md" ]]; then
   echo "" >> "$ROOT/log.md"
-  echo "## [$TODAY] distill | scaffold project [[projects/$SLUG/index]] profile=$PROFILE against $GIT_SHA" >> "$ROOT/log.md"
+  echo "## [$TODAY] distill | scaffold project [[projects/$SLUG/architecture]] against $GIT_SHA" >> "$ROOT/log.md"
 fi
 
-echo "Scaffolded projects/$SLUG (profile=$PROFILE) — fill from real code, then wiki-build.sh"
-if [[ "$PROFILE" == "lite" ]]; then
-  echo "Lite: Overview + Quick start only. Later: wiki-scaffold-project.sh $SLUG $ABS_REPO --full"
-else
-  echo "Feature pages: wiki-add-feature.sh $SLUG <feature-slug> [master-feature]"
-fi
+echo "Scaffolded projects/$SLUG — fill from real code, then wiki-build.sh"
+echo "Feature pages: wiki-add-feature.sh $SLUG <feature-slug> [master-feature]"

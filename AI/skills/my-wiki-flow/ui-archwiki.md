@@ -36,10 +36,10 @@ Use vault `assets/wiki.css` (from skill). Match ArchWiki cues:
 | Links | Near-black text + underline (no blue/purple) |
 | Headings | Clear hierarchy; underline/border under `h1` |
 | TOC | Bordered box, centered “Contents” |
-| Note / Tip / Warning | Same neutral gray callout box (labels carry meaning) |
+| Note / Tip / Warning | ArchWiki boxes: Note blue, Tip green, Warning amber |
 | Nav | Compact list; current page gray left bar; Vector expand chevron |
 | Tables | Header `#eaecf0` |
-| Color rule | Grayscale only — no accent fills in chrome or diagrams |
+| Color rule | Chrome/diagrams stay grayscale; color only for attention (callouts, search marks) |
 | Mermaid | Neutral gray theme |
 | Nav | Collapse/expand projects, Solution design, and feature groups (persisted) |
 | Chrome | Minimal; no dashboard cards, no purple gradients, no emoji clutter |

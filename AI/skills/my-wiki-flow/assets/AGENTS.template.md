@@ -7,25 +7,23 @@ skill docs: `content-contract.md` and `project-structure.md`.
 ## Vault layout
 
 - `raw/` — immutable sources (read only)
-- `projects/{slug}/` — Overview → Glossary (or lite: Overview + Quick start)
+- `projects/{slug}/` — Architecture, Solution design, Glossary
 - `projects/{slug}/solution-design/` — one page per confirmed feature
 - `projects/{slug}/references/` — overflow only (`article.template.md`)
 - `inbox/` — uncategorized captures
 - `index.md` — master catalog (`##` + `[[wikilinks]]`)
 - `log.md` — append-only timeline
-- `config.yaml` — `projects.{slug}.workspace` + `profile`
+- `config.yaml` — `projects.{slug}.workspace`
 - `ai/INDEX.md`, `ai/CONTEXT.md` — agent routing
 - `site/` — generated HTML (do not edit)
 
-## Canonical project pages (full profile)
+## Canonical project pages
 
-1. `index.md` — Overview
-2. `quick-start.md` — Setup / run / verify
-3. `architecture.md` — Building block (`C4Container`/`C4Component`) + Interaction (`C4Dynamic` with `UpdateLayoutConfig` 1/row + C4 palette); quality goals, communication table, risks, ADR-lite decisions
-4. `solution-design.md` + `solution-design/{feature}.md` — **`sequenceDiagram`** with `alt`/`opt`; Business requirements; progressive API (full tables + curl only when Owns=yes); Cross-cutting deltas
-5. `glossary.md`
+1. `architecture.md` — Building block (`C4Container`/`C4Component`) + Interaction (`C4Dynamic` with `UpdateLayoutConfig` 1/row + C4 palette); quality goals, communication table, risks, ADR-lite decisions
+2. `solution-design.md` + `solution-design/{feature}.md` — **`sequenceDiagram`** with `alt`/`opt`; Business requirements; progressive API (full tables + curl only when Owns=yes); Cross-cutting deltas
+3. `glossary.md`
 
-Lite profile: (1)+(2) only. No tips-and-tricks / design-guide.
+No Overview, Quick start, tips-and-tricks, or design-guide pages.
 
 Required H2s: project-structure.md. Scaffold / features: skill scripts.
 

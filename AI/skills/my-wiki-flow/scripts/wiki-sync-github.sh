@@ -67,7 +67,7 @@ def wiki_name(rel: Path) -> str:
     def cap(s: str) -> str:
         return "".join(p.capitalize() for p in s.replace("_", "-").split("-") if p)
     project = cap(slug)
-    if stem == "index":
+    if stem == "architecture":
         return project
     if "solution-design" in parts and stem != "solution-design":
         return f"{project}-SolutionDesign-{cap(stem)}"

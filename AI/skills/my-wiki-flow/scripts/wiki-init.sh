@@ -87,7 +87,6 @@ projects: {}
 # projects:
 #   my-app:
 #     workspace: /path/to/my-app
-#     profile: full   # full | lite
 EOF
 
 cat > "$ROOT/README.md" <<EOF
@@ -143,7 +142,7 @@ cat > "$ROOT/ai/CONTEXT.md" <<EOF
 ## How to answer from this wiki
 
 1. Pick project(s) from [INDEX.md](INDEX.md)
-2. Read that project's \`index.md\` + matching pages
+2. Read that project's Architecture, Solution design, and Glossary as needed
 3. Prefer frontmatter \`summary\` before full body
 4. Cite page paths when stating facts from the wiki
 5. If missing, say so — do not invent wiki content
@@ -152,7 +151,7 @@ EOF
 cat > "$ROOT/ai/INDEX.md" <<EOF
 # Wiki index
 
-_No projects yet. Ingest a workspace or add \`projects/{slug}/index.md\`._
+_No projects yet. Ingest a workspace or add \`projects/{slug}/architecture.md\`._
 
 ## inbox
 

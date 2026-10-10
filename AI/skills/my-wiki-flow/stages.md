@@ -82,16 +82,15 @@ and [content-contract.md](content-contract.md).
 
 1. Resolve workspace from `config.yaml` → `projects.{slug}.workspace` (ask if missing).
 2. Record `git rev-parse --short HEAD`.
-3. Choose profile: `lite` (Overview + Quick start) or `full` (five pages). Ask if unclear.
-4. If pages missing → `wiki-scaffold-project.sh {slug} {workspace} [--lite|--full]`.
-5. **Feature discovery** (full profile only) — see project-structure; **confirm the
-   feature list with the user** before writing pages. Then
-   `wiki-add-feature.sh {slug} {feature} [master]`.
-6. Validate against **real code**; fill required H2 sections.
-7. Remove obsolete `tips-and-tricks.md` / `design-guide.md` if present.
-8. Set `source`, `validated_against`, `updated`, `summary`, `claims`.
-9. Update root `index.md` and `ai/INDEX.md`; append `log.md`.
-10. Show paths + bullets + SHA. **Wait for approval** on bulk rewrites
+3. If pages missing → `wiki-scaffold-project.sh {slug} {workspace}`.
+4. **Feature discovery** — see project-structure; **confirm the feature list with the
+   user** before writing pages. Then `wiki-add-feature.sh {slug} {feature} [master]`.
+5. Validate against **real code**; fill required H2 sections.
+6. Remove obsolete `index.md` / `quick-start.md` / `tips-and-tricks.md` /
+   `design-guide.md` if present under the project.
+7. Set `source`, `validated_against`, `updated`, `summary`, `claims`.
+8. Update root `index.md` and `ai/INDEX.md`; append `log.md`.
+9. Show paths + bullets + SHA. **Wait for approval** on bulk rewrites
     (≥3 pages rewritten or any Architecture / Solution design rewrite).
 
 ## Stage 3b — Update (incremental)
@@ -100,9 +99,9 @@ When the vault already has content for `{slug}`:
 
 1. Read `validated_against` SHA and `projects.{slug}.workspace`.
 2. `git -C {workspace} diff --name-only {old-sha}..HEAD` (or `git status` if unknown).
-3. Map changed paths → affected wiki pages (entrypoint → Overview/Architecture;
-   routes/handlers → feature pages; package scripts → Quick start; schemas →
-   contracts on feature pages).
+3. Map changed paths → affected wiki pages (entrypoint / deployables → Architecture;
+   routes/handlers → feature pages; schemas → contracts on feature pages;
+   domain names → Glossary).
 4. Update **only** those pages; bump `validated_against` + `updated`.
 5. Show a short diff summary (paths + bullets). HITL if ≥3 pages or diagram changes.
 6. Run **lint**, then **build**.
@@ -122,8 +121,8 @@ Answer from the wiki (do not rebuild unless asked):
 
 Run: `wiki-lint.py [--project slug]`
 
-Checks: canonical pages for profile, required H2s, Mermaid types, complex-logic
-citations, docs-only claims, stale SHA, broken wikilinks, orphans, obsolete pages.
+Checks: canonical pages, required H2s, Mermaid types, complex-logic citations,
+docs-only claims, stale SHA, broken wikilinks, orphans, obsolete pages.
 Appends `log.md`. Fix errors before treating distill as done.
 
 ## Stage 4 — Build

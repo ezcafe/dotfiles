@@ -22,8 +22,6 @@ INFRA_BASENAMES = {"index.md", "log.md", "agents.md", "claude.md", "soul.md", "c
 
 # Canonical project nav order (project-structure.md).
 PROJECT_PAGE_ORDER = (
-    "index",
-    "quick-start",
     "architecture",
     "solution-design",
     "glossary",
@@ -494,7 +492,7 @@ def page_kind(page: Page) -> str:
         return "solution-design"
     if stem == "architecture":
         return "architecture"
-    if stem in ("index", "quick-start", "glossary"):
+    if stem == "glossary":
         return stem
     return "article"
 
@@ -515,7 +513,7 @@ def page_kind_badge(kind: str) -> str:
 
 
 def page_sort_key(page: Page) -> tuple[int, str, str]:
-    """Canonical five pages first, then solution-design features, then the rest."""
+    """Canonical pages first, then solution-design features, then the rest."""
     stem = page.path.stem.lower()
     rel = page.rel.as_posix().lower()
     if stem in PROJECT_PAGE_ORDER and "solution-design/" not in rel:
@@ -656,7 +654,7 @@ def render_page(
     prefix = "/".join([".."] * depth) + "/" if depth else ""
     css = f"{prefix}assets/wiki.css"
     home = f"{prefix}index.html"
-    project_href = f"{prefix}projects/{page.project}/index.html"
+    project_href = f"{prefix}projects/{page.project}/architecture.html"
     if page.project == "inbox":
         project_href = f"{prefix}inbox/index.html"
     meta_bits = []
@@ -745,7 +743,7 @@ def write_home(
     html_out = render_page(template, site_title, home, body, toc, nav, Path("index.html"))
     # Fix project footer for home
     html_out = html_out.replace(
-        f'Project: <a href="projects/home/index.html">home</a>',
+        f'Project: <a href="projects/home/architecture.html">home</a>',
         "Home",
     )
     (site / "index.html").write_text(html_out, encoding="utf-8")

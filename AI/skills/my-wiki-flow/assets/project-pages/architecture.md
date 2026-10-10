@@ -139,5 +139,5 @@ Link an ADR only after confirming the code still matches.
 
 ## See also
 
-- [[projects/PROJECT_SLUG/index|Overview]]
 - [[projects/PROJECT_SLUG/solution-design|Solution design]]
+- [[projects/PROJECT_SLUG/glossary|Glossary]]
