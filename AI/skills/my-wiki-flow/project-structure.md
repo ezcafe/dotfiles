@@ -69,34 +69,35 @@ Project-wide only. **No** feature sequence diagrams.
 
 | Section | Content |
 |---------|---------|
-| Purpose and scope | Boundaries |
-| Interaction diagram | Mermaid **`C4Dynamic`** — numbered runtime interactions among major components |
-| Component responsibilities | Short description per component |
-| Key interactions and data flows | How components communicate |
-| Cross-cutting concerns | Security, observability, errors, resilience |
-| Deployment view | Environments |
-| Key decisions and constraints | Brief; link detail elsewhere |
+| Purpose and quality goals | Boundaries + top quality goals (metric/signal + `workspace:` source) |
+| Building block view | Mermaid **`C4Container`** (or **`C4Component`**) + responsibilities table |
+| Interaction diagram | Mermaid **`C4Dynamic`** — 1–2 architecturally relevant scenarios |
+| Communication and data | From/To/Protocol/Sync-async/Data owned (no diagram re-narration) |
+| Cross-cutting concerns | Security, observability, errors, resilience (project-wide) |
+| Deployment view | Environments; optional deployment Mermaid if >1 deployable |
+| Risks and technical debt | Risk/debt, impact, mitigation, source |
+| Key decisions and constraints | ADR-lite: Status, Date, Summary, Consequences |
 | Related solution designs | Links to feature pages |
 
 ### 4. Solution design — hub + features (full only)
 
-**Hub** (`solution-design.md`): master feature index. Optional frontmatter
-`nav_group:` / `master_feature:` groups features in the HTML sidebar.
+**Hub** (`solution-design.md`): master feature index (Owner + Status columns).
+Optional frontmatter `nav_group:` / `master_feature:` groups features in the HTML sidebar.
 
 **Feature page** — required H2s:
 
 | Section | Content |
 |---------|---------|
-| Summary | Problem, goal, owner, status |
-| Scope and requirements | Behavior, acceptance, exclusions |
+| Summary | Short problem/goal/owner/status (outcomes live under Business requirements) |
+| Scope and requirements | **Business requirements** + in-scope/exclusions + **Given/When/Then** acceptance |
 | Design overview | Affected components (table only) |
-| Sequence diagram | Mermaid **`sequenceDiagram` only** |
-| API contracts | Spec summary + API spec; **curl** example requests; success/error responses (arrays show ≥1 item); link canonical schema/code |
+| Sequence diagram | Mermaid **`sequenceDiagram` only**; include `alt`/`opt` for a failure/edge path |
+| API contracts | **Progressive:** Spec summary always (`Owns contract?` + `workspace:`). Full field tables + curl success/error only when Owns=`yes` (or shared + non-obvious). Arrays ≥1 item |
 | Data and state changes | Entities, storage, migrations |
-| Complex logic | Rules + **`workspace:` path** + example code fence |
-| Failure and retry behavior | Timeouts, retries, idempotency |
-| Security and observability | Permissions, logs, metrics |
-| Testing and rollout | Tests, release, rollback |
+| Complex logic | Rules + `workspace:` + code fence; or `N/A` + `workspace:` cite |
+| Failure and retry behavior | Timeouts, retries, idempotency; or `N/A` + cite |
+| Cross-cutting deltas | Only deltas vs Architecture; or `N/A — inherits Architecture` |
+| Testing and rollout | Separate lists: Key tests / Release / Rollback |
 | Decisions and open questions | Decisions / open items |
 
 ### 5. Glossary — `glossary.md` (full only)
@@ -140,7 +141,24 @@ After confirmation: `wiki-add-feature.sh` for each; fill from code; link from hu
 ## Diagrams and tables
 
 - Overview: `flowchart` or `C4Context` (system context).
-- Architecture: **`C4Dynamic`** interaction diagram (or flowchart with `C4Dynamic unavailable`).
-- Features: **`sequenceDiagram` only**.
+- Architecture building blocks: **`C4Container`** or **`C4Component`**.
+- Architecture interaction: **`C4Dynamic`** (or flowchart with `C4Dynamic unavailable`).
+- Features: **`sequenceDiagram` only** (prefer `alt`/`opt` for errors).
 - HTML Mermaid figures are zoomable (wheel / drag / toolbar).
 - GFM tables → `.wiki-table` on build. No escaped `\|` in table wikilinks.
+
+### C4 layout and color (required for Architecture)
+
+Mermaid C4 packs **4 shapes per row by default**, which overlaps labels on Interaction diagrams.
+
+1. Interaction: prefer **`flowchart TB`** + phrase `C4Dynamic unavailable` when there are return paths or >3 participants (Mermaid C4Dynamic often overlaps).
+2. If using `C4Dynamic`: **required** `UpdateLayoutConfig($c4ShapeInRow="1")`; no reverse Rel on the same vertical stack; short labels + `UpdateRelStyle` offsets.
+3. Building blocks: `UpdateLayoutConfig($c4ShapeInRow="2"|`"3")`; group many externals into one `System_Ext` when possible.
+4. Colors: grayscale only — do not add `UpdateElementStyle` / `classDef` accent fills.
+
+## Content anti-patterns
+
+- Re-narrate diagrams in prose under Communication and data.
+- Copy Architecture cross-cutting into every feature (use Cross-cutting deltas).
+- Leave agent instructional essays on distilled pages (keep fill rules in AGENTS / this file).
+- Force full API field tables when the feature only consumes an API (`Owns contract?` = `no`).

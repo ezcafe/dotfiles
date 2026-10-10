@@ -17,20 +17,36 @@ claims: []
 
 | Field | Value |
 |-------|-------|
-| Problem | … |
-| Goal | … |
+| Problem | One sentence |
+| Goal | One sentence (outcomes live under Business requirements) |
 | Owner | … |
 | Status | draft / in progress / shipped |
 
 ## Scope and requirements
 
-| In scope (behavior) | Acceptance criteria | Exclusions |
-|---------------------|---------------------|------------|
-| … | … | … |
+### Business requirements
+
+Outcomes, rules, constraints, KPIs — verified against how the code behaves.
+
+| ID / theme | Business requirement | Priority | Notes |
+|------------|----------------------|----------|-------|
+| … | … | must / should / could | … |
+
+### In scope / exclusions
+
+| In scope (behavior) | Exclusions |
+|---------------------|------------|
+| … | … |
+
+### Acceptance criteria
+
+| ID | Given | When | Then |
+|----|-------|------|------|
+| AC1 | … | … | … |
 
 ## Design overview
 
-Affected components (table only — the diagram for this page is the sequence diagram below).
+Affected components (table only — diagram is the sequence below).
 
 | Component | Role in this feature | Source |
 |-----------|----------------------|--------|
@@ -38,7 +54,9 @@ Affected components (table only — the diagram for this page is the sequence di
 
 ## Sequence diagram
 
-Required. Use Mermaid **`sequenceDiagram` only** (not flowchart, not C4). Show the important interactions among users, services, assets, and external systems. Derive steps from real handlers/call sites. Site theme applies blue/green/amber colors automatically.
+Mermaid **`sequenceDiagram` only**. Derive steps from real handlers. Include at least one `alt` or `opt` for a failure or edge path. Use concrete messages (`POST /orders`, not `request`).
+
+> **Note** Happy path alone is not enough — document the main failure branch in `alt` or `opt`.
 
 ```mermaid
 sequenceDiagram
@@ -47,27 +65,34 @@ sequenceDiagram
   participant API
   participant Service
   participant Ext as External
-  User->>UI: action
-  UI->>API: request
+  User->>UI: submit action
+  UI->>API: POST /resource
   API->>Service: handle
-  Service->>Ext: call
-  Ext-->>Service: result
-  Service-->>API: result
-  API-->>UI: response
-  Note over API,Service: complex branch — see Complex logic
+  alt success
+    Service->>Ext: call dependency
+    Ext-->>Service: 200 result
+    Service-->>API: ok
+    API-->>UI: 200 body
+  else validation / upstream failure
+    Service-->>API: error
+    API-->>UI: 4xx/5xx body
+  end
+  Note over API,Service: non-trivial branch — see Complex logic
 ```
-
-Reference: [Mermaid sequence diagrams](https://mermaid.js.org/syntax/sequenceDiagram.html).
 
 ## API contracts
 
-Link to canonical OpenAPI / proto / event schemas in code. For each endpoint or event this feature owns, document the **API spec** plus **example request and response for success and error**.
+Always link the canonical schema/code. Full field tables and curl examples are required only when **Owns contract?** is `yes` (or `shared` with non-obvious behavior).
 
 ### Spec summary
 
-| Kind | Name / path | Method | Auth | Canonical source |
-|------|-------------|--------|------|------------------|
-| HTTP / event | `/…` | GET/POST/… | … | `workspace:…` |
+| Kind | Name / path | Method | Auth | Owns contract? | Canonical source |
+|------|-------------|--------|------|----------------|------------------|
+| HTTP / event | `/…` | GET/POST/… | … | yes / no / shared | `workspace:…` |
+
+When **Owns contract?** is `no` for every row: stop here (link only).
+
+When any row is `yes` (or shared + non-obvious), fill the blocks below for each owned operation.
 
 ### API spec
 
@@ -76,13 +101,40 @@ Link to canonical OpenAPI / proto / event schemas in code. For each endpoint or 
 | Operation | … |
 | Path / topic | … |
 | Headers | … |
-| Request schema | link or short field list from code |
-| Success response | status / schema |
-| Error responses | status codes and error body shape |
+| Success status | e.g. `200` / `201` |
+| Error statuses | e.g. `400`, `401`, `404`, `409`, `5xx` |
+| Canonical source | `workspace:…` |
+
+Nested fields use dotted paths (e.g. `items[].id`). Example values must match the curl / JSON examples.
+
+#### Request fields
+
+| Field | Type | Required | Example value | Notes |
+|-------|------|----------|---------------|-------|
+| … | string / number / boolean / object / array | yes / no | `…` | … |
+
+#### Response fields (success)
+
+| Field | Type | Example value | Notes |
+|-------|------|---------------|-------|
+| … | … | `…` | … |
+| items[] | array | _(see first item)_ | show ≥1 element in the JSON example |
+| items[].id | string | `…` | … |
+
+#### Response fields (error)
+
+| Field | Type | Example value | Notes |
+|-------|------|---------------|-------|
+| error | string | `…` | … |
+| details[] | array | _(see first item)_ | … |
+| details[].field | string | `…` | … |
+| details[].message | string | `…` | … |
 
 ### Example — success
 
-**Request** (curl — required form for every example request):
+Put **Request** or **Response** on its own line before each fence so HTML collapses them.
+
+**Request** (curl)
 
 ```bash
 curl -sS -X POST 'https://example.local/…' \
@@ -93,7 +145,7 @@ curl -sS -X POST 'https://example.local/…' \
   }'
 ```
 
-**Response** (status + body). If any field is an array, show **at least the first element** with realistic fields — do not use `[]` alone.
+**Response** (arrays show ≥1 item)
 
 ```json
 {
@@ -108,9 +160,9 @@ curl -sS -X POST 'https://example.local/…' \
 
 ### Example — error
 
-Document at least one realistic failure from the handler (validation, auth, not found, conflict, upstream). Prefer the status and body the code actually returns.
+Use a realistic failure the handler returns.
 
-**Request** (curl):
+**Request** (curl)
 
 ```bash
 curl -sS -X POST 'https://example.local/…' \
@@ -121,7 +173,7 @@ curl -sS -X POST 'https://example.local/…' \
   }'
 ```
 
-**Response** (error status + body). If the error payload includes an array (e.g. field errors), show at least the first item.
+**Response**
 
 ```json
 {
@@ -135,7 +187,9 @@ curl -sS -X POST 'https://example.local/…' \
 }
 ```
 
-Compatibility notes: …
+### Compatibility
+
+Breaking-change or version notes, or omit if none.
 
 ## Data and state changes
 
@@ -145,11 +199,11 @@ Compatibility notes: …
 
 ## Complex logic
 
-Rules, edge cases, and algorithms — only what exists in code. **Required:** cite the reference path and show a short example (trimmed from the real file, or a minimal equivalent that matches behavior).
+Non-trivial rules only. If none: `N/A — no non-trivial branches` plus one `workspace:` cite for the main handler.
 
 | Rule / edge case | Behavior | Reference |
 |------------------|----------|-----------|
-| … | … | `workspace:path/to/file` (lines if known) |
+| … | … | `workspace:path/to/file` |
 
 ### Reference / example code
 
@@ -159,23 +213,35 @@ Rules, edge cases, and algorithms — only what exists in code. **Required:** ci
 
 ## Failure and retry behavior
 
+If sync-only with no retries: `N/A — no async retry path` plus one `workspace:` cite.
+
 | Case | Timeout / retry | Idempotency | Recovery |
 |------|-----------------|-------------|----------|
 | … | … | … | … |
 
-## Security and observability
+## Cross-cutting deltas
 
-| Area | Detail | Source |
-|------|--------|--------|
+Only what differs from [[projects/PROJECT_SLUG/architecture|Architecture]]. If none: `N/A — inherits Architecture`.
+
+| Area | Delta | Source |
+|------|-------|--------|
 | Permissions | … | `workspace:…` |
 | Sensitive data | … | … |
 | Logs / metrics / alerts | … | … |
 
 ## Testing and rollout
 
-| Key tests | Release steps | Rollback |
-|-----------|---------------|----------|
-| … | … | … |
+**Key tests**
+
+- …
+
+**Release**
+
+- …
+
+**Rollback**
+
+- …
 
 ## Decisions and open questions
 
@@ -185,7 +251,7 @@ Rules, edge cases, and algorithms — only what exists in code. **Required:** ci
 
 ## Key claims
 
--
+- Feature behavior matches code at `validated_against` — `workspace:REPO_PATH`
 
 ## See also
 

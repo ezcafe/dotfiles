@@ -95,9 +95,9 @@ Manual / agent checklist (same rules):
 1. Missing canonical pages for profile → scaffold, then fill.
 2. Stray tips-and-tricks / design-guide → remove.
 3. Missing required H2s → add and fill from code.
-4. Architecture without Interaction diagram (`C4Dynamic`, or flowchart + `C4Dynamic unavailable`) → fix.
-5. Feature without `sequenceDiagram` → fix; API contracts need spec + curl requests + success/error responses (arrays show ≥1 item).
-6. Complex logic without `workspace:` path + code fence → add both.
+4. Architecture without Building block (`C4Container`/`C4Component`) or Interaction (`C4Dynamic`, or flowchart + `C4Dynamic unavailable`) → fix.
+5. Feature without `sequenceDiagram` → fix; Scope needs Business requirements; API Spec summary always; full field tables + curl only when Owns contract? = yes (arrays ≥1 item).
+6. Complex logic without `workspace:` path (+ code fence, or N/A) → fix.
 7. Claims citing only README/docs without code path → reject.
 8. Stale `validated_against` vs HEAD → re-validate (`update` stage).
 9. Frontmatter `claims` entries missing from Key claims → align.
@@ -112,8 +112,9 @@ Manual / agent checklist (same rules):
 - Store secrets in the vault.
 - Replace `raw/` during ingest.
 - Put feature sequences on Architecture; put flowchart/C4 on feature Sequence diagram sections.
-- Ship API contracts without curl requests or without success/error responses (arrays must show ≥1 item, not empty `[]`).
-- Duplicate full API schemas when a canonical code file exists.
+- When Owns contract? = yes: ship without field-level request/response tables (example values), without curl success/error, or with empty `[]` array examples.
+- When Owns contract? = no: ship without Spec summary and a `workspace:` canonical link.
+- Duplicate full API schemas into every feature when a canonical code file exists.
 - Create unbounded feature pages without user-confirmed discovery list.
 
 ## References

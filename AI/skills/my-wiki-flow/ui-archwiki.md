@@ -33,12 +33,14 @@ Use vault `assets/wiki.css` (from skill). Match ArchWiki cues:
 |---------|-----------|
 | Background | Light gray page (`#f8f9fa`), white article surface |
 | Text | Dark readable (`#202122`), system-ui / sans; code in monospace |
-| Links | Blue (`#0645ad`); visited purple-ish (`#0b0080`) |
+| Links | Near-black text + underline (no blue/purple) |
 | Headings | Clear hierarchy; underline/border under `h1` |
-| TOC | Bordered box, nested list, “Contents” label |
-| Note / Tip / Warning | Left-border callout boxes (ArchWiki Note/Tip/Warning) |
-| Nav | Compact list; current page highlighted; project headers bold |
-| Mermaid | Colored theme (blue/green/amber); zoomable (+/−/Reset, wheel, drag) |
+| TOC | Bordered box, centered “Contents” |
+| Note / Tip / Warning | Same neutral gray callout box (labels carry meaning) |
+| Nav | Compact list; current page gray left bar; Vector expand chevron |
+| Tables | Header `#eaecf0` |
+| Color rule | Grayscale only — no accent fills in chrome or diagrams |
+| Mermaid | Neutral gray theme |
 | Nav | Collapse/expand projects, Solution design, and feature groups (persisted) |
 | Chrome | Minimal; no dashboard cards, no purple gradients, no emoji clutter |
 

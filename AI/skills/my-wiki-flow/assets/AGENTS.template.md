@@ -21,8 +21,8 @@ skill docs: `content-contract.md` and `project-structure.md`.
 
 1. `index.md` — Overview
 2. `quick-start.md` — Setup / run / verify
-3. `architecture.md` — Mermaid **Interaction diagram** (`C4Dynamic`)
-4. `solution-design.md` + `solution-design/{feature}.md` — **`sequenceDiagram`**; API contracts with curl requests + success/error responses (arrays ≥1 item)
+3. `architecture.md` — Building block (`C4Container`/`C4Component`) + Interaction (`C4Dynamic` with `UpdateLayoutConfig` 1/row + C4 palette); quality goals, communication table, risks, ADR-lite decisions
+4. `solution-design.md` + `solution-design/{feature}.md` — **`sequenceDiagram`** with `alt`/`opt`; Business requirements; progressive API (full tables + curl only when Owns=yes); Cross-cutting deltas
 5. `glossary.md`
 
 Lite profile: (1)+(2) only. No tips-and-tricks / design-guide.
@@ -42,9 +42,10 @@ Required H2s: project-structure.md. Scaffold / features: skill scripts.
 1. Resolve workspace from config; capture git SHA.
 2. **Update:** diff `{old-sha}..HEAD` → touch only affected pages.
 3. Fill pages from **code** only. Confirm feature list before adding pages.
-4. Architecture: Interaction `C4Dynamic`; features: `sequenceDiagram` + API curl + success/error (arrays ≥1 item) + complex-logic code.
-5. Set `validated_against`. HITL on bulk changes. Append `log.md`.
-6. Run `wiki-lint.py`.
+4. Architecture: Building block + Interaction diagrams; features: `sequenceDiagram` + progressive API + complex-logic cite.
+5. Content-first pages: do not paste AGENTS instructions into distilled Markdown. Prefer tables with `workspace:` cites.
+6. Set `validated_against`. HITL on bulk changes. Append `log.md`.
+7. Run `wiki-lint.py`.
 
 ### Query
 

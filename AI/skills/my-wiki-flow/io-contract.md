@@ -27,7 +27,7 @@
 Rules: [content-contract.md](content-contract.md) and [project-structure.md](project-structure.md).
 
 Frontmatter must include `validated_against: workspace:…@SHA` after distill/update.
-Claims cite code paths. Architecture: Interaction diagram (`C4Dynamic`). Features: `sequenceDiagram`. API contracts include spec, **curl** requests, and success/error responses (arrays show ≥1 item).
+Claims cite code paths. Architecture: Building block (`C4Container`/`C4Component`) + Interaction (`C4Dynamic`). Features: `sequenceDiagram`. API: Spec summary always; full field tables + **curl** success/error when Owns contract? = yes (arrays ≥1 item).
 
 ## HTML page contract
 

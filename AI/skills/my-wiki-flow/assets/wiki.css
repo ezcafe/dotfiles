@@ -1,30 +1,28 @@
 /* my-wiki-flow — MediaWiki Vector / ArchWiki palette and layout */
 
 :root {
-  /* Vector / ArchWiki core */
+  /* Neutral / grayscale only (no accent chrome) */
   --wiki-bg: #f8f9fa;
   --wiki-surface: #ffffff;
   --wiki-text: #202122;
   --wiki-muted: #54595d;
   --wiki-border: #a2a9b1;
   --wiki-border-subtle: #c8ccd1;
-  --wiki-link: #0645ad;
-  --wiki-link-hover: #447ff5;
-  --wiki-visited: #0b0080;
-  --wiki-link-active: #faa700;
+  --wiki-link: #202122;
+  --wiki-link-hover: #000000;
+  --wiki-visited: #54595d;
+  --wiki-link-active: #202122;
   --wiki-nav-bg: #f8f9fa;
   --wiki-nav-current: #ffffff;
-  --wiki-nav-current-border: #36c;
+  --wiki-nav-current-border: #54595d;
   --wiki-toc-bg: #f8f9fa;
   --wiki-header-bg: #ffffff;
-  --wiki-note-bg: #eaecf0;
-  --wiki-note-border: #72777d;
-  --wiki-tip-bg: #eaf3ff;
-  --wiki-tip-border: #36c;
-  --wiki-warn-bg: #fee7e6;
-  --wiki-warn-border: #d33;
   --wiki-code-bg: #f8f9fa;
   --wiki-pre-border: #a2a9b1;
+  --wiki-table-head: #eaecf0;
+  /* Callouts share the same neutral box */
+  --wiki-callout-bg: #eaecf0;
+  --wiki-callout-border: #72777d;
   --wiki-header-h: 3.5rem;
   --wiki-nav-w: 15.5rem;
   --wiki-font: sans-serif;
@@ -53,7 +51,9 @@ body {
 
 a {
   color: var(--wiki-link);
-  text-decoration: none;
+  text-decoration: underline;
+  text-decoration-color: var(--wiki-border);
+  text-underline-offset: 0.12em;
 }
 
 a:visited {
@@ -62,7 +62,7 @@ a:visited {
 
 a:hover {
   color: var(--wiki-link-hover);
-  text-decoration: underline;
+  text-decoration-color: var(--wiki-text);
 }
 
 a:active {
@@ -89,9 +89,9 @@ a:active {
   --pf-text-muted: var(--wiki-muted);
   --pf-background: var(--wiki-surface);
   --pf-border: var(--wiki-border);
-  --pf-border-focus: var(--wiki-link);
+  --pf-border-focus: var(--wiki-border);
   --pf-hover: rgba(0, 0, 0, 0.03);
-  --pf-mark: var(--wiki-link);
+  --pf-mark: var(--wiki-muted);
   --pf-font: var(--wiki-font);
   --pf-border-radius: 2px;
   --pf-input-font-size: 1rem;
@@ -114,11 +114,9 @@ a:active {
   text-decoration: none;
 }
 
-.wiki-brand:visited {
-  color: var(--wiki-text);
-}
-
-.wiki-brand:hover {
+.wiki-brand:visited,
+.wiki-brand:hover,
+.wiki-brand:active {
   color: var(--wiki-text);
   text-decoration: none;
 }
@@ -161,13 +159,14 @@ a:active {
 
 .wiki-nav h2 {
   margin: 0;
-  padding: 0.5rem 0.75rem;
+  padding: 0.5rem 0.75rem 0.35rem;
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.03em;
   color: var(--wiki-muted);
   border: 0;
+  border-bottom: 1px solid var(--wiki-border-subtle);
 }
 
 .wiki-nav .nav-project {
@@ -193,34 +192,62 @@ a:active {
   min-width: 0;
 }
 
+/* Vector / ArchWiki expand chevron (mw-ui-icon-wikimedia-expand): down when open, rotate −90° when collapsed */
 .wiki-nav .nav-toggle {
   flex: 0 0 auto;
-  width: 1.35rem;
-  height: 1.35rem;
-  margin: 0 0.25rem 0 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.375rem;
+  height: 1.375rem;
+  margin: 0 0.15rem 0 0.1rem;
   padding: 0;
   border: 0;
+  border-radius: 2px;
   background: transparent;
   color: var(--wiki-muted);
   cursor: pointer;
-  line-height: 1;
-  font-size: 0.65rem;
+  line-height: 0;
+  transition: background-color 0.15s ease;
+}
+
+.wiki-nav .nav-toggle:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--wiki-text);
+}
+
+.wiki-nav .nav-toggle:focus-visible {
+  outline: 2px solid var(--wiki-border);
+  outline-offset: 1px;
 }
 
 /* Peer page row (Solution design hub): toggle after label so text aligns with Architecture */
 .wiki-nav .nav-page-row > .nav-toggle {
-  margin: 0 0.5rem 0 0;
+  margin: 0 0.35rem 0 0.15rem;
 }
 
 .wiki-nav .nav-toggle::before {
-  content: "▾";
+  content: "";
   display: block;
-  text-align: center;
+  width: 0.75rem;
+  height: 0.75rem;
+  background-color: currentColor;
+  /* Codex / Wikimedia "expand" chevron (points down when expanded) */
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Cpath d='M17.5 4.75 10 12.25l-7.5-7.5L1 6.25l9 9 9-9z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Cpath d='M17.5 4.75 10 12.25l-7.5-7.5L1 6.25l9 9 9-9z'/%3E%3C/svg%3E");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  transform: rotate(0deg);
+  transition: transform 0.15s ease;
 }
 
 .wiki-nav .nav-collapsible.is-collapsed > .nav-toggle::before,
 .wiki-nav .nav-collapsible.is-collapsed > .nav-row > .nav-toggle::before {
-  content: "▸";
+  transform: rotate(-90deg);
 }
 
 .wiki-nav .nav-collapsible.is-collapsed > .nav-root,
@@ -263,7 +290,7 @@ a:active {
 .wiki-nav .nav-page-label {
   display: block;
   padding: 0.2rem 0.75rem;
-  color: var(--wiki-link);
+  color: var(--wiki-text);
   border-left: 3px solid transparent;
   font-size: inherit;
   font-weight: inherit;
@@ -286,13 +313,19 @@ a:active {
 .wiki-nav .nav-page-row > a {
   display: block;
   padding: 0.2rem 0.75rem;
-  color: var(--wiki-link);
+  color: var(--wiki-text);
   border-left: 3px solid transparent;
   font-weight: inherit;
+  text-decoration: none;
+}
+
+.wiki-nav li a:visited {
+  color: var(--wiki-text);
 }
 
 .wiki-nav li a:hover {
   background: rgba(0, 0, 0, 0.03);
+  color: var(--wiki-text);
   text-decoration: none;
 }
 
@@ -302,6 +335,7 @@ a:active {
   font-weight: 600;
   color: var(--wiki-text);
   text-decoration: none;
+  box-shadow: inset 0 0 0 1px var(--wiki-border-subtle);
 }
 
 .wiki-main {
@@ -311,7 +345,7 @@ a:active {
   border-left: 0;
 }
 
-/* Contents box — floated right like ArchWiki */
+/* Contents box — floated right like ArchWiki (neutral chrome) */
 .wiki-toc {
   float: right;
   clear: right;
@@ -327,6 +361,20 @@ a:active {
   font-weight: 700;
   margin: 0 0 0.35rem;
   font-size: 0.95rem;
+  text-align: center;
+  color: var(--wiki-text);
+}
+
+.wiki-toc a {
+  color: var(--wiki-text);
+  text-decoration: none;
+}
+
+.wiki-toc a:visited,
+.wiki-toc a:hover {
+  color: var(--wiki-text);
+  text-decoration: underline;
+  text-decoration-color: var(--wiki-border);
 }
 
 .wiki-toc ol {
@@ -346,6 +394,20 @@ a:active {
   content: "";
   display: table;
   clear: both;
+}
+
+.wiki-kind-badge {
+  display: inline-block;
+  margin: 0 0 0.5rem;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--wiki-muted);
+  background: var(--wiki-toc-bg);
+  border: 1px solid var(--wiki-border-subtle);
+  border-radius: 2px;
 }
 
 .wiki-article h1 {
@@ -424,32 +486,70 @@ a:active {
 }
 
 /* ArchWiki-style Note / Tip / Warning */
+/* Collapsible API request/response examples */
+.wiki-collapse {
+  margin: 0.65rem 0 1rem;
+  border: 1px solid var(--wiki-border);
+  border-radius: 2px;
+  background: var(--wiki-surface);
+}
+
+.wiki-collapse > summary {
+  cursor: pointer;
+  padding: 0.45rem 0.75rem;
+  font-weight: 600;
+  color: var(--wiki-text);
+  list-style: none;
+  user-select: none;
+  background: var(--wiki-toc-bg);
+}
+
+.wiki-collapse > summary::-webkit-details-marker {
+  display: none;
+}
+
+.wiki-collapse > summary::before {
+  content: "▸ ";
+  color: var(--wiki-muted);
+  font-weight: 400;
+}
+
+.wiki-collapse[open] > summary::before {
+  content: "▾ ";
+}
+
+.wiki-collapse > summary:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.wiki-collapse > pre {
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--wiki-border);
+  border-radius: 0;
+}
+
 .wiki-callout {
   margin: 1rem 0;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--wiki-border);
+  padding: 0.55rem 0.85rem;
+  border: 1px solid transparent;
   border-left-width: 4px;
   max-width: 100%;
   overflow: hidden;
+  color: var(--wiki-text);
 }
 
-.wiki-callout.note {
-  background: var(--wiki-note-bg);
-  border-left-color: var(--wiki-note-border);
-}
-
-.wiki-callout.tip {
-  background: var(--wiki-tip-bg);
-  border-left-color: var(--wiki-tip-border);
-}
-
+.wiki-callout.note,
+.wiki-callout.tip,
 .wiki-callout.warning {
-  background: var(--wiki-warn-bg);
-  border-left-color: var(--wiki-warn-border);
+  background: var(--wiki-callout-bg);
+  border-color: var(--wiki-border-subtle);
+  border-left-color: var(--wiki-callout-border);
 }
 
 .wiki-callout .label {
   font-weight: 700;
+  margin-right: 0.35rem;
 }
 
 /* GFM tables */
@@ -477,7 +577,7 @@ a:active {
 }
 
 .wiki-table thead th {
-  background: var(--wiki-toc-bg);
+  background: var(--wiki-table-head);
   font-weight: 700;
 }
 
@@ -485,7 +585,11 @@ a:active {
   background: #fbfcfd;
 }
 
-/* Mermaid diagrams (zoomable) */
+.wiki-table tbody tr:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+/* Mermaid diagrams (zoomable) — neutral frame; color lives in diagram semantics only */
 .wiki-mermaid {
   margin: 1rem 0;
   border: 1px solid var(--wiki-border);
@@ -501,7 +605,7 @@ a:active {
   align-items: center;
   padding: 0.35rem 0.5rem;
   border-bottom: 1px solid var(--wiki-border-subtle);
-  background: var(--wiki-nav-bg);
+  background: var(--wiki-toc-bg);
 }
 
 .wiki-mermaid-toolbar button {
@@ -523,12 +627,13 @@ a:active {
 .wiki-mermaid-viewport {
   position: relative;
   overflow: hidden;
-  max-height: min(70vh, 36rem);
-  min-height: 12rem;
-  padding: 0.75rem;
+  max-height: min(80vh, 48rem);
+  min-height: 18rem;
+  padding: 1.25rem 1.5rem;
   cursor: grab;
   touch-action: none;
   user-select: none;
+  background: #ffffff;
 }
 
 .wiki-mermaid-viewport.is-panning {
@@ -541,6 +646,20 @@ a:active {
   height: auto;
   margin: 0 auto;
   will-change: transform;
+}
+
+/* C4 / Mermaid: keep edge labels readable over lines */
+.wiki-mermaid-viewport .edgeLabel,
+.wiki-mermaid-viewport .edgeLabel rect,
+.wiki-mermaid-viewport foreignObject .edgeLabel {
+  background: #ffffff !important;
+}
+
+.wiki-mermaid-viewport .edgeLabel span,
+.wiki-mermaid-viewport .edgeLabel p {
+  background: #ffffff;
+  color: #202122;
+  padding: 0 0.2rem;
 }
 
 .wiki-mermaid pre.mermaid {

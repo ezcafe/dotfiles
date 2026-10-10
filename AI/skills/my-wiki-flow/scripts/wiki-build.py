@@ -306,6 +306,44 @@ def md_to_html(
             )
             continue
 
+        # Collapsible API example request/response: **Request** / **Response** + fence
+        req_resp = re.match(
+            r"^\*\*(Request|Response)\*\*(.*)$",
+            line.strip(),
+            re.I,
+        )
+        if req_resp:
+            close_list()
+            flush_para(para)
+            label = req_resp.group(1).capitalize()
+            suffix = req_resp.group(2).strip()
+            summary = f"{label}{(' ' + suffix) if suffix else ''}"
+            j = i + 1
+            while j < len(lines) and not lines[j].strip():
+                j += 1
+            if j < len(lines) and lines[j].startswith("```"):
+                code_lang = lines[j][3:].strip().split()[0] if lines[j][3:].strip() else ""
+                j += 1
+                code_buf = []
+                while j < len(lines) and not lines[j].startswith("```"):
+                    code_buf.append(lines[j])
+                    j += 1
+                if j < len(lines) and lines[j].startswith("```"):
+                    j += 1  # closing fence
+                code = "\n".join(code_buf)
+                lang_attr = (
+                    f' class="language-{html.escape(code_lang)}"' if code_lang else ""
+                )
+                out.append(
+                    f'<details class="wiki-collapse">'
+                    f"<summary>{html.escape(summary)}</summary>"
+                    f"<pre><code{lang_attr}>{html.escape(code)}</code></pre>"
+                    f"</details>"
+                )
+                i = j
+                continue
+            # No fence — fall through as normal paragraph
+
         ul = re.match(r"^[-*]\s+(.+)$", line)
         ol = re.match(r"^\d+\.\s+(.+)$", line)
         if ul or ol:
@@ -445,6 +483,35 @@ def is_solution_design_hub(page: Page) -> bool:
 
 def is_solution_design_feature(page: Page) -> bool:
     return "/solution-design/" in page.rel.as_posix().lower()
+
+
+def page_kind(page: Page) -> str:
+    """CSS body kind for ArchWiki-style page accents."""
+    stem = page.path.stem.lower()
+    if is_solution_design_feature(page):
+        return "solution-design-feature"
+    if is_solution_design_hub(page):
+        return "solution-design"
+    if stem == "architecture":
+        return "architecture"
+    if stem in ("index", "quick-start", "glossary"):
+        return stem
+    return "article"
+
+
+def page_kind_badge(kind: str) -> str:
+    labels = {
+        "architecture": "Architecture",
+        "solution-design": "Solution design",
+        "solution-design-feature": "Feature design",
+    }
+    label = labels.get(kind)
+    if not label:
+        return ""
+    return (
+        f'<p class="wiki-kind-badge" data-kind="{html.escape(kind)}">'
+        f"{html.escape(label)}</p>"
+    )
 
 
 def page_sort_key(page: Page) -> tuple[int, str, str]:
@@ -606,10 +673,14 @@ def render_page(
     if details:
         meta += f'<p class="wiki-meta">{" · ".join(details)}</p>'
 
+    kind = page_kind(page)
+    body_class = f"wiki-kind-{kind}"
     return (
         template.replace("{{TITLE}}", html.escape(page.title))
         .replace("{{SITE_TITLE}}", html.escape(site_title))
         .replace("{{SUMMARY}}", html.escape(page.summary or page.title))
+        .replace("{{BODY_CLASS}}", body_class)
+        .replace("{{PAGE_KIND}}", page_kind_badge(kind))
         .replace("{{CSS_HREF}}", css)
         .replace("{{HOME_HREF}}", home)
         .replace("{{NAV}}", nav_html)

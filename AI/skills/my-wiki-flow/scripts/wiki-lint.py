@@ -50,12 +50,13 @@ REQUIRED_H2 = {
         "Next steps",
     ],
     "architecture.md": [
-        "Purpose and scope",
+        "Purpose and quality goals",
+        "Building block view",
         "Interaction diagram",
-        "Component responsibilities",
-        "Key interactions and data flows",
+        "Communication and data",
         "Cross-cutting concerns",
         "Deployment view",
+        "Risks and technical debt",
         "Key decisions and constraints",
         "Related solution designs",
     ],
@@ -72,7 +73,7 @@ FEATURE_H2 = [
     "Data and state changes",
     "Complex logic",
     "Failure and retry behavior",
-    "Security and observability",
+    "Cross-cutting deltas",
     "Testing and rollout",
     "Decisions and open questions",
 ]
@@ -236,40 +237,183 @@ def check_required_h2(body: str, required: list[str], path: str, result: LintRes
             result.add("error", path, f"Missing required H2: ## {h}")
 
 
+def _section_body(body: str, heading: str) -> str:
+    marker = f"## {heading}"
+    if marker not in body:
+        return ""
+    section = body.split(marker, 1)[1]
+    next_h2 = re.search(r"\n##\s+", section)
+    if next_h2:
+        section = section[: next_h2.start()]
+    return section
+
+
+def _mermaid_diagram_head(block: str) -> str:
+    """First diagram keyword line, skipping %% comments and YAML frontmatter."""
+    lines = block.strip().splitlines()
+    i = 0
+    if lines and lines[0].strip() == "---":
+        i = 1
+        while i < len(lines) and lines[i].strip() != "---":
+            i += 1
+        i += 1  # past closing ---
+    while i < len(lines):
+        line = lines[i].strip()
+        if not line or line.startswith("%%"):
+            i += 1
+            continue
+        return line.lower().replace(" ", "")
+    return ""
+
+
+def _mermaid_heads(section: str) -> list[tuple[str, str]]:
+    """Return (head_compact, full_block) for each mermaid fence in section."""
+    out: list[tuple[str, str]] = []
+    for block in MERMAID_RE.findall(section):
+        out.append((_mermaid_diagram_head(block), block))
+    return out
+
+
+def check_architecture_diagrams(body: str, path: str, result: LintResult) -> None:
+    bb = _section_body(body, "Building block view")
+    if not bb:
+        result.add("error", path, "Missing ## Building block view section")
+    else:
+        heads = _mermaid_heads(bb)
+        if not heads:
+            result.add(
+                "error",
+                path,
+                "Building block view must include Mermaid C4Container or C4Component",
+            )
+        else:
+            ok = any(
+                "c4container" in h or "c4component" in h for h, _ in heads
+            )
+            if not ok:
+                result.add(
+                    "error",
+                    path,
+                    "Building block view must use Mermaid C4Container or C4Component",
+                )
+
+    ix = _section_body(body, "Interaction diagram")
+    if not ix:
+        result.add("error", path, "Missing ## Interaction diagram section")
+        return
+    heads = _mermaid_heads(ix)
+    if not heads:
+        result.add(
+            "error",
+            path,
+            "Interaction diagram must include Mermaid C4Dynamic "
+            "(or flowchart with 'C4Dynamic unavailable')",
+        )
+        return
+    for head_compact, block in heads:
+        if "c4dynamic" in head_compact:
+            # Horizontal C4Dynamic packs ~4/row and overlaps return labels — require 1/row.
+            if not re.search(
+                r"updatelayoutconfig\s*\([^)]*c4shapeinrow\s*=\s*[\"']1[\"']",
+                block,
+                re.I,
+            ):
+                result.add(
+                    "error",
+                    path,
+                    "C4Dynamic Interaction diagram must include "
+                    "UpdateLayoutConfig($c4ShapeInRow=\"1\") "
+                    "(or use flowchart TB with 'C4Dynamic unavailable')",
+                )
+            continue
+        if "c4dynamic unavailable" in block.lower() and (
+            head_compact.startswith("flowchart") or head_compact.startswith("graph")
+        ):
+            result.add(
+                "warn",
+                path,
+                "Architecture uses flowchart fallback (C4Dynamic unavailable)",
+            )
+            continue
+        result.add(
+            "error",
+            path,
+            "Architecture Interaction diagram must use Mermaid C4Dynamic "
+            "(or flowchart with 'C4Dynamic unavailable' note)",
+        )
+
+
 def check_mermaid_types(body: str, path: str, kind: str, result: LintResult) -> None:
     blocks = MERMAID_RE.findall(body)
     if not blocks:
         result.add("error", path, f"Missing Mermaid fence for {kind}")
         return
-    for block in blocks:
-        head = block.strip().splitlines()[0].strip().lower() if block.strip() else ""
-        head_compact = head.replace(" ", "")
-        if kind == "architecture":
-            if "c4dynamic" in head_compact:
-                continue
-            if "c4dynamic unavailable" in block.lower() and (
-                head_compact.startswith("flowchart") or head_compact.startswith("graph")
-            ):
-                result.add(
-                    "warn",
-                    path,
-                    "Architecture uses flowchart fallback (C4Dynamic unavailable)",
-                )
-                continue
-            result.add(
-                "error",
-                path,
-                "Architecture Interaction diagram must use Mermaid C4Dynamic "
-                "(or flowchart with 'C4Dynamic unavailable' note)",
-            )
-        elif kind == "sequence":
+    if kind == "architecture":
+        check_architecture_diagrams(body, path, result)
+        return
+    if kind == "sequence":
+        has_seq = False
+        has_alt_opt = False
+        for block in blocks:
+            head = block.strip().splitlines()[0].strip().lower() if block.strip() else ""
+            head_compact = head.replace(" ", "")
             if "sequencediagram" in head_compact:
-                continue
+                has_seq = True
+                if re.search(r"(?m)^\s*(alt|opt)\b", block):
+                    has_alt_opt = True
+            else:
+                result.add(
+                    "error",
+                    path,
+                    "Feature Mermaid must be sequenceDiagram (not flowchart/C4)",
+                )
+        if not has_seq:
             result.add(
                 "error",
                 path,
                 "Feature Mermaid must be sequenceDiagram (not flowchart/C4)",
             )
+        elif not has_alt_opt:
+            result.add(
+                "warn",
+                path,
+                "Sequence diagram should include alt or opt for a failure/edge path",
+            )
+
+
+def check_scope_and_requirements(body: str, path: str, result: LintResult) -> None:
+    if "## Scope and requirements" not in body:
+        return
+    section = body.split("## Scope and requirements", 1)[1]
+    next_h2 = re.search(r"\n##\s+", section)
+    if next_h2:
+        section = section[: next_h2.start()]
+    if "business requirement" not in section.lower():
+        result.add(
+            "error",
+            path,
+            "Scope and requirements must include Business requirements "
+            "(### Business requirements or a Business requirement column)",
+        )
+
+
+def _owns_api_contract(section: str) -> bool:
+    """True when Spec summary marks any row as owning the contract."""
+    lower = section.lower()
+    if "owns contract" not in lower:
+        # Legacy / incomplete: treat as owning so full checks still apply
+        return True
+    # Table cells: | yes | or | shared | near Owns column — look for yes/shared values
+    # Prefer explicit owns markers in the section body.
+    for line in section.splitlines():
+        if "owns contract" in line.lower():
+            continue  # header row
+        cells = [c.strip().lower() for c in line.split("|") if c.strip()]
+        if not cells:
+            continue
+        if any(c in ("yes", "shared") for c in cells):
+            return True
+    return False
 
 
 def check_api_contracts(body: str, path: str, result: LintResult) -> None:
@@ -280,8 +424,41 @@ def check_api_contracts(body: str, path: str, result: LintResult) -> None:
     if next_h2:
         section = section[: next_h2.start()]
     lower = section.lower()
-    if "### api spec" not in lower and "api spec" not in lower:
-        result.add("error", path, "API contracts must include an API spec subsection")
+    if "spec summary" not in lower:
+        result.add("error", path, "API contracts must include a Spec summary")
+    if "workspace:" not in section:
+        result.add(
+            "error",
+            path,
+            "API contracts must cite at least one workspace: canonical source",
+        )
+
+    owns = _owns_api_contract(section)
+    if not owns:
+        # Progressive: link-only consumer feature
+        return
+
+    if "### api spec" not in lower and re.search(r"(?m)^###\s+api spec\b", section) is None:
+        if "api spec" not in lower:
+            result.add("error", path, "API contracts must include an API spec subsection")
+    if "request fields" not in lower:
+        result.add(
+            "error",
+            path,
+            "API spec must list Request fields (table with type + example value)",
+        )
+    if "response fields" not in lower:
+        result.add(
+            "error",
+            path,
+            "API spec must list Response fields (success and/or error) with example values",
+        )
+    if "example value" not in lower and "example values" not in lower:
+        result.add(
+            "error",
+            path,
+            "API spec field tables must include an Example value column",
+        )
     if "example — success" not in lower and "### example — success" not in lower:
         if "success" not in lower or "request" not in lower:
             result.add(
@@ -296,7 +473,6 @@ def check_api_contracts(body: str, path: str, result: LintResult) -> None:
                 path,
                 "API contracts must include example request/response for error",
             )
-    # Example requests must be curl
     curl_count = len(re.findall(r"(?m)^\s*curl\b", section))
     if curl_count < 2:
         result.add(
@@ -305,7 +481,6 @@ def check_api_contracts(body: str, path: str, result: LintResult) -> None:
             "API contracts example requests must use curl "
             "(need curl for success and error)",
         )
-    # Empty JSON arrays in response examples are not enough
     if re.search(r":\s*\[\s*\]", section):
         result.add(
             "warn",
@@ -336,11 +511,13 @@ def check_complex_logic(body: str, path: str, result: LintResult) -> None:
             path,
             "Complex logic must cite workspace: reference path(s)",
         )
-    if "```" not in section:
+    na = bool(re.search(r"\bn/?a\b", section, re.I))
+    if not na and "```" not in section:
         result.add(
             "error",
             path,
-            "Complex logic must include a reference/example code fence",
+            "Complex logic must include a reference/example code fence "
+            "(or N/A with a workspace: cite)",
         )
 
 
@@ -408,7 +585,7 @@ def lint_project(
         if name in REQUIRED_H2 and REQUIRED_H2[name]:
             check_required_h2(body, REQUIRED_H2[name], rel, result)
         if name == "architecture.md":
-            check_mermaid_types(body, rel, "architecture", result)
+            check_architecture_diagrams(body, rel, result)
         check_key_claims(body, meta, rel, result)
         # wikilinks
         for m in WIKI_LINK_RE.finditer(body):
@@ -430,6 +607,7 @@ def lint_project(
             check_required_h2(body, FEATURE_H2, rel, result)
             check_mermaid_types(body, rel, "sequence", result)
             check_complex_logic(body, rel, result)
+            check_scope_and_requirements(body, rel, result)
             check_api_contracts(body, rel, result)
             check_key_claims(body, meta, rel, result)
 
