@@ -1,0 +1,26 @@
+# my-wiki-flow shell aliases — paste into ~/.zshrc (or source this file).
+# Requires: scripts on PATH, or set WIKI_SKILL to this skill directory.
+#
+#   export WIKI_SKILL="$HOME/dotfiles/AI/skills/my-wiki-flow"
+#   export PATH="$WIKI_SKILL/scripts:$PATH"
+#   export WIKI_ROOT="$HOME/Documents/my-wiki"
+
+: "${WIKI_ROOT:=$HOME/Documents/my-wiki}"
+: "${WIKI_SKILL:=$HOME/dotfiles/AI/skills/my-wiki-flow}"
+
+alias .wiki-init='wiki-init.sh'
+alias .wiki-build='wiki-build.sh'
+alias .wiki-serve='wiki-serve.sh'
+alias .wiki-scaffold='wiki-scaffold-project.sh'
+alias .wiki-feature='wiki-add-feature.sh'
+alias .wiki-lint='wiki-lint.py'
+alias .wiki-sync='wiki-sync-github.sh'
+alias .wiki='cd "$WIKI_ROOT"'
+
+# Re-validate one project after code moves (agent): lint + build
+alias .wiki-refresh='wiki-lint.py && wiki-build.sh'
+
+# Cursor agent (explicit skill name)
+alias .wiki-flow='agent -p --force -- "my-wiki-flow: "'
+alias .wiki-query='agent -p --force -- "my-wiki-flow: query "'
+alias .wiki-update='agent -p --force -- "my-wiki-flow: update "'

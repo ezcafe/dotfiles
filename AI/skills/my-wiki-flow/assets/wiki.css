@@ -1,0 +1,585 @@
+/* my-wiki-flow — MediaWiki Vector / ArchWiki palette and layout */
+
+:root {
+  /* Vector / ArchWiki core */
+  --wiki-bg: #f8f9fa;
+  --wiki-surface: #ffffff;
+  --wiki-text: #202122;
+  --wiki-muted: #54595d;
+  --wiki-border: #a2a9b1;
+  --wiki-border-subtle: #c8ccd1;
+  --wiki-link: #0645ad;
+  --wiki-link-hover: #447ff5;
+  --wiki-visited: #0b0080;
+  --wiki-link-active: #faa700;
+  --wiki-nav-bg: #f8f9fa;
+  --wiki-nav-current: #ffffff;
+  --wiki-nav-current-border: #36c;
+  --wiki-toc-bg: #f8f9fa;
+  --wiki-header-bg: #ffffff;
+  --wiki-note-bg: #eaecf0;
+  --wiki-note-border: #72777d;
+  --wiki-tip-bg: #eaf3ff;
+  --wiki-tip-border: #36c;
+  --wiki-warn-bg: #fee7e6;
+  --wiki-warn-border: #d33;
+  --wiki-code-bg: #f8f9fa;
+  --wiki-pre-border: #a2a9b1;
+  --wiki-header-h: 3.5rem;
+  --wiki-nav-w: 15.5rem;
+  --wiki-font: sans-serif;
+  --wiki-mono: monospace, ui-monospace, Menlo, Consolas, "Courier New", monospace;
+  --wiki-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--wiki-font);
+  color: var(--wiki-text);
+  background: var(--wiki-bg);
+  line-height: 1.6;
+}
+
+a {
+  color: var(--wiki-link);
+  text-decoration: none;
+}
+
+a:visited {
+  color: var(--wiki-visited);
+}
+
+a:hover {
+  color: var(--wiki-link-hover);
+  text-decoration: underline;
+}
+
+a:active {
+  color: var(--wiki-link-active);
+}
+
+/* --- Header (ArchWiki top chrome) + Pagefind Component UI tokens --- */
+.wiki-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: var(--wiki-header-h);
+  height: var(--wiki-header-h);
+  padding: 0 1.25rem;
+  background: var(--wiki-header-bg);
+  border-bottom: 1px solid var(--wiki-border);
+  overflow: visible;
+  /* Pagefind Component UI (--pf-*) */
+  --pf-text: var(--wiki-text);
+  --pf-text-secondary: var(--wiki-muted);
+  --pf-text-muted: var(--wiki-muted);
+  --pf-background: var(--wiki-surface);
+  --pf-border: var(--wiki-border);
+  --pf-border-focus: var(--wiki-link);
+  --pf-hover: rgba(0, 0, 0, 0.03);
+  --pf-mark: var(--wiki-link);
+  --pf-font: var(--wiki-font);
+  --pf-border-radius: 2px;
+  --pf-input-font-size: 1rem;
+  --pf-input-height: 2.5rem;
+  --pf-result-title-font-size: 1rem;
+  --pf-result-excerpt-font-size: 1rem;
+  --pf-summary-font-size: 1rem;
+  --pf-searchbox-max-width: 28rem;
+  --pf-searchbox-dropdown-max-height: min(70vh, 24rem);
+  --pf-dropdown-z-index: 300;
+  --pf-shadow-md: var(--wiki-shadow);
+}
+
+.wiki-brand {
+  flex: 0 0 auto;
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+  color: var(--wiki-text);
+  text-decoration: none;
+}
+
+.wiki-brand:visited {
+  color: var(--wiki-text);
+}
+
+.wiki-brand:hover {
+  color: var(--wiki-text);
+  text-decoration: none;
+}
+
+/* Search: pagefind-searchbox dropdown overlay (no layout push) */
+
+.wiki-search {
+  position: relative;
+  flex: 1 1 auto;
+  max-width: 28rem;
+  margin-left: auto;
+  z-index: 150;
+}
+
+.wiki-search pagefind-searchbox {
+  display: block;
+  width: 100%;
+}
+
+/* --- Shell: sidebar + content (Vector) --- */
+.wiki-shell {
+  display: grid;
+  grid-template-columns: minmax(12rem, var(--wiki-nav-w)) minmax(0, 1fr);
+  align-items: start;
+  max-width: 100%;
+  min-height: calc(100vh - var(--wiki-header-h));
+  border-top: 0;
+}
+
+.wiki-nav {
+  position: sticky;
+  top: var(--wiki-header-h);
+  max-height: calc(100vh - var(--wiki-header-h));
+  overflow: auto;
+  padding: 0.75rem 0 2rem;
+  background: var(--wiki-nav-bg);
+  border-right: 1px solid var(--wiki-border);
+  font-size: 0.875rem;
+}
+
+.wiki-nav h2 {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--wiki-muted);
+  border: 0;
+}
+
+.wiki-nav .nav-project {
+  border-top: 1px solid var(--wiki-border-subtle);
+}
+
+.wiki-nav .nav-project:first-of-type {
+  border-top: 0;
+}
+
+.wiki-nav .nav-row {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.wiki-nav .nav-row > a,
+.wiki-nav .nav-row > .nav-group-label,
+.wiki-nav .nav-row > .nav-page-label,
+.wiki-nav .nav-row > .project {
+  flex: 1;
+  min-width: 0;
+}
+
+.wiki-nav .nav-toggle {
+  flex: 0 0 auto;
+  width: 1.35rem;
+  height: 1.35rem;
+  margin: 0 0.25rem 0 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--wiki-muted);
+  cursor: pointer;
+  line-height: 1;
+  font-size: 0.65rem;
+}
+
+/* Peer page row (Solution design hub): toggle after label so text aligns with Architecture */
+.wiki-nav .nav-page-row > .nav-toggle {
+  margin: 0 0.5rem 0 0;
+}
+
+.wiki-nav .nav-toggle::before {
+  content: "▾";
+  display: block;
+  text-align: center;
+}
+
+.wiki-nav .nav-collapsible.is-collapsed > .nav-toggle::before,
+.wiki-nav .nav-collapsible.is-collapsed > .nav-row > .nav-toggle::before {
+  content: "▸";
+}
+
+.wiki-nav .nav-collapsible.is-collapsed > .nav-root,
+.wiki-nav .nav-collapsible.is-collapsed > .nav-children {
+  display: none;
+}
+
+.wiki-nav .project {
+  margin: 0;
+  padding: 0.55rem 0.5rem 0.25rem 0;
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: var(--wiki-text);
+}
+
+.wiki-nav ul {
+  list-style: none;
+  margin: 0 0 0.35rem;
+  padding: 0;
+}
+
+.wiki-nav ul.nav-children {
+  margin: 0 0 0.15rem;
+  padding: 0;
+}
+
+/* Master-feature subgroups only — not the Solution design hub (peer of Architecture) */
+.wiki-nav li.nav-group > .nav-row > .nav-group-label {
+  font-weight: 600;
+}
+
+.wiki-nav .nav-group-label {
+  display: block;
+  padding: 0.25rem 0.5rem 0.1rem 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--wiki-muted);
+}
+
+.wiki-nav .nav-page-label {
+  display: block;
+  padding: 0.2rem 0.75rem;
+  color: var(--wiki-link);
+  border-left: 3px solid transparent;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+/* Features nest under Solution design; hub itself matches Architecture indent */
+.wiki-nav ul.nav-root > li.nav-parent > ul.nav-children > li > a {
+  padding-left: 1.6rem;
+}
+
+.wiki-nav li.nav-group > ul.nav-children > li > a {
+  padding-left: 2.1rem;
+}
+
+.wiki-nav li.nav-group > .nav-row {
+  padding-left: 0.85rem;
+}
+
+.wiki-nav li a,
+.wiki-nav .nav-page-row > a {
+  display: block;
+  padding: 0.2rem 0.75rem;
+  color: var(--wiki-link);
+  border-left: 3px solid transparent;
+  font-weight: inherit;
+}
+
+.wiki-nav li a:hover {
+  background: rgba(0, 0, 0, 0.03);
+  text-decoration: none;
+}
+
+.wiki-nav li a.current {
+  background: var(--wiki-nav-current);
+  border-left-color: var(--wiki-nav-current-border);
+  font-weight: 600;
+  color: var(--wiki-text);
+  text-decoration: none;
+}
+
+.wiki-main {
+  padding: 1.25rem 1.75rem 3rem;
+  background: var(--wiki-surface);
+  min-width: 0;
+  border-left: 0;
+}
+
+/* Contents box — floated right like ArchWiki */
+.wiki-toc {
+  float: right;
+  clear: right;
+  width: min(100%, 20em);
+  margin: 0 0 0.75rem 1.25rem;
+  padding: 0.65rem 0.85rem;
+  background: var(--wiki-toc-bg);
+  border: 1px solid var(--wiki-border);
+  font-size: 0.875rem;
+}
+
+.wiki-toc .toc-title {
+  font-weight: 700;
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+}
+
+.wiki-toc ol {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.wiki-toc li {
+  margin: 0.12rem 0;
+}
+
+.wiki-article {
+  clear: none;
+}
+
+.wiki-article::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.wiki-article h1 {
+  margin: 0 0 0.5rem;
+  padding-bottom: 0.15rem;
+  font-size: 1.8rem;
+  font-weight: 400;
+  font-family: "Linux Libertine", Georgia, Times, serif;
+  border-bottom: 1px solid var(--wiki-border);
+  line-height: 1.25;
+}
+
+.wiki-article h2 {
+  margin: 1.5rem 0 0.5rem;
+  padding-bottom: 0.1rem;
+  font-size: 1.5rem;
+  font-weight: 400;
+  font-family: "Linux Libertine", Georgia, Times, serif;
+  border-bottom: 1px solid var(--wiki-border-subtle);
+}
+
+.wiki-article h3 {
+  margin: 1.15rem 0 0.4rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.wiki-article h4 {
+  margin: 1rem 0 0.35rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.wiki-lead {
+  color: var(--wiki-text);
+  margin: 0 0 1rem;
+}
+
+.wiki-meta {
+  font-size: 0.8125rem;
+  color: var(--wiki-muted);
+  margin: 0 0 1rem;
+}
+
+.wiki-article p,
+.wiki-article li {
+  max-width: none;
+}
+
+.wiki-article ul,
+.wiki-article ol {
+  padding-left: 1.6rem;
+}
+
+.wiki-article code {
+  font-family: var(--wiki-mono);
+  font-size: 0.875em;
+  background: var(--wiki-code-bg);
+  border: 1px solid var(--wiki-border-subtle);
+  padding: 0.05em 0.35em;
+  border-radius: 2px;
+}
+
+.wiki-article pre {
+  background: var(--wiki-code-bg);
+  border: 1px solid var(--wiki-pre-border);
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+  line-height: 1.45;
+}
+
+.wiki-article pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+/* ArchWiki-style Note / Tip / Warning */
+.wiki-callout {
+  margin: 1rem 0;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--wiki-border);
+  border-left-width: 4px;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.wiki-callout.note {
+  background: var(--wiki-note-bg);
+  border-left-color: var(--wiki-note-border);
+}
+
+.wiki-callout.tip {
+  background: var(--wiki-tip-bg);
+  border-left-color: var(--wiki-tip-border);
+}
+
+.wiki-callout.warning {
+  background: var(--wiki-warn-bg);
+  border-left-color: var(--wiki-warn-border);
+}
+
+.wiki-callout .label {
+  font-weight: 700;
+}
+
+/* GFM tables */
+.wiki-table-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.wiki-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--wiki-border);
+  background: var(--wiki-surface);
+  font-size: 0.9375rem;
+}
+
+.wiki-table th,
+.wiki-table td {
+  border: 1px solid var(--wiki-border-subtle);
+  padding: 0.4rem 0.65rem;
+  text-align: start;
+  vertical-align: top;
+}
+
+.wiki-table thead th {
+  background: var(--wiki-toc-bg);
+  font-weight: 700;
+}
+
+.wiki-table tbody tr:nth-child(even) {
+  background: #fbfcfd;
+}
+
+/* Mermaid diagrams (zoomable) */
+.wiki-mermaid {
+  margin: 1rem 0;
+  border: 1px solid var(--wiki-border);
+  background: var(--wiki-surface);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.wiki-mermaid-toolbar {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid var(--wiki-border-subtle);
+  background: var(--wiki-nav-bg);
+}
+
+.wiki-mermaid-toolbar button {
+  font: inherit;
+  font-size: 0.8125rem;
+  line-height: 1;
+  min-width: 1.75rem;
+  padding: 0.3rem 0.45rem;
+  border: 1px solid var(--wiki-border);
+  background: var(--wiki-surface);
+  color: var(--wiki-text);
+  cursor: pointer;
+}
+
+.wiki-mermaid-toolbar button:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.wiki-mermaid-viewport {
+  position: relative;
+  overflow: hidden;
+  max-height: min(70vh, 36rem);
+  min-height: 12rem;
+  padding: 0.75rem;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.wiki-mermaid-viewport.is-panning {
+  cursor: grabbing;
+}
+
+.wiki-mermaid-viewport svg {
+  display: block;
+  max-width: none;
+  height: auto;
+  margin: 0 auto;
+  will-change: transform;
+}
+
+.wiki-mermaid pre.mermaid {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: center;
+}
+
+.wiki-footer {
+  clear: both;
+  margin-top: 2rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--wiki-border-subtle);
+  font-size: 0.8125rem;
+  color: var(--wiki-muted);
+}
+
+@media (max-width: 48rem) {
+  .wiki-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .wiki-nav {
+    position: relative;
+    top: 0;
+    max-height: none;
+    border-right: 0;
+    border-bottom: 1px solid var(--wiki-border);
+  }
+
+  .wiki-toc {
+    float: none;
+    width: 100%;
+    margin: 0 0 1rem;
+  }
+
+  .wiki-search {
+    max-width: none;
+  }
+}
