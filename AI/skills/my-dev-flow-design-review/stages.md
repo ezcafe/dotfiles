@@ -5,9 +5,44 @@ Templates: `{my-dev-flow}/artifacts/03a-api-contract-review.md`, `03a-db-design-
 
 ---
 
+## 0s. Design verify phase (Verifier) — Fast|Medium — Mode **simple** only
+
+**When:** Mode **simple**. One Task replaces isolated API/DB + general design-review. Mode **full** uses 0a / 0b / 1 instead.
+
+**subagent_type:** `generalPurpose`  
+**model:** Fast preferred (Fast-on-simple); else Medium  
+**Task description:** `Design verify phase`
+
+**Done when:** Overall **clean** | **needs update** across written `03a-*` files (same clean rule as SKILL.md).
+
+**Task prompt:**
+
+```
+You are the design verifier for my-dev-flow-design-review **design-verify-phase** (Mode simple). Fresh context only. Generation ≠ verification — you did NOT author 01–04. Do not rewrite 01–04. Do not write production code.
+
+<Stage-scoped handoff for stage id design-verify-phase from {my-dev-flow}/handoffs.md>
+
+Read 00-run.md (Has API/DB), 01-idea, 02-analysis, 02b (if present), 03-design, 04-tasks, 02-skim (if present).
+
+### If Has API = yes
+Write 03a-api-contract-review.md using the API contract checklist from stage 0a / {api-and-interface-design}. Result clean | needs update.
+
+### If Has DB = yes
+Write 03a-db-design-review.md using the DB checklist from stage 0b / {database-and-data-model}. Result clean | needs update.
+
+### Always
+Write 03a-design-review-log.md using the general design-review checklist from stage 1 (gaps, System design, patterns, UI alignment, OWASP light). If API/DB files exist, do not deep-duplicate those checks — point to them. Overall clean only if API/DB are clean|skipped AND this log has zero Critical/Major ({my-dev-flow}/severity.md).
+
+Return: overall clean | needs update + paths to 03a files written.
+```
+
+**After:** needs update → design Update → re-run this stage (max 3). Clean → TDD / Gate B path.
+
+---
+
 ## 0a. API contract review (Verifier) — Medium — when Has API
 
-**When:** `00-run.md` **Has API = yes**, or `03-design.md` defines new/changed public API contracts and Has API is unknown (treat as yes).
+**When:** Mode **full** and (`00-run.md` **Has API = yes**, or `03-design.md` defines new/changed public API contracts and Has API is unknown — treat as yes). Mode **simple** uses **0s** instead.
 
 **Generation ≠ verification:** you did not write these contracts. Do not rewrite docs here.
 
@@ -60,7 +95,9 @@ Return: clean | needs update, and path to 03a-api-contract-review.md.
 
 ## 0b. DB design review (Verifier) — Medium — when Has DB
 
-**When:** `00-run.md` **Has DB = yes**, or `03-design.md` defines new/changed Database contracts / migrations and Has DB is unknown (treat as yes).
+**When:** Mode **full** and (`00-run.md` **Has DB = yes**, or `03-design.md` defines new/changed Database contracts / migrations and Has DB is unknown — treat as yes). Mode **simple** uses **0s** instead.
+
+**Parallel:** When Has API and Has DB are both yes, parent **must** launch 0a and 0b in the **same** turn.
 
 **Generation ≠ verification:** you did not write these contracts. Do not rewrite docs here.
 
@@ -113,6 +150,8 @@ Return: clean | needs update, and path to 03a-db-design-review.md.
 ---
 
 ## 1. Design review (Verifier) — Medium
+
+**When:** Mode **full** (after 0a/0b when flagged). Mode **simple** uses **0s**.
 
 **Generation ≠ verification:** you did not write this design. Do not rewrite docs here.
 
@@ -192,24 +231,17 @@ Return: clean | needs update, and path to 03a-design-review-log.md.
 
 **If needs update:** parent runs `my-dev-flow-design` Update, then **re-runs** from API contract review (when Has API) and/or DB design review (when Has DB), then this stage.
 
-**If clean:** parent continues (TDD → Gate B → Build → Smoke → review/test per Review profile). Ensure **Lens plan** will include **api** when Has API and **db** when Has DB.
+**If clean:** parent continues (TDD → Gate B → Build verify-pass + Smoke section → skip Smoke Task → review/test per Review profile). Ensure **Lens plan** will include **api** when Has API and **db** when Has DB.
 
 ---
 
 ## Parent loop hint (my-dev-flow)
 
 ```
-my-dev-flow-design (Ideation → Gate A → skim → Analyze → Grill → Design; set Has API + Has DB)
-→ my-dev-flow-design-review
-   → if Has API: API contract review Task
-   → if Has DB: DB design review Task
-   → Design review Task
-→ if needs update → Update → re-review (max 3)
-→ my-dev-flow-code (TDD review only)
-→ Gate B
-→ my-dev-flow-code (Build)
-→ my-dev-flow-test (Smoke)
-→ my-dev-flow-review (include api lens when Has API; db lens when Has DB)
-→ my-dev-flow-test (Full|lite)
+Full: Ideation → Gate A → skim → Analyze → Grill → Design
+  → [API ‖ DB when both] → Design review → Update↔re-review (max 3)
+Simple: design-phase → design-verify-phase → Update↔re-verify (max 3)
+→ optional 04a → Gate B → Build (verify-pass + Smoke; skip Smoke Task)
+→ review (full separate | lite code-review-phase) → test-full | test-lite
 → Gate C → merge
 ```

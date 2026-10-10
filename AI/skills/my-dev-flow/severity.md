@@ -25,6 +25,6 @@ Fix ask bullets include **Critical** and **Major** only (≤ cap in handoffs.md)
 
 | Profile | Code review |
 |---------|-------------|
-| **full** | Adversarial → Quality → lenses → test |
-| **lite** | Same sequence; parent **may** use one combined Task (`Lite combined review`) instead of separate Adversarial + Quality when Mode simple and Lens plan is none or single lens |
+| **full** | Adversarial → Quality → lenses → test (separate Tasks; Mode full only) |
+| **lite** | **Must** use one Task (`Lite combined review` / stage id `code-review-phase`) for Adversarial + Quality when Lens plan is `none` or **one** lens. Do **not** launch separate Adversarial then Quality. If Lens plan has **2+** lenses → Lite combined for Adv+Quality, then parallel lenses + Merge as usual |
 | **skip-review** | Skip this subflow entirely after smoke-pass |

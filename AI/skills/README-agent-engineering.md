@@ -2,6 +2,18 @@
 
 Cursor-optimized adaptations of [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills). Concise workflows with safety rails; deep examples live in each skill’s `reference.md` where needed.
 
+## Source of truth and Cursor sync
+
+**Canonical copy:** this directory (`AI/skills/` in the dotfiles repo).
+
+Cursor discovers skills from `~/.cursor/skills/`. After editing here, sync:
+
+```bash
+./AI/skills/sync-to-cursor.sh
+```
+
+That copies each package with a `SKILL.md` into `~/.cursor/skills/<name>/` without deleting unrelated skills. Task prompts should resolve `{skill-name}` to `AI/skills/<name>/` first (see [my-dev-flow/skills-path.md](my-dev-flow/skills-path.md)).
+
 ## When to use which
 
 | Skill | Use when |
@@ -19,12 +31,12 @@ Cursor-optimized adaptations of [addyosmani/agent-skills](https://github.com/add
 
 | Skill | Role |
 |-------|------|
-| [my-dev-flow](my-dev-flow/SKILL.md) | Full delivery pipeline; [stages.md](my-dev-flow/stages.md); [severity.md](my-dev-flow/severity.md); [artifacts/INDEX.md](my-dev-flow/artifacts/INDEX.md) |
+| [my-dev-flow](my-dev-flow/SKILL.md) | Full delivery pipeline; Speed defaults (simple phase bundles, test-full one Task); [stages.md](my-dev-flow/stages.md); [verify-and-fix.md](my-dev-flow/verify-and-fix.md); [severity.md](my-dev-flow/severity.md) |
 | [my-dev-flow-design](my-dev-flow-design/SKILL.md) | Design phase (Ideation → Grill → Design) |
 | [my-dev-flow-design-review](my-dev-flow-design-review/SKILL.md) | Design verification (+ isolated API/DB reviews) |
-| [my-dev-flow-code](my-dev-flow-code/SKILL.md) | TDD review + Build / fix-from-tests |
-| [my-dev-flow-test](my-dev-flow-test/SKILL.md) | Smoke / full / lite tests |
-| [my-dev-flow-review](my-dev-flow-review/SKILL.md) | Code review lenses |
+| [my-dev-flow-code](my-dev-flow-code/SKILL.md) | TDD review + Build / Fix (Verify gate; Smoke Option B) |
+| [my-dev-flow-test](my-dev-flow-test/SKILL.md) | Smoke re-run / full / lite (uses Verify commands) |
+| [my-dev-flow-review](my-dev-flow-review/SKILL.md) | Code review lenses (`lens-*` stage ids) |
 | [my-dev-flow-merge](my-dev-flow-merge/SKILL.md) | Gate C → commit / push / PR / merge |
 | [my-gtd-flow](my-gtd-flow/SKILL.md) | Lazy GTD: GitHub Projects / Reminders, Calendar / Outlook, 9–5 plan |
 | [myplan](myplan/SKILL.md) | Discovery → spec → plan (use *before* task breakdown) |

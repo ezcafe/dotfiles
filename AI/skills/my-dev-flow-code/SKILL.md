@@ -3,11 +3,13 @@ name: my-dev-flow-code
 description: >-
   Optionally reviews planned TDD test cases before Gate B when 04-tasks lists
   real tests to create; then builds approved design tasks with TDD after Gate B
-  using a fast model. Also fixes failures from my-dev-flow-test when
-  06-test-log.md reports smoke-fail or failure. Produces a draft only — no merge
-  or self-approval. Use when the user says run my-dev-flow-code, build from
-  design, fix from test failures, TDD test-case review, or after
-  my-dev-flow-design-review is clean / Gate B is approved.
+  using a fast model. Build and Fix must pass a Verify gate (Verify commands;
+  max 3 attempts; Result verify-pass first line). Build writes the Smoke section
+  so the parent can skip the Smoke Task (Option B). Also fixes failures from
+  my-dev-flow-test when 06-test-log.md reports smoke-fail or failure. Produces a
+  draft only — no merge or self-approval. Use when the user says run
+  my-dev-flow-code, build from design, fix from test failures, TDD test-case
+  review, or after my-dev-flow-design-review is clean / Gate B is approved.
 ---
 
 # my-dev-flow-code
@@ -15,10 +17,10 @@ description: >-
 Build subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md).
 
 - **TDD test-case review** runs **before Gate B** only when `04-tasks.md` has planned test cases.
-- **Build** runs **after Gate B** and produces a **draft** (then Smoke → review).
-- **Fix-from-tests** repairs [`my-dev-flow-test`](../my-dev-flow-test/SKILL.md) smoke or full failures.
+- **Build** runs **after Gate B**, passes **Verify gate**, writes Smoke section (Option B).
+- **Fix-from-tests** repairs [`my-dev-flow-test`](../my-dev-flow-test/SKILL.md) failures and must **verify-pass** before re-test.
 
-**Details:** [stages.md](stages.md) · handoffs [`../my-dev-flow/handoffs.md`](../my-dev-flow/handoffs.md) · templates [`../my-dev-flow/artifacts/INDEX.md`](../my-dev-flow/artifacts/INDEX.md)
+**Details:** [stages.md](stages.md) · shared [`../my-dev-flow/verify-and-fix.md`](../my-dev-flow/verify-and-fix.md) · handoffs [`../my-dev-flow/handoffs.md`](../my-dev-flow/handoffs.md)
 
 ## When to run
 
@@ -28,13 +30,14 @@ Build subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md).
 ## Principles
 
 - First Build output is a draft, not a deliverable.
-- **TDD test-case review before Gate B (conditional):** Run only if `04-tasks.md` creates planned tests (non-empty TDD case lists). Otherwise skip — note `04a skipped — no planned test cases` in `00-run.md`; do not invent `04a`.
+- **TDD test-case review before Gate B (conditional):** Run only if `04-tasks.md` creates planned tests. Otherwise skip — note `04a skipped — no planned test cases` in `00-run.md`.
 - **Build after Gate B only** (when parent is `my-dev-flow`). Gate B may be HITL **auto**.
 - TDD: Red → Green → Refactor → Verify (when tasks include tests).
-- **Build when Has UI:** match Design UI specs + existing app chrome. Do not invent a conflicting layout.
-- When fixing from tests: **only** address `06-test-log.md` fix ask + stay aligned with design/tasks (+ Design UI when Has UI).
-- Each Task has a **fresh context** and **stage-scoped handoff** (`tdd-review`, `build`, `fix-tests`).
-- Plain words in comments.
+- **Verify gate:** Follow [`verify-and-fix.md`](../my-dev-flow/verify-and-fix.md) — Verify commands on `00-run.md`, max 3 attempts, first return line `Result: verify-pass | verify-fail`.
+- **Smoke Option B:** On verify-pass, write `06-test-log.md` Smoke section; parent skips Smoke Task by default.
+- **Build when Has UI:** match Design UI specs + existing app chrome.
+- Fix-from-tests: only `06-test-log.md` fix ask + design/tasks; then Verify gate.
+- Stage-scoped handoffs (`tdd-review`, `build`, `fix-tests`). Plain words.
 
 ## Models
 
@@ -44,60 +47,43 @@ Follow [`my-dev-flow/stages.md`](../my-dev-flow/stages.md) → **Models** (TDD r
 
 **TDD test-case review** (before Gate B) — only when tests are planned:
 
-- `03-design.md` and `04-tasks.md` present
-- `04-tasks.md` has concrete planned test cases (not N/A / empty)
-- Prefer `03a` Result **clean** (when present; skip in simple if absent and starting mid-pipeline)
-- Full: Gate A checked; Simple: prefer those already checked from earlier framing
+- `03-design.md` and `04-tasks.md` present with concrete planned test cases
+- Prefer `03a` Result **clean** when present
 - Gate B is **not** required yet
 
 **Build mode** (after Gate B):
 
-- Gate B checked in `00-run.md` (human or HITL auto)
-- Prefer `04a-tdd-test-review.md` present **or** Notes say 04a skipped
+- Gate B checked in `00-run.md`
+- Prefer `04a` present **or** Notes say 04a skipped
 - `03-design.md` and `04-tasks.md` present
+- **Verify commands** set on `00-run.md` (not empty)
 
 **Fix-from-tests mode:**
 
 - `06-test-log.md` with **Result: smoke-fail** or **failure** and Fix ask
-- Prefer Gate B already checked
+- Prefer Gate B already checked; Verify commands set
 
 If the requested mode’s files are not ready → **stop**.
 
 ## Pipeline
 
 ```
-TDD review (Step 4a, if planned tests):  TDD test-case review (Medium) → Gate B (parent HITL) → Build
-No planned tests:                        skip 04a → Gate B (parent HITL) → Build
-Build mode:                              Build TDD (Fast) → draft → parent runs Smoke then review
-Fix-from-tests mode:                     Fix from 06-test-log (Fast, TDD) → re-run smoke or full test
+TDD review (if planned):  TDD review → Gate B → Build
+No planned tests:         skip 04a → Gate B → Build
+Build:                    TDD → Verify gate → write Smoke → verify-pass → parent skips Smoke (Option B)
+Fix-from-tests:           Fix → Verify gate → verify-pass → re-run smoke or full/lite
 ```
-
-When parent runs `my-dev-flow`, it calls this skill for TDD review only when needed, then again for Build after Gate B.
-
-## TDD (required when tests exist)
-
-**Before Gate B — TDD test-case review (conditional):**
-
-1. If `04-tasks.md` has **no** planned test cases → skip; parent notes skip; go to Gate B.
-2. Else collect planned tests from `04-tasks.md`.
-3. Launch TDD review Task → `04a-tdd-test-review.md`.
-4. If **needs more tests**: fold Fix ask into `04-tasks.md` when practical.
-5. Hand off to parent for **Gate B** — do **not** Build yet.
-
-**After Gate B — per task / fix:**
-
-1. Red → Green → Refactor → Verify (include 04a Fix ask when 04a ran)
 
 ## Orchestrator rules
 
-- Detect mode: no planned tests → skip TDD review; TDD review only / Step 4a → stop before Build; `06-test-log` failure → fix-from-tests; else Build (require Gate B when parent is my-dev-flow).
+- Detect mode: no planned tests → skip 04a; `06-test-log` failure → fix-from-tests; else Build (require Gate B when parent is my-dev-flow).
 - Fresh Task per stage.
-- After **TDD review or skip**: next is **Gate B** (parent HITL).
-- After **Build**: next is Smoke (`my-dev-flow-test` smoke), then `my-dev-flow-review` (unless parent orchestrates).
-- After **Fix-from-tests**: re-run the same test mode (smoke or full).
+- After Build **verify-pass**: skip Smoke Task unless Notes `smoke re-run` or Smoke section incomplete.
+- After Fix **verify-pass**: re-run the same test mode. After 3 verify-fail attempts → Decision N.
+- Persist Last Verify + attempts on Orchestrator card.
 
 ## Start checklist
 
-1. Confirm mode + required files. Check whether planned tests exist before launching 04a.
-2. Resolve Medium + Fast models.
-3. TDD review (or skip) → Gate B. Build → draft. Fix → repair from log.
+1. Confirm mode + required files + Verify commands (for Build/Fix).
+2. Resolve Medium + Fast models from allowlist.
+3. TDD review (or skip) → Gate B → Build/Fix per stages.md.

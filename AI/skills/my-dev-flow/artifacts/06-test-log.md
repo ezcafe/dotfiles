@@ -1,4 +1,4 @@
-Copy into `.my-docs/workflow/<slug>/`. [handoffs.md](../handoffs.md) · [LEGACY.md](../LEGACY.md).
+Copy into `.my-docs/workflow/<slug>/`. [handoffs.md](../handoffs.md) · [LEGACY.md](../LEGACY.md) · [verify-and-fix.md](../verify-and-fix.md).
 
 # 06-test-log.md
 
@@ -6,16 +6,19 @@ Copy into `.my-docs/workflow/<slug>/`. [handoffs.md](../handoffs.md) · [LEGACY.
 # Test log: <slug>
 
 **Result:** pending | smoke-pass | smoke-fail | success | failure
-**Mode last run:** smoke | full
+**Mode last run:** smoke | full | lite
 **Round:** 1
 **Updated:**
+**Smoke source:** Build-verify | Smoke-Task | pending
 
-## Smoke (build + unit only — before code review)
+## Smoke (build + unit — usually written by Build on verify-pass)
+
+Use Verify commands from `00-run.md`.
 
 | Step | Command | Exit | Notes |
 |------|---------|------|-------|
 | Build | | | |
-| Unit | | | |
+| Unit | | | N/A if no unit suite |
 
 **Smoke result:** pending | smoke-pass | smoke-fail
 
@@ -28,9 +31,9 @@ Map design success criteria / main flows → e2e.
 | | | |
 
 **E2E stack:** (playwright / cypress / none / …)
-**E2E command:**
+**E2E command:** (from Verify commands e2e when set)
 
-## Runs (full mode)
+## Runs (full / lite mode)
 
 | Step | Command | Exit | Notes |
 |------|---------|------|-------|

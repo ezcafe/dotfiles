@@ -1,16 +1,15 @@
 ---
 name: my-dev-flow-design
 description: >-
-  Runs Ideation (set Has UI; Problem map diagnose-before-framing) → Gate A
-  day-to-day auto-approve → light repo skim → Analyze (What/Why/How +
-  Solution branches) → Grill (design tree + glossary/ADR; auto-settle by
-  default) → Design. Gate B comes later (after design-review + optional TDD
-  test-case review). Also updates design docs from my-dev-flow-design-review
-  findings. Writes framing, skim, analysis, grill, design options (two in full;
-  one in simple), system design + design-patterns teach sections, sequence
-  diagrams, API/database contracts, and TDD-ready tasks under .my-docs/workflow.
-  Use when the user says run my-dev-flow-design, design-only workflow, update
-  design from review, or after my-dev-flow-design-review.
+  Runs Ideation → Gate A → skim → Analyze → Grill → Design (Mode full), or one
+  design-phase Task bundling Analyze+Grill+Design (Mode simple). Gate B comes
+  later (after design-review / design-verify-phase + optional TDD review). Also
+  updates design docs from my-dev-flow-design-review findings. Writes framing,
+  skim, analysis, grill, design options (two in full; one in simple), system
+  design + design-patterns, sequence diagrams, API/database contracts, and
+  TDD-ready tasks under .my-docs/workflow. Use when the user says run
+  my-dev-flow-design, design-only workflow, update design from review, or after
+  my-dev-flow-design-review.
 ---
 
 # my-dev-flow-design
@@ -40,7 +39,7 @@ reaches the design phase / design↔review loop.
 - **Has DB:** Set/refine in `00-run.md` during Analyze or Design when schema, migrations, or persistence queries change (`yes` / `no`). When **yes**, design-review runs an isolated **DB design review** Task; code review includes the **db** lens.
 - **Gate A after Ideation:** user-role day-to-day + 80/20 → `01a`. Auto-approve when ok.
 - **Light skim after Gate A:** `02-skim.md` constraints before Analyze.
-- **Grill after Analyze (before Design):** follow [`my-dev-flow/grill.md`](../my-dev-flow/grill.md) — design-tree frontier + glossary/ADR. Mode **full** always (unless already frontier-empty). Mode **simple** when frontier open or Has API/DB; else skip. Prefer **auto** user-first settle (HITL Gate B). Do not start Design on `needs-round`.
+- **Grill after Analyze (before Design):** follow [`my-dev-flow/grill.md`](../my-dev-flow/grill.md) — design-tree frontier + glossary/ADR. Mode **full** always (unless already frontier-empty). Mode **simple** when frontier open or Has API/DB; else skip. Honor **HITL Grill** (independent of Gate B; defaults full → async-notify, simple → auto). Do not start Design on `needs-round`.
 - Analyze/Design must not abandon Gate A #1/#2. Design review checks **alignment**, not re-litigation of Gate A 80/20. Design honors grill Settled decisions.
 - **Diagnose before design:** Ideation fills **Problem map** (3 WHAT branches → Core problem → mind map with ★) before Outcome. Mode **full** required; Mode **simple** stub OK.
 - **Analyze + spike deep dive (required):** For the feature and each major solution piece, answer in `02-analysis.md` (ask the user when unclear):
@@ -75,8 +74,8 @@ Full:
   → (parent) design-review → optional TDD review → GATE B (HITL) → Build
 
 Simple (from my-dev-flow):
-  Analyze (High) → Grill (Medium; or skip) → Design (High; **one option by default**)
-  → (parent) design-review → optional TDD review → GATE B (HITL) → Build
+  **design-phase** (High — Analyze + Grill/skip + Design in **one** Task; **one option by default**)
+  → (parent) **design-verify-phase** → optional TDD review → GATE B (HITL) → Build
   (requires 01-idea — existing framing or parent bootstrap for new simple runs;
    prefer Gate A / skim when already present; do not invent them)
 
@@ -114,11 +113,11 @@ Do **not** create removed UI-concept artifacts — see [`LEGACY.md`](../my-dev-f
 
 ## Orchestrator rules
 
-- Detect mode: `03a` needs update → Update; else parent Mode **simple** → Analyze → Design only; else Full.
-- **Full:** do **not** skip Gate A; do **not** start Analyze until Gate A checked and skim done (or skim skipped with Notes). Do **not** start Design until Grill is frontier-empty or skipped.
-- **Simple:** do **not** re-run Ideation / Gate A / skim; start at Analyze. Accept parent-bootstrapped `01-idea.md` when early framing was skipped. Grill when frontier open / Has API/DB; else skip. Design: **one option by default**. Honor artifact size caps.
-- One **fresh** Task per stage; prompts from [stages.md](stages.md); **stage-scoped handoffs**.
-- Task **`description`** from my-dev-flow map (`Ideation problem framing`, `User day-to-day review`, `Light repo skim`, …).
+- Detect mode: `03a` needs update → Update; else parent Mode **simple** → **design-phase** only; else Full.
+- **Full:** do **not** skip Gate A; do **not** start Analyze until Gate A checked and skim done (or skim skipped with Notes). Do **not** start Design until Grill is frontier-empty or skipped. Separate Tasks for Analyze / Grill / Design.
+- **Simple:** do **not** re-run Ideation / Gate A / skim; launch **one** `design-phase` Task (not three). Accept parent-bootstrapped `01-idea.md`. Grill inside the bundle when frontier open / Has API/DB; else skip. Design: **one option by default**. Honor artifact size caps.
+- One **fresh** Task per stage id; prompts from [stages.md](stages.md); **stage-scoped handoffs**.
+- Task **`description`** from my-dev-flow map (`Design phase bundle` on simple; full uses Analyze / Grill / Design titles).
 - **Gate A auto-approve:** when `01a` Result **ok**, check Gate A in `00-run.md` — no human chat turn.
 - **Gate A needs update:** Ideation update → re-run Gate A (max 3).
 - **From my-dev-flow:** after Design, do **not** Gate B yet — design-review → optional TDD → Gate B (HITL) → Build.
@@ -139,5 +138,5 @@ Do **not** create removed UI-concept artifacts — see [`LEGACY.md`](../my-dev-f
 ## Start checklist
 
 1. Confirm mode (Full / Simple / Update) + files; resolve models → `00-run.md`. Parent should already have set Mode from complexity (or override).
-2. Full: Ideation → Gate A → skim → Analyze → Grill → Design. Simple: Analyze → Grill (or skip) → Design (`01-idea` present or parent-bootstrapped).
-3. Hand off to design-review → optional TDD → Gate B (HITL) → Build.
+2. Full: Ideation → Gate A → skim → Analyze → Grill → Design. Simple: **design-phase** (`01-idea` present or parent-bootstrapped).
+3. Hand off to design-review / **design-verify-phase** → optional TDD → Gate B (HITL) → Build.

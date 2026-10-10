@@ -1,10 +1,49 @@
 # my-dev-flow-review stages
 
-Stage-scoped handoff: `{my-dev-flow}/handoffs.md` → stage id (`adversarial`, `quality`, `spm-api`, `spm-db`, `spm-security`, `spm-perf`, `spm-memory`, `merge-findings`, `fix-review`).
+Stage-scoped handoff: `{my-dev-flow}/handoffs.md` → stage id (`code-review-phase`, `adversarial`, `quality`, `lens-*`, `merge-findings`, `fix-review`).
+
+---
+
+## 0. Lite combined / code-review-phase (Verifier) — Fast — Review profile **lite**
+
+**When:** Review profile **lite**. **Required** (not optional). Covers Adversarial + Quality in one Task. Mode full with profile full uses stages 1–2 instead.
+
+**subagent_type:** `generalPurpose`  
+**model:** Fast preferred (Fast-on-simple)  
+**Task description:** `Lite combined review`
+
+**Done when:** `05-review-log.md` Adversarial + Quality sections clean (zero Critical/Major), or Fix ask listed.
+
+**Task prompt:**
+
+```
+You are the Senior Verifier for my-dev-flow-review **Lite combined review** (code-review-phase). Fresh context only. Generation ≠ verification — you did not write this draft. Do not fix code in this Task.
+
+<Stage-scoped handoff for stage id code-review-phase from {my-dev-flow}/handoffs.md>
+
+Read 00-run.md (Lens plan — default none), 01-idea, 03-design, 04-tasks, draft code/tests.
+Read {code-review-and-quality}/SKILL.md for the Quality pass.
+
+### Pass A — Adversarial tests
+Check mock theater, missing edges/negatives, flaky patterns, missing failure-mode coverage vs 04-tasks. Append “Adversarial test review” to 05-review-log.md.
+
+### Pass B — Quality
+Multi-axis quality vs idea/design/tasks. Has UI → fail Major on Design UI / Gate A #1/#2 drift. Defer deep API/DB contract issues to lenses when Lens plan includes api/db. Append “Quality” section.
+
+### Optional — single lens
+If Lens plan has exactly **one** lens, you may run that checklist in this same Task and write the matching 05-lens-*.md; else leave lenses to parent.
+
+Clean only if zero Critical/Major in Adv + Quality ({my-dev-flow}/severity.md). Else Fix ask ≤15 bullets Critical/Major only.
+Return: clean | needs fix + path to 05-review-log.md.
+```
+
+**If findings:** Fix → re-run this stage until clean → then lenses if Lens plan has 2+ (or the one lens not done here).
 
 ---
 
 ## 1. Adversarial test review (Verifier) — Medium
+
+**When:** Review profile **full**. Profile **lite** uses stage **0** instead.
 
 **Generation ≠ verification:** different pass from Build.
 
@@ -42,6 +81,8 @@ Return: finding table or clean status.
 ---
 
 ## 2. Quality review (Verifier) — Medium
+
+**When:** Review profile **full** (after Adversarial clean). Profile **lite** uses stage **0** instead.
 
 **Skills:** `{code-review-and-quality}/SKILL.md`  
 Bugbot only if the user asked.
@@ -108,9 +149,9 @@ Overwrite the lens file each round. Use the lens template in `{my-dev-flow}/arti
 **Task prompt:**
 
 ```
-You are a Senior Verifier for my-dev-flow-review API Contract Review. Fresh context only. You run in parallel with other SPM lenses when present — write ONLY 05-lens-api.md; do not edit 05-review-log.md or other lens files. Do not fix code.
+You are a Senior Verifier for my-dev-flow-review API Contract Review. Fresh context only. You run in parallel with other lenses when present — write ONLY 05-lens-api.md; do not edit 05-review-log.md or other lens files. Do not fix code.
 
-<Stage-scoped handoff for stage id spm-api from {my-dev-flow}/handoffs.md>
+<Stage-scoped handoff for stage id lens-api from {my-dev-flow}/handoffs.md>
 
 Read {api-and-interface-design}/SKILL.md (and reference.md if needed).
 Also read 03-design.md API/DB contracts and the draft route/handler/validator/schema files.
@@ -143,9 +184,9 @@ Return: Result + path to 05-lens-api.md.
 **Task prompt:**
 
 ```
-You are a Senior Verifier for my-dev-flow-review Database Review. Fresh context only. You run in parallel with other SPM lenses when present — write ONLY 05-lens-db.md; do not edit 05-review-log.md or other lens files. Do not fix code.
+You are a Senior Verifier for my-dev-flow-review Database Review. Fresh context only. You run in parallel with other lenses when present — write ONLY 05-lens-db.md; do not edit 05-review-log.md or other lens files. Do not fix code.
 
-<Stage-scoped handoff for stage id spm-db from {my-dev-flow}/handoffs.md>
+<Stage-scoped handoff for stage id lens-db from {my-dev-flow}/handoffs.md>
 
 Read {database-and-data-model}/SKILL.md.
 Also read 03-design.md Database contracts + example queries, 04-tasks.md, and the draft schema / migration / query / server persistence files.
@@ -301,7 +342,7 @@ Return: Result + count of fix items + path to 05-review-log.md.
 - If **clean** → lens loop done (workflow review phase complete, unless parent needs Adversarial recheck from a prior Fix — usually none).
 - If **needs fix** → run **Fix** with merged Fix ask → then:
   - If Fix changed tests/behavior → re-run Adversarial once (Quality if structure changed)
-  - Re-run SPM-plan lenses (parallel) → Merge findings again (max 3 rounds, then pause)
+  - Re-run Lens plan lenses (parallel) → Merge findings again (max 3 rounds, then pause)
 
 ---
 
@@ -316,44 +357,48 @@ Return: Result + count of fix items + path to 05-review-log.md.
 - After Adversarial or Quality findings (sequential lenses), OR
 - After Merge findings Result **needs fix** (use merged Fix ask only)
 
+**Done when:** Fix-ask items addressed; **Verify gate pass** per `{my-dev-flow}/verify-and-fix.md` (unless docs-only); Result **verify-pass** (first return line).
+
+**Verify gate (blocking):** Use Verify commands from `00-run.md`; max 3 attempts. On **verify-fail**, parent must **not** re-run verifiers — re-launch Fix or Decision N.
+
 **Task prompt:**
 
 ```
-You are the Senior Developer for my-dev-flow-review Fix. You fix listed findings only. You do not self-approve — verifiers will re-check.
+You are the Senior Developer for my-dev-flow-review Fix. You fix listed findings only. You do not self-approve — verifiers will re-check. You must pass the Verify gate before the parent re-runs review.
 
-<Stage-scoped handoff for this stage id from {my-dev-flow}/handoffs.md>
+<Stage-scoped handoff for stage id fix-review from {my-dev-flow}/handoffs.md>
+Read {my-dev-flow}/verify-and-fix.md.
 
-Mode: <adversarial-tests | quality | merged-spm>
+Mode: <adversarial-tests | quality | merged-lenses>
 Findings / Fix ask to apply:
 <paste findings or merged Fix ask>
 
 Rules:
 - TDD: for behavior bugs, add/adjust a failing test first (Red), then fix (Green), refactor, verify.
-- Pure docs/comments: note “TDD skipped — no behavior” in 05-review-log.md.
-- Use existing test stack. Do not expand scope.
+- Pure docs/comments: note “TDD skipped — no behavior” in 05-review-log.md; Verify skipped when no code/tests changed.
+- Use Verify commands from 00-run.md. Do not expand scope.
 - Update 05-review-log.md Fix notes with what you fixed.
-- For merged-spm: only apply the Merged lenses Fix ask winners — do not revive deferred losers unless needed for a winner.
+- For merged-lenses: only apply the Merged lenses Fix ask winners — do not revive deferred losers unless needed for a winner.
+- **Verify gate:** Max 3 attempts. Do not claim done on verify-fail.
 
-Return: list of fixes + tests run + whether tests/behavior changed (yes/no).
+Return FIRST LINE exactly: Result: verify-pass | verify-fail
+Then: list of fixes; commands + pass/fail; whether tests/behavior changed (yes/no).
 ```
 
 **After Fix:**
 
+- Advance only on Result **verify-pass** (or docs-only skip noted). On **verify-fail** after 3 → Decision N; else re-launch Fix.
 - Mode adversarial-tests → re-run Adversarial until clean.
 - Mode quality → re-run Quality until clean.
-- Mode merged-spm → if tests/behavior changed, Adversarial once (Quality if structure changed); then re-run SPM-plan lenses → Merge findings (if 2+).
+- Mode merged-lenses → if tests/behavior changed, Adversarial once (Quality if structure changed); then re-run Lens plan lenses → Merge findings (if 2+).
 
 ---
 
 ## Parent loop hint (my-dev-flow)
 
 ```
-Adversarial ⇄ Fix until clean
-→ Quality ⇄ Fix until clean
-→ Loop (max 3):
-    [API when Has API] ‖ [DB when Has DB] ‖ Security ‖ Performance ‖ Memory  (only lenses in Lens plan)
-    → Merge findings (if 2+)
-    → if clean → done
-    → Fix (merged) → optional Adversarial/Quality recheck → repeat
-→ my-dev-flow-test full|lite
+lite: code-review-phase ⇄ Fix → lenses if 2+ → test-lite
+full: Adversarial ⇄ Fix → Quality ⇄ Fix
+  → Loop (max 3): only Lens plan lenses (must parallel when 2+) → Merge if 2+ → Fix → recheck
+→ test-full (one Task)
 ```

@@ -1,12 +1,13 @@
 ---
 name: my-dev-flow-design-review
 description: >-
-  Reviews design artifacts for gaps and issues against real-world best practices,
-  then hands findings to my-dev-flow-design for updates. When Has API, runs an
-  isolated API contract review Task first. When Has DB, runs an isolated DB
-  design review Task. Checks UI alignment with Gate A / Design UI specs (does not
-  re-litigate 80/20). Use when the user says run my-dev-flow-design-review, review
-  the design, or after my-dev-flow-design before my-dev-flow-code.
+  Reviews design artifacts for gaps against real-world best practices, then hands
+  findings to my-dev-flow-design for updates. Mode full: isolated API∥DB reviews
+  (must parallel when both) then general design-review. Mode simple: one
+  design-verify-phase Task. Checks UI alignment with Gate A / Design UI specs
+  (does not re-litigate 80/20). Use when the user says run
+  my-dev-flow-design-review, review the design, or after my-dev-flow-design before
+  my-dev-flow-code.
 ---
 
 # my-dev-flow-design-review
@@ -25,8 +26,9 @@ the first design pass and before code.
 ## Principles
 
 - Never trust the first design. Challenge gaps, vagueness, and weak practices.
-- **Has API → isolated API contract review:** When `00-run.md` **Has API = yes**, launch a **separate** Task (fresh context) that reviews API contracts against [`api-and-interface-design`](../api-and-interface-design/SKILL.md). Do not rely on the general design-review agent alone for deep API contract checks.
-- **Has DB → isolated DB design review:** When `00-run.md` **Has DB = yes**, launch a **separate** Task (fresh context) that reviews schema/migrations/queries against [`database-and-data-model`](../database-and-data-model/SKILL.md). Do not rely on the general design-review agent alone for deep DB checks.
+- **Has API → API contract review:** When `00-run.md` **Has API = yes**, deep-check API contracts against [`api-and-interface-design`](../api-and-interface-design/SKILL.md). Mode **full:** isolated Task. Mode **simple:** fold into `design-verify-phase` (same Task writes `03a-api-contract-review.md`).
+- **Has DB → DB design review:** When `00-run.md` **Has DB = yes**, deep-check schema/migrations/queries against [`database-and-data-model`](../database-and-data-model/SKILL.md). Mode **full:** isolated Task. Mode **simple:** fold into `design-verify-phase`.
+- **API ∥ DB (Mode full):** When both yes, parent **must** launch both isolated Tasks in the **same** turn (parallel). Never serial API-then-DB.
 - Check against **real-world best practices** for this stack — plain words.
 - **Analyze deep dive:** fail Major if `02-analysis.md` skips or hand-waves What / Why / How (other ways + best practices). Mode **full:** also fail Major if **Solution branches** (Quick wins / Systemic / Creative) missing or hand-wavy.
 - **Problem map:** Mode **full:** fail Major if `01-idea.md` lacks Problem map Steps 1–2 + Core problem (one sentence), or mind map has no ★ priority. Mode **simple:** Core problem line or stub OK.
@@ -55,13 +57,21 @@ If design docs are missing → **stop** and tell the user to run `my-dev-flow-de
 
 ## Pipeline
 
+**Mode full:**
+
 ```
-if Has API = yes:
-  API contract review (Medium|Fast) → 03a-api-contract-review.md
-if Has DB = yes:
-  DB design review (Medium|Fast) → 03a-db-design-review.md
-(parallel OK when both yes)
+if Has API = yes AND Has DB = yes:
+  API contract review ‖ DB design review  (MUST same turn / parallel)
+else if Has API = yes: API contract review
+else if Has DB = yes: DB design review
 → Design review (Medium|Fast) → 03a-design-review-log.md
+```
+
+**Mode simple:**
+
+```
+design-verify-phase (Fast preferred) — one Task:
+  writes 03a-api / 03a-db when flagged + 03a-design-review-log.md
 ```
 
 Overall **clean** only when API file is clean|skipped, DB file is clean|skipped, **and** general design review is clean.
@@ -78,19 +88,19 @@ If not clean → hand **Fix ask** to `my-dev-flow-design` Update mode → parent
 
 | Result | Next (when parent is my-dev-flow) |
 |--------|-----------------------------------|
-| **clean** | TDD → Gate B → Build → Smoke → review/test per **Review profile** (full / lite / skip-review); ensure Lens plan includes **api** when Has API and **db** when Has DB |
+| **clean** | TDD → Gate B → Build (verify-pass + Smoke section; skip Smoke Task) → review/test per **Review profile** (full / lite / skip-review); ensure Lens plan includes **api** when Has API and **db** when Has DB |
 | **needs update** | `my-dev-flow-design` Update → re-run this skill |
 
-Standalone: on clean say next is TDD → Gate B → Build → Smoke → review/test per Review profile.
+Standalone: on clean say next is TDD → Gate B → Build (verify-pass + Smoke section) → review/test per Review profile.
 
 ## Orchestrator rules
 
-- When **Has API = yes**: launch **API contract review** Task (`description`: `API contract review`).
-- When **Has DB = yes**: launch **DB design review** Task (`description`: `DB design review`).
-- When both yes: launch both isolated Tasks (parallel OK), then Design review.
-- When **Has API = no**: skip API contract Task; mark 03a API section **skipped**.
-- When **Has DB = no**: skip DB design Task; mark 03a DB section **skipped**.
-- Set Task **`description`** from my-dev-flow map.
+- **Mode simple:** launch **one** `design-verify-phase` Task (`description`: `Design verify phase`). Do not launch separate API/DB/general Tasks.
+- **Mode full — Has API = yes:** launch **API contract review** Task.
+- **Mode full — Has DB = yes:** launch **DB design review** Task.
+- **Mode full — both yes:** launch both isolated Tasks **in the same turn** (parallel **required**), then Design review.
+- When **Has API = no**: skip API file (or mark skipped). When **Has DB = no**: skip DB file.
+- Set Task **`description`** from my-dev-flow map. Fast-on-simple for mechanical.
 - Do **not** edit `01`–`04` here — only write `03a-*` review files.
 - Do not write production code.
 - Progress = subagent card; parent shows short summary + path for `03a`.
@@ -108,6 +118,6 @@ Standalone: on clean say next is TDD → Gate B → Build → Smoke → review/t
 
 ## Start checklist
 
-1. Confirm design artifacts; init `03a` if needed; confirm **Has API** and **Has DB**.
-2. Resolve Medium model.
-3. If Has API → API contract review; if Has DB → DB design review; then Design review → clean or hand off Fix ask.
+1. Confirm design artifacts; init `03a` if needed; confirm **Has API** and **Has DB**; read Mode.
+2. Resolve models (Fast-on-simple; Medium|Fast on full).
+3. Simple → design-verify-phase. Full → API∥DB (must parallel when both) → Design review → clean or Fix ask.

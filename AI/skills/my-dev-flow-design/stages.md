@@ -178,18 +178,62 @@ Write .my-docs/workflow/<slug>/02-skim.md using the template from {my-dev-flow}/
 
 Must include: project shape (1–3 sentences), related UI paths, related APIs/data, hard constraints, risks if ignored, enough for Analyze/Design?
 
+Also propose **Verify commands** for 00-run.md when obvious (cwd, build, unit, e2e — or N/A + reason). See {my-dev-flow}/verify-and-fix.md.
+
 Do not write production code. Do not write full analysis or design.
-Return: short summary + path to 02-skim.md.
+Return: short summary + path to 02-skim.md + proposed Verify commands.
 ```
 
 **After:** Parent continues:
 
+- Copy proposed Verify commands into `00-run.md` when clear.
 - Proceed to Analyze after skim (UI specs come later in Design).
 
 ---
 
 
+## 2s. Design phase bundle (Architect) — High — Mode **simple** only
+
+**When:** Mode **simple**. Replaces separate Analyze → Grill → Design Tasks. Mode **full** must use stages 2 → 2g → 3 instead.
+
+**Skills:** same as Analyze + Grill + Design.
+
+**subagent_type:** `generalPurpose`  
+**model:** resolved High  
+**Task description:** `Design phase bundle`
+
+**Done when:** `02-analysis.md` written; Grill **frontier-empty** or Notes skip; `03-design.md` + `04-tasks.md` ready for `design-verify-phase`.
+
+**Task prompt:**
+
+```
+You are the Architect for my-dev-flow-design **design-phase** (Mode simple bundle). Fresh context only. Do Analyze → Grill (or skip) → Design in this one Task. Do not write production code.
+
+<Stage-scoped handoff for stage id design-phase from {my-dev-flow}/handoffs.md>
+
+Read 00-run.md (Mode simple, HITL Grill, Has UI), 01-idea.md, and 01a / 02-skim when present.
+
+### A — Analyze
+Write 02-analysis.md (template). Deep dive What / Why / How; Mode simple Solution branches stub OK. Design tree (Settled / Open / Blocked). Set **Has API** and **Has DB** yes/no. Confirm or propose **Verify commands**. State Grill: **yes** if open frontier or Has API/DB; else **no**.
+
+### B — Grill (or skip)
+If Grill no: Notes reason; Result skipped for grill; do not invent 02b drama.
+If Grill yes: follow {my-dev-flow}/grill.md; write 02b-grill.md; HITL Grill auto/async-notify → settle user-first now. Must reach frontier-empty before Design.
+
+### C — Design
+Write 03-design.md: one recommended design + ≤3-line rejected alternative. System design + Design patterns headings (N/A OK per templates). Sequence, API/DB contracts, OWASP, UI locks when Has UI. Write 04-tasks.md with acceptance (+ TDD notes or clear “no automated tests”).
+Honor artifact size caps. Confirm Has API/DB again.
+
+Return: Has API/DB + Verify commands + Grill result + paths to 02-analysis, 02b (or skip), 03-design, 04-tasks.
+```
+
+**After:** Parent copies Has API/DB + Verify commands into `00-run.md`. Next: `design-verify-phase` (not separate Analyze/Grill/Design).
+
+---
+
 ## 2. Analyze + Q&A (Architect) — High
+
+**When:** Mode **full** (or standalone Analyze). Mode **simple** uses **2s** instead.
 
 **Skills:** explore; if UI, `dev-decision-routing`.
 
@@ -239,13 +283,14 @@ Write 02-analysis.md (template) including Deep dive (+ Solution branches), **Des
 Ask: “Are the instructions and reference files clear enough to design? Any gaps in What / Why / How?”
 
 Also state whether this change touches public APIs / contracts (**Has API** yes/no) and whether it touches schema / migrations / persistence queries (**Has DB** yes/no) so the parent can set 00-run.md.
+Confirm or refine **Verify commands** (cwd, build, unit, e2e, or N/A + reason) for 00-run.md — see {my-dev-flow}/verify-and-fix.md.
 State whether Grill should run: **yes** if Open frontier or unsettled Decisions remain; **no** if frontier already empty (simple clear asks).
 
 Do not write production code. Do not finalize design yet.
-Return: short summary + deep-dive highlights + open questions + Design tree summary + Grill recommended? + Has API recommendation (yes/no) + Has DB recommendation (yes/no).
+Return: short summary + deep-dive highlights + open questions + Design tree summary + Grill recommended? + Has API/DB + Verify commands.
 ```
 
-**After:** Parent may answer Q&A, sets/refines **Has API** and **Has DB** in `00-run.md` from Analyze return, then **Grill** (or skip per [`my-dev-flow/grill.md`](../my-dev-flow/grill.md) rules), then Design (or pause if blocked).
+**After:** Parent may answer Q&A, sets/refines **Has API**, **Has DB**, and **Verify commands** in `00-run.md` from Analyze return, then **Grill** (or skip per [`my-dev-flow/grill.md`](../my-dev-flow/grill.md) rules), then Design (or pause if blocked).
 
 ---
 
@@ -261,7 +306,7 @@ Return: short summary + deep-dive highlights + open questions + Design tree summ
 
 **Done when:** `02b-grill.md` Result **frontier-empty** or **skipped**; glossary/ADR updated when terms/decisions qualify.
 
-**HITL:** Honor **HITL Gate B** in `00-run.md`. Default **auto** / **async-notify** → apply user-first recommendations and settle the frontier in this Task (do not wait). **blocking** → write open frontier with recommendations; parent pauses for human answers, then re-run or parent applies answers.
+**HITL:** Honor **HITL Grill** in `00-run.md` (independent of Gate B). Defaults: Mode full → `async-notify`; Mode simple → `auto`. **auto** / **async-notify** → apply user-first recommendations and settle the frontier in this Task (do not wait). **blocking** → write open frontier with recommendations; parent pauses for human answers, then re-run or parent applies answers. See `{my-dev-flow}/grill.md`.
 
 **Task prompt:**
 
@@ -270,7 +315,7 @@ You are grilling the design tree for my-dev-flow-design. Fresh context only. Fol
 
 <Stage-scoped handoff for stage id grill from {my-dev-flow}/handoffs.md>
 
-Read 00-run.md (Mode, HITL Gate B, Has API/DB), 01-idea.md, 02-skim.md (if present), 02-analysis.md (especially Design tree + Blocking questions + Settled decisions).
+Read 00-run.md (Mode, HITL Grill, Has API/DB), 01-idea.md, 02-skim.md (if present), 02-analysis.md (especially Design tree + Blocking questions + Settled decisions).
 Read repo GLOSSARY.md or GLOSSARY-MAP.md if present. Cross-check claims against code when needed — look up facts yourself; do not ask the user for look-up-able facts.
 
 Build the design tree. Work the frontier in rounds:

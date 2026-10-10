@@ -1,7 +1,7 @@
 # my-dev-flow handoffs
 
 Stage-scoped handoffs, Decision options shape, and artifact size caps.
-Artifact templates: [artifacts/INDEX.md](artifacts/INDEX.md) (one file per stage). Severity: [severity.md](severity.md). Paths: [skills-path.md](skills-path.md).
+Artifact templates: [artifacts/INDEX.md](artifacts/INDEX.md) (one file per stage). Severity: [severity.md](severity.md). Paths: [skills-path.md](skills-path.md). Verify/Fix: [verify-and-fix.md](verify-and-fix.md).
 
 ## Decision options (required for every choice list)
 
@@ -55,25 +55,28 @@ Severity exit per my-dev-flow/severity.md (Critical/Major block clean; defer Enh
 | `analyze` | `00-run.md`, `01-idea.md`, `01a-idea-ui-review.md` (if present), `02-skim.md` (if present) | `02-analysis.md` |
 | `grill` | `00-run.md`, `01-idea.md`, `02-skim.md` (if present), `02-analysis.md`; also repo `GLOSSARY.md` / `GLOSSARY-MAP.md` / ADR dir when present | `02b-grill.md`; may update `02-analysis.md` Settled/Design tree; may update repo `GLOSSARY.md` and/or one ADR |
 | `design` | `00-run.md`, `01-idea.md`, `01a-idea-ui-review.md` (if present), `02-skim.md` (if present), `02-analysis.md`, `02b-grill.md` (if present) | `03-design.md`, `04-tasks.md` |
+| `design-phase` | `00-run.md`, `01-idea.md`, `01a` (if present), `02-skim.md` (if present) — **Mode simple only** | `02-analysis.md`, `02b-grill.md` (or Notes skip), `03-design.md`, `04-tasks.md` |
 | `design-review` | `00-run.md`, `01-idea.md`, `01a` (if present), `02-skim.md` (if present), `02-analysis.md`, `02b-grill.md` (if present), `03-design.md`, `04-tasks.md`, `03a-api-contract-review.md` (if Has API), `03a-db-design-review.md` (if Has DB) | `03a-design-review-log.md` |
+| `design-verify-phase` | same reads as `design-review` — **Mode simple only** | `03a-design-review-log.md` + `03a-api-contract-review.md` when Has API + `03a-db-design-review.md` when Has DB |
 | `api-contract-review` | `00-run.md`, `02-analysis.md`, `03-design.md` (API contracts), `04-tasks.md`, `02-skim.md` (if present), repo `AGENTS.md` / route patterns when present | `03a-api-contract-review.md` only |
 | `db-design-review` | `00-run.md`, `02-analysis.md`, `03-design.md` (Database contracts + example queries), `04-tasks.md`, `02-skim.md` (if present), repo `AGENTS.md` / `db/schema` / migration patterns when present | `03a-db-design-review.md` only |
 | `design-update` | `00-run.md`, `03a-design-review-log.md`, `03a-api-contract-review.md` (if present), `03a-db-design-review.md` (if present), `01-idea.md`, `02-skim.md` (if present), `02-analysis.md`, `02b-grill.md` (if present), `03-design.md`, `04-tasks.md` | Fix-ask targets + round notes in `03a*` files |
 | `tdd-review` | `00-run.md`, `03-design.md`, `04-tasks.md`, `03a-design-review-log.md` (if present) — **only when planned tests exist** | `04a-tdd-test-review.md` |
-| `build` | `00-run.md`, `03-design.md`, `04-tasks.md`, `04a-tdd-test-review.md` (if present) | code (after Gate B) |
-| `smoke` | `00-run.md`, `06-test-log.md` | `06-test-log.md` (Smoke section) |
+| `build` | `00-run.md` (Verify commands), `03-design.md`, `04-tasks.md`, `04a-tdd-test-review.md` (if present), `06-test-log.md` (create/update Smoke) | code + Smoke section; first line Result **verify-pass** \| **verify-fail**; parent skips Smoke Task on verify-pass |
+| `smoke` | `00-run.md`, `06-test-log.md` | `06-test-log.md` (Smoke section) — only when Smoke re-run needed |
 | `adversarial` | `00-run.md`, `04-tasks.md`, `05-review-log.md` + draft code/tests | `05-review-log.md` (Adversarial section) |
 | `quality` | `00-run.md`, `01-idea.md`, `01a-idea-ui-review.md` (if present), `03-design.md`, `04-tasks.md`, `05-review-log.md` + draft code | `05-review-log.md` (Quality section) |
-| `spm-api` | `00-run.md`, `03-design.md` (API contracts), `04-tasks.md` + draft API/route/validator code | `05-lens-api.md` only |
-| `spm-db` | `00-run.md`, `03-design.md` (Database contracts + example queries), `04-tasks.md` + draft schema/migration/query code | `05-lens-db.md` only |
-| `spm-security` | `00-run.md`, `03-design.md`, `04-tasks.md` + draft code | `05-lens-security.md` only |
-| `spm-perf` | `00-run.md`, `03-design.md`, `04-tasks.md` + draft code | `05-lens-performance.md` only |
-| `spm-memory` | `00-run.md`, `03-design.md`, `04-tasks.md` + draft code | `05-lens-memory.md` only |
+| `code-review-phase` | `00-run.md`, `01-idea.md`, `01a` (if present), `03-design.md`, `04-tasks.md`, `05-review-log.md` + draft code/tests — **Review profile lite** (alias: Lite combined) | `05-review-log.md` (Adversarial + Quality; optional single-lens notes when Lens plan has one lens) |
+| `lens-api` | `00-run.md`, `03-design.md` (API contracts), `04-tasks.md` + draft API/route/validator code | `05-lens-api.md` only *(alias: `spm-api`)* |
+| `lens-db` | `00-run.md`, `03-design.md` (Database contracts + example queries), `04-tasks.md` + draft schema/migration/query code | `05-lens-db.md` only *(alias: `spm-db`)* |
+| `lens-security` | `00-run.md`, `03-design.md`, `04-tasks.md` + draft code | `05-lens-security.md` only *(alias: `spm-security`)* |
+| `lens-perf` | `00-run.md`, `03-design.md`, `04-tasks.md` + draft code | `05-lens-performance.md` only *(alias: `spm-perf`)* |
+| `lens-memory` | `00-run.md`, `03-design.md`, `04-tasks.md` + draft code | `05-lens-memory.md` only *(alias: `spm-memory`)* |
 | `merge-findings` | `00-run.md`, active `05-lens-*.md` for this round, `05-review-log.md` | `05-review-log.md` (Merged lenses section) |
-| `fix-review` | `00-run.md`, `05-review-log.md` (Fix ask), `03-design.md`, `04-tasks.md` | code + fix notes in `05-review-log.md` |
-| `test-full` | `00-run.md`, `04-tasks.md`, `06-test-log.md` | `06-test-log.md` |
-| `test-lite` | `00-run.md`, `04-tasks.md`, `06-test-log.md` | `06-test-log.md` (smoke + targeted e2e only) |
-| `fix-tests` | `00-run.md`, `06-test-log.md` (Fix ask), `03-design.md`, `04-tasks.md` | code |
+| `fix-review` | `00-run.md` (Verify commands), `05-review-log.md` (Fix ask), `03-design.md`, `04-tasks.md` | code + fix notes; first line Result **verify-pass** \| **verify-fail** |
+| `test-full` | `00-run.md` (Verify commands), `03-design.md`, `04-tasks.md`, `06-test-log.md` — **one Task:** coverage + add missing e2e + run suite | `06-test-log.md` (Coverage + Runs + Result) |
+| `test-lite` | `00-run.md` (Verify commands), `04-tasks.md`, `06-test-log.md` | `06-test-log.md` (targeted e2e; unit if needed) |
+| `fix-tests` | `00-run.md` (Verify commands), `06-test-log.md` (Fix ask), `03-design.md`, `04-tasks.md` | code; first line Result **verify-pass** \| **verify-fail** |
 | `merge` | `00-run.md`, `06-test-log.md` | PR / merge (no secret files) |
 
 **Prompt tip:** After the base block, paste only the concrete paths for that stage (expand `<slug>`). Example for `design-review`:

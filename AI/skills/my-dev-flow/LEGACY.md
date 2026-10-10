@@ -10,7 +10,20 @@ These steps and artifacts were **removed**. New runs ignore them.
 
 **Resume old runs:** treat Gate A2 / `01b` / `ui-refs` as skipped/N/A. Do not re-open them.
 
-**Aliases (still valid):** Gate 1 + Gate 2-UI ≈ Gate A; Gate 2 ≈ Gate B; Gate 3 ≈ Gate C; **SPM plan** ≈ **Lens plan** (prefer **Lens plan** in new docs); stage ids `spm-api` … `spm-memory` ≈ lens Tasks (prefer **Lens plan** wording in chat); **Merged SPM** ≈ **Merged lenses** in `05-review-log.md`.
+**Aliases (still valid):**
+
+| Legacy | Prefer now |
+|--------|------------|
+| Gate 1 + Gate 2-UI | Gate A |
+| Gate 2 | Gate B |
+| Gate 3 | Gate C |
+| **SPM plan** | **Lens plan** |
+| Stage ids `spm-api` … `spm-memory` | `lens-api` … `lens-memory` (accept old ids on resume) |
+| **Merged SPM** / mode `merged-spm` | **Merged lenses** / mode `merged-lenses` |
+| Separate test Tasks: Coverage / Add missing e2e / Run suite | One Task `test-full` (resume: treat old three as that step) |
+| Mode simple: separate Analyze → Grill → Design | One Task `design-phase` |
+| Mode simple: separate API/DB + design-review | One Task `design-verify-phase` |
+| Lite: optional separate Adversarial + Quality | **Required** `code-review-phase` / Lite combined when profile lite |
 
 ## Renamed subflow skills
 
@@ -24,3 +37,8 @@ These steps and artifacts were **removed**. New runs ignore them.
 | `my-merge-subflow` | `my-dev-flow-merge` |
 
 Treat old trigger phrases as the new skill names.
+
+## Skill install path
+
+Canonical skill text lives in the repo under **`AI/skills/`**. Cursor loads copies from
+`~/.cursor/skills/` — keep them in sync with `AI/skills/sync-to-cursor.sh`.

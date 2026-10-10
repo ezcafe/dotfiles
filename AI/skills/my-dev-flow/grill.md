@@ -128,12 +128,23 @@ Optionally update:
 
 **Result values:** `frontier-empty` | `needs-round` | `skipped`
 
+## HITL Grill (independent of Gate B)
+
+Read **HITL Grill** from `00-run.md` — do **not** inherit Gate B tier unless explicitly set equal.
+
+| Tier | Grill behavior |
+|------|----------------|
+| **auto** | Settle recommended answers now; log user-first auto-picks; continue to Design |
+| **async-notify** | Post Grill digest + picks; continue immediately; user may veto in **next** message |
+| **blocking** | Pause for human answers on open frontier; Result **needs-round** until answered |
+
+**Defaults (Step 0):** Mode **full** → `async-notify` (use **blocking** when auth/PII/schema forks). Mode **simple** → `auto`.
+
 ## Completion
 
 - **frontier-empty** — every branch visited; no silent assumptions left for Design.
-- Parent may **auto-approve** and continue to Design (default). Post a short
-  **Grill digest** (≤4 bullets): settled picks, glossary/ADR touches, residual risk.
-- **needs-round** only when HITL is **blocking** and human answers are required,
+- Honor **HITL Grill**. Post a short **Grill digest** (≤4 bullets): settled picks, glossary/ADR touches, residual risk.
+- **needs-round** only when HITL Grill is **blocking** and human answers are required,
   or when facts are still loading from a subagent (unblock other frontier items).
 
 ## Do not

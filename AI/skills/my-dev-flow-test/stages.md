@@ -7,7 +7,7 @@ Test log template: same file → “06-test-log.md”.
 
 ## Smoke — build + unit only — Fast
 
-**When:** After Build; **before** `my-dev-flow-review`. Parent Step 4s / `run my-dev-flow-test smoke`.
+**When:** Smoke **re-run** only — Build did not leave smoke-pass, commands mismatch Verify commands, or Notes `smoke re-run`. Default after Build verify-pass: **parent skips this Task** (Option B — see `{my-dev-flow}/verify-and-fix.md`).
 
 **subagent_type:** `generalPurpose`  
 **model:** resolved Fast  
@@ -20,17 +20,17 @@ Test log template: same file → “06-test-log.md”.
 ```
 You are the runner for my-dev-flow-test Smoke (build + unit only). Fresh context only. Do not run e2e. Do not start code review here.
 
-<Stage-scoped handoff for this stage id from {my-dev-flow}/handoffs.md>
+<Stage-scoped handoff for stage id smoke from {my-dev-flow}/handoffs.md>
 
-Discover build and unit commands from package.json / project docs.
+Read 00-run.md **Verify commands** (required). Use those commands and cwd only — do not invent a different stack. N/A unit → run build only (see verify-and-fix.md).
 
 Run in order:
-1. Build
-2. Unit tests
+1. Build (if not N/A)
+2. Unit tests (if not N/A)
 
 Rules:
 - Update 06-test-log.md → Smoke section + Mode last run: smoke.
-- Result = smoke-pass only if build + unit both green.
+- Result = smoke-pass only if all non-N/A Verify build/unit steps are green.
 - Otherwise Result = smoke-fail and fill Fix ask for my-dev-flow-code.
 - Do not fix product code. Do not merge or push.
 - Simple plain words.
@@ -38,7 +38,7 @@ Rules:
 Return: smoke-pass | smoke-fail, and path to 06-test-log.md.
 ```
 
-**After:** Parent: smoke-pass → `my-dev-flow-review`. smoke-fail → Fix-from-tests → re-smoke.
+**After:** Parent: smoke-pass → `my-dev-flow-review` (or Gate C if skip-review). smoke-fail → Fix-from-tests → verify-pass → re-smoke.
 
 ---
 
@@ -65,111 +65,58 @@ Return: Result + short summary + path.
 ```
 
 ---
-## Coverage check — Fast
+## Full test suite — Fast — stage id `test-full` (one Task)
 
-**When:** Full mode only (after review clean).
+**When:** Review profile **full** after review clean. **One Task** covers coverage check + add missing e2e + run suite. Do **not** launch separate coverage / add-e2e / run Tasks on new runs (legacy names accepted on resume — see LEGACY.md).
 
 **subagent_type:** `generalPurpose`  
-**model:** resolved Fast
+**model:** resolved Fast  
+**Task description:** `Full test suite`
 
-**Done when:** `06-test-log.md` lists covered vs missing e2e against design success criteria / main user flows.
+**Done when:** `06-test-log.md` has Coverage + Runs filled; Result **success** | **failure**.
 
 **Task prompt:**
 
 ```
-You are the verifier for my-dev-flow-test Coverage check. Generation ≠ verification — you judge gaps; you do not rewrite product features.
+You run **full** verification for my-dev-flow-test in **one** Task (coverage + gaps + suite). Fresh context only. Do not fix product behavior here (except adding e2e for MISSING flows). Do not merge or push.
 
-<Stage-scoped handoff for this stage id from {my-dev-flow}/handoffs.md>
+<Stage-scoped handoff for stage id test-full from {my-dev-flow}/handoffs.md>
+Read {my-dev-flow}/verify-and-fix.md for Verify commands rules.
 
-Read 03-design.md (success criteria, flows) and 04-tasks.md. Scan the repo for existing e2e tests and how they are run (package.json scripts, playwright/cypress/etc.).
+### 1 — Coverage
+Read 03-design.md (success criteria, flows) and 04-tasks.md. Scan existing e2e + how to run them.
+Map each main flow → covered (file + test name) or MISSING. Note stack or “no e2e stack”.
+Write 06-test-log.md Coverage section. Mode last run: full.
 
-Rules:
-- Map each success criterion / main user flow to existing e2e coverage (file + test name) or mark MISSING.
-- Do not invent a new e2e framework. Note the repo’s stack, or “no e2e stack found”.
-- Simple plain words.
+### 2 — Add missing e2e
+If MISSING items exist **and** an e2e stack exists: add tests only for those flows using repo patterns. Do not change product behavior. If a gap cannot be automated safely, mark blocked with why.
+If no e2e stack: skip add; note in Coverage; parent may mark failure if e2e was required.
 
-Update 06-test-log.md → Coverage section only. Mode last run: full.
+### 3 — Run suite
+Read 00-run.md **Verify commands**. Use those cwd/build/unit/e2e only (N/A → skip with note).
+Run in order: build → unit → e2e (when not N/A).
+Capture exit codes + short failure excerpts.
+Result = **success** only if all non-N/A Verify steps are green AND no open required MISSING/blocked gaps.
+Else Result = **failure** + Fix ask for my-dev-flow-code.
+Update 06-test-log.md Runs + Result.
 
-Return: covered count, missing list, e2e command if known.
+Return: success | failure + path to 06-test-log.md.
 ```
 
----
-
-## Add missing e2e — Fast
-
-**Only if** Coverage check listed MISSING items **and** an e2e stack exists. Full mode only.
-
-**subagent_type:** `generalPurpose`  
-**model:** resolved Fast
-
-**Done when:** new e2e tests exist for each MISSING item (or explicitly blocked with reason).
-
-**Task prompt:**
-
-```
-You are the Senior Developer for my-dev-flow-test Add missing e2e.
-
-<Stage-scoped handoff for this stage id from {my-dev-flow}/handoffs.md>
-
-Read 06-test-log.md Coverage section and 03-design.md / 04-tasks.md.
-
-Rules:
-- Add e2e tests only for listed MISSING flows, using the repo’s existing e2e patterns and helpers.
-- Do not change product behavior here. Do not rewrite unrelated tests.
-- If a gap cannot be automated safely, mark it blocked in 06-test-log.md with why.
-- Simple plain words in comments.
-
-Return: files added, which gaps closed, any still blocked.
-```
-
-If **no e2e stack**: skip this stage; parent marks failure / asks user (see SKILL.md).
-
----
-
-## Run suite — Fast (full mode)
-
-**When:** Full mode after coverage (+ optional add e2e).
-
-**subagent_type:** `generalPurpose`  
-**model:** resolved Fast
-
-**Done when:** build, unit, and e2e commands have been run (or skipped with explicit reason) and `06-test-log.md` Result is **success** or **failure**.
-
-**Task prompt:**
-
-```
-You are the runner for my-dev-flow-test Run suite (full).
-
-<Stage-scoped handoff for this stage id from {my-dev-flow}/handoffs.md>
-
-Discover commands from package.json / project docs (build, unit test, e2e). Prefer project scripts over ad-hoc commands.
-
-Run in order:
-1. Build
-2. Unit tests
-3. E2E tests (if stack + script exist)
-
-Rules:
-- Capture exit codes and short failure excerpts (trim huge logs).
-- Update 06-test-log.md → Runs + Result. Mode last run: full.
-- Result = success only if build + unit + e2e all green AND Coverage has no open MISSING/blocked required gaps.
-- Otherwise Result = failure and fill “Fix ask for my-dev-flow-code”.
-- Do not fix product code in this stage. Do not merge or push.
-- Simple plain words.
-
-Return: success | failure, and paths to log sections.
-```
+**After:** success → Gate C. failure → Fix-from-tests (verify-pass) → re-run `test-full`.
 
 ---
 
 ## Parent loop hint (my-dev-flow)
 
 ```
-After Build → Smoke
-  On smoke-fail → my-dev-flow-code Fix → re-smoke
-  On smoke-pass → my-dev-flow-review
-After review clean → Full test
-  On failure → my-dev-flow-code Fix → re-full
+After Build verify-pass (+ Smoke section written)
+  → Skip Smoke Task (Option B) unless smoke re-run needed
+  → skip-review → Gate C
+  → else → my-dev-flow-review
+Smoke re-run fail → Fix (verify-pass) → re-smoke
+After review clean → test-full (one Task) | test-lite
+  On failure → Fix (verify-pass) → re-test
   On success → Gate C → my-dev-flow-merge
-After 3 test↔code rounds per mode → pause and ask the user.
+After 3 test↔code rounds per mode → pause (Decision N)
 ```

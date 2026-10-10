@@ -5,13 +5,14 @@ This file is the **source of truth** for pipeline order, Mode, HITL, lenses, mod
 
 **Progress:** Cursor subagent card = live status (no “now running…” banners).  
 **After each step:** ≤5 lines summary + full path; read Result header only (~40 lines); update Orchestrator card.  
-**HITL:** Gate B `auto` | `async-notify` | `blocking`. **Gate C always blocking.** Grill uses Gate B tier (prefer auto). Gate digest ≤4 bullets. User-first picks on auto/async.  
-**File also:** Run log + Last stage + Orchestrator card.  
+**HITL:** Gate B `auto` | `async-notify` | `blocking`. **Gate C always blocking.** **HITL Grill** is independent of Gate B (defaults below). Gate digest ≤4 bullets. User-first picks on auto/async.  
+**File also:** Run log + Last stage + Orchestrator card + Last Verify.  
 **Chat OK:** post-step summary + path, human gates, Decision N, stop, finish.  
 **Subagent context:** every Task starts fresh — [handoffs.md](handoffs.md) stage id only.  
+**Verify / Fix:** [verify-and-fix.md](verify-and-fix.md).  
 **Legacy removals:** [LEGACY.md](LEGACY.md).  
 **Severity exit:** [severity.md](severity.md) (Critical/Major block clean; defer Enhancement).  
-**Skill paths:** [skills-path.md](skills-path.md) (`{my-dev-flow}` placeholders in Task prompts).
+**Skill paths:** [skills-path.md](skills-path.md) — SoT `AI/skills/`; sync via `AI/skills/sync-to-cursor.sh`.
 
 | Phase | Skill | Stages file |
 |-------|--------|-------------|
@@ -54,8 +55,8 @@ Parent / main agent (no Task unless classifying is ambiguous):
 
 1. **Overrides:** resume keeps Mode + Review profile; user said `simple` / `full` / `skip-review` → that Mode/profile.
 2. Else **classify** (table below + cheap path matrix). Ambiguous → Decision N.
-3. Create slug `YYYYMMDD-feature-x`; write `00-run.md` from [artifacts/00-run.md](artifacts/00-run.md): Mode, Review profile, Complexity, Has UI/API/DB when known, resolve models, Orchestrator card, HITL Gate B (refine after Design), **HITL Gate C: blocking**.
-4. Chat one line: Mode + Review profile + why.
+3. Create slug `YYYYMMDD-feature-x`; write `00-run.md` from [artifacts/00-run.md](artifacts/00-run.md): Mode, Review profile, Complexity, Has UI/API/DB when known, **Lens plan: none**, resolve models, Orchestrator card, HITL Gate B (refine after Design), **HITL Grill** (full → async-notify; simple → auto), **HITL Gate C: blocking**. Verify commands may stay empty until skim/Analyze/`design-phase`.  
+4. Chat one line: Mode + Review profile + why (+ note phase bundles when Mode simple).
 
 ### Mode selection
 
@@ -71,11 +72,11 @@ Parent / main agent (no Task unless classifying is ambiguous):
 
 ### Review profile
 
-| Profile | When | After smoke |
-|---------|------|-------------|
-| **full** | Mode full | Adversarial → Quality → Conditional lenses → full test |
-| **lite** | Mode simple default | Same review lenses (often none) → **lite test** (targeted e2e) |
-| **skip-review** | Mode simple + copy/token/docs-only or user said skip-review | Skip code review + further tests → Gate C |
+| Profile | When | After Build verify-pass |
+|---------|------|-------------------------|
+| **full** | Mode full | Smoke skip or re-run → Adversarial → Quality → Conditional lenses → full test |
+| **lite** | Mode simple default | Smoke skip or re-run → review (often none) → **lite test** (targeted e2e) |
+| **skip-review** | Mode simple + copy/token/docs-only or user said skip-review | Gate C test bar = Build **verify-pass** (+ Smoke section); skip Smoke Task + code review + further tests → Gate C |
 
 ### Mid-run reclassify
 
@@ -104,13 +105,30 @@ If scope grows (Has API/DB flips to **yes**, auth/PII appears, multi-surface UX,
 
 **async-notify example:** Gate B posts digest + auto-pick “Option 1 — ship thin API first”; pipeline continues to Build. User’s **next** message says “stop — use Option 2 instead” → Status `stopped` or re-open Gate B with veto; a later message that only says “looks good” is **not** a veto if the pipeline already moved on.
 
+**async-notify veto after Build started:** Do not silently continue to review. Pause with **Decision N**:
+
+| Option | What |
+|--------|------|
+| 1 | Discard draft; re-open Gate B with veto pick |
+| 2 | Keep draft; re-open Gate B (amend design/tasks only) |
+| 3 | Stop (Status `stopped`) |
+
+**HITL Grill (independent of Gate B):**
+
+| Mode | Default Grill tier |
+|------|--------------------|
+| **full** | `async-notify` (prefer human-visible picks; blocking when auth/PII/schema forks) |
+| **simple** | `auto` |
+
+Do **not** copy Gate B tier into Grill unless `00-run.md` explicitly sets them equal. See [grill.md](grill.md).
+
 **Gate C test bar (before merge subflow):**
 
-| Review profile | `06-test-log.md` Result required |
-|----------------|----------------------------------|
-| **skip-review** | **smoke-pass** (no full/lite suite) |
-| **lite** | **success** after lite run |
-| **full** | **success** after full run |
+| Review profile | Required |
+|----------------|----------|
+| **skip-review** | Build **verify-pass** + Smoke section smoke-pass (no Smoke Task / full / lite required) |
+| **lite** | `06-test-log.md` Result **success** after lite run |
+| **full** | `06-test-log.md` Result **success** after full run |
 
 Explicit user override may waive green tests; log override in Notes.
 
@@ -139,8 +157,8 @@ Set during Analyze/Design (or earlier if obvious). **Before design-review**, par
 
 | Flag | Yes when | When yes, parent must |
 |------|----------|------------------------|
-| **Has API** | New/changed REST/GraphQL/routes/server actions, edge validators, cross-boundary public types | Isolated **API contract review** Task + include **api** in Lens plan |
-| **Has DB** | New/changed tables/columns/indexes/migrations/ORM, notable writes/transactions/raw SQL | Isolated **DB design review** Task + include **db** in Lens plan |
+| **Has API** | New/changed REST/GraphQL/routes/server actions, edge validators, cross-boundary public types | Full: isolated **API contract review** Task (∥ DB when both). Simple: include in **design-verify-phase**. Always include **api** in Lens plan |
+| **Has DB** | New/changed tables/columns/indexes/migrations/ORM, notable writes/transactions/raw SQL | Full: isolated **DB design review** Task (∥ API when both). Simple: include in **design-verify-phase**. Always include **db** in Lens plan |
 
 Independent flags. Skills: [`api-and-interface-design`](../api-and-interface-design/SKILL.md), [`database-and-data-model`](../database-and-data-model/SKILL.md).
 
@@ -148,19 +166,21 @@ Independent flags. Skills: [`api-and-interface-design`](../api-and-interface-des
 
 ## Conditional lenses / Lens plan
 
-Before code review, set **Lens plan** in `00-run.md`. Launch only matching lenses. (Legacy field name **SPM plan** — see [LEGACY.md](LEGACY.md).)
+Before code review, set **Lens plan** in `00-run.md`. Launch only matching lenses. (Legacy: **SPM plan** / stage ids `spm-*` — prefer **Lens plan** / `lens-*`; see [LEGACY.md](LEGACY.md).)
 
-| Lens | Launch when |
-|------|-------------|
-| **API** | Has API = yes, or new/changed public contracts / edge validators |
-| **DB** | Has DB = yes, or new/changed schema/migrations/persistence queries |
-| **Security** | auth, sessions, PII, uploads, SQL/raw, secrets, permissions |
-| **Performance** | lists/tables, charts, fetch, bundle-sensitive UI, heavy client compute |
-| **Memory** | subscriptions, large client caches, websockets/realtime, media buffers |
+**Default: `none`.** Start with **none**. Add a lens only when a signal below is clearly true (or Has API / Has DB forces api/db). Do not pre-load security/perf/memory “just in case.”
 
-- **none** → after Quality clean, skip lenses → test per Review profile  
+| Lens | Stage id | Launch when |
+|------|----------|-------------|
+| **API** | `lens-api` | Has API = yes, or new/changed public contracts / edge validators |
+| **DB** | `lens-db` | Has DB = yes, or new/changed schema/migrations/persistence queries |
+| **Security** | `lens-security` | auth, sessions, PII, uploads, SQL/raw, secrets, permissions |
+| **Performance** | `lens-perf` | lists/tables, charts, fetch, bundle-sensitive UI, heavy client compute |
+| **Memory** | `lens-memory` | subscriptions, large client caches, websockets/realtime, media buffers |
+
+- **none** → after Quality / Lite combined clean, skip lenses → test per Review profile  
 - **1 lens** → that lens only; parent copies Result into Merged lenses (no Merge Task)  
-- **2+ lenses** → parallel → Merge findings Task  
+- **2+ lenses** → **must** launch in parallel → Merge findings Task  
 
 API lens → `05-lens-api.md`. DB lens → `05-lens-db.md`.
 
@@ -172,47 +192,81 @@ Run `04a` **only if** `04-tasks.md` lists concrete tests to create. Else Notes `
 
 ---
 
+## Speed defaults (latency)
+
+Keep quality rails; cut **Task cold starts**.
+
+| Rule | Mode **simple** | Mode **full** |
+|------|-----------------|---------------|
+| Design chain | **One** Task `design-phase` (Analyze + Grill/skip + Design) | Separate Analyze → Grill → Design |
+| Design verify | **One** Task `design-verify-phase` (general + API/DB sections when flagged) | Isolated API ∥ DB (**must** parallel when both) → then general design-review |
+| Code review | **Must** `code-review-phase` / Lite combined when profile **lite** | Separate Adversarial → Quality → lenses |
+| Full test | n/a (use lite test) | **One** Task `test-full` (coverage + add e2e + run) |
+| Lens plan default | **none** (add only on signals) | **none** then add signals |
+| Mechanical model | Prefer **Fast** (see Models) | Medium when available; Fast if Medium missing |
+
+**API ∥ DB:** When both Has API and Has DB are yes, parent **must** launch both isolated Tasks in the **same** turn (parallel). Never serial API-then-DB. Mode simple folds them into `design-verify-phase` instead.
+
 ## Full pipeline order
 
-1. Step 0 — Mode full; Review profile full; models + card + HITL  
+1. Step 0 — Mode full; Review profile full; models + card + HITL; Lens plan default **none**  
 2. Step 1 — Ideation (set Has UI)  
 3. Gate A — day-to-day + 80/20 → `01a` (auto when ok; max 3 update rounds)  
 4. Step 1s — Light skim → `02-skim.md`  
 5. Steps 2–3 — Analyze → Grill (or skip) → Design (two options); refine Has API/DB; UI in Design  
-6. Design ↔ review until clean (API contract review when Has API; DB when Has DB); max 3  
+6. Design ↔ review until clean — when Has API **and** Has DB: **must** parallel API ∥ DB, then general; max 3  
 7. Step 4a — TDD only if planned tests  
 8. Gate B — HITL tier + digest  
-9. Step 4 — Build  
-10. Step 4s — Smoke (fail → Fix → re-smoke)  
-11. Set Lens plan → Steps 5–9 review ⇄ Fix  
-12. Steps 10–12 — Full test ⇄ Fix (max 3)  
+9. Step 4 — Build (**Verify gate** → `verify-pass`; write Smoke section; max 3 attempts)  
+10. Step 4s — Smoke Task **skipped** when Build wrote smoke-pass (Option B); else Smoke re-run; fail → Fix → verify-pass → re-smoke  
+11. Set Lens plan (default none) → Steps 5–9 review ⇄ Fix (**verify-pass** before re-review; max 3 Fix rounds)  
+12. Step `test-full` — **one** Task (coverage + missing e2e + run) ⇄ Fix (max 3; Fix must **verify-pass** before re-test)  
 13. Gate C — blocking → merge only after yes  
 
 ## Simple pipeline order
 
-Starts at Analyze. Skip Ideation / Gate A / skim.
+Starts at Analyze. Skip Ideation / Gate A / skim. Prefer **phase bundles** (fewer Tasks).
 
-1. Step 0 — Mode simple; Review profile lite|skip-review; bootstrap `01-idea` if needed  
-2. Steps 2–3 — Analyze → Grill (or skip) → Design (one recommended design by default)  
-3. Design ↔ review until clean (API/DB Tasks when flagged)  
-4. 4a if planned → Gate B → Build → Smoke  
-5. skip-review → Gate C; else lite review → lite test → Gate C  
+1. Step 0 — Mode simple; Review profile lite|skip-review; Lens plan default **none**; bootstrap `01-idea` if needed  
+2. Step `design-phase` — Analyze + Grill (or skip) + Design (one recommended design); set Verify commands + Has API/DB  
+3. Step `design-verify-phase` — design-review (+ API/DB sections when flagged) until clean; max 3 Update ↔ verify rounds  
+4. 4a if planned → Gate B → Build (**verify-pass** + Smoke section)  
+5. skip-review → Gate C (verify-pass bar); else Smoke skip → **must** `code-review-phase` (Lite combined) → lite test → Gate C  
 
-**Grill:** Mode full always (unless frontier-empty). Mode simple when frontier open or Has API/DB; else skip. See [grill.md](grill.md).
+### Build / Fix Verify gate
+
+Canonical rules: [verify-and-fix.md](verify-and-fix.md).
+
+- Set **Verify commands** on `00-run.md` before Build.  
+- Build / Fix → **verify-pass** (max 3 attempts) before parent advances; persist Last Verify on card.  
+- Build **writes** Smoke section on verify-pass → parent **skips Smoke Task** by default (Option B).  
+- skip-review: Gate C bar = Build verify-pass (+ Smoke section).  
+- full/lite after review remain independent verification for merge.  
+- Task return **first line:** `Result: verify-pass | verify-fail`.
+
+**Grill:** Mode full always (unless frontier-empty). Mode simple when frontier open or Has API/DB; else skip. HITL Grill independent of Gate B. See [grill.md](grill.md).
 
 ---
 
 ## Models (resolve once)
 
-| Tier | Used by | Preferred (first present in Task allowlist) |
-|------|---------|-----------------------------------------------|
-| **High** | Analyze; Design; Update from design review | `claude-sonnet-5-5-high` → `claude-fable-5-1-thinking-high` → Medium → Fast → `inherit` |
-| **Medium** | Ideation; judgment stages when available | `claude-opus-5-5-medium` → Fast → `inherit` |
-| **Fast** | Build/Fix/Smoke/Test/Merge; mechanical when Medium missing | `composer-2.5-fast` → `inherit` |
+Resolve from the **current Task model allowlist** (not a frozen hardcoded list). Soft preferred hints may go stale — allowlist wins.
 
-**Mechanical stages** (use Fast when Medium missing): Gate A, skim, grill, design-review, API/DB contract review, TDD review, Adversarial, Quality, lenses, Merge findings.
+| Tier | Used by | How to pick from allowlist |
+|------|---------|----------------------------|
+| **High** | Analyze; Design; Update from design review; **simple** `design-phase` | First slug matching high/thinking-high preference; else any High-tier; else Medium → Fast → `inherit` |
+| **Medium** | Ideation; Mode **full** judgment stages when available | First Medium-tier slug; else Fast → `inherit` |
+| **Fast** | Build/Fix/Smoke/Test/Merge; **Mode simple** mechanical + lite review; mechanical when Medium missing | First Fast-tier slug (hint: `composer-2.5-fast` if listed); else `inherit` |
 
-At start: pick first available slug per tier; write into `00-run.md`; note fallbacks. Only ask user if **no** Task can launch.
+**Soft preferred hints** (use only when present in allowlist): High `claude-sonnet-5-5-high` → `claude-fable-5-1-thinking-high`; Medium `claude-opus-5-5-medium`; Fast `composer-2.5-fast`.
+
+**Mechanical stages:** Gate A, skim, grill, design-review, design-verify-phase, API/DB contract review, TDD review, Adversarial, Quality, Lite combined / code-review-phase, lenses, Merge findings.
+
+**Fast-on-simple:** When Mode is **simple**, mechanical stages and lite review **prefer Fast** even if Medium is on the allowlist (cut latency). Mode **full** still prefers Medium for those stages when available; use Fast only when Medium is missing.
+
+**Mode full mechanical** (use Fast when Medium missing): same mechanical list as above.
+
+At start: resolve once; write slugs into `00-run.md`; note fallbacks. Re-resolve if allowlist changes mid-run. Only ask user if **no** Task can launch.
 
 ### Usage-limit fallback (per stage)
 
@@ -238,11 +292,11 @@ When a Task hits a usage limit / rate limit / quota / capacity error:
 
 ## Subagent context
 
-1. One new Task per stage (no `resume` across different stages).  
+1. One new Task per **stage id** (no `resume` across different stage ids). Mode **simple** phase bundles (`design-phase`, `design-verify-phase`, `code-review-phase`) and Mode **full** `test-full` are single stage ids that cover multiple former micro-steps.  
 2. Prompt = stage-scoped handoff + stage rules + user decisions.  
 3. Absolute paths under `.my-docs/workflow/<slug>/`.  
 4. Task return = only handoff back.  
-5. Update Orchestrator card after each step.
+5. Update Orchestrator card after each step. Optional: increment **Task count** in Run metrics.
 
 ---
 
@@ -273,14 +327,14 @@ After every stage: Result header only → **≤5 lines** summary + path → upda
 | 1 Ideation | `01-idea.md` |
 | Gate A | `01a-idea-ui-review.md` |
 | 1s Skim | `02-skim.md` |
-| 2 Analyze | `02-analysis.md` |
+| 2 Analyze | `02-analysis.md` (full) or via `design-phase` (simple) |
 | 2g Grill | `02b-grill.md` or skip note |
 | 3 Design | `03-design.md` + `04-tasks.md` |
-| Design review / API / DB | `03a-design-review-log.md` + `03a-api-contract-review.md` + `03a-db-design-review.md` when flagged |
+| Design review / API / DB | `03a-*` when flagged (`design-verify-phase` on simple; API∥DB parallel on full) |
 | 4a | `04a-tdd-test-review.md` or skip note |
 | Gate B | digest + HITL |
 | 4 Build | key paths |
-| Smoke / test | `06-test-log.md` |
+| Smoke / test | `06-test-log.md` (`test-full` or `test-lite`) |
 | Review | `05-review-log.md` (+ `05-lens-*.md`) |
 | Gate C / Merge | PR URL / result |
 
@@ -293,19 +347,21 @@ After every stage: Result header only → **≤5 lines** summary + path → upda
 | Gate A | `User day-to-day review` |
 | Ideation update | `Update idea from review` |
 | Light skim | `Light repo skim` |
-| 2 | `Analyze codebase` |
-| 2g | `Grill design tree` |
-| 3 | `Design and tasks` |
-| Design review | `Design review` |
-| API contract review | `API contract review` |
-| DB design review | `DB design review` |
+| 2 | `Analyze codebase` (Mode full) |
+| 2g | `Grill design tree` (Mode full) |
+| 3 | `Design and tasks` (Mode full) |
+| design-phase | `Design phase bundle` (Mode simple — Analyze+Grill+Design) |
+| Design review | `Design review` (Mode full general) |
+| API contract review | `API contract review` (Mode full; parallel with DB when both) |
+| DB design review | `DB design review` (Mode full; parallel with API when both) |
+| design-verify-phase | `Design verify phase` (Mode simple — general + API/DB when flagged) |
 | Design update | `Update design docs` |
 | TDD test review | `Review TDD test cases` |
 | 4 | `Build with TDD` |
-| Smoke | `Smoke build and unit` |
-| 5 | `Adversarial test review` |
-| 5-lite | `Lite combined review` (optional — profile lite, Lens plan none or one) |
-| 6 | `Quality review` |
+| Smoke | `Smoke build and unit` (re-run only; usually skipped) |
+| 5 | `Adversarial test review` (Mode full) |
+| 5-lite / code-review-phase | `Lite combined review` (**required** when profile lite) |
+| 6 | `Quality review` (Mode full) |
 | 7 | `Security review` |
 | 8 | `Performance review` |
 | 9 | `Memory review` |
@@ -313,9 +369,8 @@ After every stage: Result header only → **≤5 lines** summary + path → upda
 | DB lens | `Database review` |
 | Merge findings | `Merge review findings` |
 | Fix · lens | `Fix review findings` |
-| 10 | `Test coverage check` |
-| 11 | `Add missing e2e` |
-| 12 | `Run build and tests` |
+| test-full | `Full test suite` (coverage + e2e gaps + run — one Task) |
+| test-lite / 12 | `Run build and tests` |
 | Test↔Code | `Fix from test log` |
 | 13 | `Push PR and merge` |
 
@@ -335,7 +390,8 @@ After every stage: Result header only → **≤5 lines** summary + path → upda
 ## Orchestrator rules (short)
 
 - One subflow at a time; honor Review profile and gates.  
-- Full: Gate A → skim → Analyze → Grill settled → Design → design-review clean → 04a or skip → Gate B → Build → smoke-pass → review clean → full test → Gate C.  
-- Simple: never re-run Ideation→Gate A→skim; one design option by default.  
-- Design-review needs update → Update mode → re-review. Smoke/test fail → Fix-from-tests → re-run that mode.  
-- Optional Notes metrics: design-review rounds · Gate B auto vs blocking · inherit retries · main-thread fallbacks.
+- Full: Gate A → skim → Analyze → Grill settled → Design → API∥DB (must parallel when both) → design-review clean → 04a or skip → Gate B → Build (**verify-pass** + Smoke section) → Smoke skip → review clean → **test-full** (one Task) → Gate C.  
+- Simple: never re-run Ideation→Gate A→skim; **design-phase** → **design-verify-phase**; one design option by default; lite → **must** code-review-phase; Fast-on-simple for mechanical.  
+- Design-review needs update → Update mode → re-review. Smoke/test fail → Fix-from-tests (**verify-pass**) → re-run that mode.  
+- Build / Fix: do **not** advance on **verify-fail**; max 3 attempts then Decision N ([verify-and-fix.md](verify-and-fix.md)).  
+- Optional metrics: Task count · design-review rounds · verify-fail count · smoke↔fix · Gate B / Grill HITL · inherit retries · main-thread fallbacks.
