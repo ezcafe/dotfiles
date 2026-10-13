@@ -19,10 +19,11 @@ file location and the three-part ADR bar. Artifact template: [artifacts/02b-gril
 Reach a **shared understanding** of open design decisions, then capture durable
 **domain language** (glossary) and **hard-to-reverse choices** (sparse ADRs).
 
-**HITL:** Prefer **auto** (user-first picks on recommended answers). Honor
-`00-run.md` **HITL Gate B**: `auto` / `async-notify` → settle recommendations and
+**HITL:** Honor **`HITL Grill`** in `00-run.md` only — **independent of Gate B**.
+Prefer user-first recommended answers. `auto` / `async-notify` → settle and
 continue (`async-notify` = continue immediately; veto only in the **next user
-message** — see stages.md); `blocking` → post frontier round and wait.
+message** — see stages.md); `blocking` → post frontier round and wait. Defaults:
+Mode full → `async-notify`; Mode simple → `auto`.
 
 ## Facts vs decisions
 

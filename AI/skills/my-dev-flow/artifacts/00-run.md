@@ -26,23 +26,9 @@ Copy into `.my-docs/workflow/<slug>/`. [handoffs.md](../handoffs.md) · [LEGACY.
 **Last Verify:** pending | verify-pass | verify-fail
 **Verify attempts:** 0 (reset per Build/Fix stage entry; max 3)
 
-**Run metrics (optional — copy to Notes at end or increment during run):**
+**Last stage:** (prefer stage id, e.g. `gate-a done`, `build verify-pass`, `gate-b auto`) — resume from the next incomplete stage id; do not redo completed gates unless artifacts changed
 
-| Metric | Value |
-|--------|-------|
-| Task count | (increment each launched Task) |
-| design-review rounds | |
-| Gate B tier used | auto \| async-notify \| blocking |
-| Grill HITL tier used | auto \| async-notify \| blocking |
-| verify-fail count | |
-| smoke↔fix rounds | |
-| review Fix rounds | |
-| usage-limit inherit retries | |
-| main-thread fallbacks | |
-| deferred Enhancements count | |
-| phase bundles used | design-phase \| design-verify-phase \| code-review-phase \| test-full \| none |
-
-**Last stage:** (e.g. `Gate A done`, `Build verify-pass`, `Gate B auto`) — resume from the next incomplete step; do not redo completed gates unless artifacts changed
+**Run metrics:** optional — only if useful; otherwise leave blank or omit. Do not block the pipeline on metrics.
 
 ## Resolved models
 
@@ -84,15 +70,16 @@ After Build/Fix: read Task return **first line** for `Result: verify-pass | veri
 | Field | Value |
 |-------|-------|
 | Phase | design \| code \| review \| test \| merge |
-| Next step | (e.g. Step 4a TDD review) |
-| Task description | (card title) |
-| Stage id | (handoff table id) |
+| Stage id | (required — handoffs.md id, e.g. `tdd-review`, `code-review-phase`) |
+| Next step | same as Stage id (+ short note); legacy Step N optional alias only |
+| Task description | (card title from stages.md description map) |
 | stages.md section | path + heading only |
 | Model tier | High \| Medium \| Fast (mechanical→Fast rule if Medium missing) |
 | Prereq Result | (e.g. design-review clean, verify-pass) |
 | Last Verify | pending \| verify-pass \| verify-fail |
 | Verify attempts | 0–3 |
 | Artifact to check | path — read first ~40 lines / Result only |
+| Design-backloop | none \| pending Decision N \| amend-design \| fix-only |
 | Main-thread fallback | none \| `<stage>` (usage limit after wait 5s + retry + inherit retry) — only that stage; next stages still Task |
 
 ## Gates
@@ -107,6 +94,7 @@ Canonical names (legacy aliases in parentheses):
 
 - Abort / scope-change: Status `stopped` + frozen stage + reason (see stages.md)
 - async-notify veto after Build started: Decision N (discard draft / keep draft + re-open Gate B / stop) — see stages.md
+- Design-backloop after Build (design invalid): Decision N (amend design → re-review → Gate B / Fix-only / stop) — see stages.md **Design-backloop**
 -
 
 ## Run log

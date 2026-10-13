@@ -68,6 +68,7 @@ Independent verification for merge remains: **full** / **lite** test after revie
 - Append Round notes on the log being updated (`06-test-log.md` or `05-review-log.md`).
 - No merge/push/commit unless user explicitly asked.
 - Max **3** Fix↔re-verify cycles per mode (smoke / full / review lens), then pause.
+- If Fix **cannot** stay aligned with design (contracts / IA / acceptance must change) → stop Fix; parent runs **Design-backloop** Decision N in [stages.md](stages.md) (amend design / Fix-only / stop). Do **not** silently rewrite `03-design` / `04-tasks` inside Fix.
 
 ## Orchestrator card fields (persist)
 

@@ -23,6 +23,13 @@ Then:
 
 Do not list bare names without these fields.
 
+**Built-in Decision shapes** (still use Decision N numbering in the run):
+
+| When | Options (fixed) | Where |
+|------|-----------------|-------|
+| Design invalid after Build / Fix | Amend design → re-review → Gate B · Fix-only · Stop | [stages.md](stages.md) **Design-backloop** |
+| async-notify Gate B veto after Build | Discard draft · Keep draft + re-open Gate B · Stop | [stages.md](stages.md) **HITL** |
+
 ---
 
 ## Stage-scoped handoff (required)

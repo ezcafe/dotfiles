@@ -42,3 +42,10 @@ Treat old trigger phrases as the new skill names.
 
 Canonical skill text lives in the repo under **`AI/skills/`**. Cursor loads copies from
 `~/.cursor/skills/` — keep them in sync with `AI/skills/sync-to-cursor.sh`.
+
+## Doc order note (2026-10)
+
+`my-dev-flow/SKILL.md` **Sub-workflows** is an **inventory** table (not runtime order).
+Canonical runtime: [stages.md](stages.md) **Happy path** — after Build:
+**Smoke → review → test → Gate C**. Old numbered Order columns that listed test
+before review are obsolete.

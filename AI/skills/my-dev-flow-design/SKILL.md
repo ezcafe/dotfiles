@@ -122,6 +122,7 @@ Do **not** create removed UI-concept artifacts — see [`LEGACY.md`](../my-dev-f
 - **Gate A needs update:** Ideation update → re-run Gate A (max 3).
 - **From my-dev-flow:** after Design, do **not** Gate B yet — design-review → optional TDD → Gate B (HITL) → Build.
 - **Update mode:** do not re-run Ideation/Gate A/skim unless Fix ask requires it; do not re-litigate Gate A 80/20 unless Fix ask says so.
+- **Design-backloop** (parent Decision: amend design after Build): same as Update mode from `03a` / explicit design Fix ask → then parent re-runs design-review (or design-verify-phase) → Gate B before Build/Fix continues. See [`../my-dev-flow/stages.md`](../my-dev-flow/stages.md) **Design-backloop**.
 - Clarity check before Analyze and Grill/Design (include What / Why / How deep dive before Grill/Design).
 
 ## Skills used

@@ -80,6 +80,7 @@ Fix-from-tests:           Fix → Verify gate → verify-pass → re-run smoke o
 - Fresh Task per stage.
 - After Build **verify-pass**: skip Smoke Task unless Notes `smoke re-run` or Smoke section incomplete.
 - After Fix **verify-pass**: re-run the same test mode. After 3 verify-fail attempts → Decision N.
+- If Fix cannot stay aligned with `03-design` / `04-tasks` → parent **Design-backloop** ([`../my-dev-flow/stages.md`](../my-dev-flow/stages.md)); do not silently rewrite design docs in Fix.
 - Persist Last Verify + attempts on Orchestrator card.
 
 ## Start checklist

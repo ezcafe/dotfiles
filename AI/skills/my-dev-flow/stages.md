@@ -14,14 +14,45 @@ This file is the **source of truth** for pipeline order, Mode, HITL, lenses, mod
 **Severity exit:** [severity.md](severity.md) (Critical/Major block clean; defer Enhancement).  
 **Skill paths:** [skills-path.md](skills-path.md) — SoT `AI/skills/`; sync via `AI/skills/sync-to-cursor.sh`.
 
-| Phase | Skill | Stages file |
-|-------|--------|-------------|
-| Design | [`../my-dev-flow-design/SKILL.md`](../my-dev-flow-design/SKILL.md) | [`../my-dev-flow-design/stages.md`](../my-dev-flow-design/stages.md) |
-| Design review | [`../my-dev-flow-design-review/SKILL.md`](../my-dev-flow-design-review/SKILL.md) | [`../my-dev-flow-design-review/stages.md`](../my-dev-flow-design-review/stages.md) |
-| Code | [`../my-dev-flow-code/SKILL.md`](../my-dev-flow-code/SKILL.md) | [`../my-dev-flow-code/stages.md`](../my-dev-flow-code/stages.md) |
-| Smoke / full test | [`../my-dev-flow-test/SKILL.md`](../my-dev-flow-test/SKILL.md) | [`../my-dev-flow-test/stages.md`](../my-dev-flow-test/stages.md) |
-| Review | [`../my-dev-flow-review/SKILL.md`](../my-dev-flow-review/SKILL.md) | [`../my-dev-flow-review/stages.md`](../my-dev-flow-review/stages.md) |
-| Merge | [`../my-dev-flow-merge/SKILL.md`](../my-dev-flow-merge/SKILL.md) | [`../my-dev-flow-merge/stages.md`](../my-dev-flow-merge/stages.md) |
+## Happy path (runtime SoT)
+
+**Mode full:**
+
+```
+Step 0 → Ideation → Gate A → skim → Analyze → Grill → Design
+  → API∥DB (parallel when both) → design-review clean → 04a?
+  → Gate B → Build (verify-pass + Smoke section) → Smoke skip?
+  → review clean → test-full → Gate C → merge
+```
+
+**Mode simple:**
+
+```
+Step 0 → design-phase → design-verify-phase clean → 04a? → Gate B
+  → Build (verify-pass + Smoke section)
+  → skip-review? → Gate C
+  : else → code-review-phase → test-lite → Gate C → merge
+```
+
+After Build, always: **Smoke → review → test → Gate C** (unless skip-review jumps to Gate C on verify-pass + Smoke section).
+
+If Build/Fix proves design wrong → [Design-backloop](#design-backloop-after-build).
+
+---
+
+## Skill inventory (not runtime order)
+
+Parent SKILL.md lists skills as inventory. This table maps **phase → skill files** only — do **not** use row order as pipeline order (see Happy path above).
+
+| Phase | Skill | Stages file | When in pipeline |
+|-------|--------|-------------|------------------|
+| Design | [`../my-dev-flow-design/SKILL.md`](../my-dev-flow-design/SKILL.md) | [`../my-dev-flow-design/stages.md`](../my-dev-flow-design/stages.md) | Before design-review / Build |
+| Design review | [`../my-dev-flow-design-review/SKILL.md`](../my-dev-flow-design-review/SKILL.md) | [`../my-dev-flow-design-review/stages.md`](../my-dev-flow-design-review/stages.md) | After Design; again on design-backloop |
+| Code | [`../my-dev-flow-code/SKILL.md`](../my-dev-flow-code/SKILL.md) | [`../my-dev-flow-code/stages.md`](../my-dev-flow-code/stages.md) | After Gate B; Fix anytime post-Build |
+| Smoke (re-run) | [`../my-dev-flow-test/SKILL.md`](../my-dev-flow-test/SKILL.md) | [`../my-dev-flow-test/stages.md`](../my-dev-flow-test/stages.md) | Right after Build when Option B skipped |
+| Review | [`../my-dev-flow-review/SKILL.md`](../my-dev-flow-review/SKILL.md) | [`../my-dev-flow-review/stages.md`](../my-dev-flow-review/stages.md) | After Smoke; **before** full/lite test |
+| Full / lite test | [`../my-dev-flow-test/SKILL.md`](../my-dev-flow-test/SKILL.md) | [`../my-dev-flow-test/stages.md`](../my-dev-flow-test/stages.md) | After review clean |
+| Merge | [`../my-dev-flow-merge/SKILL.md`](../my-dev-flow-merge/SKILL.md) | [`../my-dev-flow-merge/stages.md`](../my-dev-flow-merge/stages.md) | After Gate C yes |
 
 ---
 
@@ -74,8 +105,8 @@ Parent / main agent (no Task unless classifying is ambiguous):
 
 | Profile | When | After Build verify-pass |
 |---------|------|-------------------------|
-| **full** | Mode full | Smoke skip or re-run → Adversarial → Quality → Conditional lenses → full test |
-| **lite** | Mode simple default | Smoke skip or re-run → review (often none) → **lite test** (targeted e2e) |
+| **full** | Mode full | Smoke skip or re-run → Adversarial → Quality → Conditional lenses → **test-full** |
+| **lite** | Mode simple default | Smoke skip or re-run → **must** `code-review-phase` (Lite combined) → **test-lite** |
 | **skip-review** | Mode simple + copy/token/docs-only or user said skip-review | Gate C test bar = Build **verify-pass** (+ Smoke section); skip Smoke Task + code review + further tests → Gate C |
 
 ### Mid-run reclassify
@@ -231,7 +262,8 @@ Starts at Analyze. Skip Ideation / Gate A / skim. Prefer **phase bundles** (fewe
 2. Step `design-phase` — Analyze + Grill (or skip) + Design (one recommended design); set Verify commands + Has API/DB  
 3. Step `design-verify-phase` — design-review (+ API/DB sections when flagged) until clean; max 3 Update ↔ verify rounds  
 4. 4a if planned → Gate B → Build (**verify-pass** + Smoke section)  
-5. skip-review → Gate C (verify-pass bar); else Smoke skip → **must** `code-review-phase` (Lite combined) → lite test → Gate C  
+5. skip-review → Gate C (verify-pass + Smoke section bar); else Smoke skip → **must** `code-review-phase` (Lite combined) → lite test → Gate C  
+
 
 ### Build / Fix Verify gate
 
@@ -287,6 +319,33 @@ When a Task hits a usage limit / rate limit / quota / capacity error:
 - User says stop / abort / cancel → Status `stopped`; Notes: frozen stage + reason.  
 - User changes scope mid-run → Decision N (reclassify / new slug / continue with amended idea). Do **not** treat “continue the pipeline” as Gate C approval.  
 - Silence at a **blocking** gate → stay paused (do not invent approval).
+- Build/Fix cannot stay aligned with design → [Design-backloop](#design-backloop-after-build) (do not silently rewrite `03-design` inside Fix).
+
+---
+
+## Design-backloop after Build
+
+**When (any of):**
+
+- Fix ask / verify-fail shows the draft **cannot** stay aligned with `03-design.md` / `04-tasks.md` without changing contracts, IA, or acceptance.
+- Review (or a lens) finds **Major/Critical** that requires design/contract change, not a local code patch.
+- Parent or user says the approved design is wrong after Build started.
+
+**Do not:** silently amend `03-design` / `04-tasks` inside Build or Fix; do not continue to Gate C.
+
+**Pause with Decision N** (handoffs.md shape). Fixed options:
+
+| Option | What it is | Example | Pros | Cons |
+|--------|------------|---------|------|------|
+| **1 — Amend design** | Update design docs → design-review (or design-verify-phase) until clean → re-open Gate B → then Fix or rebuild | API shape wrong; change `03-design` contracts first | Keeps design↔code lock | Extra rounds / latency |
+| **2 — Fix-only** | Stay on current design; Fix code/tests only under existing contracts | Bug in implementation; design still right | Fast | Wrong if design is actually wrong |
+| **3 — Stop** | Status `stopped`; freeze stage + reason | Scope unclear; need human rethink | Safe | Pipeline paused |
+
+**Recommendation default:** Option **1** when contracts/IA/acceptance must change; Option **2** when only implementation drifts; Option **3** when the user rejects continuing.
+
+**After Option 1:** Run log `design-backloop — amend design`; clear or amend Gate B check as needed; do **not** treat prior Gate B as still valid for the new design. Resume at design-update / design-review, then Gate B, then Fix or Build as appropriate.
+
+**async-notify Gate B veto after Build** still uses the separate discard / keep / stop Decision in HITL (above). Design-backloop is for **design invalidation**, not Gate B veto alone.
 
 ---
 
@@ -321,58 +380,61 @@ Any 2+ choice: **Decision N** + Option 1/2… with What it is / Example / Pros /
 
 After every stage: Result header only → **≤5 lines** summary + path → update card → continue or pause.
 
-| Step | Path |
-|------|------|
-| 0 Classify | `00-run.md` |
-| 1 Ideation | `01-idea.md` |
-| Gate A | `01a-idea-ui-review.md` |
-| 1s Skim | `02-skim.md` |
-| 2 Analyze | `02-analysis.md` (full) or via `design-phase` (simple) |
-| 2g Grill | `02b-grill.md` or skip note |
-| 3 Design | `03-design.md` + `04-tasks.md` |
-| Design review / API / DB | `03a-*` when flagged (`design-verify-phase` on simple; API∥DB parallel on full) |
-| 4a | `04a-tdd-test-review.md` or skip note |
-| Gate B | digest + HITL |
-| 4 Build | key paths |
-| Smoke / test | `06-test-log.md` (`test-full` or `test-lite`) |
-| Review | `05-review-log.md` (+ `05-lens-*.md`) |
-| Gate C / Merge | PR URL / result |
+**Orchestrator card uses stage ids** (handoffs.md). Legacy Step labels below are aliases only.
 
-### Task `description` map
+| Stage id (prefer) | Alias | Path |
+|-------------------|-------|------|
+| (classify) | Step 0 | `00-run.md` |
+| `ideation` | Step 1 | `01-idea.md` |
+| `gate-a` | Gate A | `01a-idea-ui-review.md` |
+| `skim` | Step 1s | `02-skim.md` |
+| `analyze` / `design-phase` | Step 2 | `02-analysis.md` (+ design bundle on simple) |
+| `grill` | Step 2g | `02b-grill.md` or skip note |
+| `design` / `design-phase` | Step 3 | `03-design.md` + `04-tasks.md` |
+| `design-review` / `api-contract-review` / `db-design-review` / `design-verify-phase` | — | `03a-*` |
+| `tdd-review` | Step 4a | `04a-tdd-test-review.md` or skip note |
+| Gate B | — | digest + HITL |
+| `build` | Step 4 | key code paths |
+| `smoke` | — | `06-test-log.md` Smoke (re-run only; usually skipped) |
+| `adversarial` / `quality` / `code-review-phase` / `lens-*` / `merge-findings` | Steps 5–9 | `05-review-log.md` (+ `05-lens-*.md`) |
+| `test-full` / `test-lite` | — | `06-test-log.md` (after review clean) |
+| `merge` | Gate C | PR URL / result |
 
-| Step | description |
-|------|-------------|
-| 0 | `Classify and resolve models` |
-| 1 | `Ideation problem framing` |
-| Gate A | `User day-to-day review` |
-| Ideation update | `Update idea from review` |
-| Light skim | `Light repo skim` |
-| 2 | `Analyze codebase` (Mode full) |
-| 2g | `Grill design tree` (Mode full) |
-| 3 | `Design and tasks` (Mode full) |
-| design-phase | `Design phase bundle` (Mode simple — Analyze+Grill+Design) |
-| Design review | `Design review` (Mode full general) |
-| API contract review | `API contract review` (Mode full; parallel with DB when both) |
-| DB design review | `DB design review` (Mode full; parallel with API when both) |
-| design-verify-phase | `Design verify phase` (Mode simple — general + API/DB when flagged) |
-| Design update | `Update design docs` |
-| TDD test review | `Review TDD test cases` |
-| 4 | `Build with TDD` |
-| Smoke | `Smoke build and unit` (re-run only; usually skipped) |
-| 5 | `Adversarial test review` (Mode full) |
-| 5-lite / code-review-phase | `Lite combined review` (**required** when profile lite) |
-| 6 | `Quality review` (Mode full) |
-| 7 | `Security review` |
-| 8 | `Performance review` |
-| 9 | `Memory review` |
-| API lens | `API contract lens` |
-| DB lens | `Database review` |
-| Merge findings | `Merge review findings` |
-| Fix · lens | `Fix review findings` |
-| test-full | `Full test suite` (coverage + e2e gaps + run — one Task) |
-| test-lite / 12 | `Run build and tests` |
-| Test↔Code | `Fix from test log` |
-| 13 | `Push PR and merge` |
+### Task `description` map (by stage id)
+
+| Stage id | description |
+|----------|-------------|
+| (classify) | `Classify and resolve models` |
+| `ideation` | `Ideation problem framing` |
+| `gate-a` | `User day-to-day review` |
+| `ideation-update` | `Update idea from review` |
+| `skim` | `Light repo skim` |
+| `analyze` | `Analyze codebase` (Mode full) |
+| `grill` | `Grill design tree` (Mode full) |
+| `design` | `Design and tasks` (Mode full) |
+| `design-phase` | `Design phase bundle` (Mode simple — Analyze+Grill+Design) |
+| `design-review` | `Design review` (Mode full general) |
+| `api-contract-review` | `API contract review` (Mode full; parallel with DB when both) |
+| `db-design-review` | `DB design review` (Mode full; parallel with API when both) |
+| `design-verify-phase` | `Design verify phase` (Mode simple — general + API/DB when flagged) |
+| `design-update` | `Update design docs` |
+| `tdd-review` | `Review TDD test cases` |
+| `build` | `Build with TDD` |
+| `smoke` | `Smoke build and unit` (re-run only; usually skipped) |
+| `adversarial` | `Adversarial test review` (Mode full) |
+| `code-review-phase` | `Lite combined review` (**required** when profile lite) |
+| `quality` | `Quality review` (Mode full) |
+| `lens-security` | `Security review` |
+| `lens-perf` | `Performance review` |
+| `lens-memory` | `Memory review` |
+| `lens-api` | `API contract lens` |
+| `lens-db` | `Database review` |
+| `merge-findings` | `Merge review findings` |
+| `fix-review` | `Fix review findings` |
+| `test-full` | `Full test suite` (coverage + e2e gaps + run — one Task) |
+| `test-lite` | `Run build and tests` |
+| `fix-tests` | `Fix from test log` |
+| `merge` | `Push PR and merge` |
 
 ### File log examples (`00-run.md` only)
 
@@ -389,9 +451,11 @@ After every stage: Result header only → **≤5 lines** summary + path → upda
 
 ## Orchestrator rules (short)
 
-- One subflow at a time; honor Review profile and gates.  
+- One subflow at a time; honor Review profile and gates. Use **Happy path** above — not the skill inventory table.  
 - Full: Gate A → skim → Analyze → Grill settled → Design → API∥DB (must parallel when both) → design-review clean → 04a or skip → Gate B → Build (**verify-pass** + Smoke section) → Smoke skip → review clean → **test-full** (one Task) → Gate C.  
 - Simple: never re-run Ideation→Gate A→skim; **design-phase** → **design-verify-phase**; one design option by default; lite → **must** code-review-phase; Fast-on-simple for mechanical.  
 - Design-review needs update → Update mode → re-review. Smoke/test fail → Fix-from-tests (**verify-pass**) → re-run that mode.  
 - Build / Fix: do **not** advance on **verify-fail**; max 3 attempts then Decision N ([verify-and-fix.md](verify-and-fix.md)).  
+- Design invalid after Build → **Design-backloop** Decision N (amend design / Fix-only / stop).  
+- Card **Next step** = stage id (+ Task description); do not rely on legacy Step numbers alone.  
 - Optional metrics: Task count · design-review rounds · verify-fail count · smoke↔fix · Gate B / Grill HITL · inherit retries · main-thread fallbacks.

@@ -21,7 +21,7 @@ after **my-dev-flow-test** success.
 ## Principles
 
 - Accountability, not rubber stamp. **Gate C** (legacy Gate 3) is **always blocking**.
-- Honor **Gate C test bar** in [`../my-dev-flow/stages.md`](../my-dev-flow/stages.md): skip-review → **smoke-pass**; lite → **success** (lite); full → **success** (full).
+- Honor **Gate C test bar** in [`../my-dev-flow/stages.md`](../my-dev-flow/stages.md): skip-review → Build **verify-pass** (+ Smoke section); lite → `06-test-log.md` Result **success** (lite); full → Result **success** (full).
 - **Never** `git commit`, `git push`, `gh pr create`, or `gh pr merge` without an **explicit user yes** in this chat. Name each action in the Gate C ask.
 - Never commit secrets; never force-push.
 - Plain words in PR body.

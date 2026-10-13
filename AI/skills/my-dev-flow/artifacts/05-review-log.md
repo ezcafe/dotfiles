@@ -68,74 +68,10 @@ List any docs-only items where TDD was skipped:
 
 ---
 
-## 05-lens-api.md / 05-lens-db.md / 05-lens-security.md / 05-lens-performance.md / 05-lens-memory.md
+## Lens files
 
-One file per parallel lens per round (overwrite each round). Do not edit `05-review-log.md` from these Tasks.
-
-```markdown
-# Lens: <api | db | security | performance | memory> — <slug>
-
-**Result:** pending | clean | has findings
-**Round:** 1
-**Updated:**
-
-## Findings
-
-| Id | Severity | Location | Finding | Suggestion |
-|----|----------|----------|---------|------------|
-| A1 / D1 / S1 / P1 / M1 | Critical / Major / Enhancement / Nit | file:line | | |
-
-## API checklist (api lens only)
-
-| Check | Status (pass / fail / N/A) | Note |
-|-------|----------------------------|------|
-| Typed input/output | | |
-| One error format | | |
-| Validate at edges only | | |
-| Lists paginated | | |
-| Additive fields / no silent breaks | | |
-| Naming matches repo | | |
-| Idempotency for mutating endpoints | | |
-| Contract matches `03-design.md` | | |
-
-Skill: `api-and-interface-design`
-
-## DB checklist (db lens only)
-
-| Check | Status (pass / fail / N/A) | Note |
-|-------|----------------------------|------|
-| Typed columns / nullability | | |
-| Indexes / uniques match queries | | |
-| Write owner + read owners | | |
-| Migration additive or expand/contract | | |
-| Safe SQL binds (`inArray` / no bad `::type[]`) | | |
-| No bigint/`SUM` → `::int` on money/large aggregates | | |
-| Lists bounded; no obvious N+1 | | |
-| Tenant/ownership filters | | |
-| Contract matches schema + queries | | |
-
-Skill: `database-and-data-model`
-
-## OWASP coverage (security lens only)
-
-| OWASP | Status (pass / fail / N/A) | Note |
-|-------|----------------------------|------|
-| A01 | | |
-| A02 | | |
-| A03 | | |
-| A04 | | |
-| A05 | | |
-| A06 | | |
-| A07 | | |
-| A08 | | |
-| A09 | | |
-| A10 | | |
-
-Source: https://owasp.org/Top10/
-
-## Round notes
-
--
-```
+Per-lens templates: [05-lens.md](05-lens.md) → write `05-lens-api.md`,
+`05-lens-db.md`, `05-lens-security.md`, `05-lens-performance.md`, or
+`05-lens-memory.md` for the active Lens plan only.
 
 ---
