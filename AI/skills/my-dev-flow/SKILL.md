@@ -43,7 +43,7 @@ Follow **[stages.md](stages.md) Step 0** (classify, seed `00-run.md`, models, li
 4. **Build / Fix Verify gate** — do not advance on verify-fail. ([verify-and-fix.md](verify-and-fix.md))
 5. **Do not invent approval** — stop / veto / async Gate B gap / **Build armed** / Status / skip-review ban: [stages.md](stages.md) · [hitl.md](hitl.md) · [lenses.md](lenses.md).
 
-**Companion links (not duplicated here):** Smoke after Build (Build-writes-Smoke) · legal skip-review → [lenses.md](lenses.md) · [verify-and-fix.md](verify-and-fix.md) · [hitl.md](hitl.md). Fresh Task → **required** `scripts/handoff-for.py <stage-id>` ([handoffs.md](handoffs.md) = edit SoT / debug only). Usage limit → [models.md](models.md). Design-backloop / max-round → [failure-playbook.md](failure-playbook.md) · [invariants.md](invariants.md). No UI concept step → [LEGACY.md](LEGACY.md). Parent checklist → [invariants.md](invariants.md). Skills SoT + sync → [skills-path.md](skills-path.md).
+**Companion links (not duplicated here):** Smoke after Build (Build-writes-Smoke) · legal skip-review → [lenses.md](lenses.md) · [verify-and-fix.md](verify-and-fix.md) · [hitl.md](hitl.md). Fresh Task → **required** `python {my-dev-flow}/scripts/handoff-for.py <stage-id>` ([handoffs.md](handoffs.md) = edit SoT / debug only · [skills-path.md](skills-path.md)). Usage limit → [models.md](models.md). Design-backloop / max-round → [failure-playbook.md](failure-playbook.md) · [invariants.md](invariants.md). No UI concept step → [LEGACY.md](LEGACY.md). Parent checklist → [invariants.md](invariants.md). Skills SoT + sync → [skills-path.md](skills-path.md).
 
 ## Routing (package + parent load)
 
@@ -51,17 +51,17 @@ Follow **[stages.md](stages.md) Step 0** (classify, seed `00-run.md`, models, li
 |------|------|
 | Runtime order / Mode / resume / abort | [stages.md](stages.md) |
 | Card Stage id / Next → which 1–2 files | [parent-next.md](parent-next.md) · `lint-run.py --next` |
-| Gate B/C · veto · async gap · **Build armed** · Gate C bar | [hitl.md](hitl.md) |
+| Gate B/C · veto · **Gate B approved** · async gap · **Build armed** · Gate C bar | [hitl.md](hitl.md) |
 | Models + usage-limit | [models.md](models.md) |
 | Has API/DB · tiny-tweak · Lens plan · skip-review ban | [lenses.md](lenses.md) |
 | Parent checklist · Task-count budget · max-round Decisions | [invariants.md](invariants.md) |
 | Hard stop chat scripts | [failure-playbook.md](failure-playbook.md) |
 | Next step (live run) | `00-run.md` Orchestrator card + **one** companion section |
-| Task prompt | **Required:** `scripts/handoff-for.py <stage-id>` + **subflow `stages/<id>.md`**. [handoffs.md](handoffs.md) = edit SoT / debug only (do not load whole file for launch) |
+| Task prompt | **Required:** `python {my-dev-flow}/scripts/handoff-for.py <stage-id>` + **subflow `stages/<id>.md`**. [handoffs.md](handoffs.md) = edit SoT / debug only (do not load whole file for launch) |
 | Build / Fix | card + handoff `build`/`fix-*` + [verify-and-fix.md](verify-and-fix.md) |
 | New artifact body | one file under [artifacts/](artifacts/INDEX.md) |
 | Grill | [grill.md](grill.md) (once when entering Grill) |
-| Lint `00-run.md` | [scripts/lint-run.py](scripts/lint-run.py) (`--next`, `--dry-run-seed`) |
+| Lint `00-run.md` | [scripts/lint-run.py](scripts/lint-run.py) (`--next`, `--before-build`, `--before-code-review`, `--dry-run-seed`) |
 | Phase entry | that subflow `SKILL.md` once |
 | Golden paths | [examples/INDEX.md](examples/INDEX.md) |
 | Anti-patterns | [examples/anti-patterns.md](examples/anti-patterns.md) |

@@ -26,14 +26,14 @@ Minimal walkthrough. Parent follows [stages.md](../stages.md) Happy path (full) 
 | 6 | `design` | Two options in `03-design.md` + `04-tasks.md`; Verify commands; Has API/DB |
 | 7 | design-review path | Isolated API∥DB when flagged, then general → overall **clean** (or `design-verify-phase` only if reclassified simple) |
 | 8 | (04a) | Only if planned tests; else Notes skip |
-| 9 | Gate B | **blocking** → `Gate B veto: none` |
+| 9 | Gate B | **blocking** → `Gate B approved: yes` (or named pick) + `Gate B veto: none` |
 | 10 | `build` | verify-pass → Smoke section smoke-pass |
 | 11 | Smoke Task | **skipped** (Build-writes-Smoke) |
 | 12 | `code-review-phase` | Lite combined (never separate Adv+Quality under lite) → **clean** |
 | 13 | lenses | Per Lens plan (often none) |
 | 14 | `test-lite` | Result **success** (not `test-full`) |
 | 15 | Gate C | blocking — user names commit / push / PR / merge |
-| 16 | `merge` | Only approved actions → Status **`done`** + calibration Notes (≤3) |
+| 16 | `merge` | Only approved actions; Status **`done`** only when Result **success** **and** `merge` ∈ Gate C approved (PR-only / commit-only → stay **paused**) + calibration Notes (≤3) |
 
 ## Do not
 

@@ -21,7 +21,7 @@ Parent reads the first ~40 lines; do not bury the token.
 | Domain | Tokens | Parent advances when | Do not advance when |
 |--------|--------|----------------------|---------------------|
 | **Verify** (Build / Fix) | `verify-pass` \| `verify-fail` | `verify-pass` | `verify-fail` (retry ≤3 or Decision N) |
-| **Blocked** (pre-code stop) | `blocked — <reason>` | — (settle reason) | Always stay; e.g. Gate B veto, Build armed missing |
+| **Blocked** (pre-code stop) | `blocked — <reason>` | — (settle reason) | Always stay; e.g. Gate B veto, Gate B approved, Build armed missing, design-backloop |
 | **Design review** (`03a*`) | `clean` \| `needs update` \| `skipped` | overall `clean` (API/DB `clean`\|`skipped`) | `needs update` → Update → re-review |
 | **Gate A** (`01a`) | `ok` \| `needs update` \| `escalate` | `ok` (auto-check Gate A) | `needs update` / `escalate` |
 | **Grill** (`02b`) | `frontier-empty` \| `needs-round` \| `skipped` | `frontier-empty` or `skipped` | `needs-round` |
@@ -29,7 +29,7 @@ Parent reads the first ~40 lines; do not bury the token.
 | **TDD review** (`04a`) | `clean` \| `needs more tests` | `clean` or Notes skip | `needs more tests` |
 | **Code review** (`05*` — Adv, Quality, Lite combined, lenses, Merge findings) | `clean` \| `needs fix` | `clean` | `needs fix` → Fix → re-review (legacy lens text `has findings` → `needs fix`) |
 | **Test / Smoke** (`06`) | `success` \| `failure` \| `smoke-pass` \| `smoke-fail` | `success` / `smoke-pass` | `failure` / `smoke-fail` → Fix |
-| **Merge** | `success` \| `aborted` | `success` → Status `done` | `aborted` → `stopped` |
+| **Merge** | `success` \| `aborted` | `success` **and** `merge` ∈ **Gate C approved** → Status `done` | `aborted` → `stopped`; `success` without `merge` in approved → stay `paused`, leave Next for remaining actions |
 
 **Clean** for review stages = zero open Critical/Major ([severity.md](severity.md)).
 

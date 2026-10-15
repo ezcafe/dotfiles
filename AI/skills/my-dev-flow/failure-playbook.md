@@ -12,19 +12,23 @@ Veto / Gate C: [hitl.md](hitl.md). Skip-review ban: [lenses.md](lenses.md).
 | **design-review / design-verify** after 3 Update rounds | Pause; Decision N | Raise cap · ship Enhancements-only if clean · Stop/reclassify |
 | **review Fix** after 3 rounds | Pause; Decision N | Raise cap · defer Enhancements if clean · Stop / design-backloop |
 | **test↔fix** after 3 rounds | Pause; Decision N | Raise cap · waive green tests → Gate C · Stop |
-| **Design-backloop** (design invalid after Build) | Pause; Decision N | Amend design · Fix-only · Stop |
+| **Design-backloop** (design invalid after Build) | Pause; Decision N | Amend → Notes `design-backloop`, **Gate B approved: none**, clear Build armed / veto-window, Next `design-update` (Decision N is entry — no prior `03a` Fix ask); Fix-only · Stop ([stages.md](stages.md)) |
 | **Gate B veto** before Build (`pending`) | Do **not** Build | Settle veto or re-open Gate B ([hitl.md](hitl.md)) |
 | **Veto window open** without **Build armed** | Do **not** Build | Arm Build on this turn / resume, or settle veto ([hitl.md](hitl.md)) |
-| **Gate B veto after Build** | Pause; Decision N | Discard draft · Keep + re-open Gate B · Stop |
+| **Gate B veto after Build** | Pause; Decision N | Discard · Keep + re-open → **Gate B approved: none**, clear armed/window, Next `gate-b` · Stop ([hitl.md](hitl.md)) |
 | **Usage limit** on Task | Wait 5s → same model → `inherit` → main-thread that stage only | Log only; do not ask unless inherit fails and main-thread also blocked |
 | **User reject / stop / abort** | Status `stopped` (not `done`) | Freeze stage + reason; require new Decision to resume |
-| **Merge success** | Status `done` | Do not continue; new work → new slug |
+| **Merge success** + `merge` ∈ Gate C approved | Status `done` | Do not continue; new work → new slug |
 | **Silence at blocking gate** | Stay paused | Do not invent approval |
 | **Mid-run scope growth** (API/DB/auth) | Decision N (reclassify) | Stay simple · Upgrade full · New slug/stop — **never** keep `skip-review` if contracts appear |
+| **Has API/DB flips yes under skip-review** | Drop skip-review → **lite** (or reclassify) | One-liner: set Has API/DB **yes**, Review profile **lite**, re-lint — [examples/drop-skip-review-api-flip.md](examples/drop-skip-review-api-flip.md) |
+| **Smoke gap under skip-review** | Ordered recovery | Prefer re-Build → or Notes `smoke re-run` once → or drop skip-review → lite ([verify-and-fix.md](verify-and-fix.md)) |
 | **Task count ≥ 20** (Mode full, running) | Decision N (soft budget) | Continue · Reclassify/slim · Stop ([invariants.md](invariants.md)) |
 | **main-thread fallbacks ≥ 3** (running) | Decision N (soft pause) | Continue · Reclassify/model path · Stop ([invariants.md](invariants.md)) |
 | **Gate C decline / silence** | Stay paused or `stopped` | No commit/push/PR/merge |
+| **Merge success without `merge` in Gate C approved** | Stay `paused` | Leave Next for remaining actions — do not set `done` ([results.md](results.md)) |
 | **async-notify Gate B on Mode full** | Do not — use **blocking** | [hitl.md](hitl.md) Default Gate B (narrow async) |
+| **Blocking Gate B without Gate B approved** | Do **not** Build | Set **Gate B approved** `yes` (or named pick) — [hitl.md](hitl.md) |
 
 ## Anti-loop rules
 

@@ -15,7 +15,7 @@ Parent uses the **resolved** model for that stage’s tier (see `00-run.md`).
 |------|-------------------|
 | **full** | `ideation` → `gate-a` → (`ideation-update` if needed) → `skim` → `analyze` → `grill` → `design` → (parent) design-review… |
 | **simple** | `design-phase` only → (parent) design-verify-phase… |
-| **update** | `design-update` → (parent) re-review |
+| **update** | `design-update` (from `03a` or Notes `design-backloop`) → (parent) re-review |
 
 Clarity: before Analyze / Grill / Design (full) or **design-phase entry** (simple) — [stages/clarity-check.md](stages/clarity-check.md).
 

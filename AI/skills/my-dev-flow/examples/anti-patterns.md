@@ -19,15 +19,16 @@ Quick “wrong move → right move” for [`my-dev-flow`](../SKILL.md).
 | Ignore `main-thread fallbacks ≥ 3` | Decision N soft pause ([invariants.md](../invariants.md)) |
 | Keep **skip-review** after Has API/DB flips to yes | Mid-run reclassify Decision N; drop skip-review ([lenses.md](../lenses.md)) |
 | Pre-load security/perf/memory lenses “just in case” | Lens plan default **none**; add on clear signals only |
-| Force **api**/**db** lenses despite Notes `tiny-contract-tweak` | Fold into design-review / Quality; no isolated API/DB Tasks; never invent empty `03a-api`/`03a-db` |
+| Force **api**/**db** lenses despite Notes `tiny-contract-tweak` | Notes fold into Quality / code-review-phase; no isolated API/DB Tasks; never invent empty `03a-api`/`03a-db` |
 | Invent Verify commands / stack on `test-lite` | Read `00-run.md` Verify commands only; honor N/A ([verify-and-fix.md](../verify-and-fix.md)) |
 | Silently amend `03-design` / `04-tasks` inside Fix | Design-backloop Decision N |
 | Re-read full orchestrator `SKILL.md` every step | Card + [parent-next.md](../parent-next.md) / `lint-run.py --next` + **one** companion section |
 | Load whole subflow `stages.md` prompt body | Load only `stages/<stage-id>.md` for the Task |
 | Launch Build while Notes say veto window open **without** **Build armed** | Next turn / resume sets **Build armed** first ([hitl.md](../hitl.md)); lint `--before-build` |
+| Launch Build without **Gate B approved** when HITL Gate B is **blocking** | Set **Gate B approved** `yes` (or named pick); keep veto `none` ([hitl.md](../hitl.md)); lint `--before-build` / `--next` |
 | Paste full artifact catalog into every Task | Stage-scoped handoff via `handoff-for.py` only |
 | Use Status values like `review` / `test` as resume position | Status = `running\|paused\|stopped\|done`; position = stage id on card |
-| Mark run `done` before merge or on abort | `done` only after merge success; abort → `stopped` |
+| Mark run `done` on PR-only / commit-only or before Merge Result **success** | `done` only when Merge Result **success** **and** `merge` ∈ Gate C approved; subset without `merge` → stay `paused`; abort → `stopped` ([results.md](../results.md)) |
 | Invent unit/e2e runners when Verify commands say N/A | Honor N/A; do not invent a test stack |
 | Copy Gate B HITL tier into Grill | HITL Grill is independent ([grill.md](../grill.md) · [hitl.md](../hitl.md)) |
 | Mode **simple** `design-phase` skips Grill HITL when frontier open or Has API/DB | Still honor HITL Grill ([grill.md](../grill.md) · [hitl.md](../hitl.md)); bundle ≠ skip Grill |

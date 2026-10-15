@@ -27,7 +27,7 @@ Minimal walkthrough. Parent follows [stages.md](../stages.md) Happy path (simple
 | 7 | `code-review-phase` | Lite combined → Result **clean** |
 | 8 | `test-lite` | Result **success** |
 | 9 | Gate C | blocking — user names commit / push / PR / merge |
-| 10 | `merge` | Only approved actions → Status **`done`** + calibration Notes (≤3) |
+| 10 | `merge` | Only approved actions; Status **`done`** only when Result **success** **and** `merge` ∈ Gate C approved (PR-only / commit-only → stay **paused**) + calibration Notes (≤3) |
 
 ## Legal skip-review variant
 

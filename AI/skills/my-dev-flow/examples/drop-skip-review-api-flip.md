@@ -14,7 +14,7 @@ Analyze/Design sets **Has API: yes** (or Has DB yes).
 
 1. Immediately drop Review profile **skip-review** → **lite** (or reclassify to full if not tiny).
 2. Decision N if scope grew beyond tiny tweak ([invariants.md](../invariants.md)).
-3. Lint: `scripts/lint-run.py <run-dir> --check-skip-review` (or `--before-build`) must not error.
+3. Lint: default `scripts/lint-run.py <run-dir>` errors while skip-review + Has API/DB yes remain; after drop, default lint must pass. `--check-skip-review` / `--before-build` are optional explicit checks.
 4. After Build verify-pass: run `code-review-phase` → `test-lite` → Gate C (skip-review path **forbidden**).
 5. Gate B: if auth/schema in scope or API/DB yes → prefer **blocking** ([hitl.md](../hitl.md)).
 

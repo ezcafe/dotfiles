@@ -31,7 +31,7 @@ Anti-patterns: [anti-patterns.md](anti-patterns.md). API/DB rules: [lenses.md](.
 | 7 | `api-contract-review` ∥ `db-design-review` | **Same parent turn** (parallel); Pending parallel `api|db` → `none` when both done; both clean or Fix ask |
 | 8 | `design-review` | General clean (after isolated clean); Deferred Enhancements OK |
 | 9 | (04a) | Only if `04-tasks` lists concrete tests; else skip Notes |
-| 10 | Gate B | **blocking** required as default (Mode **full** — never async-notify default; [hitl.md](../hitl.md) Default Gate B narrow async); on approve set `Gate B veto: none` |
+| 10 | Gate B | **blocking** required as default (Mode **full** — never async-notify default; [hitl.md](../hitl.md) Default Gate B narrow async); on approve set `Gate B approved: yes` (or named pick) + `Gate B veto: none` |
 | 11 | `build` | Veto check → TDD → verify-pass → Smoke section |
 | 12 | Smoke Task | **skipped** (Build-writes-Smoke) |
 | 13 | Lens plan | Set `api+db` (+ **security** when authz/PII in scope) |
@@ -39,7 +39,7 @@ Anti-patterns: [anti-patterns.md](anti-patterns.md). API/DB rules: [lenses.md](.
 | 15 | `lens-api` ∥ `lens-db` (∥ `lens-security` if planned) | Parallel when 2+ → `merge-findings` |
 | 16 | `test-full` | One Task; Result **success** |
 | 17 | Gate C | blocking — user names commit / push / PR / merge |
-| 18 | `merge` | Only approved actions → Status **`done`** + calibration Notes (≤3) |
+| 18 | `merge` | Only approved actions; Status **`done`** only when Result **success** **and** `merge` ∈ Gate C approved (PR-only / commit-only → stay **paused**) + calibration Notes (≤3) |
 
 ## Tiny-tweak variant (not this ask)
 

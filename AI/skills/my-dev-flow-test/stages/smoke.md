@@ -2,7 +2,7 @@
 
 **Stage id:** `smoke`
 
-**When:** Smoke **re-run** only — Build did not leave smoke-pass, commands mismatch Verify commands, or Notes `smoke re-run`. Default after Build verify-pass: **parent skips this Task** (Build-writes-Smoke — see `{my-dev-flow}/verify-and-fix.md`).
+**When:** Smoke **re-run** only — Build did not leave smoke-pass, commands mismatch Verify commands, or Notes `smoke re-run`. Default after Build verify-pass: **parent skips this Task** (Build-writes-Smoke — see `{my-dev-flow}/verify-and-fix.md`). Under **skip-review**, prefer re-Build first; Notes `smoke re-run` allows one Smoke Task; else drop skip-review → lite.
 
 **subagent_type:** `generalPurpose`  
 **model:** resolved Fast  

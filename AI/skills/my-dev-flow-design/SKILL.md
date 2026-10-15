@@ -43,7 +43,7 @@ Design-only subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). No production c
 - **Has API / Has DB:** set `yes`/`no` in Analyze or Design. This skill does **not** write `03a-*`.
 - **Gate A** (full): day-to-day + 80/20 → `01a`; auto when Result **ok**.
 - **Grill** after Analyze: grill.md. Do not start Design on `needs-round`. HITL Grill ≠ Gate B.
-- **Update from review:** only `03a` Fix ask; stay aligned with Gate A idea.
+- **Update from review:** `03a` Fix ask, **or** Notes `design-backloop` / Decision N Option 1 (no prior Fix ask); stay aligned with Gate A idea.
 - Plain words. Max 3 design↔review rounds → Decision N (invariants.md).
 
 ## Models
@@ -54,7 +54,7 @@ Design-only subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). No production c
 
 **Full:** user idea; create slug/`00-run.md` if standalone.  
 **Simple:** `01-idea.md` present (or parent bootstrap); Mode simple; do not invent Ideation/Gate A/skim.  
-**Update:** `03a` Result **needs update** + existing `01`–`04`.
+**Update:** (`03a` Result **needs update**, **or** Notes `design-backloop` after Decision N Amend) + existing `01`–`04`.
 
 If not ready → **stop**.
 
@@ -65,12 +65,12 @@ Parent order: [`../my-dev-flow/stages.md`](../my-dev-flow/stages.md).
 ```
 Full:   Ideation → Gate A → skim → Analyze → Grill → Design → (parent) design-review → …
 Simple: design-phase → (parent) design-verify-phase → …
-Update: Update from 03a → (parent) re-review
+Update: Update from 03a or design-backloop → (parent) re-review
 ```
 
 ## Orchestrator rules
 
-- Detect: `03a` needs update → Update; Mode simple → **design-phase** only; else Full.
+- Detect: `03a` needs update **or** Notes `design-backloop` → Update; Mode simple → **design-phase** only; else Full.
 - Full: separate Tasks; Gate A before Analyze; Grill before Design.
 - Simple: one `design-phase` Task; Grill inside bundle when frontier open / Has API/DB.
 - Fresh Task + `stages/<id>.md` + paste `scripts/handoff-for.py <stage-id>` output (do not load whole handoffs.md for launch).

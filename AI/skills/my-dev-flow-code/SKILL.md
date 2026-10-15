@@ -53,7 +53,7 @@ Build subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). First output is a **d
 | Mode | Need |
 |------|------|
 | **TDD review** | `03`+`04` with planned tests; Gate B not required yet |
-| **Build** | Gate B checked; veto `none`; **Build armed** if async window open; Verify commands; prefer `04a` or Notes skip |
+| **Build** | Gate B checked; veto `none`; when HITL Gate B is **blocking**, **Gate B approved** `yes` (or named pick) — [hitl.md](../my-dev-flow/hitl.md); **Build armed** if async window open (**auto** may leave Gate B approved `none`); Verify commands; prefer `04a` or Notes skip |
 | **Fix-from-tests** | `06` smoke-fail/failure + Fix ask; Verify commands |
 
 If not ready → **stop**.

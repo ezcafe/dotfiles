@@ -29,15 +29,17 @@ Build, Fix, Smoke, and full/lite test **must** use these commands (same cwd). Do
 
 ## Gate B veto check (before Build coding)
 
-Build Task **first action:** read `00-run.md` **Gate B veto** and Notes. Full async rules: [hitl.md](hitl.md).
+Build Task **first action:** read `00-run.md` **Gate B veto**, **Gate B approved**, and Notes. Full async rules: [hitl.md](hitl.md). Aligns with [`my-dev-flow-code/stages/build.md`](../my-dev-flow-code/stages/build.md).
 
 | Condition | Action |
 |-----------|--------|
 | `Gate B veto: pending` | Stop; first return line `Result: blocked — Gate B veto`; do not change code |
+| HITL Gate B is **blocking** and **Gate B approved** is `none`/missing | Stop; first return line `Result: blocked — Gate B approved`; do not change code |
 | Notes say veto window open **and** **Build armed** missing | Stop; first return line `Result: blocked — Build armed missing`; do not change code |
-| `Gate B veto: none` and (no open veto window, or **Build armed** present) | Continue Build |
+| Notes match `design-backloop` | Stop; first return line `Result: blocked — design-backloop`; do not change code |
+| `Gate B veto: none` and (blocking → approved settled; auto may leave approved `none`) and (no open veto window, or **Build armed** present) and no `design-backloop` | Continue Build |
 
-Parent must not launch Build while veto is `pending`, or while veto window is open without **Build armed**. Lint: `scripts/lint-run.py <run-dir> --before-build`.
+Parent must not launch Build while veto is `pending`, while blocking Gate B lacks **Gate B approved**, while veto window is open without **Build armed**, or while Notes say `design-backloop`. Lint: `scripts/lint-run.py <run-dir> --before-build`.
 
 ## Verify gate (blocking)
 
@@ -70,10 +72,18 @@ Parent then:
 | Condition | Action |
 |-----------|--------|
 | Smoke section complete + smoke-pass + commands match Verify commands | **Skip Smoke Task** — treat as smoke-pass; continue (review or Gate C) |
-| Smoke incomplete, mismatch, or Notes `smoke re-run` | Launch Smoke Task (independent re-run) |
-| Review profile **skip-review** (legal only in **Mode simple** when Has API=no **and** Has DB=no — [lenses.md](lenses.md)) | Gate C test bar = Build verify-pass (+ Smoke section). No Smoke Task required. Mode full or Has API/DB = yes → must not stay skip-review |
+| Smoke incomplete, mismatch, or Notes `smoke re-run` | Launch Smoke Task (independent re-run) — see **skip-review ordered recovery** below |
+| Review profile **skip-review** (legal only in **Mode simple** when Has API=no **and** Has DB=no — [lenses.md](lenses.md)) | Gate C test bar = Build verify-pass (+ Smoke section). No Smoke Task required by default. Mode full or Has API/DB = yes → must not stay skip-review |
 
-Independent verification for merge remains: **full** / **lite** test after review (or smoke-pass alone for Mode simple legal skip-review).
+### Skip-review + Smoke ordered recovery (SoT)
+
+When Review profile is **skip-review** and Smoke is incomplete / mismatched / needs re-proof, parent uses this order (lint `--next` aligns):
+
+1. **Prefer re-Build** — rewrites Smoke section; stay on legal skip-review → Gate C path.
+2. **Or** Notes `smoke re-run` → allow **one** Smoke Task under skip-review (exception; clear the Notes token after smoke-pass).
+3. **Or** drop skip-review → **lite** → `code-review-phase` → `test-lite` → Gate C.
+
+Do **not** launch `smoke` under skip-review without Notes `smoke re-run` (lint warn). Independent verification for merge remains: **full** / **lite** test after review (or smoke-pass alone for Mode simple legal skip-review).
 
 ## Fix rules (TDD)
 

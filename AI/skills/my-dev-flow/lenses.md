@@ -15,8 +15,8 @@ Set during Analyze/Design (or earlier if obvious). **Before design-review**, par
 
 | Flag | Yes when | When yes, parent must |
 |------|----------|------------------------|
-| **Has API** | New/changed REST/GraphQL/routes/server actions, edge validators, cross-boundary public types | Full: isolated **API contract review** Task (∥ DB when both), **unless** [tiny tweak](#tiny-apidb-tweak). Simple: include in **design-verify-phase**. Include **api** in Lens plan (unless tiny tweak folds into Quality / code-review-phase) |
-| **Has DB** | New/changed tables/columns/indexes/migrations/ORM, notable writes/transactions/raw SQL | Full: isolated **DB design review** Task (∥ API when both), **unless** tiny tweak. Simple: include in **design-verify-phase**. Include **db** in Lens plan (unless tiny tweak) |
+| **Has API** | New/changed REST/GraphQL/routes/server actions, edge validators, cross-boundary public types | Full: isolated **API contract review** Task (∥ DB when both), **unless** [tiny tweak](#tiny-apidb-tweak). Simple: include in **design-verify-phase**. Include **api** in Lens plan (unless Notes fold into Quality / code-review-phase) |
+| **Has DB** | New/changed tables/columns/indexes/migrations/ORM, notable writes/transactions/raw SQL | Full: isolated **DB design review** Task (∥ API when both), **unless** tiny tweak. Simple: include in **design-verify-phase**. Include **db** in Lens plan (unless Notes fold into Quality / code-review-phase) |
 
 Independent flags. Skills: `{api-and-interface-design}`, `{database-and-data-model}` — resolve per [skills-path.md](skills-path.md) (`~/.cursor/skills` or `AI/skills`; not necessarily under this tree).
 
@@ -26,9 +26,10 @@ When **Has API = yes** or **Has DB = yes**:
 
 1. Always set the flag(s) **yes** (do not leave unknown).
 2. **Never** keep Review profile **`skip-review`**. Legal skip-review → Gate C is **Mode simple only** ([stages.md](stages.md)). Mid-run flip → Decision N reclassify; drop skip-review.
-3. Mode may stay **simple** only if [tiny tweak](#tiny-apidb-tweak) criteria all hold (fold contract checks into design-verify-phase / Quality). Otherwise prefer **full** (or Decision N).
-4. Lint: `scripts/lint-run.py <run-dir>` errors on skip-review + Has API/DB yes via `--before-build` **and** `--before-design-review` (and `--check-skip-review`).
+3. Mode may stay **simple** only if [tiny tweak](#tiny-apidb-tweak) criteria all hold (Notes fold into Quality / code-review-phase; design-verify-phase covers contracts). Otherwise prefer **full** (or Decision N).
+4. Lint: `scripts/lint-run.py <run-dir>` errors on skip-review + Has API/DB yes on **default lint** (when profile is skip-review), and via `--before-build` / `--before-design-review` / `--check-skip-review`.
 5. Mode **full** + both Has API and Has DB **yes** (not tiny tweak): set **Pending parallel:** `api|db` until both isolated `03a-*` exist, then `none` ([artifacts/00-run.md](artifacts/00-run.md); lint `--before-design-review`).
+6. Before code review: Lens plan must include **api** / **db** when the matching Has flag is yes (unless Notes fold into Quality / code-review-phase — e.g. `tiny-contract-tweak`). Lint: `--before-code-review` (also auto when card Next is `adversarial` or `code-review-phase`).
 
 ### Tiny API/DB tweak
 
@@ -37,7 +38,7 @@ When **all** are true, parent may fold contract checks (no isolated API/DB Task;
 - Change is one field / one column / one validator / docs-only contract note
 - No new auth, PII, or cross-service boundary
 - Blast radius stays inside one package
-- Notes: `tiny-contract-tweak — folded into design-review / Quality`
+- Notes: `tiny-contract-tweak — Notes fold into Quality / code-review-phase`
 
 Otherwise: Mode **full** → isolated API∥DB + forced lenses; Mode **simple** → API/DB inside **design-verify-phase** + Lens plan api/db (unless tiny tweak).
 
@@ -49,7 +50,7 @@ Before code review, set **Lens plan** in `00-run.md`. Launch only matching lense
 
 **Default: `none`.** Start with **none**. Add a lens only when a signal below is clearly true (or Has API / Has DB forces api/db, except tiny tweak). Do not pre-load security/perf/memory “just in case.”
 
-**Auto-add api/db:** Parent adds **api** / **db** to Lens plan only when Has API/DB = yes **and** none of: (1) Notes `tiny-contract-tweak`, (2) Lens plan already folds contract checks into Quality / code-review-phase. Finalize Lens plan before code review; may draft api/db at design-review clean.
+**Auto-add api/db:** Parent adds **api** / **db** to Lens plan only when Has API/DB = yes **and** none of: (1) Notes fold into Quality / code-review-phase (e.g. `tiny-contract-tweak`), (2) Lens plan already records that fold. Finalize Lens plan before code review; may draft api/db at design-review clean.
 
 | Lens | Stage id | Launch when |
 |------|----------|-------------|

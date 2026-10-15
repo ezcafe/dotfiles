@@ -2,20 +2,28 @@
 """Lint a my-dev-flow run folder (.my-docs/workflow/<slug>/).
 
 Checks required 00-run.md fields with exact-token enums (reject template `|`),
-Status, Mode, Review profile, Gate B veto, Pending parallel, Has API/DB,
-stage ids, Verify commands before Build, skip-review+API/DB error
-(--before-build, --before-design-review, or --check-skip-review),
+Status, Mode, Review profile, Gate B veto, Gate B approved, Pending parallel,
+Has API/DB, stage ids, Verify commands before Build, skip-review+API/DB error
+(always on default lint when profile is skip-review; also --before-build /
+--before-design-review / --check-skip-review),
 Mode full+skip-review error, Mode simple+full error, Mode full + HITL Gate B
 auto/async-notify error, Mode simple + Has API/DB yes + soft Gate B error,
 Mode full API∥DB Pending parallel (simple keeps none),
-async Gate B gap + Build armed, Gate C approved before merge
-(auto when card Next=merge, or with --before-merge).
+async Gate B gap + Build armed, Gate B approved when HITL Gate B is blocking
+(--before-build / --next), Notes design-backloop → error until cleared after
+fresh Gate B settle (blocks Build even when Gate B soft / approved none),
+Gate C approved before merge (auto when card Next=merge, or with --before-merge),
+Lens plan api/db before code review (--before-code-review or Next in
+adversarial / code-review-phase).
 
 Also:
   --next              print next incomplete stage hint + companion / handoff
-                      (no Task handoff when blocked / gate-b / gate-c /
-                      merge without Gate C approved)
+                      (no Task handoff when Status done|stopped / blocked /
+                      gate-b / gate-c / Build without Gate B approved when
+                      blocking / merge without Gate C approved)
+  Status=done         error unless merge ∈ Gate C approved
   --before-merge      require Gate C approved actions (also auto when Next=merge)
+  --before-code-review  require Lens plan api/db when Has API/DB yes (not tiny/fold)
   --dry-run-seed      create slug dir, seed 00-run.md from template, lint, stop
   --check-stage-ids   verify stage-id registry (handoffs / parent-next / VALID_STAGE_IDS / stages/*.md)
 """
@@ -55,6 +63,7 @@ VALID_GATE_C_ACTIONS = frozenset({"commit", "push", "pr", "merge"})
 VALID_PENDING_PARALLEL = frozenset({"none", "api", "db", "api|db"})
 
 # Mode × profile Happy-path legality for --next (warn only)
+# grill + Analyze→Design peers are Mode full standalone (simple uses design-phase)
 FULL_ONLY_STAGES = frozenset(
     {
         "ideation",
@@ -62,6 +71,7 @@ FULL_ONLY_STAGES = frozenset(
         "ideation-update",
         "skim",
         "analyze",
+        "grill",
         "design",
         "design-review",
         "api-contract-review",
@@ -71,6 +81,7 @@ FULL_ONLY_STAGES = frozenset(
         "test-full",
     }
 )
+CODE_REVIEW_ENTRY_STAGES = frozenset({"adversarial", "code-review-phase"})
 SIMPLE_BUNDLE_STAGES = frozenset({"design-phase", "design-verify-phase"})
 PROFILE_FULL_ONLY_STAGES = frozenset({"adversarial", "quality", "test-full"})
 PROFILE_LITE_PATH_STAGES = frozenset({"code-review-phase", "test-lite"})
@@ -168,8 +179,18 @@ PENDING_PARALLEL_RE = re.compile(
 HAS_API_LINE_RE = re.compile(r"^[-*]?\s*\*\*Has API:\*\*\s*(.+)$", re.M | re.I)
 HAS_DB_LINE_RE = re.compile(r"^[-*]?\s*\*\*Has DB:\*\*\s*(.+)$", re.M | re.I)
 HITL_GATE_B_RE = re.compile(r"^[-*]?\s*\*\*HITL Gate B:\*\*\s*(.+)$", re.M | re.I)
+GATE_B_APPROVED_RE = re.compile(
+    r"^[-*]?\s*\*\*Gate B approved:\*\*\s*(.+)$", re.M | re.I
+)
 GATE_C_APPROVED_RE = re.compile(
     r"^[-*]?\s*\*\*Gate C approved:\*\*\s*(.+)$", re.M | re.I
+)
+LENS_PLAN_RE = re.compile(r"^\*\*Lens plan:\*\*\s*(.+)$", re.M | re.I)
+SMOKE_RERUN_RE = re.compile(r"(?i)\bsmoke\s+re-?run\b")
+FOLD_API_DB_RE = re.compile(
+    r"(?i)(?:fold|folded).{0,40}(?:api|db|contract)|"
+    r"(?:api|db|contract).{0,40}(?:fold|folded).{0,40}"
+    r"(?:quality|code-review-phase|lite)"
 )
 NOTES_SECTION_RE = re.compile(
     r"### Notes\s*\n(.*?)(?=\n### |\n## |\Z)", re.M | re.S
@@ -198,7 +219,147 @@ PARENT_TURN_GAP_RE = re.compile(
     r"(?i)parent turn gap|turn gap observed|async-notify gap|one[- ]turn gap"
 )
 TINY_TWEAK_RE = re.compile(r"(?i)tiny-contract-tweak")
+# Active Notes bullet only (not doc pointers like "Design-backloop: stages.md")
+DESIGN_BACKLOOP_RE = re.compile(
+    r"(?i)(?:^|\n)\s*[-*]\s*`?design-backloop`?(?:\s*$|\s*[—#–-]|\s*\n)"
+)
 SOFT_TASK_CAP = 20
+
+
+def _parse_gate_b_approved(text: str) -> str | None:
+    """Return primary Gate B approved token, or None if missing/template.
+
+    Values: ``none`` (not settled), ``yes``, or a named pick (any non-none token).
+    """
+    m = GATE_B_APPROVED_RE.search(text)
+    if not m:
+        return None
+    raw = m.group(1).strip()
+    if _looks_like_template(raw):
+        return None
+    primary = re.split(r"\s+[—#–-]\s+|\s{2,}", raw, maxsplit=1)[0].strip()
+    compact = primary.strip("`*_").lower()
+    if compact in ("", "none", "n/a", "-", "—"):
+        return "none"
+    # Keep original primary (may be "yes" or named pick like "Option 2")
+    return primary.strip("`*_")
+
+
+def _gate_b_approved_ok(text: str) -> bool:
+    """True when Gate B approved is yes or a named pick (not none/missing)."""
+    val = _parse_gate_b_approved(text)
+    if val is None or val.lower() == "none":
+        return False
+    return True
+
+
+def _parse_lens_plan_tokens(text: str) -> set[str]:
+    """Return lowercase lens tokens from Lens plan (empty if missing/none)."""
+    m = LENS_PLAN_RE.search(text)
+    if not m:
+        return set()
+    raw = m.group(1).strip()
+    if _looks_like_template(raw):
+        return set()
+    primary = re.split(r"\s+[—#–-]\s+|\s{2,}", raw, maxsplit=1)[0].strip()
+    compact = primary.strip("`*_").lower()
+    if compact in ("", "none", "n/a", "-", "—"):
+        return set()
+    parts = re.split(r"[,|+/]+", compact)
+    return {p.strip() for p in parts if p.strip()}
+
+
+def _check_gate_b_approved(
+    text: str, issues: list[Issue], *, before_build: bool
+) -> None:
+    """When HITL Gate B is blocking, require Gate B approved before Build."""
+    enforce = before_build or _card_next_stage_id(text) == "build"
+    if not enforce:
+        return
+    tier = _parse_hitl_gate_b(text)
+    if tier != "blocking":
+        return
+    if _gate_b_approved_ok(text):
+        return
+    raw = _parse_gate_b_approved(text)
+    if raw is None:
+        issues.append(
+            Issue(
+                "error",
+                "Gate B approved missing — set yes (or named pick) after "
+                "blocking Gate B yes (hitl.md)",
+            )
+        )
+    else:
+        issues.append(
+            Issue(
+                "error",
+                "Gate B approved is none — require yes (or named pick) before "
+                "Build when HITL Gate B is blocking (hitl.md)",
+            )
+        )
+
+
+def _check_design_backloop_gate_b(
+    text: str, issues: list[Issue]
+) -> None:
+    """Notes design-backloop → error until cleared after fresh Gate B settle.
+
+    After Option 1: Notes design-backloop + Gate B approved none + Next
+    design-update (not Build). Clear token only after fresh Gate B settle
+    (stages.md: blocking → clear + approved; auto → clear, approved may
+    stay none). Blocks Build even when HITL Gate B is soft.
+    """
+    notes = _notes_blob(text)
+    if not DESIGN_BACKLOOP_RE.search(notes):
+        return
+    issues.append(
+        Issue(
+            "error",
+            "Notes design-backloop — do not Build; Next design-update → "
+            "re-review → Gate B; clear Notes design-backloop only after "
+            "fresh Gate B settle (stages.md)",
+        )
+    )
+
+
+def _check_lens_plan_api_db(
+    text: str, issues: list[Issue], *, before_code_review: bool
+) -> None:
+    """Require Lens plan api/db when Has API/DB yes (not tiny-tweak / Notes fold)."""
+    next_id = _card_next_stage_id(text)
+    enforce = before_code_review or next_id in CODE_REVIEW_ENTRY_STAGES
+    if not enforce:
+        return
+
+    has_api = _parsed_yes_no(text, HAS_API_LINE_RE)
+    has_db = _parsed_yes_no(text, HAS_DB_LINE_RE)
+    needs_api = has_api == "yes"
+    needs_db = has_db == "yes"
+    if not needs_api and not needs_db:
+        return
+
+    notes = _notes_blob(text)
+    if TINY_TWEAK_RE.search(notes) or FOLD_API_DB_RE.search(notes):
+        return
+
+    tokens = _parse_lens_plan_tokens(text)
+    missing: list[str] = []
+    if needs_api and "api" not in tokens:
+        missing.append("api")
+    if needs_db and "db" not in tokens:
+        missing.append("db")
+    if not missing:
+        return
+    issues.append(
+        Issue(
+            "error",
+            "Lens plan missing "
+            + "+".join(missing)
+            + " — Has API/DB yes requires api/db in Lens plan "
+            "(or Notes tiny-contract-tweak / fold) before code review (lenses.md)",
+        )
+    )
 
 
 def stage_ids_from_handoffs(text: str | None = None) -> frozenset[str]:
@@ -666,8 +827,33 @@ def _check_gate_c_approved(
         )
 
 
+def _check_status_done_requires_merge(
+    text: str, issues: list[Issue]
+) -> None:
+    """Status done only when merge ∈ Gate C approved (stages.md Done criteria)."""
+    status_m = REQUIRED_FIELD_PATTERNS["Status"].search(text)
+    if not status_m:
+        return
+    if _first_token(status_m.group(1)) != "done":
+        return
+    _raw, actions = _parse_gate_c_approved(text)
+    if "merge" in actions:
+        return
+    issues.append(
+        Issue(
+            "error",
+            "Status=done requires merge in Gate C approved — "
+            "PR-only/commit-only stays paused; abort → stopped "
+            "(stages.md · results.md · hitl.md)",
+        )
+    )
+
+
 def _next_stage_legality_warns(
-    stage_id: str, mode_token: str | None, review_token: str | None
+    stage_id: str,
+    mode_token: str | None,
+    review_token: str | None,
+    notes: str = "",
 ) -> list[str]:
     """Warn messages when Next stage is illegal for Mode × Review profile."""
     warns: list[str] = []
@@ -704,10 +890,21 @@ def _next_stage_legality_warns(
             "profile full uses Adv→Quality→test-full (stages.md)"
         )
     if review_token == "skip-review" and stage_id in SKIP_REVIEW_FORBIDDEN_STAGES:
-        warns.append(
-            f"Next `{stage_id}` illegal under skip-review — "
-            "legal path is Gate C after Build verify-pass (lenses.md · hitl.md)"
-        )
+        # M3: smoke allowed once when Notes say smoke re-run; else prefer re-Build
+        if stage_id == "smoke" and SMOKE_RERUN_RE.search(notes or ""):
+            return warns
+        if stage_id == "smoke":
+            warns.append(
+                "Next `smoke` illegal under skip-review without Notes "
+                "`smoke re-run` — prefer re-Build to rewrite Smoke, or Notes "
+                "`smoke re-run` once, or drop skip-review → lite "
+                "(verify-and-fix.md)"
+            )
+        else:
+            warns.append(
+                f"Next `{stage_id}` illegal under skip-review — "
+                "legal path is Gate C after Build verify-pass (lenses.md · hitl.md)"
+            )
     return warns
 
 
@@ -824,6 +1021,7 @@ def lint_run_md(
     before_build: bool,
     check_skip_review: bool = False,
     before_merge: bool = False,
+    before_code_review: bool = False,
     run_dir: Path | None = None,
 ) -> list[Issue]:
     issues: list[Issue] = []
@@ -880,7 +1078,11 @@ def lint_run_md(
         )
 
     _check_hitl_gate_b_mode(text, issues, mode_token)
+    _check_gate_b_approved(text, issues, before_build=before_build)
+    _check_design_backloop_gate_b(text, issues)
     _check_gate_c_approved(text, issues, before_merge=before_merge)
+    _check_status_done_requires_merge(text, issues)
+    _check_lens_plan_api_db(text, issues, before_code_review=before_code_review)
 
     cm = CARD_STAGE_RE.search(text)
     if cm:
@@ -940,7 +1142,13 @@ def lint_run_md(
             if veto == "pending":
                 issues.append(Issue("error", "Gate B veto is pending — do not Build"))
 
-    if before_build or before_design_review or check_skip_review:
+    # M1: always ban skip-review + Has API/DB on default lint (and explicit flags)
+    if (
+        before_build
+        or before_design_review
+        or check_skip_review
+        or review_token == "skip-review"
+    ):
         _check_skip_review_api_db(text, issues)
 
     metrics_present = bool(
@@ -1001,14 +1209,48 @@ def print_next_hint(run_dir: Path) -> int:
     print(f"Status: {status}")
     print(f"Stage id (card): {stage_raw or '(empty)'}")
     print(f"Next step (card): {next_raw or '(empty)'}")
+
+    # Terminal lifecycle: do not launch further pipeline Tasks
+    if status in ("done", "stopped"):
+        print("companion: stages.md · results.md (Done / abort)")
+        print("handoff: do-not-launch")
+        if status == "done":
+            print(
+                "next action: run finished — new work needs a new slug "
+                "(or explicit Decision to re-open)"
+            )
+        else:
+            print(
+                "next action: run stopped — freeze stage; require Decision "
+                "to resume or new slug"
+            )
+        return 0
+
     if not stage_id:
         print("hint: set Orchestrator card Next step / Stage id")
         print(f"companion: {PARENT_NEXT_MD}")
         return 0
     print(f"next incomplete stage: {stage_id}")
 
-    for msg in _next_stage_legality_warns(stage_id, mode_token, review_token):
+    for msg in _next_stage_legality_warns(
+        stage_id, mode_token, review_token, notes=notes
+    ):
         print(f"warn: {msg}")
+
+    # Design-backloop: redirect Build only — gate-b after re-review is settle path
+    # (token stays until settle; do not redirect Next=gate-b → design-update)
+    if DESIGN_BACKLOOP_RE.search(notes) and stage_id == "build":
+        print(
+            "warn: Notes design-backloop — do not Build; Next design-update "
+            "until re-review, then gate-b settle (stages.md)"
+        )
+        print("companion: stages.md · parent-next.md (row for `design-update`)")
+        print("handoff: do-not-launch")
+        print(
+            "next action: set Next design-update (or gate-b after re-review); "
+            "clear design-backloop only after fresh Gate B settle"
+        )
+        return 0
 
     # Parent gates / blocked async gap: never emit Task handoff
     if stage_id == "build" and veto_window and not build_armed:
@@ -1020,11 +1262,28 @@ def print_next_hint(run_dir: Path) -> int:
         print("handoff: do-not-launch")
         print("next action: set Notes/Run log Build armed (parent turn gap), re-run --next")
         return 0
+    if stage_id == "build":
+        hitl_tier = _parse_hitl_gate_b(text)
+        if hitl_tier == "blocking" and not _gate_b_approved_ok(text):
+            print("companion: hitl.md · parent-next.md (row for `build`)")
+            print("handoff: do-not-launch")
+            print(
+                "next action: blocking Gate B — set Gate B approved "
+                "yes (or named pick), then re-run --next"
+            )
+            return 0
     if stage_id in ("gate-b", "gate-c"):
         print(f"companion: hitl.md · parent-next.md (row for `{stage_id}`)")
         print("handoff: do-not-launch")
         if stage_id == "gate-b":
-            print("next action: Gate B digest + HITL (no Task) — hitl.md")
+            if DESIGN_BACKLOOP_RE.search(notes):
+                print(
+                    "next action: Gate B digest + settle while design-backloop "
+                    "present — clear Notes token on settle (stages.md); "
+                    "blocking → set approved; auto may leave approved none"
+                )
+            else:
+                print("next action: Gate B digest + HITL (no Task) — hitl.md")
         else:
             print(
                 "next action: Gate C blocking ask; set Gate C approved "
@@ -1043,7 +1302,9 @@ def print_next_hint(run_dir: Path) -> int:
             return 0
 
     print(f"companion: parent-next.md (row for `{stage_id}`)")
-    print(f"handoff: python {PACKAGE / 'scripts' / 'handoff-for.py'} {stage_id}")
+    print(
+        f"handoff: python {PACKAGE / 'scripts' / 'handoff-for.py'} {stage_id}"
+    )
     return 0
 
 
@@ -1099,7 +1360,10 @@ def main() -> int:
     p.add_argument(
         "--before-build",
         action="store_true",
-        help="Enforce Verify commands + Gate B veto none + Build armed + async gap",
+        help=(
+            "Enforce Verify commands + Gate B veto none + Build armed + async gap "
+            "+ Gate B approved when HITL Gate B is blocking"
+        ),
     )
     p.add_argument(
         "--before-merge",
@@ -1107,12 +1371,25 @@ def main() -> int:
         help=(
             "Require Gate C approved actions (commit|push|pr|merge); "
             "also auto-enforced when card Next=merge"
-        )
+        ),
+    )
+    p.add_argument(
+        "--before-code-review",
+        action="store_true",
+        help=(
+            "Require Lens plan api/db when Has API/DB yes "
+            "(unless Notes tiny-contract-tweak / fold); "
+            "also auto when card Next is adversarial or code-review-phase"
+        ),
     )
     p.add_argument(
         "--check-skip-review",
         action="store_true",
-        help="Error if skip-review + Has API/DB yes (also implied by --before-build / --before-design-review)",
+        help=(
+            "Error if skip-review + Has API/DB yes "
+            "(also on default lint when profile is skip-review; "
+            "and --before-build / --before-design-review)"
+        ),
     )
     p.add_argument(
         "--strict",
@@ -1170,6 +1447,7 @@ def main() -> int:
         before_build=args.before_build,
         check_skip_review=args.check_skip_review,
         before_merge=args.before_merge,
+        before_code_review=args.before_code_review,
         run_dir=args.run_dir,
     )
 

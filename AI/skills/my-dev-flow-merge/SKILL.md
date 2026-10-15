@@ -39,7 +39,7 @@ Merge subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). Human owns top risks.
 - PR body from [`artifacts/pr-body.md`](../my-dev-flow/artifacts/pr-body.md) — **not** INDEX.md.
 - Never commit secrets; never force-push; do not skip hooks.
 - Honor subsets: “PR only” → stop after `gh pr create`; “commit only” → commit and stop (no push).
-- Merge Task returns first line `Result: success | aborted` ([`results.md`](../my-dev-flow/results.md)). After **success** when merge was approved, **parent** sets Status **`done`** on `00-run.md`. **aborted** / reject → `stopped`, not `done`.
+- Merge Task returns first line `Result: success | aborted` ([results.md](../my-dev-flow/results.md)). Parent sets Status **`done`** only when Result **success** **and** `merge` ∈ **Gate C approved**. Subset without merge → stay `paused`. **aborted** / reject → `stopped`, not `done`.
 - Load one `stages/merge.md` per Task; plain words in PR body.
 
 ## Models
@@ -67,7 +67,7 @@ GATE C (blocking user yes — parent may ask) → Merge Task (only approved: com
 - After yes: write **`Gate C approved:`** subset on `00-run.md`; launch Merge Task ([`stages/merge.md`](stages/merge.md)) with **`description`** `Push PR and merge`. Pass only approved actions.
 - If user says “PR only” / not merge yet: stop after `gh pr create`.
 - If user says “commit only”: commit and stop (no push).
-- Expect first line `Result: success | aborted`; then PR URL / detail. Parent marks Status `done` only after Result **success** when merge was approved.
+- Expect first line `Result: success | aborted`; then PR URL / detail. Parent marks Status `done` only after Result **success** and `merge` ∈ Gate C approved.
 
 ## Start checklist
 

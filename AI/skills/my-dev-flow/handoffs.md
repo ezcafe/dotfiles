@@ -5,7 +5,7 @@ Stage-scoped handoffs, Decision options shape, artifact size caps, progress path
 Tiny-tweak / never invent empty `03a-api` / `03a-db`: [lenses.md](lenses.md) (do not treat this file as second SoT for that rule).  
 Templates: [artifacts/INDEX.md](artifacts/INDEX.md). Severity: [severity.md](severity.md). Paths: [skills-path.md](skills-path.md). Verify/Fix: [verify-and-fix.md](verify-and-fix.md). Parent checklist: [invariants.md](invariants.md). HITL / veto: [hitl.md](hitl.md). Pipeline order: [stages.md](stages.md).
 
-**Required for Task launch:** `python scripts/handoff-for.py <stage-id>` → prints base block template + that stage’s R/W row.  
+**Required for Task launch:** `python {my-dev-flow}/scripts/handoff-for.py <stage-id>` → prints base block template + that stage’s R/W row (resolve `{my-dev-flow}` per [skills-path.md](skills-path.md); optional `--skill-root` / `--slug`).  
 **This file (handoffs.md):** edit SoT / debug only — do **not** load the whole file for every launch.
 
 ## Decision options (required for every choice list)
@@ -44,6 +44,8 @@ Do **not** paste the full artifact catalog into every Task. Use the **base block
 
 ### Base block (every Task)
 
+Printed by `python {my-dev-flow}/scripts/handoff-for.py <stage-id>`. With `--skill-root <abs>`, paths below become absolute under that root.
+
 ```
 Repo root: <absolute path>
 Workflow slug: <slug>
@@ -75,7 +77,7 @@ Severity exit per my-dev-flow/severity.md (Critical/Major block clean; defer Enh
 | `db-design-review` | `00-run.md`, `02-analysis.md`, `03-design.md` (Database contracts + example queries), `04-tasks.md`, `02-skim.md` (if present), repo `AGENTS.md` / `db/schema` / migration patterns when present — stage N/A when Has DB = no or Notes `tiny-contract-tweak` | `03a-db-design-review.md` only (do not invent if skipped) |
 | `design-update` | `00-run.md`, `03a-design-review-log.md`, `03a-api-contract-review.md` (if present — not Notes `tiny-contract-tweak` / skipped), `03a-db-design-review.md` (if present — not Notes `tiny-contract-tweak` / skipped), `01-idea.md`, `02-skim.md` (if present), `02-analysis.md`, `02b-grill.md` (if present), `03-design.md`, `04-tasks.md` | Fix-ask targets + round notes in `03a*` files (no empty `03a-api` / `03a-db`) |
 | `tdd-review` | `00-run.md`, `03-design.md`, `04-tasks.md`, `03a-design-review-log.md` (if present) — **only when planned tests exist** | `04a-tdd-test-review.md` |
-| `build` | `00-run.md` (Verify commands + **Gate B veto** must be `none`; if Notes veto window open → **Build armed** required — [hitl.md](hitl.md) · [verify-and-fix.md](verify-and-fix.md)), `03-design.md`, `04-tasks.md`, `04a-tdd-test-review.md` (if present), when **Has UI**: Design UI specs in `03-design` / acceptance in `04-tasks` (+ `01a-idea-ui-review.md` if present for Gate A #1/#2), `06-test-log.md` (create/update Smoke) | code + Smoke section; first line Result **verify-pass** \| **verify-fail**; if veto `pending` or (veto window open without **Build armed**) → stop without coding (`blocked — …`); parent skips Smoke Task on verify-pass |
+| `build` | `00-run.md` (Verify commands + **Gate B veto** must be `none`; when HITL Gate B is **blocking** → **Gate B approved** `yes`/named pick; if Notes veto window open → **Build armed** required — [hitl.md](hitl.md) · [verify-and-fix.md](verify-and-fix.md)), `03-design.md`, `04-tasks.md`, `04a-tdd-test-review.md` (if present), when **Has UI**: Design UI specs in `03-design` / acceptance in `04-tasks` (+ `01a-idea-ui-review.md` if present for Gate A #1/#2), `06-test-log.md` (create/update Smoke) | code + Smoke section; first line Result **verify-pass** \| **verify-fail**; if veto `pending`, (blocking without **Gate B approved**), or (veto window open without **Build armed**) → stop without coding (`blocked — …`); parent skips Smoke Task on verify-pass |
 | `smoke` | `00-run.md`, `06-test-log.md` | `06-test-log.md` (Smoke section) — only when Smoke re-run needed |
 | `adversarial` | `00-run.md`, `04-tasks.md`, `05-review-log.md` + draft code/tests | `05-review-log.md` (Adversarial section) |
 | `quality` | `00-run.md`, `01-idea.md`, `01a-idea-ui-review.md` (if present), `03-design.md`, `04-tasks.md`, `05-review-log.md` + draft code | `05-review-log.md` (Quality section) |

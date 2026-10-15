@@ -3,7 +3,7 @@ Copy into `.my-docs/workflow/<slug>/`. [handoffs.md](../handoffs.md) · [LEGACY.
 # 00-run.md
 
 Fill **Required** at Step 0. Fill **Optional** when known.  
-**Lint (required):** `scripts/lint-run.py <run-dir>` at Step 0; `--before-design-review` before design-review; `--before-build` before Build; `--before-merge` before merge when Next=`merge`.
+**Lint (required):** `scripts/lint-run.py <run-dir>` at Step 0; `--before-design-review` before design-review; `--before-build` before Build; `--before-code-review` before Adv / code-review-phase; `--before-merge` before merge when Next=`merge`.
 
 **Enums (exact single token — no `|` templates in filled runs):**
 
@@ -13,6 +13,7 @@ Fill **Required** at Step 0. Fill **Optional** when known.
 | Mode | `full` \| `simple` |
 | Review profile | `full` \| `lite` \| `skip-review` |
 | Gate B veto | `none` \| `pending` |
+| Gate B approved | `none` \| `yes` \| named pick (e.g. `Option 2`) |
 | Pending parallel | `none` \| `api` \| `db` \| `api\|db` |
 | Has UI / API / DB | `yes` \| `no` |
 | Last Verify | `pending` \| `verify-pass` \| `verify-fail` |
@@ -54,6 +55,9 @@ Fill **Required** at Step 0. Fill **Optional** when known.
 
 **Gate B veto:** none
 <!-- Exact one of: none | pending — hitl.md. Must be none before Build. -->
+
+**Gate B approved:** none
+<!-- none until Gate B settles. HITL Gate B blocking → yes (or named pick) before Build. auto → may stay none. async-notify → Build armed + gap (not this field) — hitl.md. -->
 
 **Last stage:** stage id + short note (e.g. `build verify-pass`, `gate-b async-notify`) — resume from next incomplete stage id
 
@@ -120,7 +124,7 @@ Update after each step. Parent reads **this card + one** stages/hitl/models/lens
 | Verify attempts | 0 |
 | Gate B veto | none |
 | Artifact to check | |
-| Design-backloop | none |
+| Design backloop | none |
 | Main-thread fallback | none |
 
 ### Gates
@@ -134,9 +138,9 @@ Update after each step. Parent reads **this card + one** stages/hitl/models/lens
 - Abort / scope-change: Status `stopped` + frozen stage + reason
 - async-notify Gate B tokens: write live lines only when posting / arming — see hitl.md (do not paste example tokens into Notes at seed time)
 - Gate C yes: set **Gate C approved:** commit,push,pr,merge (subset as named); optional Notes `Gate C yes — … (chat HH:MM)` — hitl.md
-- Design-backloop: failure-playbook.md / invariants.md
-- tiny-contract-tweak — folded into design-review / Quality (optional)
-- Status `done` only after merge success; abort → `stopped`
+- Design backloop path: failure-playbook.md / invariants.md / stages.md
+- tiny-contract-tweak — Notes fold into Quality / code-review-phase (optional)
+- Status `done` only after Merge Result success **and** `merge` ∈ Gate C approved; subset without merge → stay paused; abort → `stopped`
 - Calibration (required after `done`, ≤3 lines): Mode OK? · Review profile OK? · Biggest friction stage? — append same lines to `.my-docs/workflow/_calibration.md` (stages.md Done criteria)
 
 ### Run log
