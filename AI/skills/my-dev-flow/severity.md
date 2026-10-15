@@ -1,6 +1,9 @@
 # Severity exit (canonical)
 
-All my-dev-flow subflows use this rule unless a stage says otherwise.
+**This file is SoT for:** clean exit (Critical/Major vs Enhancement).  
+All my-dev-flow subflows use this rule unless a stage says otherwise.  
+**Result first-line tokens** (verify-pass, clean, blocked, …): [results.md](results.md).  
+Lens / skip-review / tiny-tweak: [lenses.md](lenses.md). Pipeline order + Review profiles: [stages.md](stages.md).
 
 ## Severities
 
@@ -19,12 +22,4 @@ Enhancements and nits do **not** block clean. List them in the findings table an
 
 ## Fix ask
 
-Fix ask bullets include **Critical** and **Major** only (≤ cap in handoffs.md). Optional: one line “Deferred Enhancements: …” in Notes.
-
-## Review profile
-
-| Profile | Code review |
-|---------|-------------|
-| **full** | Adversarial → Quality → lenses → test (separate Tasks; Mode full only) |
-| **lite** | **Must** use one Task (`Lite combined review` / stage id `code-review-phase`) for Adversarial + Quality when Lens plan is `none` or **one** lens. Do **not** launch separate Adversarial then Quality. If Lens plan has **2+** lenses → Lite combined for Adv+Quality, then parallel lenses + Merge as usual |
-| **skip-review** | Skip this subflow entirely after Build **verify-pass** (+ Smoke section) |
+Fix ask bullets include **Critical** and **Major** only (≤ cap in [handoffs.md](handoffs.md)). Optional: one line “Deferred Enhancements: …” in Notes.

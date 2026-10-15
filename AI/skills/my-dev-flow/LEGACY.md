@@ -1,6 +1,7 @@
 # my-dev-flow legacy (do not create on new runs)
 
 These steps and artifacts were **removed**. New runs ignore them.
+Aliases below stay for **resume** of old runs only.
 
 | Removed | What it was | What to do instead |
 |---------|-------------|--------------------|
@@ -10,20 +11,26 @@ These steps and artifacts were **removed**. New runs ignore them.
 
 **Resume old runs:** treat Gate A2 / `01b` / `ui-refs` as skipped/N/A. Do not re-open them.
 
-**Aliases (still valid):**
+## Aliases (resume only — not for new runs)
+
+Prefer current names on new runs. Accept these when reading old `00-run.md` / handoffs:
 
 | Legacy | Prefer now |
 |--------|------------|
 | Gate 1 + Gate 2-UI | Gate A |
 | Gate 2 | Gate B |
 | Gate 3 | Gate C |
-| **SPM plan** | **Lens plan** |
-| Stage ids `spm-api` … `spm-memory` | `lens-api` … `lens-memory` (accept old ids on resume) |
-| **Merged SPM** / mode `merged-spm` | **Merged lenses** / mode `merged-lenses` |
-| Separate test Tasks: Coverage / Add missing e2e / Run suite | One Task `test-full` (resume: treat old three as that step) |
+| **SPM plan** / **Merged SPM** / mode `merged-spm` | **Lens plan** / **Merged lenses** / `merged-lenses` |
+| Stage ids `spm-api` … `spm-memory` | `lens-api` … `lens-memory` |
+| “Shared handoff block” | Stage-scoped handoff for that stage id ([handoffs.md](handoffs.md)) |
+| Separate test Tasks: Coverage / Add missing e2e / Run suite | One Task `test-full` |
 | Mode simple: separate Analyze → Grill → Design | One Task `design-phase` |
 | Mode simple: separate API/DB + design-review | One Task `design-verify-phase` |
 | Lite: optional separate Adversarial + Quality | **Required** `code-review-phase` / Lite combined when profile lite |
+| Lens Result `has findings` | `needs fix` ([results.md](results.md); Critical/Major open → needs fix, else clean) |
+| Old Status values without phase bundles | Map to card **Stage id** `design-phase` / `design-verify-phase` / `code-review-phase` / `test-full` / `test-lite` |
+| Status used as pipeline position (`ideation`, `review`, `test`, `gate-b`, …) | **Status** = `running\|paused\|stopped\|done` only; put position on **Last stage** / Orchestrator card Stage id |
+| **Complexity** as simple\|complex second classifier | Complexity = **one-line reason** only; Mode remains the classifier |
 
 ## Renamed subflow skills
 
@@ -43,9 +50,6 @@ Treat old trigger phrases as the new skill names.
 Canonical skill text lives in the repo under **`AI/skills/`**. Cursor loads copies from
 `~/.cursor/skills/` — keep them in sync with `AI/skills/sync-to-cursor.sh`.
 
-## Doc order note (2026-10)
+## Doc layout note
 
-`my-dev-flow/SKILL.md` **Sub-workflows** is an **inventory** table (not runtime order).
-Canonical runtime: [stages.md](stages.md) **Happy path** — after Build:
-**Smoke → review → test → Gate C**. Old numbered Order columns that listed test
-before review are obsolete.
+Runtime order: [stages.md](stages.md) **Full/Simple pipeline order**. Progress paths / Task descriptions → [handoffs.md](handoffs.md). HITL → [hitl.md](hitl.md). Models → [models.md](models.md). Lenses → [lenses.md](lenses.md). Parent checklist → [invariants.md](invariants.md). After Build: Mode × Review profile table in stages.md (legal skip-review → [lenses.md](lenses.md) · [hitl.md](hitl.md)).

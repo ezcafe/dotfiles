@@ -1,4 +1,4 @@
-Copy into `.my-docs/workflow/<slug>/`. [handoffs.md](../handoffs.md) · [LEGACY.md](../LEGACY.md).
+Copy into `.my-docs/workflow/<slug>/`. [handoffs.md](../handoffs.md) · [grill.md](../grill.md) · [hitl.md](../hitl.md).
 
 # 02b-grill.md
 
@@ -7,7 +7,7 @@ Copy into `.my-docs/workflow/<slug>/`. [handoffs.md](../handoffs.md) · [LEGACY.
 
 **Result:** frontier-empty | needs-round | skipped
 **Updated:**
-**HITL:** auto | async-notify | blocking — from Gate B tier; prefer auto
+**HITL:** auto | async-notify | blocking — from **HITL Grill** in `00-run.md` (independent of Gate B; see grill.md / hitl.md)
 **Size:** ≤ ~60 lines
 
 ## Design tree summary

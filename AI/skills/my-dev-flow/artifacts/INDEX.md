@@ -1,6 +1,6 @@
 # Artifact templates (index)
 
-Read **one** template per stage.
+Read **one** template per stage. Size caps: [handoffs.md](../handoffs.md). Severity / Deferred: [severity.md](../severity.md).
 
 | Workflow artifact | Template |
 |-------------------|----------|
@@ -12,6 +12,8 @@ Read **one** template per stage.
 | `02b-grill.md` | [02b-grill.md](02b-grill.md) |
 | `03-design.md` | [03-design.md](03-design.md) |
 | `03a-design-review-log.md` | [03a-design-review-log.md](03a-design-review-log.md) |
+| `03a-api-contract-review.md` | [03a-api-contract-review.md](03a-api-contract-review.md) — only when Has API=yes and not tiny-tweak |
+| `03a-db-design-review.md` | [03a-db-design-review.md](03a-db-design-review.md) — only when Has DB=yes and not tiny-tweak |
 | `04-tasks.md` | [04-tasks.md](04-tasks.md) |
 | `04a-tdd-test-review.md` | [04a-tdd-test-review.md](04a-tdd-test-review.md) |
 | `05-review-log.md` | [05-review-log.md](05-review-log.md) |
@@ -22,5 +24,4 @@ Read **one** template per stage.
 | `05-lens-memory.md` | [05-lens.md](05-lens.md) (copy; set lens = memory) |
 | `06-test-log.md` | [06-test-log.md](06-test-log.md) |
 | `pr-body.md` | [pr-body.md](pr-body.md) |
-| `03a-api-contract-review.md` | [03a-api-contract-review.md](03a-api-contract-review.md) |
-| `03a-db-design-review.md` | [03a-db-design-review.md](03a-db-design-review.md) |
+| `_calibration.md` (optional learning log) | [_calibration.md](_calibration.md) — append after `done` |

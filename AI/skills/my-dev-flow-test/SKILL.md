@@ -10,71 +10,70 @@ description: >-
 
 # my-dev-flow-test
 
-Test subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). Proves the draft
-is worth reviewing (smoke) and matches requirements before merge (full/lite).
+Test subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). Proves the draft is
+worth reviewing (smoke) and matches requirements before merge (full/lite).
 
-**Details:** [stages.md](stages.md) · Verify commands [`../my-dev-flow/verify-and-fix.md`](../my-dev-flow/verify-and-fix.md) · handoffs [`../my-dev-flow/handoffs.md`](../my-dev-flow/handoffs.md)
+**Owned stages:** [stages.md](stages.md) index — load **`stages/<stage-id>.md` only** via parent-next / handoff (`smoke`, `test-full`, `test-lite`)
+
+**Shared SoT (do not restate Happy path):**
+
+| Concern | File |
+|---------|------|
+| Pipeline order / Status | [`../my-dev-flow/stages.md`](../my-dev-flow/stages.md) |
+| Verify commands + Smoke Option B | [`../my-dev-flow/verify-and-fix.md`](../my-dev-flow/verify-and-fix.md) |
+| Gate C test bar / skip-review legality | [`../my-dev-flow/hitl.md`](../my-dev-flow/hitl.md) |
+| Stage handoffs | [`../my-dev-flow/handoffs.md`](../my-dev-flow/handoffs.md) |
+| Models (all test = Fast) | [`../my-dev-flow/models.md`](../my-dev-flow/models.md) |
+| Max rounds / Decision N | [`../my-dev-flow/invariants.md`](../my-dev-flow/invariants.md) |
+| Test log template | [`../my-dev-flow/artifacts/06-test-log.md`](../my-dev-flow/artifacts/06-test-log.md) |
 
 ## When to run
 
-- **Smoke:** only when parent needs a **re-run** (Build did not write smoke-pass, mismatch, or Notes `smoke re-run`). Default after Build verify-pass: **skip** Smoke Task (Option B). Also Gate C bar for **skip-review** is Build verify-pass — no Smoke Task required.
-- **Lite:** after lite review clean — targeted e2e; skip coverage / add-e2e unless `04-tasks` requires new e2e.
-- **Full:** after full review clean, before Gate C — **one** `test-full` Task (not three).
+`run my-dev-flow-test`, smoke re-run, or when parent reaches smoke / test after Build or review clean.
 
-## Principles
+## Principles (owned here)
 
-- **Honor Review profile** — full → `test-full` (one Task); lite → `test-lite`; skip-review → Gate C on Build verify-pass (no further test Tasks).
-- **Use Verify commands** from `00-run.md` (same as Build/Fix). Do not invent a new test stack.
-- **Fill e2e gaps** inside `test-full` only (lite: only if tasks require new e2e).
-- **Generation ≠ verification.** Product fixes go to [`my-dev-flow-code`](../my-dev-flow-code/SKILL.md). Full/lite re-run build+unit(+e2e) independently after review.
-- Stage-scoped handoff (`smoke`, `test-full`, `test-lite`, `fix-tests`).
-- Plain words in `06-test-log.md`.
+- Route by Review profile / skip-review legality: parent [`stages.md`](../my-dev-flow/stages.md) · [`lenses.md`](../my-dev-flow/lenses.md) · [`hitl.md`](../my-dev-flow/hitl.md).
+- **Smoke Task** only on re-run need (Option B default skip) — [`verify-and-fix.md`](../my-dev-flow/verify-and-fix.md).
+- **Use Verify commands** from `00-run.md`. Do **not** invent a test stack.
+- **test-full = one Task** (coverage → missing e2e → suite).
+- Product fixes → [`my-dev-flow-code`](../my-dev-flow-code/SKILL.md). Do **not** open Gate C from this skill.
+- Result tokens: [`results.md`](../my-dev-flow/results.md). Max 3 test↔Fix rounds → Decision N ([`invariants.md`](../my-dev-flow/invariants.md)).
 
 ## Models
 
-Follow [`my-dev-flow/stages.md`](../my-dev-flow/stages.md) → **Models** (all test stages = Fast).
+[`models.md`](../my-dev-flow/models.md) — all test stages = Fast.
 
 ## Prerequisites
 
 - Draft code exists (after Build / review fixes).
 - Prefer Verify commands set on `00-run.md`.
-- Prefer `03-design.md` / `04-tasks.md` for full mode success criteria.
-- Create `06-test-log.md` from templates if missing.
+- Prefer `03-design.md` / `04-tasks.md` for full-mode success criteria.
+- Create `06-test-log.md` from template if missing.
 
 If there is no code to test → **stop**.
 
 ## Pipeline
 
-### Smoke mode (re-run only)
-
 ```
-Use Verify commands → Run build + unit → write Smoke section
-→ Result: smoke-pass | smoke-fail
+smoke (re-run only):  Verify commands → build + unit → Smoke section → smoke-pass | smoke-fail
+test-lite:            targeted e2e (+ unit if needed) → success | failure
+test-full (one Task): coverage → add missing e2e → build+unit+e2e → success | failure
 ```
 
-### Lite / Full
-
-- **lite** (`test-lite`): targeted e2e (+ unit if needed).
-- **full** (`test-full`): **one** Task — coverage → add missing e2e → build+unit+e2e using Verify commands.
-
-## Exit rule
-
-| Result | Meaning | Next (parent my-dev-flow) |
-|--------|---------|---------------------------|
-| **smoke-pass** (from Build or Smoke Task) | Build + unit green | `my-dev-flow-review` (or Gate C if skip-review) |
-| **smoke-fail** | Build or unit red | Fix-from-tests → verify-pass → re-smoke |
-| **success** | Full or lite suite green | Gate C → `my-dev-flow-merge` |
-| **failure** | Suite red or required e2e missing | Fix-from-tests → verify-pass → re-full/lite |
+Parent routes next steps (review / Gate C / Fix / merge) — see Happy path in [`stages.md`](../my-dev-flow/stages.md).
 
 ## Orchestrator rules
 
 - Detect smoke vs full vs lite from parent ask / **Review profile**.
-- Prefer **skip Smoke Task** when Build already wrote smoke-pass matching Verify commands.
-- Cap: max **3** test↔fix rounds per mode, then pause.
+- Prefer **skip Smoke Task** when Build already wrote smoke-pass (Option B).
+- Legal skip-review (Mode simple + Has API/DB = no) → do not launch test Tasks; parent goes Gate C on verify-pass.
+- Fresh Task per stage; prompt from [`stages/<stage-id>.md`](stages/<stage-id>.md) only (index: [stages.md](stages.md)).
+- On failure / smoke-fail → Fix-from-tests (code); re-run same mode only after verify-pass.
 - Do not merge, push, or open Gate C.
 
 ## Start checklist
 
-1. Confirm draft exists; init `06-test-log.md` if needed; detect smoke vs full vs skip.
+1. Confirm draft exists; init `06-test-log.md` if needed; detect smoke vs full vs lite vs skip.
 2. Resolve Fast model; use Verify commands from `00-run.md`.
-3. Run mode → success/failure or smoke-pass/fail.
+3. Run mode per [`stages/<id>.md`](stages/<stage-id>.md) → write Result; return path.

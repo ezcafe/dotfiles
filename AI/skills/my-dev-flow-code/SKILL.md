@@ -14,77 +14,66 @@ description: >-
 
 # my-dev-flow-code
 
-Build subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md).
+Build subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). First output is a **draft** — no merge or self-approval.
 
-- **TDD test-case review** runs **before Gate B** only when `04-tasks.md` has planned test cases.
-- **Build** runs **after Gate B**, passes **Verify gate**, writes Smoke section (Option B).
-- **Fix-from-tests** repairs [`my-dev-flow-test`](../my-dev-flow-test/SKILL.md) failures and must **verify-pass** before re-test.
+**Owned stages:** load **`stages/<stage-id>.md` only** (`tdd-review`, `build`, `fix-tests`) — index [stages.md](stages.md).
 
-**Details:** [stages.md](stages.md) · shared [`../my-dev-flow/verify-and-fix.md`](../my-dev-flow/verify-and-fix.md) · handoffs [`../my-dev-flow/handoffs.md`](../my-dev-flow/handoffs.md)
+**Honor parent SoT** (do not restate Happy path / skip-review / veto mechanics here):
+
+| Topic | File |
+|-------|------|
+| Runtime order | [`../my-dev-flow/stages.md`](../my-dev-flow/stages.md) |
+| Verify / Smoke Option B / Fix | [`../my-dev-flow/verify-and-fix.md`](../my-dev-flow/verify-and-fix.md) |
+| Gate B veto / Build armed | [`../my-dev-flow/hitl.md`](../my-dev-flow/hitl.md) |
+| skip-review legality | [`../my-dev-flow/lenses.md`](../my-dev-flow/lenses.md) |
+| Design-backloop / max rounds | [`../my-dev-flow/invariants.md`](../my-dev-flow/invariants.md) |
+| Result tokens | [`../my-dev-flow/results.md`](../my-dev-flow/results.md) |
+| Handoffs / models | [`../my-dev-flow/handoffs.md`](../my-dev-flow/handoffs.md) · [`../my-dev-flow/models.md`](../my-dev-flow/models.md) |
 
 ## When to run
 
-`run my-dev-flow-code`, build from design, TDD test-case review, fix from test failures, or when
-`my-dev-flow` reaches Step 4a (before Gate B), Step 4 Build (after Gate B), or Test↔Code loop.
+`run my-dev-flow-code`, build from design, TDD review, fix from test failures, or when parent reaches 4a / Build / Test↔Code.
 
-## Principles
+## Principles (owned here)
 
-- First Build output is a draft, not a deliverable.
-- **TDD test-case review before Gate B (conditional):** Run only if `04-tasks.md` creates planned tests. Otherwise skip — note `04a skipped — no planned test cases` in `00-run.md`.
-- **Build after Gate B only** (when parent is `my-dev-flow`). Gate B may be HITL **auto**.
-- TDD: Red → Green → Refactor → Verify (when tasks include tests).
-- **Verify gate:** Follow [`verify-and-fix.md`](../my-dev-flow/verify-and-fix.md) — Verify commands on `00-run.md`, max 3 attempts, first return line `Result: verify-pass | verify-fail`.
-- **Smoke Option B:** On verify-pass, write `06-test-log.md` Smoke section; parent skips Smoke Task by default.
-- **Build when Has UI:** match Design UI specs + existing app chrome.
-- Fix-from-tests: only `06-test-log.md` fix ask + design/tasks; then Verify gate.
-- Stage-scoped handoffs (`tdd-review`, `build`, `fix-tests`). Plain words.
+- **TDD review before Gate B** only if `04-tasks` lists planned tests; else Notes skip.
+- **Build after Gate B** (when parent is my-dev-flow). Re-read veto + Notes first — blocked tokens: [results.md](../my-dev-flow/results.md) / [hitl.md](../my-dev-flow/hitl.md).
+- **Verify gate:** first line `Result: verify-pass | verify-fail`; max 3; on pass Build writes Smoke (Option B).
+- **Fix-from-tests:** repair from `06` Fix ask only; verify-pass before re-test.
+- **Design-backloop** if `03`/`04` must change — never silently rewrite (invariants.md).
+- TDD when tasks include tests. Has UI → match Design UI + chrome.
+- Stage-scoped handoffs; plain words.
 
 ## Models
 
-Follow [`my-dev-flow/stages.md`](../my-dev-flow/stages.md) → **Models** (TDD review = mechanical; Build/Fix = Fast).
+[`models.md`](../my-dev-flow/models.md) — TDD = mechanical; Build/Fix = Fast.
 
 ## Prerequisites
 
-**TDD test-case review** (before Gate B) — only when tests are planned:
+| Mode | Need |
+|------|------|
+| **TDD review** | `03`+`04` with planned tests; Gate B not required yet |
+| **Build** | Gate B checked; veto `none`; **Build armed** if async window open; Verify commands; prefer `04a` or Notes skip |
+| **Fix-from-tests** | `06` smoke-fail/failure + Fix ask; Verify commands |
 
-- `03-design.md` and `04-tasks.md` present with concrete planned test cases
-- Prefer `03a` Result **clean** when present
-- Gate B is **not** required yet
-
-**Build mode** (after Gate B):
-
-- Gate B checked in `00-run.md`
-- Prefer `04a` present **or** Notes say 04a skipped
-- `03-design.md` and `04-tasks.md` present
-- **Verify commands** set on `00-run.md` (not empty)
-
-**Fix-from-tests mode:**
-
-- `06-test-log.md` with **Result: smoke-fail** or **failure** and Fix ask
-- Prefer Gate B already checked; Verify commands set
-
-If the requested mode’s files are not ready → **stop**.
+If not ready → **stop**.
 
 ## Pipeline
 
 ```
-TDD review (if planned):  TDD review → Gate B → Build
-No planned tests:         skip 04a → Gate B → Build
-Build:                    TDD → Verify gate → write Smoke → verify-pass → parent skips Smoke (Option B)
-Fix-from-tests:           Fix → Verify gate → verify-pass → re-run smoke or full/lite
+TDD (if planned) → Gate B → Build → Verify → Smoke (Option B)
+Fix-from-tests    → Fix → Verify → verify-pass → re-test
 ```
 
 ## Orchestrator rules
 
-- Detect mode: no planned tests → skip 04a; `06-test-log` failure → fix-from-tests; else Build (require Gate B when parent is my-dev-flow).
-- Fresh Task per stage.
-- After Build **verify-pass**: skip Smoke Task unless Notes `smoke re-run` or Smoke section incomplete.
-- After Fix **verify-pass**: re-run the same test mode. After 3 verify-fail attempts → Decision N.
-- If Fix cannot stay aligned with `03-design` / `04-tasks` → parent **Design-backloop** ([`../my-dev-flow/stages.md`](../my-dev-flow/stages.md)); do not silently rewrite design docs in Fix.
-- Persist Last Verify + attempts on Orchestrator card.
+- Detect: no planned tests → skip 04a; `06` failure → fix-tests; else Build (require Gate B when parent is my-dev-flow).
+- Advance only on **verify-pass**. Skip Smoke Task after Option B unless Notes `smoke re-run`.
+- After 3 verify-fail → Decision N (parent). Persist Last Verify on card.
+- Post-Build routing (skip-review vs review): parent [stages.md](../my-dev-flow/stages.md) · [lenses.md](../my-dev-flow/lenses.md).
 
 ## Start checklist
 
-1. Confirm mode + required files + Verify commands (for Build/Fix).
-2. Resolve Medium + Fast models from allowlist.
-3. TDD review (or skip) → Gate B → Build/Fix per stages.md.
+1. Confirm mode + files + Verify commands.
+2. Resolve models.
+3. Run `stages/<id>.md` for TDD / Build / Fix.

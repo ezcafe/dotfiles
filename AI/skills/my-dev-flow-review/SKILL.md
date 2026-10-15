@@ -12,113 +12,91 @@ description: >-
 
 Review + Fix subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). Generation ≠ verification.
 
-**Details:** [stages.md](stages.md) · handoffs [`../my-dev-flow/handoffs.md`](../my-dev-flow/handoffs.md) · severity [`../my-dev-flow/severity.md`](../my-dev-flow/severity.md)
+**Owned stages:** [stages.md](stages.md) index — load **`stages/<stage-id>.md` only** (`adversarial`, `quality`, `code-review-phase`, `lens-*`, `merge-findings`, `fix-review`)
+
+**Shared SoT (do not duplicate Happy path here):**
+
+| Topic | File |
+|-------|------|
+| Runtime order | [`../my-dev-flow/stages.md`](../my-dev-flow/stages.md) Happy path |
+| Review profile / severity exit | [`../my-dev-flow/severity.md`](../my-dev-flow/severity.md) |
+| Lens plan / api/db / tiny-tweak | [`../my-dev-flow/lenses.md`](../my-dev-flow/lenses.md) |
+| Verify gate on Fix | [`../my-dev-flow/verify-and-fix.md`](../my-dev-flow/verify-and-fix.md) |
+| Max rounds / Decision N | [`../my-dev-flow/invariants.md`](../my-dev-flow/invariants.md) |
+| Stage handoffs | [`../my-dev-flow/handoffs.md`](../my-dev-flow/handoffs.md) |
+| Models | [`../my-dev-flow/models.md`](../my-dev-flow/models.md) |
 
 ## When to run
 
-`run my-dev-flow-review`, review the draft, or when `my-dev-flow` reaches review.
+`run my-dev-flow-review`, review the draft, or when `my-dev-flow` reaches review after Build verify-pass + Smoke.
 
-## Principles
+## Principles (owned here)
 
-- Never trust the first output. Challenge the draft.
-- Writers (Fix) never self-approve; verifiers re-check after Fix.
-- **Review profile:** If `00-run.md` says **skip-review**, do not run this skill (parent goes Gate C after Build verify-pass).
-- **Sequential first:** Adversarial tests, then Quality.
-- **UI lock (Has UI):** Quality compares draft UI to Design UI specs + Gate A #1/#2 / existing chrome — fail **Major** on clear drift.
-- **Conditional lenses:** Parent sets **Lens plan** in `00-run.md` (legacy name **SPM plan**). Launch **only** listed lenses (**API** / **DB** / Security / Perf / Memory). If **none**, skip lenses + Merge after Quality clean.
-- **API lens required when Has API:** If `00-run.md` **Has API = yes**, Lens plan **must** include **api**. Launch an isolated Task — do not fold contract checks into Quality or the parent chat.
-- **DB lens required when Has DB:** If `00-run.md` **Has DB = yes**, Lens plan **must** include **db**. Launch an isolated Task — do not fold schema/migration/query checks into Quality or the parent chat.
-- **Merge findings:** Required only when **2+** lenses ran. **1 lens:** parent copies that lens Result into `05-review-log.md` **Merged lenses** (no Merge Task). Conflict priority when merging: **Security Critical > API/DB contract / correctness / data-integrity > Quality > Perf/Memory Enhancements**.
-- **Lite required:** When Review profile **lite**, parent **must** run one Task (`Lite combined review` / stage id `code-review-phase`) for Adversarial + Quality when Lens plan is `none` or **one** lens. Do **not** launch separate Adversarial then Quality. If Lens plan has **2+** lenses: Lite combined first, then parallel lenses + Merge. See [`../my-dev-flow/severity.md`](../my-dev-flow/severity.md).
-- **One Fix** from the merged Fix ask (not parallel Fix agents).
-- Re-run only the lenses in Lens plan → merge (if 2+) → Fix until clean (max 3 rounds, then pause).
-- If Fix changed tests/behavior, re-run **Adversarial** (or Lite combined) once (and Quality if structure changed).
-- Use **stage-scoped handoffs** (`code-review-phase`, `adversarial`, `quality`, `lens-*`, `merge-findings`, `fix-review`). Legacy `spm-*` aliases: LEGACY.md.
-- Mechanical: Fast-on-simple; Mode full → Fast when Medium unavailable (see my-dev-flow).
-- Plain words in the review log.
+- Never trust the first draft. Writers (Fix) never self-approve; verifiers re-check after Fix.
+- **skip-review → do nothing** — legality: [`lenses.md`](../my-dev-flow/lenses.md) (parent Gate C).
+- **Review profile full:** Adv → Quality → lenses → then `test-full`. **Review profile lite** (any Mode, including Mode full): must one `code-review-phase` (never separate Adv+Quality) → then `test-lite`.
+- **Lenses / tiny-tweak / api·db:** [`lenses.md`](../my-dev-flow/lenses.md). Merge findings only if **2+** lenses.
+- **Fix:** verify-pass before re-review; max 3 → Decision N ([`verify-and-fix.md`](../my-dev-flow/verify-and-fix.md) · [`invariants.md`](../my-dev-flow/invariants.md)).
+- **UI lock (Has UI):** Quality fails **Major** on Design UI / Gate A #1/#2 / chrome drift.
+- Result tokens: [`results.md`](../my-dev-flow/results.md). Stage-scoped handoffs; plain words.
 
 ## Models
 
-Follow [`my-dev-flow/stages.md`](../my-dev-flow/stages.md) → **Models** (review lenses = mechanical → Fast when Medium missing; Fix = Fast).
+[`models.md`](../my-dev-flow/models.md) — review lenses = mechanical (Fast when Medium missing); Fix = Fast.
 
 ## Prerequisites
 
-- Draft code exists (after `my-dev-flow-code` or equivalent).
-- Prefer Gate B checked in `00-run.md` (required when parent is `my-dev-flow`; legacy: Gate 2).
-- Prefer **smoke-pass** in `06-test-log.md` when parent is `my-dev-flow` (from Build Verify Option B or Smoke re-run).
-- Prefer `03-design.md` / `04-tasks.md` present for intent checks.
-- Create `05-review-log.md` from templates if missing.
+- Draft exists (after `my-dev-flow-code` or equivalent).
+- Prefer Gate B checked; prefer Smoke **smoke-pass** in `06-test-log.md` when parent is `my-dev-flow`.
+- Prefer `03`/`04` for intent checks; create `05-review-log.md` from templates if missing.
 
-If there is no draft to review → **stop** and tell the user to run `my-dev-flow-code` first.
-If parent is `my-dev-flow` and Gate B is unchecked → **stop** and wait for Gate B.
-If parent is `my-dev-flow` and smoke is not **smoke-pass** → **stop** (Build should have written Smoke, or run Smoke re-run).
+If no draft → **stop** (run code first). If parent Gate B unchecked or smoke not smoke-pass → **stop**.
 
 ## Pipeline
 
 ```
-(skip entirely if Review profile = skip-review)
+skip-review (Mode simple + Has API/DB=no only) → stop (parent Gate C)
 
-Review profile lite:
-  code-review-phase / Lite combined (Fast) ⇄ Fix until clean
-  → if Lens plan = none → done
-  → if 1 lens → that lens (or included in combined when practical) → parent copies Merged
-  → if 2+ lenses → parallel lenses → Merge → Fix loop (max 3)
-
-Review profile full:
-  Adversarial ⇄ Fix until clean
-  → Quality ⇄ Fix until clean
-  → if Lens plan = none → done
-  → Loop (max 3): parallel lenses (must when 2+) → Merge if 2+ → Fix → optional Adv/Quality recheck
-→ done → test per Review profile
+Review profile lite (any Mode):  code-review-phase ⇄ Fix → lenses per plan → Merge if 2+ → test-lite
+Review profile full:             Adv ⇄ Fix → Quality ⇄ Fix → lenses → Merge if 2+ → Fix loop → test-full
 ```
 
-## Severity exit rule
+Parent runtime order: [`../my-dev-flow/stages.md`](../my-dev-flow/stages.md) Happy path (Mode × Review profile table).
 
-Findings: see [`../my-dev-flow/severity.md`](../my-dev-flow/severity.md).
+## Severity exit
 
-- Adversarial / Quality: clean at zero Critical/Major; Fix → re-run **same** lens until clean.
-- Lens loop: clean when Merge findings Result is **clean** (no open Critical/Major after merge). Enhancements → Deferred; dropped losers stay Nit/deferred.
-
-## TDD on Fix
-
-For behavior findings: Red → Green → Refactor → Verify. Docs/comments only: note “TDD skipped” in `05-review-log.md`.
-
-**Verify gate:** Shared rules in [`../my-dev-flow/verify-and-fix.md`](../my-dev-flow/verify-and-fix.md). When code/tests changed, Fix must **verify-pass** (Verify commands; max 3 attempts; first return line `Result: verify-pass | verify-fail`) before parent re-runs verifiers.
+[`severity.md`](../my-dev-flow/severity.md) — Adv/Quality clean at zero Critical/Major; lens loop clean when Merge Result **clean** (or single-lens parent copy). Enhancements → Deferred.
 
 ## Orchestrator rules
 
-- If Review profile **skip-review** → stop (nothing to do).
-- If Review profile **lite** → **must** launch `code-review-phase` (`Lite combined review`). Do **not** launch separate Adversarial + Quality.
-- If Review profile **full** → Adversarial, then Quality, each with Fix loops — **not** in parallel with lens Tasks.
-- After Fix: advance only on **verify-pass** (or docs-only skip); on **verify-fail** (max 3) → Decision N or re-launch Fix.
-- Before lenses: read **Lens plan** from `00-run.md` (default **none**). If **Has API = yes** and plan omits **api**, add **api**. If **Has DB = yes** and plan omits **db**, add **db**. Launch **only** matching lenses (0–5).
-- Wait for launched lenses. Merge findings only if **2+** lenses (**must** parallel). Single lens: parent copies into Merged lenses.
-- Launch **one** Fix Task from the Fix ask only.
-- Stage-scoped handoffs; Task **`description`** from my-dev-flow map.
-- Bugbot only if the user asks.
-- Parent: Result header summary + path; update Orchestrator card.
-- When clean: next is `my-dev-flow-test` **test-full** (profile full) or **test-lite** (profile lite), then Gate C.
+- **skip-review** → stop immediately (nothing to do here). Parent Gate C only when Mode **simple** + Has API/DB = no.
+- **Review profile lite** (even if Mode full) → must launch `code-review-phase`; never separate Adv+Quality.
+- **Review profile full** → Adv then Quality, each with Fix loops; then Lens plan only.
+- Before lenses: read Lens plan (default **none**); auto-add api/db per [`lenses.md`](../my-dev-flow/lenses.md). Isolated Tasks for api/db when listed (not tiny-tweak). Parallel when 2+.
+- Merge Task only if **2+** lenses; 1 lens → parent copies into Merged lenses.
+- After Fix: advance only on **verify-pass** (or docs-only skip); verify-fail max 3 → Decision N.
+- If Fix changed tests/behavior → re-run Adv (or Lite) once (+ Quality if structure changed).
+- When clean → `my-dev-flow-test` **test-full** (Review profile full) or **test-lite** (Review profile lite), then Gate C. Do not pick test mode from Mode alone.
 
 ## Skills used
 
 | Stage | Skills |
 |-------|--------|
-| Quality | `code-review-and-quality` |
+| Quality / code-review-phase | `code-review-and-quality` |
 | API | `api-and-interface-design` |
 | DB | `database-and-data-model` |
-| Security | `security-and-hardening` (OWASP Top 10 required) + `review-security` |
+| Security | `security-and-hardening` (OWASP Top 10) + `review-security` |
 | Performance | `performance-optimization` (+ `vercel-react-best-practices` if React/Next) |
-| Memory | checklist in [stages.md](stages.md) |
-| Merge findings | conflict rules in [stages.md](stages.md); reads launched lens files |
-| Fix | same build skills as my-dev-flow-code; merged Fix ask only |
+| Memory | [stages/lens-memory.md](stages/lens-memory.md) |
+| Merge / Fix | [stages/merge-findings.md](stages/merge-findings.md) · [stages/fix-review.md](stages/fix-review.md); Fix uses same build skills as my-dev-flow-code |
 
 ## Artifacts
 
 - `05-review-log.md` — adversarial, quality, merged lenses, deferred, fix notes
-- `05-lens-*.md` — only for lenses in Lens plan (overwrite each round), including `05-lens-api.md` when api and `05-lens-db.md` when db
+- `05-lens-*.md` — only for lenses in Lens plan (overwrite each round)
 
 ## Start checklist
 
-1. Confirm draft exists; init `05-review-log.md` if needed; read Review profile + Lens plan (default none).
+1. Confirm draft + Smoke; init `05-review-log.md`; read Review profile + Lens plan.
 2. Resolve models (Fast-on-simple; Medium|Fast on full).
-3. lite → code-review-phase; full → Adversarial → Quality → lenses → Fix until clean.
+3. Review profile lite → code-review-phase; Review profile full → Adv → Quality → lenses → Fix until clean ([stages.md](stages.md) · parent Happy path).

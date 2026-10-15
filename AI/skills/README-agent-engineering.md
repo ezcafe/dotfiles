@@ -31,7 +31,7 @@ That copies each package with a `SKILL.md` into `~/.cursor/skills/<name>/` witho
 
 | Skill | Role |
 |-------|------|
-| [my-dev-flow](my-dev-flow/SKILL.md) | Full delivery pipeline; Speed defaults (simple phase bundles, test-full one Task); [stages.md](my-dev-flow/stages.md); [verify-and-fix.md](my-dev-flow/verify-and-fix.md); [severity.md](my-dev-flow/severity.md) |
+| [my-dev-flow](my-dev-flow/SKILL.md) | Full delivery pipeline; Speed defaults; [stages.md](my-dev-flow/stages.md); [results.md](my-dev-flow/results.md); [parent-next.md](my-dev-flow/parent-next.md); [failure-playbook.md](my-dev-flow/failure-playbook.md); [verify-and-fix.md](my-dev-flow/verify-and-fix.md); [severity.md](my-dev-flow/severity.md); lint `scripts/lint-run.py` |
 | [my-dev-flow-design](my-dev-flow-design/SKILL.md) | Design phase (Ideation → Grill → Design) |
 | [my-dev-flow-design-review](my-dev-flow-design-review/SKILL.md) | Design verification (+ isolated API/DB reviews) |
 | [my-dev-flow-code](my-dev-flow-code/SKILL.md) | TDD review + Build / Fix (Verify gate; Smoke Option B) |

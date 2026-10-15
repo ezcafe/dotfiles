@@ -1,4 +1,5 @@
-Copy into `.my-docs/workflow/<slug>/`. **db-design-review** Task only.
+Copy into `.my-docs/workflow/<slug>/`. **db-design-review** Task only.  
+Do **not** invent this file when Has DB = no or Notes `tiny-contract-tweak` ([handoffs.md](../handoffs.md) · [lenses.md](../lenses.md)).
 
 # 03a-db-design-review.md
 
@@ -18,6 +19,10 @@ Copy into `.my-docs/workflow/<slug>/`. **db-design-review** Task only.
 ## Fix ask for my-dev-flow-design
 
 1.
+
+## Deferred Enhancements (do not block clean)
+
+-
 
 ## Round notes
 

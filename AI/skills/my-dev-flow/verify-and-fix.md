@@ -1,8 +1,11 @@
 # Verify gate + Fix rules (shared)
 
+**This file is SoT for:** Verify gate, Smoke Option B, Fix rules.  
 Used by [`my-dev-flow-code`](../my-dev-flow-code/SKILL.md) (Build, Fix-from-tests) and
-[`my-dev-flow-review`](../my-dev-flow-review/SKILL.md) (Fix). Parent rules in
-[stages.md](stages.md) **Build / Fix Verify gate**.
+[`my-dev-flow-review`](../my-dev-flow-review/SKILL.md) (Fix).  
+Pipeline pointer: [stages.md](stages.md). Parent checklist: [invariants.md](invariants.md).  
+Gate B veto before Build: [hitl.md](hitl.md). Hard stops: [failure-playbook.md](failure-playbook.md).  
+**Lint (required) before Build:** `scripts/lint-run.py <run-dir> --before-build`.
 
 ## Verify commands (00-run.md)
 
@@ -24,6 +27,18 @@ Discovery: prefer project scripts in `package.json` / docs / `AGENTS.md`. Do not
 
 Build, Fix, Smoke, and full/lite test **must** use these commands (same cwd). Do not rediscover conflicting commands.
 
+## Gate B veto check (before Build coding)
+
+Build Task **first action:** read `00-run.md` **Gate B veto** and Notes. Full async rules: [hitl.md](hitl.md).
+
+| Condition | Action |
+|-----------|--------|
+| `Gate B veto: pending` | Stop; first return line `Result: blocked — Gate B veto`; do not change code |
+| Notes say veto window open **and** **Build armed** missing | Stop; first return line `Result: blocked — Build armed missing`; do not change code |
+| `Gate B veto: none` and (no open veto window, or **Build armed** present) | Continue Build |
+
+Parent must not launch Build while veto is `pending`, or while veto window is open without **Build armed**. Lint: `scripts/lint-run.py <run-dir> --before-build`.
+
 ## Verify gate (blocking)
 
 **When:** End of Build; end of Fix-from-tests; end of review Fix when code/tests changed.
@@ -32,7 +47,7 @@ Build, Fix, Smoke, and full/lite test **must** use these commands (same cwd). Do
 
 **Fail (`verify-fail`):** Any required command red after the attempt budget.
 
-**Attempt budget:** Max **3** Verify attempts per stage entry (Build or one Fix launch). Each attempt = run commands + optional in-Task fix. After 3 still red → Result **verify-fail**; parent pauses with **Decision N** (narrow scope / user waive / stop). Do not infinite-loop.
+**Attempt budget:** Max **3** Verify attempts per stage entry (Build or one Fix launch). Each attempt = run commands + optional in-Task fix. After 3 still red → Result **verify-fail**; parent pauses with **Decision N** ([invariants.md](invariants.md) verify-fail shape). Do not infinite-loop.
 
 **Return (first line of Task return — required):**
 
@@ -56,9 +71,9 @@ Parent then:
 |-----------|--------|
 | Smoke section complete + smoke-pass + commands match Verify commands | **Skip Smoke Task** — treat as smoke-pass; continue (review or Gate C) |
 | Smoke incomplete, mismatch, or Notes `smoke re-run` | Launch Smoke Task (independent re-run) |
-| Review profile **skip-review** | Gate C test bar = Build verify-pass (+ Smoke section). No Smoke Task required |
+| Review profile **skip-review** (legal only in **Mode simple** when Has API=no **and** Has DB=no — [lenses.md](lenses.md)) | Gate C test bar = Build verify-pass (+ Smoke section). No Smoke Task required. Mode full or Has API/DB = yes → must not stay skip-review |
 
-Independent verification for merge remains: **full** / **lite** test after review (or smoke-pass alone for skip-review).
+Independent verification for merge remains: **full** / **lite** test after review (or smoke-pass alone for Mode simple legal skip-review).
 
 ## Fix rules (TDD)
 
@@ -68,7 +83,7 @@ Independent verification for merge remains: **full** / **lite** test after revie
 - Append Round notes on the log being updated (`06-test-log.md` or `05-review-log.md`).
 - No merge/push/commit unless user explicitly asked.
 - Max **3** Fix↔re-verify cycles per mode (smoke / full / review lens), then pause.
-- If Fix **cannot** stay aligned with design (contracts / IA / acceptance must change) → stop Fix; parent runs **Design-backloop** Decision N in [stages.md](stages.md) (amend design / Fix-only / stop). Do **not** silently rewrite `03-design` / `04-tasks` inside Fix.
+- If Fix **cannot** stay aligned with design (contracts / IA / acceptance must change) → stop Fix; parent runs **Design-backloop** Decision N in [stages.md](stages.md) / [invariants.md](invariants.md). Do **not** silently rewrite `03-design` / `04-tasks` inside Fix.
 
 ## Orchestrator card fields (persist)
 

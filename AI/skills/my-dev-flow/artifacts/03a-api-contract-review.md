@@ -1,4 +1,5 @@
-Copy into `.my-docs/workflow/<slug>/`. **api-contract-review** Task only.
+Copy into `.my-docs/workflow/<slug>/`. **api-contract-review** Task only.  
+Do **not** invent this file when Has API = no or Notes `tiny-contract-tweak` ([handoffs.md](../handoffs.md) · [lenses.md](../lenses.md)).
 
 # 03a-api-contract-review.md
 
@@ -18,6 +19,10 @@ Copy into `.my-docs/workflow/<slug>/`. **api-contract-review** Task only.
 ## Fix ask for my-dev-flow-design
 
 1.
+
+## Deferred Enhancements (do not block clean)
+
+-
 
 ## Round notes
 

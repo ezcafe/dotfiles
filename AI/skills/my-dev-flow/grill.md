@@ -1,18 +1,19 @@
 # Grill (inside my-dev-flow)
 
-Design-tree frontier interview + domain modeling. Adapted from
+**This file is SoT for:** Grill domain (frontier interview, glossary, ADRs).  
+Adapted from
 [mattpocock/skills grill-with-docs](https://github.com/mattpocock/skills/tree/main/skills/engineering/grill-with-docs),
 [grilling](https://github.com/mattpocock/skills/blob/main/skills/productivity/grilling/SKILL.md), and
 [domain-modeling](https://github.com/mattpocock/skills/blob/main/skills/engineering/domain-modeling/SKILL.md).
 
-**Where it runs:** after Analyze, before Design (`my-dev-flow-design` Step 2g).
-May also run alone when the user says `grill`, `grill-with-docs`, or
-`stress-test this plan`.
+**Where it runs:** after Analyze, before Design (`my-dev-flow-design` Step 2g).  
+May also run alone when the user says `grill`, `grill-with-docs`, or `stress-test this plan`.
 
-Also follow [`documentation-and-adrs`](../documentation-and-adrs/SKILL.md) for ADR
-file location and the three-part ADR bar. Artifact template: [artifacts/02b-grill.md](artifacts/02b-grill.md)
-→ `02b-grill.md`. Stage prompt: [`../my-dev-flow-design/stages.md`](../my-dev-flow-design/stages.md)
-→ **2g. Grill**. Pipeline rules: [stages.md](stages.md).
+Also follow `{documentation-and-adrs}` for ADR file location and the three-part ADR bar
+(resolve per [skills-path.md](skills-path.md) — `~/.cursor/skills` or `AI/skills`).
+Artifact template: [artifacts/02b-grill.md](artifacts/02b-grill.md)
+→ `02b-grill.md`. Stage prompt: [`../my-dev-flow-design/stages/grill.md`](../my-dev-flow-design/stages/grill.md)
+(index: [`../my-dev-flow-design/stages.md`](../my-dev-flow-design/stages.md)). Pipeline rules: [stages.md](stages.md). HITL tiers: [hitl.md](hitl.md).
 
 ## Goal
 
@@ -20,10 +21,8 @@ Reach a **shared understanding** of open design decisions, then capture durable
 **domain language** (glossary) and **hard-to-reverse choices** (sparse ADRs).
 
 **HITL:** Honor **`HITL Grill`** in `00-run.md` only — **independent of Gate B**.
-Prefer user-first recommended answers. `auto` / `async-notify` → settle and
-continue (`async-notify` = continue immediately; veto only in the **next user
-message** — see stages.md); `blocking` → post frontier round and wait. Defaults:
-Mode full → `async-notify`; Mode simple → `auto`.
+Prefer user-first recommended answers. Defaults: Mode full → `async-notify`; Mode simple → `auto`.
+Tier behavior: [hitl.md](hitl.md) (Grill section).
 
 ## Facts vs decisions
 
@@ -58,7 +57,7 @@ depend on it.
 **Decision N vs grill Q:**
 
 - In **chat** for multi-option product/tech choices that need the full
-  What / Example / Pros / Cons shape → use my-dev-flow **Decision N**.
+  What / Example / Pros / Cons shape → use my-dev-flow **Decision N** ([handoffs.md](handoffs.md)).
 - **Binary** frontier Qs (yes/no or two short labels) may use the grill Q format
   alone when settled picks are logged in `02b-grill.md`. Do not duplicate both
   formats for the same Q.
@@ -103,7 +102,7 @@ Offer / write an ADR **only when all three** are true:
 
 Prefer a **short** ADR (1–3 sentences: context, decision, why). Match existing
 repo ADR location (`docs/adr/`, `docs/decisions/`, …). If none, use
-`docs/decisions/ADR-NNN-short-title.md`. See `documentation-and-adrs`.
+`docs/decisions/ADR-NNN-short-title.md`. See `{documentation-and-adrs}` ([skills-path.md](skills-path.md)).
 
 Skip ADRs for easy-to-reverse or obvious choices. Record “ADR skipped — …” in
 `02b-grill.md` when a tempting decision fails the three-part bar.

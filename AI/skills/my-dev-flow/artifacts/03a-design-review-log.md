@@ -1,4 +1,4 @@
-Copy into `.my-docs/workflow/<slug>/`. [handoffs.md](../handoffs.md) · [LEGACY.md](../LEGACY.md).
+Copy into `.my-docs/workflow/<slug>/`. [handoffs.md](../handoffs.md) · [LEGACY.md](../LEGACY.md) · [severity.md](../severity.md).
 
 # 03a-design-review-log.md
 
@@ -9,7 +9,7 @@ Copy into `.my-docs/workflow/<slug>/`. [handoffs.md](../handoffs.md) · [LEGACY.
 **Round:** 1
 **Updated:**
 
-**Isolated reviews (parallel-safe):** When Has API, see `03a-api-contract-review.md`. When Has DB, see `03a-db-design-review.md`. Overall **clean** requires those Results **clean|skipped** and this log **clean**.
+**Isolated reviews (parallel-safe):** When Has API **and** not Notes `tiny-contract-tweak`, see `03a-api-contract-review.md`. When Has DB **and** not Notes `tiny-contract-tweak`, see `03a-db-design-review.md`. Tiny-tweak / Has no → treat as **skipped** (no empty files). Overall **clean** requires those Results **clean|skipped** and this log **clean**.
 
 ## Findings
 
@@ -19,10 +19,16 @@ Copy into `.my-docs/workflow/<slug>/`. [handoffs.md](../handoffs.md) · [LEGACY.
 
 ## Fix ask for my-dev-flow-design
 
-Concrete updates (file + what to change):
+Concrete updates (file + what to change) — Critical/Major only:
 
 1.
 2.
+
+## Deferred Enhancements (do not block clean)
+
+Optional polish / Enhancements logged but not in Fix ask:
+
+-
 
 ## Round notes
 

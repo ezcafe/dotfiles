@@ -9,7 +9,7 @@ One file per parallel lens per round (overwrite each round). Do **not** edit
 ```markdown
 # Lens: <api | db | security | performance | memory> — <slug>
 
-**Result:** pending | clean | has findings
+**Result:** pending | clean | needs fix
 **Round:** 1
 **Updated:**
 
