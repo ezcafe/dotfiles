@@ -36,7 +36,7 @@ Optional seed: [artifacts/_calibration.md](artifacts/_calibration.md).
 
 **One numbered list per Mode** below (agent SoT). Diagram is human overview only.
 
-**Skip-review / Smoke Option B legality** (once): [lenses.md](lenses.md) · [verify-and-fix.md](verify-and-fix.md) · [hitl.md](hitl.md).
+**Skip-review / Smoke after Build (Build-writes-Smoke) legality** (once): [lenses.md](lenses.md) · [verify-and-fix.md](verify-and-fix.md) · [hitl.md](hitl.md).
 
 ```mermaid
 flowchart LR
@@ -63,9 +63,9 @@ flowchart LR
 
 | Mode | Review profile | After Build verify-pass + Smoke section |
 |------|----------------|------------------------------------------|
-| **full** | **full** | Option B skip → Adv → Quality → lenses → `test-full` → Gate C → merge → `done` |
-| **full** | **lite** | Option B skip → `code-review-phase` → lenses per plan → `test-lite` → Gate C → merge → `done` |
-| **simple** | **lite** | Option B skip → `code-review-phase` → lenses per plan → `test-lite` → Gate C → merge → `done` |
+| **full** | **full** | Build-writes-Smoke skip → Adv → Quality → lenses → `test-full` → Gate C → merge → `done` |
+| **full** | **lite** | Build-writes-Smoke skip → `code-review-phase` → lenses per plan → `test-lite` → Gate C → merge → `done` |
+| **simple** | **lite** | Build-writes-Smoke skip → `code-review-phase` → lenses per plan → `test-lite` → Gate C → merge → `done` |
 | **simple** | **skip-review** | Legal path → Gate C → merge → `done` ([lenses.md](lenses.md) · [hitl.md](hitl.md)); else drop |
 
 **Forbidden combos (lint error):** Mode **simple** + Review profile **full** (want Adv→Quality→`test-full` → use Mode **full**, or keep simple with **lite** / **skip-review**). Mode **full** + **skip-review**: [lenses.md](lenses.md). Hard stops: [failure-playbook.md](failure-playbook.md). Design wrong after Build → [Design-backloop](#design-backloop-after-build).
@@ -79,9 +79,9 @@ flowchart LR
 5. Analyze → Grill (or skip) → Design (two options); refine Has API/DB
 6. Design ↔ review until clean — Has API **and** Has DB: **must** parallel API ∥ DB (unless tiny tweak), then general; max 3; **Pending parallel** ([artifacts/00-run.md](artifacts/00-run.md))
 7. 4a — TDD only if planned tests
-8. Gate B — HITL + digest ([hitl.md](hitl.md)); Mode **full** → **blocking** only; async-notify only if [hitl.md](hitl.md) Default Gate B allows (narrow) → veto `none` + **one turn gap** + **Build armed**
+8. Gate B — HITL + digest ([hitl.md](hitl.md)). Mode **full** → **blocking** only (never async-notify). Async-notify path: Simple step 4 / [hitl.md](hitl.md).
 9. Build (veto + **Build armed** if async → Verify → `verify-pass` + Smoke section; max 3) — Result tokens: [results.md](results.md)
-10. Smoke Task skipped on smoke-pass (Option B); else re-run; fail → Fix → verify-pass → re-smoke
+10. Smoke Task skipped on smoke-pass (Build-writes-Smoke); else re-run; fail → Fix → verify-pass → re-smoke
 11. Review ⇄ Fix (verify-pass before re-review; max 3) — **by Review profile:**
     - **full** — Lens plan (default none) → Adv → Quality → lenses (Merge if 2+)
     - **lite** — `code-review-phase` → lenses per plan (Merge if 2+)
@@ -97,7 +97,7 @@ Skip Ideation / Gate A / skim. Prefer phase bundles.
 1. Step 0 — Mode simple; Review profile **lite** or **skip-review** only (**never** profile **full** — lint error; want full review → Mode **full**); Lens plan **none**; Gate B veto **none**; Status `running`; bootstrap `01-idea` if needed; **lint**
 2. `design-phase` — Analyze + Grill (or skip) + Design; set Verify commands + Has API/DB
 3. `design-verify-phase` until clean; max 3
-4. 4a if planned → Gate B → Build (veto + **Build armed** if async + verify-pass + Smoke); Gate B tier per [hitl.md](hitl.md) (async-notify only when narrow rule allows)
+4. 4a if planned → Gate B → Build (veto + **Build armed** if async + verify-pass + Smoke). Gate B tier per [hitl.md](hitl.md): Mode simple → auto|async-notify when narrow rule allows; else **blocking**.
 5. After smoke-pass (Smoke Task usually skipped):
    - **(a) Legal skip-review** — per [lenses.md](lenses.md) → Gate C → merge → **`done`** ([hitl.md](hitl.md))
    - **(b)** drop skip-review ([lenses.md](lenses.md)) → `code-review-phase` → `test-lite` → Gate C → **`done`**
@@ -137,7 +137,7 @@ Ambiguous → Decision N. API/DB rule: [lenses.md](lenses.md).
 3. Create slug; write `00-run.md` from [artifacts/00-run.md](artifacts/00-run.md): Status `running`, Mode, profile, Complexity (one-line), Has UI/API/DB when known, Lens plan **none**, **Pending parallel: none**, Gate B veto **none**, models ([models.md](models.md)), card, HITL Gate B ([hitl.md](hitl.md) Default Gate B — full → **blocking**; simple low-risk → auto|async-notify), HITL Grill (full → async-notify; simple → auto), HITL Gate C **blocking**.
 4. **Lint (required):** `scripts/lint-run.py .my-docs/workflow/<slug>/` (again `--before-design-review` / `--before-build`). Optional: `--check-stage-ids` after editing handoffs/parent-next/stages.
 5. Chat one line: Mode + profile + why.
-6. **Skills sync:** After SoT edits under `AI/skills/`, run `./AI/skills/sync-to-cursor.sh` before Cursor discovery ([skills-path.md](skills-path.md)).
+6. **Skills sync:** After SoT edits under `AI/skills/`, run `./AI/skills/sync-to-cursor.sh` (optional `--check` for my-dev-flow* drift) before Cursor discovery ([skills-path.md](skills-path.md)).
 
 ### Mode selection
 
@@ -173,7 +173,7 @@ Scope grows (API/DB yes, auth/PII, multi-surface, blast radius): **Decision N** 
 2. Do not re-classify unless asked or scope changed.
 3. Do not redo completed gates unless artifacts changed.
 4. Next = first incomplete Full/Simple step, or card Next step / Stage id ([LEGACY.md](LEGACY.md) for Status-as-stage).
-5. One subflow `SKILL.md`; prompt = `scripts/handoff-for.py <stage-id>` (or handoffs row) + **`stages/<stage-id>.md`** ([parent-next.md](parent-next.md)).
+5. One subflow `SKILL.md`; prompt = **required** `scripts/handoff-for.py <stage-id>` + **`stages/<stage-id>.md`** ([parent-next.md](parent-next.md); handoffs.md = edit SoT / debug only).
 6. `stopped` → new Decision; `done` → new slug or explicit re-open.
 7. Gate B veto `pending` → do not Build ([hitl.md](hitl.md)).
 8. async-notify gap: Notes veto window / paused + Next `build` + veto `none` → this resume **is** next parent turn — set **Build armed**, then launch ([hitl.md](hitl.md)).
@@ -237,8 +237,8 @@ Gate B veto after Build is separate ([hitl.md](hitl.md)).
 ## Orchestrator rules (short)
 
 - Honor Full/Simple order above; one subflow at a time.
-- Before each Task: [invariants.md](invariants.md); prefer `scripts/handoff-for.py <stage-id>`.
+- Before each Task: [invariants.md](invariants.md); **required** `scripts/handoff-for.py <stage-id>`.
 - Design-review update → re-review. Smoke/test fail → Fix (verify-pass) → re-run.
 - No advance on verify-fail; max 3 → Decision N. Design invalid → Design-backloop.
-- Card Next step = stage id (+ description from [handoffs.md](handoffs.md)).
+- Card Next step = stage id (+ description from `handoff-for.py` / [handoffs.md](handoffs.md) SoT).
 - Mode full Task count ≥20 → Decision N ([invariants.md](invariants.md)).

@@ -18,7 +18,7 @@ Bugbot only if the user asked.
 ```
 You are a Senior Verifier for my-dev-flow-review Quality Review. Generation ≠ verification — you did not write this draft.
 
-<Stage-scoped handoff for stage id quality from {my-dev-flow}/handoffs.md>
+<Paste output of: python {my-dev-flow}/scripts/handoff-for.py quality>
 
 Read {code-review-and-quality}/SKILL.md and follow it.
 Review uncommitted / branch changes against 01-idea, 03-design, and 04-tasks.

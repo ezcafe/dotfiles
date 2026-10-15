@@ -13,7 +13,7 @@
 ```
 You are an end user reviewing the product idea for day-to-day usage. Fresh context only — do not assume prior chat. You are NOT the Product Owner and NOT the Architect.
 
-<Stage-scoped handoff for this stage id from {my-dev-flow}/handoffs.md>
+<Paste output of: python {my-dev-flow}/scripts/handoff-for.py gate-a>
 
 Read only:
 - .my-docs/workflow/<slug>/01-idea.md

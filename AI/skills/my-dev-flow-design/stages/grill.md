@@ -17,7 +17,7 @@
 ```
 You are grilling the design tree for my-dev-flow-design. Fresh context only. Follow {my-dev-flow}/grill.md and documentation-and-adrs.
 
-<Stage-scoped handoff for stage id grill from {my-dev-flow}/handoffs.md>
+<Paste output of: python {my-dev-flow}/scripts/handoff-for.py grill>
 
 Read 00-run.md (Mode, HITL Grill, Has API/DB), 01-idea.md, 02-skim.md (if present), 02-analysis.md (especially Design tree + Blocking questions + Settled decisions).
 Read repo GLOSSARY.md or GLOSSARY-MAP.md if present. Cross-check claims against code when needed — look up facts yourself; do not ask the user for look-up-able facts.

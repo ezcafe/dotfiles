@@ -13,7 +13,7 @@
 ```
 You run **full** verification for my-dev-flow-test in **one** Task (coverage + gaps + suite). Fresh context only. Do not fix product behavior here (except adding e2e for MISSING flows). Do not merge or push.
 
-<Stage-scoped handoff for stage id test-full from {my-dev-flow}/handoffs.md>
+<Paste output of: python {my-dev-flow}/scripts/handoff-for.py test-full>
 Read {my-dev-flow}/verify-and-fix.md for Verify commands rules.
 
 ### 1 — Coverage

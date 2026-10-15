@@ -5,11 +5,17 @@ Checks required 00-run.md fields with exact-token enums (reject template `|`),
 Status, Mode, Review profile, Gate B veto, Pending parallel, Has API/DB,
 stage ids, Verify commands before Build, skip-review+API/DB error
 (--before-build, --before-design-review, or --check-skip-review),
-Mode full+skip-review error, Mode simple+full error, Mode full API∥DB Pending
-parallel (simple keeps none), async Gate B gap + Build armed.
+Mode full+skip-review error, Mode simple+full error, Mode full + HITL Gate B
+auto/async-notify error, Mode simple + Has API/DB yes + soft Gate B error,
+Mode full API∥DB Pending parallel (simple keeps none),
+async Gate B gap + Build armed, Gate C approved before merge
+(auto when card Next=merge, or with --before-merge).
 
 Also:
   --next              print next incomplete stage hint + companion / handoff
+                      (no Task handoff when blocked / gate-b / gate-c /
+                      merge without Gate C approved)
+  --before-merge      require Gate C approved actions (also auto when Next=merge)
   --dry-run-seed      create slug dir, seed 00-run.md from template, lint, stop
   --check-stage-ids   verify stage-id registry (handoffs / parent-next / VALID_STAGE_IDS / stages/*.md)
 """
@@ -43,8 +49,48 @@ VALID_MODE = frozenset({"simple", "full"})
 VALID_REVIEW_PROFILE = frozenset({"full", "lite", "skip-review"})
 VALID_GATE_B_VETO = frozenset({"none", "pending"})
 VALID_YES_NO = frozenset({"yes", "no"})
+VALID_HITL_TIER = frozenset({"auto", "async-notify", "blocking"})
+VALID_GATE_C_ACTIONS = frozenset({"commit", "push", "pr", "merge"})
 # Exact enum for Pending parallel (H4)
 VALID_PENDING_PARALLEL = frozenset({"none", "api", "db", "api|db"})
+
+# Mode × profile Happy-path legality for --next (warn only)
+FULL_ONLY_STAGES = frozenset(
+    {
+        "ideation",
+        "gate-a",
+        "ideation-update",
+        "skim",
+        "analyze",
+        "design",
+        "design-review",
+        "api-contract-review",
+        "db-design-review",
+        "adversarial",
+        "quality",
+        "test-full",
+    }
+)
+SIMPLE_BUNDLE_STAGES = frozenset({"design-phase", "design-verify-phase"})
+PROFILE_FULL_ONLY_STAGES = frozenset({"adversarial", "quality", "test-full"})
+PROFILE_LITE_PATH_STAGES = frozenset({"code-review-phase", "test-lite"})
+SKIP_REVIEW_FORBIDDEN_STAGES = frozenset(
+    {
+        "adversarial",
+        "quality",
+        "code-review-phase",
+        "test-full",
+        "test-lite",
+        "merge-findings",
+        "fix-review",
+        "lens-security",
+        "lens-perf",
+        "lens-memory",
+        "lens-api",
+        "lens-db",
+        "smoke",
+    }
+)
 
 # Stage ids from handoffs.md Task description map
 VALID_STAGE_IDS = frozenset(
@@ -121,6 +167,10 @@ PENDING_PARALLEL_RE = re.compile(
 )
 HAS_API_LINE_RE = re.compile(r"^[-*]?\s*\*\*Has API:\*\*\s*(.+)$", re.M | re.I)
 HAS_DB_LINE_RE = re.compile(r"^[-*]?\s*\*\*Has DB:\*\*\s*(.+)$", re.M | re.I)
+HITL_GATE_B_RE = re.compile(r"^[-*]?\s*\*\*HITL Gate B:\*\*\s*(.+)$", re.M | re.I)
+GATE_C_APPROVED_RE = re.compile(
+    r"^[-*]?\s*\*\*Gate C approved:\*\*\s*(.+)$", re.M | re.I
+)
 NOTES_SECTION_RE = re.compile(
     r"### Notes\s*\n(.*?)(?=\n### |\n## |\Z)", re.M | re.S
 )
@@ -500,6 +550,167 @@ def _check_pending_parallel(
         )
 
 
+def _parse_hitl_gate_b(text: str) -> str | None:
+    """Return HITL Gate B tier token, or None if missing/template."""
+    m = HITL_GATE_B_RE.search(text)
+    if not m:
+        return None
+    raw = m.group(1).strip()
+    if _looks_like_template(raw):
+        return None
+    primary = re.split(r"\s+[—#–-]\s+|\s{2,}", raw, maxsplit=1)[0].strip()
+    token = primary.strip("`*_").lower()
+    # Allow "async-notify" as one token (may contain hyphen only)
+    if token in VALID_HITL_TIER:
+        return token
+    # First whitespace token for "blocking (note)"
+    first = primary.split()[0].strip("`*_").lower() if primary.split() else ""
+    if first in VALID_HITL_TIER:
+        return first
+    return None
+
+
+def _parse_gate_c_approved(text: str) -> tuple[str | None, set[str]]:
+    """Return (raw_primary, action_set). action_set empty when none/missing."""
+    m = GATE_C_APPROVED_RE.search(text)
+    if not m:
+        return None, set()
+    raw = m.group(1).strip()
+    if _looks_like_template(raw):
+        return raw, set()
+    primary = re.split(r"\s+[—#–-]\s+|\s{2,}", raw, maxsplit=1)[0].strip()
+    compact = primary.strip("`*_").lower()
+    if compact in ("", "none", "n/a", "-", "—"):
+        return "none", set()
+    parts = [p.strip() for p in re.split(r"[,|/]+", compact) if p.strip()]
+    actions = {p for p in parts if p in VALID_GATE_C_ACTIONS}
+    return compact, actions
+
+
+def _check_hitl_gate_b_mode(
+    text: str, issues: list[Issue], mode_token: str | None
+) -> None:
+    """Mode full / simple+API/DB must use blocking Gate B (hitl.md)."""
+    tier = _parse_hitl_gate_b(text)
+    if tier is None:
+        return
+    if mode_token == "full" and tier in ("auto", "async-notify"):
+        issues.append(
+            Issue(
+                "error",
+                f"Mode full + HITL Gate B {tier!r} is forbidden — "
+                "use blocking (hitl.md Default Gate B narrow async)",
+            )
+        )
+        return
+    if mode_token == "simple" and tier in ("auto", "async-notify"):
+        has_api = _parsed_yes_no(text, HAS_API_LINE_RE)
+        has_db = _parsed_yes_no(text, HAS_DB_LINE_RE)
+        if has_api == "yes" or has_db == "yes":
+            issues.append(
+                Issue(
+                    "error",
+                    "Mode simple + Has API/DB yes + non-blocking HITL Gate B — "
+                    "use blocking (hitl.md Default Gate B narrow async)",
+                )
+            )
+
+
+def _card_next_stage_id(text: str) -> str:
+    """Orchestrator card Next step token (empty if missing)."""
+    next_m = CARD_NEXT_RE.search(text)
+    if not next_m:
+        return ""
+    return _extract_stage_token(next_m.group(1))
+
+
+def _check_gate_c_approved(
+    text: str, issues: list[Issue], *, before_merge: bool
+) -> None:
+    """Require durable Gate C approved when Next=merge or --before-merge."""
+    enforce = before_merge or _card_next_stage_id(text) == "merge"
+    if not enforce:
+        return
+
+    raw, actions = _parse_gate_c_approved(text)
+    if raw is None:
+        issues.append(
+            Issue(
+                "error",
+                "Gate C approved missing — set comma-separated "
+                "commit,push,pr,merge subset after user yes (hitl.md)",
+            )
+        )
+        return
+    if raw == "none" or not actions:
+        issues.append(
+            Issue(
+                "error",
+                "Gate C approved is none/empty — require explicit approved-actions "
+                "before merge (hitl.md)",
+            )
+        )
+        return
+    unknown = {
+        p.strip()
+        for p in re.split(r"[,|/]+", raw)
+        if p.strip() and p.strip() not in VALID_GATE_C_ACTIONS
+    }
+    if unknown:
+        issues.append(
+            Issue(
+                "error",
+                f"Gate C approved has unknown tokens {sorted(unknown)} — "
+                f"use subset of {sorted(VALID_GATE_C_ACTIONS)}",
+            )
+        )
+
+
+def _next_stage_legality_warns(
+    stage_id: str, mode_token: str | None, review_token: str | None
+) -> list[str]:
+    """Warn messages when Next stage is illegal for Mode × Review profile."""
+    warns: list[str] = []
+    if not stage_id:
+        return warns
+    if mode_token == "full" and review_token == "skip-review":
+        warns.append(
+            "Mode full + Review profile skip-review is forbidden — "
+            "use full/lite or Mode simple (stages.md)"
+        )
+    if mode_token == "simple" and review_token == "full":
+        warns.append(
+            "Mode simple + Review profile full is forbidden — "
+            "use lite/skip-review or Mode full (stages.md)"
+        )
+    if mode_token == "simple" and stage_id in FULL_ONLY_STAGES:
+        warns.append(
+            f"Next `{stage_id}` is Mode full Happy-path only — "
+            "reclassify or pick a simple-pipeline stage (stages.md)"
+        )
+    if mode_token == "full" and stage_id in SIMPLE_BUNDLE_STAGES:
+        warns.append(
+            f"Next `{stage_id}` is Mode simple bundle — "
+            "Mode full uses Analyze→Grill→Design / design-review (stages.md)"
+        )
+    if review_token == "lite" and stage_id in PROFILE_FULL_ONLY_STAGES:
+        warns.append(
+            f"Next `{stage_id}` requires Review profile full — "
+            "lite path uses code-review-phase / test-lite (stages.md)"
+        )
+    if review_token == "full" and stage_id in PROFILE_LITE_PATH_STAGES:
+        warns.append(
+            f"Next `{stage_id}` is Review profile lite path — "
+            "profile full uses Adv→Quality→test-full (stages.md)"
+        )
+    if review_token == "skip-review" and stage_id in SKIP_REVIEW_FORBIDDEN_STAGES:
+        warns.append(
+            f"Next `{stage_id}` illegal under skip-review — "
+            "legal path is Gate C after Build verify-pass (lenses.md · hitl.md)"
+        )
+    return warns
+
+
 def _check_async_gate_b_gap(text: str, issues: list[Issue], *, before_build: bool) -> None:
     """async-notify Gate B veto window / Build armed / parent turn gap."""
     status_m = REQUIRED_FIELD_PATTERNS["Status"].search(text)
@@ -612,6 +823,7 @@ def lint_run_md(
     before_design_review: bool,
     before_build: bool,
     check_skip_review: bool = False,
+    before_merge: bool = False,
     run_dir: Path | None = None,
 ) -> list[Issue]:
     issues: list[Issue] = []
@@ -666,6 +878,9 @@ def lint_run_md(
                 "use lite/skip-review or Mode full",
             )
         )
+
+    _check_hitl_gate_b_mode(text, issues, mode_token)
+    _check_gate_c_approved(text, issues, before_merge=before_merge)
 
     cm = CARD_STAGE_RE.search(text)
     if cm:
@@ -770,6 +985,10 @@ def print_next_hint(run_dir: Path) -> int:
     text = run_md.read_text(encoding="utf-8")
     status_m = REQUIRED_FIELD_PATTERNS["Status"].search(text)
     status = _first_token(status_m.group(1)) if status_m else "?"
+    mode_m = REQUIRED_FIELD_PATTERNS["Mode"].search(text)
+    mode_token = _first_token(mode_m.group(1)) if mode_m else None
+    rp_m = REQUIRED_FIELD_PATTERNS["Review profile"].search(text)
+    review_token = _first_token(rp_m.group(1)) if rp_m else None
     next_m = CARD_NEXT_RE.search(text)
     stage_m = CARD_STAGE_RE.search(text)
     next_raw = next_m.group(1).strip() if next_m else ""
@@ -787,11 +1006,43 @@ def print_next_hint(run_dir: Path) -> int:
         print(f"companion: {PARENT_NEXT_MD}")
         return 0
     print(f"next incomplete stage: {stage_id}")
+
+    for msg in _next_stage_legality_warns(stage_id, mode_token, review_token):
+        print(f"warn: {msg}")
+
+    # Parent gates / blocked async gap: never emit Task handoff
     if stage_id == "build" and veto_window and not build_armed:
-        print("blocked: veto window open — set Build armed on this turn (hitl.md), then Build")
+        print(
+            "blocked: veto window open — set Build armed on this turn "
+            "(hitl.md), then Build"
+        )
         print("companion: hitl.md · parent-next.md")
-    else:
-        print(f"companion: parent-next.md (row for `{stage_id}`)")
+        print("handoff: do-not-launch")
+        print("next action: set Notes/Run log Build armed (parent turn gap), re-run --next")
+        return 0
+    if stage_id in ("gate-b", "gate-c"):
+        print(f"companion: hitl.md · parent-next.md (row for `{stage_id}`)")
+        print("handoff: do-not-launch")
+        if stage_id == "gate-b":
+            print("next action: Gate B digest + HITL (no Task) — hitl.md")
+        else:
+            print(
+                "next action: Gate C blocking ask; set Gate C approved "
+                "before merge — hitl.md"
+            )
+        return 0
+    if stage_id == "merge":
+        _gc_raw, gc_actions = _parse_gate_c_approved(text)
+        if _gc_raw is None or _gc_raw == "none" or not gc_actions:
+            print("companion: hitl.md · parent-next.md (row for `merge`)")
+            print("handoff: do-not-launch")
+            print(
+                "next action: Gate C blocking ask; set Gate C approved "
+                "(non-empty commit|push|pr|merge subset), then re-run --next"
+            )
+            return 0
+
+    print(f"companion: parent-next.md (row for `{stage_id}`)")
     print(f"handoff: python {PACKAGE / 'scripts' / 'handoff-for.py'} {stage_id}")
     return 0
 
@@ -849,6 +1100,14 @@ def main() -> int:
         "--before-build",
         action="store_true",
         help="Enforce Verify commands + Gate B veto none + Build armed + async gap",
+    )
+    p.add_argument(
+        "--before-merge",
+        action="store_true",
+        help=(
+            "Require Gate C approved actions (commit|push|pr|merge); "
+            "also auto-enforced when card Next=merge"
+        )
     )
     p.add_argument(
         "--check-skip-review",
@@ -910,6 +1169,7 @@ def main() -> int:
         before_design_review=args.before_design_review,
         before_build=args.before_build,
         check_skip_review=args.check_skip_review,
+        before_merge=args.before_merge,
         run_dir=args.run_dir,
     )
 

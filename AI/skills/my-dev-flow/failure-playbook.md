@@ -24,7 +24,7 @@ Veto / Gate C: [hitl.md](hitl.md). Skip-review ban: [lenses.md](lenses.md).
 | **Task count ≥ 20** (Mode full, running) | Decision N (soft budget) | Continue · Reclassify/slim · Stop ([invariants.md](invariants.md)) |
 | **main-thread fallbacks ≥ 3** (running) | Decision N (soft pause) | Continue · Reclassify/model path · Stop ([invariants.md](invariants.md)) |
 | **Gate C decline / silence** | Stay paused or `stopped` | No commit/push/PR/merge |
-| **async-notify Gate B on Mode full** | Do not — use **blocking** | [hitl.md](hitl.md) Default Gate B (Option A) |
+| **async-notify Gate B on Mode full** | Do not — use **blocking** | [hitl.md](hitl.md) Default Gate B (narrow async) |
 
 ## Anti-loop rules
 

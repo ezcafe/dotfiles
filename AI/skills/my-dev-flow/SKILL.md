@@ -2,15 +2,17 @@
 name: my-dev-flow
 description: >-
   Orchestrates the AI-assisted delivery pipeline (design → review → build →
-  test → merge). Classifies simple vs full; Soft HITL for Gate B and Grill;
-  blocking Gate C. Use when the user says run my-dev-flow, start my-dev-flow,
-  run my-plan-flow / my-workflow (legacy), simple mode, ideate → build → merge,
-  grill / stress-test this plan, or wants the end-to-end delivery pipeline.
+  test → merge). Classifies simple vs full. Gate C always blocking; Mode full
+  Gate B blocking; Mode simple Gate B soft (auto|async-notify when allowed);
+  Grill soft by default. Use when the user says run my-dev-flow, start
+  my-dev-flow, run my-plan-flow / my-workflow (legacy), simple mode,
+  ideate → build → merge, grill / stress-test this plan, or wants the
+  end-to-end delivery pipeline.
 ---
 
 # my-dev-flow
 
-**TL;DR:** (1) Classify Mode simple vs full. (2) Seed `.my-docs/workflow/<slug>/` from artifacts. (3) Run **Full/Simple pipeline order** in [stages.md](stages.md). (4) Gate C is always **blocking** — never commit/push/PR/merge without explicit yes. (5) Soft Gate B / Grill — [hitl.md](hitl.md).
+**TL;DR:** (1) Classify Mode simple vs full. (2) Seed `.my-docs/workflow/<slug>/` from artifacts. (3) Run **Full/Simple pipeline order** in [stages.md](stages.md). (4) Gate C always **blocking**. Mode **full** Gate B **blocking**. Mode **simple** Gate B soft (auto|async-notify when allowed). Grill soft by default. Soft HITL → Grill + Mode simple Gate B only — [hitl.md](hitl.md).
 
 End-to-end **orchestrator only**. Stage prompts live in subflows.  
 **Runtime order (SoT):** [stages.md](stages.md) Happy path.  
@@ -23,7 +25,7 @@ design-heavy, never ship first draft, generation ≠ verification.
 
 Follow **[stages.md](stages.md) Step 0** (classify, seed `00-run.md`, models, lint, chat one line). Do not restate Step 0 bullets here.
 
-**Skills sync (after SoT edits):** If you edited under `AI/skills/`, run `./AI/skills/sync-to-cursor.sh` before relying on Cursor discovery ([skills-path.md](skills-path.md)).
+**Skills sync (after SoT edits):** If you edited under `AI/skills/`, run `./AI/skills/sync-to-cursor.sh` (optional `--check`) before relying on Cursor discovery ([skills-path.md](skills-path.md)).
 
 ## When to run
 
@@ -41,7 +43,7 @@ Follow **[stages.md](stages.md) Step 0** (classify, seed `00-run.md`, models, li
 4. **Build / Fix Verify gate** — do not advance on verify-fail. ([verify-and-fix.md](verify-and-fix.md))
 5. **Do not invent approval** — stop / veto / async Gate B gap / **Build armed** / Status / skip-review ban: [stages.md](stages.md) · [hitl.md](hitl.md) · [lenses.md](lenses.md).
 
-**Companion links (not duplicated here):** Smoke Option B · legal skip-review → [lenses.md](lenses.md) · [verify-and-fix.md](verify-and-fix.md) · [hitl.md](hitl.md). Fresh Task + stage handoff → [handoffs.md](handoffs.md) / `scripts/handoff-for.py`. Usage limit → [models.md](models.md). Design-backloop / max-round → [failure-playbook.md](failure-playbook.md) · [invariants.md](invariants.md). No UI concept step → [LEGACY.md](LEGACY.md). Parent checklist → [invariants.md](invariants.md). Skills SoT + sync → [skills-path.md](skills-path.md).
+**Companion links (not duplicated here):** Smoke after Build (Build-writes-Smoke) · legal skip-review → [lenses.md](lenses.md) · [verify-and-fix.md](verify-and-fix.md) · [hitl.md](hitl.md). Fresh Task → **required** `scripts/handoff-for.py <stage-id>` ([handoffs.md](handoffs.md) = edit SoT / debug only). Usage limit → [models.md](models.md). Design-backloop / max-round → [failure-playbook.md](failure-playbook.md) · [invariants.md](invariants.md). No UI concept step → [LEGACY.md](LEGACY.md). Parent checklist → [invariants.md](invariants.md). Skills SoT + sync → [skills-path.md](skills-path.md).
 
 ## Routing (package + parent load)
 
@@ -55,7 +57,7 @@ Follow **[stages.md](stages.md) Step 0** (classify, seed `00-run.md`, models, li
 | Parent checklist · Task-count budget · max-round Decisions | [invariants.md](invariants.md) |
 | Hard stop chat scripts | [failure-playbook.md](failure-playbook.md) |
 | Next step (live run) | `00-run.md` Orchestrator card + **one** companion section |
-| Task prompt | `scripts/handoff-for.py <stage-id>` **or** [handoffs.md](handoffs.md) row + **subflow `stages/<id>.md`** (not whole stages.md) |
+| Task prompt | **Required:** `scripts/handoff-for.py <stage-id>` + **subflow `stages/<id>.md`**. [handoffs.md](handoffs.md) = edit SoT / debug only (do not load whole file for launch) |
 | Build / Fix | card + handoff `build`/`fix-*` + [verify-and-fix.md](verify-and-fix.md) |
 | New artifact body | one file under [artifacts/](artifacts/INDEX.md) |
 | Grill | [grill.md](grill.md) (once when entering Grill) |

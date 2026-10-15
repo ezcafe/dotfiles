@@ -4,7 +4,7 @@ Parent checks these **before every Task launch** and after every Task return.
 **This file is SoT for:** parent pre-launch checklist + max-round Decision shapes.  
 Decision option shape: [handoffs.md](handoffs.md).  
 Hard stops / what to chat: [failure-playbook.md](failure-playbook.md).  
-**Lint (required):** `scripts/lint-run.py .my-docs/workflow/<slug>/` at Step 0; `--before-design-review` before design-review; `--before-build` before Build.
+**Lint (required):** `scripts/lint-run.py .my-docs/workflow/<slug>/` at Step 0; `--before-design-review` before design-review; `--before-build` before Build; default lint (or `--before-merge`) when Next=`merge`.
 
 ## Pre-launch checklist (≤10)
 
@@ -14,10 +14,10 @@ Hard stops / what to chat: [failure-playbook.md](failure-playbook.md).
 4. **Verify commands** set before `build` / `fix-*` / test stages ([verify-and-fix.md](verify-and-fix.md)).
 5. **Gate B checked** (or HITL auto/async logged) before `build`. async-notify → **one parent turn gap** + Notes **`Build armed`** before Build ([hitl.md](hitl.md)).
 6. **`Gate B veto`** is `none` before launching Build; if `pending` → do not Build ([hitl.md](hitl.md)). Veto window open without **Build armed** → do not Build.
-7. Handoff = `scripts/handoff-for.py <stage-id>` **or** base block + that stage row ([handoffs.md](handoffs.md)) + load **`stages/<stage-id>.md`** only ([parent-next.md](parent-next.md)).
-8. Load **one** subflow `SKILL.md` for the phase (or when Mode/profile changes). Do **not** re-read orchestrator SKILL every step.
-9. Model tier from [models.md](models.md) (Fast-on-simple when Mode simple). Soft Task-count budget: Mode **full** ≥20 → Decision N (below). **main-thread fallbacks ≥ 3** → Decision N (below).
-10. After return: read **Result first line** ([results.md](results.md); ~40 lines max); update Orchestrator card + Last Verify; do **not** advance on `verify-fail`. After SoT edits under `AI/skills/`: `./AI/skills/sync-to-cursor.sh` ([skills-path.md](skills-path.md)).
+7. **Next=`merge`** → **Gate C approved** must be a non-empty subset of `commit,push,pr,merge` (not `none`) before handoff ([hitl.md](hitl.md)). Lint errors otherwise.
+8. Handoff = **required** `scripts/handoff-for.py <stage-id>` + load **`stages/<stage-id>.md`** only ([parent-next.md](parent-next.md)). Do **not** load whole [handoffs.md](handoffs.md) for launch (edit SoT / debug only). Prefer clarity-check at design/code boundaries ([parent-next.md](parent-next.md)).
+9. Load **one** subflow `SKILL.md` for the phase (or when Mode/profile changes). Do **not** re-read orchestrator SKILL every step. Model tier from [models.md](models.md) (Fast-on-simple when Mode simple). Soft Task-count budget: Mode **full** ≥20 → Decision N (below). **main-thread fallbacks ≥ 3** → Decision N (below).
+10. After return: read **Result first line** ([results.md](results.md); ~40 lines max); update Orchestrator card + Last Verify; do **not** advance on `verify-fail`. After SoT edits under `AI/skills/`: `./AI/skills/sync-to-cursor.sh` (optional `--check` for my-dev-flow* drift — [skills-path.md](skills-path.md)).
 
 ## Built-in Decision shapes (max rounds / hard stops)
 

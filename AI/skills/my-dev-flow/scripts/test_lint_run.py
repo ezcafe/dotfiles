@@ -47,7 +47,11 @@ def _base(
     next_step: str = "design-phase",
     stage_id: str = "design-phase",
     verify: bool = True,
+    hitl_gate_b: str | None = None,
+    gate_c_approved: str = "none",
 ) -> str:
+    if hitl_gate_b is None:
+        hitl_gate_b = "blocking" if mode == "full" else "auto"
     pp = (
         f"**Pending parallel:** {pending_parallel}\n"
         if pending_parallel is not None
@@ -99,9 +103,10 @@ def _base(
 - **Has UI:** no
 - **Has API:** {has_api}
 - **Has DB:** {has_db}
-- **HITL Gate B:** auto
+- **HITL Gate B:** {hitl_gate_b}
 - **HITL Grill:** auto
 - **HITL Gate C:** blocking
+- **Gate C approved:** {gate_c_approved}
 
 ### Orchestrator card (parent — avoid re-ingest)
 
@@ -406,6 +411,165 @@ class TestValidStageIdsSync(unittest.TestCase):
         )
 
 
+class TestHitlGateBAndGateC(unittest.TestCase):
+    def test_mode_full_async_notify_gate_b_errors(self):
+        text = _base(
+            mode="full",
+            review="full",
+            hitl_gate_b="async-notify",
+        )
+        issues = lint_run_md(
+            text, before_design_review=False, before_build=False
+        )
+        self.assertTrue(
+            any(
+                "Mode full + HITL Gate B" in e and "async-notify" in e
+                for e in _errors(issues)
+            )
+        )
+
+    def test_mode_full_auto_gate_b_errors(self):
+        text = _base(mode="full", review="full", hitl_gate_b="auto")
+        issues = lint_run_md(
+            text, before_design_review=False, before_build=False
+        )
+        self.assertTrue(
+            any("Mode full + HITL Gate B" in e for e in _errors(issues))
+        )
+
+    def test_mode_full_blocking_gate_b_ok(self):
+        text = _base(mode="full", review="full", hitl_gate_b="blocking")
+        issues = lint_run_md(
+            text, before_design_review=False, before_build=False
+        )
+        self.assertFalse(
+            any("HITL Gate B" in e for e in _errors(issues))
+        )
+
+    def test_mode_simple_api_yes_soft_gate_b_errors(self):
+        text = _base(
+            mode="simple",
+            review="lite",
+            has_api="yes",
+            hitl_gate_b="async-notify",
+        )
+        issues = lint_run_md(
+            text, before_design_review=False, before_build=False
+        )
+        self.assertTrue(
+            any(
+                "Has API/DB yes" in e and "non-blocking" in e
+                for e in _errors(issues)
+            )
+        )
+        self.assertFalse(
+            any(
+                "Has API/DB yes" in w and "non-blocking" in w
+                for w in _warns(issues)
+            )
+        )
+
+    def test_mode_simple_api_yes_soft_gate_b_before_build_errors(self):
+        text = _base(
+            mode="simple",
+            review="lite",
+            has_api="yes",
+            hitl_gate_b="auto",
+            next_step="build",
+            stage_id="gate-b",
+        )
+        issues = lint_run_md(
+            text, before_design_review=False, before_build=True
+        )
+        self.assertTrue(
+            any(
+                "Has API/DB yes" in e and "non-blocking" in e
+                for e in _errors(issues)
+            )
+        )
+
+    def test_before_merge_requires_gate_c_approved(self):
+        text = _base(
+            next_step="merge",
+            stage_id="gate-c",
+            gate_c_approved="none",
+        )
+        issues = lint_run_md(
+            text,
+            before_design_review=False,
+            before_build=False,
+            before_merge=True,
+        )
+        self.assertTrue(
+            any("Gate C approved" in e for e in _errors(issues))
+        )
+
+    def test_default_lint_next_merge_requires_gate_c_approved(self):
+        """N2: plain lint errors when Next=merge and approved is none."""
+        text = _base(
+            next_step="merge",
+            stage_id="gate-c",
+            gate_c_approved="none",
+        )
+        issues = lint_run_md(
+            text,
+            before_design_review=False,
+            before_build=False,
+            before_merge=False,
+        )
+        self.assertTrue(
+            any("Gate C approved" in e for e in _errors(issues))
+        )
+
+    def test_default_lint_non_merge_allows_gate_c_none(self):
+        text = _base(
+            next_step="test-lite",
+            stage_id="code-review-phase",
+            gate_c_approved="none",
+        )
+        issues = lint_run_md(
+            text,
+            before_design_review=False,
+            before_build=False,
+            before_merge=False,
+        )
+        self.assertFalse(
+            any("Gate C approved" in e for e in _errors(issues))
+        )
+
+    def test_before_merge_with_approved_actions_ok(self):
+        text = _base(
+            next_step="merge",
+            stage_id="gate-c",
+            gate_c_approved="commit,push,pr,merge",
+        )
+        issues = lint_run_md(
+            text,
+            before_design_review=False,
+            before_build=False,
+            before_merge=True,
+        )
+        self.assertFalse(
+            any("Gate C approved" in e for e in _errors(issues))
+        )
+
+    def test_default_lint_next_merge_with_approved_ok(self):
+        text = _base(
+            next_step="merge",
+            stage_id="gate-c",
+            gate_c_approved="commit,push",
+        )
+        issues = lint_run_md(
+            text,
+            before_design_review=False,
+            before_build=False,
+            before_merge=False,
+        )
+        self.assertFalse(
+            any("Gate C approved" in e for e in _errors(issues))
+        )
+
+
 class TestNextAndDryRun(unittest.TestCase):
     def test_print_next_hint(self):
         text = _base(next_step="build", stage_id="gate-b", status="paused")
@@ -414,6 +578,109 @@ class TestNextAndDryRun(unittest.TestCase):
             (run_dir / "00-run.md").write_text(text, encoding="utf-8")
             rc = lint_run.print_next_hint(run_dir)
             self.assertEqual(rc, 0)
+
+    def test_print_next_hint_blocked_async_omits_handoff(self):
+        text = _base(
+            status="paused",
+            next_step="build",
+            stage_id="gate-b",
+            notes="- async-notify posted — veto window open until Build starts",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            from io import StringIO
+            import contextlib
+
+            buf = StringIO()
+            with contextlib.redirect_stdout(buf):
+                rc = lint_run.print_next_hint(run_dir)
+            out = buf.getvalue()
+            self.assertEqual(rc, 0)
+            self.assertIn("handoff: do-not-launch", out)
+            self.assertIn("Build armed", out)
+            self.assertNotIn("handoff-for.py build", out)
+
+    def test_print_next_hint_gate_b_no_task_handoff(self):
+        text = _base(next_step="gate-b", stage_id="design-verify-phase")
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            from io import StringIO
+            import contextlib
+
+            buf = StringIO()
+            with contextlib.redirect_stdout(buf):
+                rc = lint_run.print_next_hint(run_dir)
+            out = buf.getvalue()
+            self.assertEqual(rc, 0)
+            self.assertIn("handoff: do-not-launch", out)
+            self.assertNotIn("handoff-for.py gate-b", out)
+
+    def test_print_next_hint_merge_without_gate_c_no_handoff(self):
+        """N1: Next=merge + Gate C approved none → do-not-launch."""
+        text = _base(
+            next_step="merge",
+            stage_id="gate-c",
+            gate_c_approved="none",
+            status="paused",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            from io import StringIO
+            import contextlib
+
+            buf = StringIO()
+            with contextlib.redirect_stdout(buf):
+                rc = lint_run.print_next_hint(run_dir)
+            out = buf.getvalue()
+            self.assertEqual(rc, 0)
+            self.assertIn("handoff: do-not-launch", out)
+            self.assertIn("Gate C approved", out)
+            self.assertNotIn("handoff-for.py merge", out)
+
+    def test_print_next_hint_merge_with_gate_c_emits_handoff(self):
+        text = _base(
+            next_step="merge",
+            stage_id="gate-c",
+            gate_c_approved="commit,push,pr,merge",
+            status="paused",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            from io import StringIO
+            import contextlib
+
+            buf = StringIO()
+            with contextlib.redirect_stdout(buf):
+                rc = lint_run.print_next_hint(run_dir)
+            out = buf.getvalue()
+            self.assertEqual(rc, 0)
+            self.assertIn("handoff-for.py merge", out)
+            self.assertNotIn("handoff: do-not-launch", out)
+
+    def test_print_next_hint_mode_profile_illegality_warn(self):
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="adversarial",
+            stage_id="build",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            from io import StringIO
+            import contextlib
+
+            buf = StringIO()
+            with contextlib.redirect_stdout(buf):
+                rc = lint_run.print_next_hint(run_dir)
+            out = buf.getvalue()
+            self.assertEqual(rc, 0)
+            self.assertIn("warn:", out)
+            self.assertIn("adversarial", out)
 
     def test_dry_run_seed(self):
         with tempfile.TemporaryDirectory() as td:

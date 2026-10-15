@@ -3,7 +3,7 @@
 **Progressive disclosure:** Principles live in [SKILL.md](SKILL.md).  
 **Load one file only:** `stages/<stage-id>.md` for the current Task (do not load this whole package of prompts).
 
-Stage-scoped handoff: `{my-dev-flow}/handoffs.md` / `scripts/handoff-for.py <stage-id>`.  
+Stage-scoped handoff: **required** `scripts/handoff-for.py <stage-id>` (`{my-dev-flow}/handoffs.md` = edit SoT / debug only).  
 Paths: `{my-dev-flow}/skills-path.md`. Models: `{my-dev-flow}/models.md`.  
 Grill HITL: `{my-dev-flow}/hitl.md` + `{my-dev-flow}/grill.md`. Parent Happy path: `{my-dev-flow}/stages.md`.
 
@@ -17,7 +17,7 @@ Parent uses the **resolved** model for that stage’s tier (see `00-run.md`).
 | **simple** | `design-phase` only → (parent) design-verify-phase… |
 | **update** | `design-update` → (parent) re-review |
 
-Clarity before Analyze / Grill / Design: [stages/clarity-check.md](stages/clarity-check.md).
+Clarity: before Analyze / Grill / Design (full) or **design-phase entry** (simple) — [stages/clarity-check.md](stages/clarity-check.md).
 
 ## Per-stage prompts
 

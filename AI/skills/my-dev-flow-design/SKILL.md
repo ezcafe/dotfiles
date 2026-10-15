@@ -22,7 +22,7 @@ Design-only subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). No production c
 |-------|------|
 | Runtime order / Mode | [`../my-dev-flow/stages.md`](../my-dev-flow/stages.md) |
 | Stage prompts | [stages.md](stages.md) index → load **`stages/<stage-id>.md` only** |
-| Handoffs | [`../my-dev-flow/handoffs.md`](../my-dev-flow/handoffs.md) |
+| Handoffs | **Required** `scripts/handoff-for.py <stage-id>` · [`handoffs.md`](../my-dev-flow/handoffs.md) = edit SoT / debug only |
 | Grill / HITL | [`../my-dev-flow/grill.md`](../my-dev-flow/grill.md) · [`../my-dev-flow/hitl.md`](../my-dev-flow/hitl.md) |
 | Has API/DB / tiny-tweak | [`../my-dev-flow/lenses.md`](../my-dev-flow/lenses.md) |
 | Max rounds / backloop | [`../my-dev-flow/invariants.md`](../my-dev-flow/invariants.md) |
@@ -73,7 +73,7 @@ Update: Update from 03a → (parent) re-review
 - Detect: `03a` needs update → Update; Mode simple → **design-phase** only; else Full.
 - Full: separate Tasks; Gate A before Analyze; Grill before Design.
 - Simple: one `design-phase` Task; Grill inside bundle when frontier open / Has API/DB.
-- Fresh Task + `stages/<id>.md` + stage-scoped handoff only.
+- Fresh Task + `stages/<id>.md` + paste `scripts/handoff-for.py <stage-id>` output (do not load whole handoffs.md for launch).
 - After Design: parent runs design-review / design-verify-phase before Gate B — do not Gate B from this skill.
 - Design-backloop / veto / skip-review: parent SoT links above.
 

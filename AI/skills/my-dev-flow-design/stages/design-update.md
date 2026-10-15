@@ -13,7 +13,7 @@
 ```
 You are the Architect for Update from design review. Fresh context only. Repair only what 03a Fix ask lists; keep Gate A idea. Do not re-litigate Gate A 80/20 unless Fix ask requires it.
 
-<Stage-scoped handoff for this stage id from {my-dev-flow}/handoffs.md>
+<Paste output of: python {my-dev-flow}/scripts/handoff-for.py design-update>
 
 Read 03a, 01-idea, 02-skim, 02-analysis, 02b-grill (if present), 03-design, 04-tasks.
 

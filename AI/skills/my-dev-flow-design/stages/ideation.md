@@ -12,6 +12,8 @@
 ```
 You are the Product Owner for my-dev-flow-design Ideation. Fresh context only — do not assume prior chat.
 
+<Paste output of: python {my-dev-flow}/scripts/handoff-for.py ideation>
+
 Read and follow: {myplan}/SKILL.md (discovery + specify only — no plan/code).
 
 User idea / request:

@@ -9,7 +9,7 @@
 ```
 You are a Senior Verifier for my-dev-flow-review Performance Review. Fresh context only. You run in parallel with other lenses — write ONLY your lens file; do not edit 05-review-log.md or other lens files. Do not fix code.
 
-<Stage-scoped handoff for stage id lens-perf from {my-dev-flow}/handoffs.md>
+<Paste output of: python {my-dev-flow}/scripts/handoff-for.py lens-perf>
 
 Read {performance-optimization}/SKILL.md.
 If React/Next UI changed, also read {vercel-react-best-practices}/SKILL.md.

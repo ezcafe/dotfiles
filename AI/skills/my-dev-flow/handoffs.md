@@ -5,8 +5,8 @@ Stage-scoped handoffs, Decision options shape, artifact size caps, progress path
 Tiny-tweak / never invent empty `03a-api` / `03a-db`: [lenses.md](lenses.md) (do not treat this file as second SoT for that rule).  
 Templates: [artifacts/INDEX.md](artifacts/INDEX.md). Severity: [severity.md](severity.md). Paths: [skills-path.md](skills-path.md). Verify/Fix: [verify-and-fix.md](verify-and-fix.md). Parent checklist: [invariants.md](invariants.md). HITL / veto: [hitl.md](hitl.md). Pipeline order: [stages.md](stages.md).
 
-**Emit one handoff without loading this whole file:**  
-`python scripts/handoff-for.py <stage-id>` → prints base block template + that stage’s R/W row.
+**Required for Task launch:** `python scripts/handoff-for.py <stage-id>` → prints base block template + that stage’s R/W row.  
+**This file (handoffs.md):** edit SoT / debug only — do **not** load the whole file for every launch.
 
 ## Decision options (required for every choice list)
 
@@ -90,7 +90,7 @@ Severity exit per my-dev-flow/severity.md (Critical/Major block clean; defer Enh
 | `test-full` | `00-run.md` (Verify commands), `03-design.md`, `04-tasks.md`, `06-test-log.md` — **one Task:** coverage + add missing e2e + run suite | `06-test-log.md` (Coverage + Runs + Result) |
 | `test-lite` | `00-run.md` (Verify commands), `04-tasks.md`, `06-test-log.md` | `06-test-log.md` (targeted e2e; unit if needed) |
 | `fix-tests` | `00-run.md` (Verify commands), `06-test-log.md` (Fix ask), `03-design.md`, `04-tasks.md` | code; first line Result **verify-pass** \| **verify-fail** |
-| `merge` | `00-run.md`, `06-test-log.md`, `05-review-log.md` (if present), skim `03-design.md` (optional for PR risk summary); template `{my-dev-flow}/artifacts/pr-body.md` | PR body from template + merge (no secret files) |
+| `merge` | `00-run.md` (**Gate C approved** — abort if missing/`none`), `06-test-log.md`, `05-review-log.md` (if present), skim `03-design.md` (optional for PR risk summary); template `{my-dev-flow}/artifacts/pr-body.md` | PR body from template + merge (no secret files) |
 
 **Prompt tip:** After the base block, paste only the concrete paths for that stage (expand `<slug>`). Example for `design-review`:
 

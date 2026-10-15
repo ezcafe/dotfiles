@@ -14,7 +14,7 @@ description: >-
 
 Design verification subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). Generation ≠ verification: this skill **reviews** design docs; it does **not** rewrite them (updates go to [`my-dev-flow-design`](../my-dev-flow-design/SKILL.md)).
 
-**Details:** [stages.md](stages.md) index · load **`stages/<stage-id>.md` only** · parent order [`../my-dev-flow/stages.md`](../my-dev-flow/stages.md) · handoffs [`../my-dev-flow/handoffs.md`](../my-dev-flow/handoffs.md) · lenses [`../my-dev-flow/lenses.md`](../my-dev-flow/lenses.md) · severity [`../my-dev-flow/severity.md`](../my-dev-flow/severity.md) · models [`../my-dev-flow/models.md`](../my-dev-flow/models.md) · invariants [`../my-dev-flow/invariants.md`](../my-dev-flow/invariants.md) · LEGACY [`../my-dev-flow/LEGACY.md`](../my-dev-flow/LEGACY.md) · templates [`../my-dev-flow/artifacts/INDEX.md`](../my-dev-flow/artifacts/INDEX.md)
+**Details:** [stages.md](stages.md) index · load **`stages/<stage-id>.md` only** · parent order [`../my-dev-flow/stages.md`](../my-dev-flow/stages.md) · handoff **required** `scripts/handoff-for.py <stage-id>` ([`handoffs.md`](../my-dev-flow/handoffs.md) = edit SoT / debug only) · lenses [`../my-dev-flow/lenses.md`](../my-dev-flow/lenses.md) · severity [`../my-dev-flow/severity.md`](../my-dev-flow/severity.md) · models [`../my-dev-flow/models.md`](../my-dev-flow/models.md) · invariants [`../my-dev-flow/invariants.md`](../my-dev-flow/invariants.md) · LEGACY [`../my-dev-flow/LEGACY.md`](../my-dev-flow/LEGACY.md) · templates [`../my-dev-flow/artifacts/INDEX.md`](../my-dev-flow/artifacts/INDEX.md)
 
 ## When to run
 
@@ -81,7 +81,7 @@ Overall **clean** only when API clean|skipped ∧ DB clean|skipped ∧ general c
 - **Mode full — Has DB = yes:** launch **db-design-review** unless tiny-tweak.
 - **Mode full — both yes (not tiny-tweak):** launch both isolated Tasks **in the same turn** (parallel required), then Design review.
 - When Has = no or Notes `tiny-contract-tweak`: Notes skip only for isolated `03a-api` / `03a-db` — **never** invent empty files.
-- Set Task **`description`** from my-dev-flow map. Fresh Task per stage id; stage-scoped handoffs.
+- Set Task **`description`** from my-dev-flow map. Fresh Task per stage id; paste `scripts/handoff-for.py <stage-id>` output (do not load whole handoffs.md for launch).
 - Do **not** edit `01`–`04` here — only write `03a-*`. No production code.
 - **needs update** → `my-dev-flow-design` Update → re-run: require isolated API/DB again **only when present and not tiny-tweak**; else re-run general / design-verify-phase only.
 - **clean** → parent: optional TDD → Gate B → Build (verify-pass + Smoke). May draft Lens plan **api**/**db** when Has API/DB and not tiny-tweak; finalize before code review — [`lenses.md`](../my-dev-flow/lenses.md).

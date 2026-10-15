@@ -2,7 +2,7 @@
 name: my-dev-flow-test
 description: >-
   Supports smoke mode (build + unit; usually skipped when Build already wrote
-  smoke-pass via Verify gate Option B), full mode as one Task (coverage + missing
+  smoke-pass via Build-writes-Smoke), full mode as one Task (coverage + missing
   e2e + build/unit/e2e), and lite mode (targeted e2e after lite review). Use when
   the user says run my-dev-flow-test, smoke tests, smoke re-run, verify before
   merge, after Build, or after my-dev-flow-review is clean before merge.
@@ -20,9 +20,9 @@ worth reviewing (smoke) and matches requirements before merge (full/lite).
 | Concern | File |
 |---------|------|
 | Pipeline order / Status | [`../my-dev-flow/stages.md`](../my-dev-flow/stages.md) |
-| Verify commands + Smoke Option B | [`../my-dev-flow/verify-and-fix.md`](../my-dev-flow/verify-and-fix.md) |
+| Verify commands + Smoke after Build (Build-writes-Smoke) | [`../my-dev-flow/verify-and-fix.md`](../my-dev-flow/verify-and-fix.md) |
 | Gate C test bar / skip-review legality | [`../my-dev-flow/hitl.md`](../my-dev-flow/hitl.md) |
-| Stage handoffs | [`../my-dev-flow/handoffs.md`](../my-dev-flow/handoffs.md) |
+| Stage handoffs | **Required** `scripts/handoff-for.py <stage-id>` · [`handoffs.md`](../my-dev-flow/handoffs.md) = edit SoT / debug only |
 | Models (all test = Fast) | [`../my-dev-flow/models.md`](../my-dev-flow/models.md) |
 | Max rounds / Decision N | [`../my-dev-flow/invariants.md`](../my-dev-flow/invariants.md) |
 | Test log template | [`../my-dev-flow/artifacts/06-test-log.md`](../my-dev-flow/artifacts/06-test-log.md) |
@@ -34,7 +34,7 @@ worth reviewing (smoke) and matches requirements before merge (full/lite).
 ## Principles (owned here)
 
 - Route by Review profile / skip-review legality: parent [`stages.md`](../my-dev-flow/stages.md) · [`lenses.md`](../my-dev-flow/lenses.md) · [`hitl.md`](../my-dev-flow/hitl.md).
-- **Smoke Task** only on re-run need (Option B default skip) — [`verify-and-fix.md`](../my-dev-flow/verify-and-fix.md).
+- **Smoke Task** only on re-run need (Build-writes-Smoke default skip) — [`verify-and-fix.md`](../my-dev-flow/verify-and-fix.md).
 - **Use Verify commands** from `00-run.md`. Do **not** invent a test stack.
 - **test-full = one Task** (coverage → missing e2e → suite).
 - Product fixes → [`my-dev-flow-code`](../my-dev-flow-code/SKILL.md). Do **not** open Gate C from this skill.
@@ -66,7 +66,7 @@ Parent routes next steps (review / Gate C / Fix / merge) — see Happy path in [
 ## Orchestrator rules
 
 - Detect smoke vs full vs lite from parent ask / **Review profile**.
-- Prefer **skip Smoke Task** when Build already wrote smoke-pass (Option B).
+- Prefer **skip Smoke Task** when Build already wrote smoke-pass (Build-writes-Smoke).
 - Legal skip-review (Mode simple + Has API/DB = no) → do not launch test Tasks; parent goes Gate C on verify-pass.
 - Fresh Task per stage; prompt from [`stages/<stage-id>.md`](stages/<stage-id>.md) only (index: [stages.md](stages.md)).
 - On failure / smoke-fail → Fix-from-tests (code); re-run same mode only after verify-pass.

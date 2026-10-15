@@ -19,11 +19,12 @@ Review + Fix subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). Generation ≠
 | Topic | File |
 |-------|------|
 | Runtime order | [`../my-dev-flow/stages.md`](../my-dev-flow/stages.md) Happy path |
-| Review profile / severity exit | [`../my-dev-flow/severity.md`](../my-dev-flow/severity.md) |
+| Review profile | [`../my-dev-flow/stages.md`](../my-dev-flow/stages.md) Mode × Review profile (+ [`../my-dev-flow/lenses.md`](../my-dev-flow/lenses.md) for skip-review) |
+| Severity exit | [`../my-dev-flow/severity.md`](../my-dev-flow/severity.md) |
 | Lens plan / api/db / tiny-tweak | [`../my-dev-flow/lenses.md`](../my-dev-flow/lenses.md) |
 | Verify gate on Fix | [`../my-dev-flow/verify-and-fix.md`](../my-dev-flow/verify-and-fix.md) |
 | Max rounds / Decision N | [`../my-dev-flow/invariants.md`](../my-dev-flow/invariants.md) |
-| Stage handoffs | [`../my-dev-flow/handoffs.md`](../my-dev-flow/handoffs.md) |
+| Stage handoffs | **Required** `scripts/handoff-for.py <stage-id>` · [`handoffs.md`](../my-dev-flow/handoffs.md) = edit SoT / debug only |
 | Models | [`../my-dev-flow/models.md`](../my-dev-flow/models.md) |
 
 ## When to run
@@ -38,7 +39,7 @@ Review + Fix subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). Generation ≠
 - **Lenses / tiny-tweak / api·db:** [`lenses.md`](../my-dev-flow/lenses.md). Merge findings only if **2+** lenses.
 - **Fix:** verify-pass before re-review; max 3 → Decision N ([`verify-and-fix.md`](../my-dev-flow/verify-and-fix.md) · [`invariants.md`](../my-dev-flow/invariants.md)).
 - **UI lock (Has UI):** Quality fails **Major** on Design UI / Gate A #1/#2 / chrome drift.
-- Result tokens: [`results.md`](../my-dev-flow/results.md). Stage-scoped handoffs; plain words.
+- Result tokens: [`results.md`](../my-dev-flow/results.md). Paste `scripts/handoff-for.py <stage-id>` output per Task; plain words.
 
 ## Models
 

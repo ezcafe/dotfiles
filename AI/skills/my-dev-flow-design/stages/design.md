@@ -12,7 +12,7 @@
 ```
 You are the Architect for my-dev-flow-design Design. Fresh context only.
 
-<Stage-scoped handoff for this stage id from {my-dev-flow}/handoffs.md>
+<Paste output of: python {my-dev-flow}/scripts/handoff-for.py design>
 
 Read 01-idea.md, 02-skim.md, 02-analysis.md, and 02b-grill.md when present. When Has UI, specify UI in design — align Gate A #1/#2 and existing chrome; **lock Build** to those Design UI specs.
 Honor grill Settled decisions and glossary terms — do not re-open frontier-empty branches without new evidence.

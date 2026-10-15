@@ -1,26 +1,28 @@
 # HITL (Gate B / Gate C / Grill)
 
 Canonical human-in-the-loop rules for [`my-dev-flow`](SKILL.md).  
-**This file is SoT for:** Gate B veto, async-notify one-turn gap, **Build armed**, Gate C test bar.  
+**This file is SoT for:** Gate B veto, async-notify one-turn gap, **Build armed**, Gate C test bar, **Gate C approved** actions.  
 Pipeline order: [stages.md](stages.md). Decision shapes: [handoffs.md](handoffs.md) + [invariants.md](invariants.md). Grill domain: [grill.md](grill.md).
 
 ## Tiers
 
 | Tier | Behavior | Allowed for |
 |------|----------|-------------|
-| **auto** | Approve without waiting. Gate digest + user-first picks. | Gate B; HITL Grill |
+| **auto** | Approve without waiting. Gate digest + user-first picks. | Gate B (**Mode simple** low-risk only); HITL Grill |
 | **async-notify** | Post digest + user-first pick. **Gate B:** end turn; Build on **next** parent turn after **Build armed** (veto window). **Grill:** continue immediately. Silence is **not** a veto. | Gate B (**narrow** — see Default Gate B); HITL Grill |
-| **blocking** | Pause for approve / reject. Gate digest ≤4 bullets. | Gate B; **required** for Gate C; HITL Grill when needed |
+| **blocking** | Pause for approve / reject. Gate digest ≤4 bullets. | Gate B (**required** Mode **full**); **required** for Gate C; HITL Grill when needed |
 
-## Default Gate B (Option A — narrow async)
+## Default Gate B (narrow async)
 
 | Mode / scope | Prefer |
 |--------------|--------|
-| Mode **full** | Always **blocking**. Never use async-notify as default. |
+| Mode **full** | Always **blocking**. Never use async-notify or auto as default. |
 | Mode **simple** + Has API=no + Has DB=no + no auth/PII/schema in scope + design-review clean + (04a ok\|skipped) | **auto** or **async-notify** |
 | Mode **simple** + any of: Has API=yes, Has DB=yes, auth/PII/schema in scope, open Critical/Major | **blocking** |
 
 **async-notify allowed only** for Mode **simple** when Has API=no **and** Has DB=no **and** no auth/PII/schema in scope. Else use **blocking** (or **auto** when the simple low-risk row above holds).
+
+**Soft HITL** applies only to **HITL Grill** and Mode **simple** Gate B (when allowed). Mode **full** Gate B and Gate C are never soft.
 
 Mechanics when async-notify is used: section below (veto window · one turn gap · **Build armed**).
 
@@ -52,7 +54,7 @@ When Gate B uses **async-notify** (only when Default Gate B allows it):
 5. **Build Task must re-read `00-run.md` first.** If `Gate B veto` is `pending` → stop with Result note `blocked — Gate B veto`; do not write code. If Notes still say veto window open **and** **Build armed** is missing → stop; parent must arm first.
 6. After Build **starts** with veto still `none` and **Build armed** present: set Status `running`; **clear** Notes “veto window open” and **Build armed** (Build in flight). Lint errors if Status=`running` while Notes still say veto window open, or if `--before-build` sees veto window without **Build armed**. A later veto uses **veto after Build** Decision below — do not silently continue to review.
 
-**Lint:** `scripts/lint-run.py <run-dir> --before-build` enforces veto `none` + veto-window / **Build armed** / Status consistency.
+**Lint:** `scripts/lint-run.py <run-dir> --before-build` enforces veto `none` + veto-window / **Build armed** / Status consistency. Mode **full** + HITL Gate B ∈ {`auto`,`async-notify`} → lint error. Mode **simple** + Has API/DB = yes + HITL Gate B ∈ {`auto`,`async-notify`} → lint error (default and `--before-build`; hitl.md Default Gate B requires **blocking**).
 
 **Durable resume:** If Notes say veto window open / Last stage is Gate B async-notify / Status `paused` with Next step `build`, and `Gate B veto` is `none`, a later **resume** counts as the next parent turn — **set Build armed**, then launch Build after veto re-read. Do not require same-session memory. See [stages.md](stages.md) Resume.
 
@@ -88,3 +90,25 @@ Do **not** copy Gate B tier into Grill unless `00-run.md` explicitly sets them e
 Explicit user override may waive green tests; log override in Notes.
 
 After merge success: set Status **`done`** on `00-run.md`. Abort/reject → `stopped`, not `done` ([stages.md](stages.md) Done criteria).
+
+## Gate C approved actions (durable)
+
+**Required when at Gate C / before merge:** record the user’s explicit yes as a durable field on `00-run.md`:
+
+```markdown
+**Gate C approved:** commit,push,pr,merge
+```
+
+| Value | Meaning |
+|-------|---------|
+| `none` | No Gate C yes yet (default until ask settles) |
+| comma-separated subset of `commit` \| `push` \| `pr` \| `merge` | Actions the user named in this chat |
+
+**Notes convention (optional but preferred):** one line referencing the yes, e.g. `Gate C yes — commit+push+pr+merge (chat HH:MM)`.
+
+**Rules:**
+
+- Do **not** invent actions. Subset only what the user named (“PR only” → `pr` or `commit,push,pr` as said).
+- Merge Task / parent must re-read **Gate C approved** before git/remote actions.
+- Lint: default `scripts/lint-run.py <run-dir>` errors when card Next=`merge` and **Gate C approved** is missing / `none` / empty. `--before-merge` enforces the same check explicitly (prefer before launching Merge).
+)

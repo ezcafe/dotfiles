@@ -31,9 +31,9 @@ Anti-patterns: [anti-patterns.md](anti-patterns.md). API/DB rules: [lenses.md](.
 | 7 | `api-contract-review` ∥ `db-design-review` | **Same parent turn** (parallel); Pending parallel `api|db` → `none` when both done; both clean or Fix ask |
 | 8 | `design-review` | General clean (after isolated clean); Deferred Enhancements OK |
 | 9 | (04a) | Only if `04-tasks` lists concrete tests; else skip Notes |
-| 10 | Gate B | **blocking** required as default (Mode **full** — never async-notify default; [hitl.md](../hitl.md) Option A); on approve set `Gate B veto: none` |
+| 10 | Gate B | **blocking** required as default (Mode **full** — never async-notify default; [hitl.md](../hitl.md) Default Gate B narrow async); on approve set `Gate B veto: none` |
 | 11 | `build` | Veto check → TDD → verify-pass → Smoke section |
-| 12 | Smoke Task | **skipped** (Option B) |
+| 12 | Smoke Task | **skipped** (Build-writes-Smoke) |
 | 13 | Lens plan | Set `api+db` (+ **security** when authz/PII in scope) |
 | 14 | `adversarial` → `quality` | Separate Tasks; clean |
 | 15 | `lens-api` ∥ `lens-db` (∥ `lens-security` if planned) | Parallel when 2+ → `merge-findings` |
@@ -48,7 +48,7 @@ If the change is **one field / one column / one validator**, no new auth/PII/cro
 ## Parent habits
 
 - After each step: ≤5 lines + path; update Orchestrator card
-- Pre-launch: [invariants.md](../invariants.md) checklist; `scripts/handoff-for.py <stage-id>`
+- Pre-launch: [invariants.md](../invariants.md) checklist; **required** `scripts/handoff-for.py <stage-id>`
 - Never commit without Gate C yes
 - On design invalid after Build → [failure-playbook.md](../failure-playbook.md) design-backloop
 - Pipeline SoT: [stages.md](../stages.md) Full pipeline order

@@ -17,7 +17,7 @@
 ```
 You are the Senior Developer for my-dev-flow-code Build. Fresh context only. First output is a DRAFT. You must pass the Verify gate and write the Smoke section before the parent advances.
 
-<Stage-scoped handoff for stage id build from {my-dev-flow}/handoffs.md>
+<Paste output of: python {my-dev-flow}/scripts/handoff-for.py build>
 Read {my-dev-flow}/verify-and-fix.md (Gate B veto / Build armed + Verify gate + Smoke after Build). See {my-dev-flow}/hitl.md for async-notify window.
 
 FIRST: Read 00-run.md **Gate B veto** and Notes.
@@ -40,4 +40,4 @@ Return FIRST LINE exactly: Result: verify-pass | verify-fail | blocked — Gate 
 Then: what shipped; commands + pass/fail; Smoke section path; remaining risks; if UI, HTML match (yes/no + intentional delta).
 ```
 
-**After:** Parent advances **only** on **verify-pass**. Update card Last Verify + attempts. **Skip Smoke Task** when Smoke section is smoke-pass (Option B). On **verify-fail** after 3 attempts → Decision N. **Legal** skip-review → Gate C only in **Mode simple** when Has API=no **and** Has DB=no; Mode full or Has API/DB = **yes** → must **not** be skip-review — take review path. If Build cannot stay aligned with `03`/`04` → parent **Design-backloop** (never silently rewrite design).
+**After:** Parent advances **only** on **verify-pass**. Update card Last Verify + attempts. **Skip Smoke Task** when Smoke section is smoke-pass (Build-writes-Smoke). On **verify-fail** after 3 attempts → Decision N. **Legal** skip-review → Gate C only in **Mode simple** when Has API=no **and** Has DB=no; Mode full or Has API/DB = **yes** → must **not** be skip-review — take review path. If Build cannot stay aligned with `03`/`04` → parent **Design-backloop** (never silently rewrite design).

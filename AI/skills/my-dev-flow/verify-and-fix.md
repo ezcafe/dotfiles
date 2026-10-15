@@ -1,6 +1,6 @@
 # Verify gate + Fix rules (shared)
 
-**This file is SoT for:** Verify gate, Smoke Option B, Fix rules.  
+**This file is SoT for:** Verify gate, Smoke after Build (Build-writes-Smoke), Fix rules.  
 Used by [`my-dev-flow-code`](../my-dev-flow-code/SKILL.md) (Build, Fix-from-tests) and
 [`my-dev-flow-review`](../my-dev-flow-review/SKILL.md) (Fix).  
 Pipeline pointer: [stages.md](stages.md). Parent checklist: [invariants.md](invariants.md).  
@@ -61,7 +61,7 @@ Then: commands run + pass/fail; what changed; risks / out of scope.
 
 **Docs-only Fix (review):** If no code/test files changed → note `TDD skipped — no behavior` and `Verify skipped — docs only`; treat as verify-pass for advance.
 
-## Smoke after Build (Option B)
+## Smoke after Build (Build-writes-Smoke)
 
 On Build **verify-pass**, Build **writes** `06-test-log.md` Smoke section (commands, exits, **Smoke result: smoke-pass**) using Verify commands.
 

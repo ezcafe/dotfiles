@@ -22,7 +22,7 @@ Prefer current names on new runs. Accept these when reading old `00-run.md` / ha
 | Gate 3 | Gate C |
 | **SPM plan** / **Merged SPM** / mode `merged-spm` | **Lens plan** / **Merged lenses** / `merged-lenses` |
 | Stage ids `spm-api` … `spm-memory` | `lens-api` … `lens-memory` |
-| “Shared handoff block” | Stage-scoped handoff for that stage id ([handoffs.md](handoffs.md)) |
+| “Shared handoff block” | Paste `scripts/handoff-for.py <stage-id>` output ([handoffs.md](handoffs.md) = edit SoT / debug only) |
 | Separate test Tasks: Coverage / Add missing e2e / Run suite | One Task `test-full` |
 | Mode simple: separate Analyze → Grill → Design | One Task `design-phase` |
 | Mode simple: separate API/DB + design-review | One Task `design-verify-phase` |
@@ -48,7 +48,7 @@ Treat old trigger phrases as the new skill names.
 ## Skill install path
 
 Canonical skill text lives in the repo under **`AI/skills/`**. Cursor loads copies from
-`~/.cursor/skills/` — keep them in sync with `AI/skills/sync-to-cursor.sh`.
+`~/.cursor/skills/` — keep them in sync with `AI/skills/sync-to-cursor.sh` (optional `--check`).
 
 ## Doc layout note
 

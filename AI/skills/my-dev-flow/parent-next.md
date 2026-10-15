@@ -4,6 +4,16 @@ Given `00-run.md` Orchestrator card **Stage id** / **Next step**, open **1–2 f
 
 **Also:** `scripts/lint-run.py <run-dir> --next` prints the same hint from a live run.
 
+**Before launch (clarity-check — parent habit, not a Task / no handoffs id):**
+
+| Boundary | Open |
+|----------|------|
+| Before Analyze / Grill / Design (Mode **full** standalone stages) | [../my-dev-flow-design/stages/clarity-check.md](../my-dev-flow-design/stages/clarity-check.md) — full-mode gates |
+| Before `design-phase` (Mode **simple** only) | Same file — **design-phase entry** section only (`01-idea` + Mode simple; do **not** require `02-analysis` / `02b` yet) |
+| Before TDD review / Build / Fix | [../my-dev-flow-code/stages/clarity-check.md](../my-dev-flow-code/stages/clarity-check.md) |
+
+If clarity-check fails → ask the user; do **not** launch the Task.
+
 | Stage id / Next | Open (1–2) | Handoff |
 |-----------------|------------|---------|
 | (Step 0 / classify) | [stages.md](stages.md) Step 0 · [artifacts/00-run.md](artifacts/00-run.md) | — seed + `lint-run.py` |
@@ -35,6 +45,7 @@ Given `00-run.md` Orchestrator card **Stage id** / **Next step**, open **1–2 f
 | `test-lite` | [../my-dev-flow-test/stages/test-lite.md](../my-dev-flow-test/stages/test-lite.md) · [verify-and-fix.md](verify-and-fix.md) | `handoff-for.py test-lite` |
 | `fix-tests` | [../my-dev-flow-code/stages/fix-tests.md](../my-dev-flow-code/stages/fix-tests.md) · [verify-and-fix.md](verify-and-fix.md) | `handoff-for.py fix-tests` |
 | `gate-c` | [hitl.md](hitl.md) Gate C bar | blocking ask — no merge yet |
-| `merge` | [../my-dev-flow-merge/stages/merge.md](../my-dev-flow-merge/stages/merge.md) · [hitl.md](hitl.md) | `handoff-for.py merge` |
+| `merge` (Gate C approved set) | [../my-dev-flow-merge/stages/merge.md](../my-dev-flow-merge/stages/merge.md) · [hitl.md](hitl.md) | `handoff-for.py merge` |
+| `merge` (approved missing or none) | [hitl.md](hitl.md) Gate C — ask + set **Gate C approved**; do not launch | — |
 
 **Resume:** [stages.md](stages.md) Resume · async Build arm: [hitl.md](hitl.md).

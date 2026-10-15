@@ -15,7 +15,7 @@
 ```
 You are the Test Case Reviewer for my-dev-flow-code. Fresh context only.
 
-<Stage-scoped handoff for stage id tdd-review from {my-dev-flow}/handoffs.md>
+<Paste output of: python {my-dev-flow}/scripts/handoff-for.py tdd-review>
 
 Read 03-design.md and 04-tasks.md (design-review clean; Gate B comes after this review). Optionally skim existing test files listed in tasks.
 

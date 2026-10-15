@@ -3,7 +3,7 @@ Copy into `.my-docs/workflow/<slug>/`. [handoffs.md](../handoffs.md) · [LEGACY.
 # 00-run.md
 
 Fill **Required** at Step 0. Fill **Optional** when known.  
-**Lint (required):** `scripts/lint-run.py <run-dir>` at Step 0; `--before-design-review` before design-review; `--before-build` before Build.
+**Lint (required):** `scripts/lint-run.py <run-dir>` at Step 0; `--before-design-review` before design-review; `--before-build` before Build; `--before-merge` before merge when Next=`merge`.
 
 **Enums (exact single token — no `|` templates in filled runs):**
 
@@ -16,6 +16,7 @@ Fill **Required** at Step 0. Fill **Optional** when known.
 | Pending parallel | `none` \| `api` \| `db` \| `api\|db` |
 | Has UI / API / DB | `yes` \| `no` |
 | Last Verify | `pending` \| `verify-pass` \| `verify-fail` |
+| Gate C approved | `none` \| comma-separated subset of `commit`,`push`,`pr`,`merge` |
 
 ```markdown
 # Workflow run: <slug>
@@ -95,7 +96,9 @@ Fill **Required** at Step 0. Fill **Optional** when known.
 - **HITL Gate B:** auto
 - **HITL Grill:** auto
 - **HITL Gate C:** blocking
-<!-- Gate C always blocking. Gate B: Mode full → blocking; async-notify only Mode simple + Has API/DB=no + no auth/PII/schema (hitl.md Option A). HITL Grill independent of Gate B. -->
+<!-- Gate C always blocking. Gate B: Mode full → blocking (never auto/async-notify); Mode simple → auto|async-notify only when Has API/DB=no + no auth/PII/schema (hitl.md Default Gate B narrow async). HITL Grill independent of Gate B. Soft HITL = Grill + simple Gate B only. -->
+- **Gate C approved:** none
+<!-- Required when at Gate C / before merge: none until user yes; then comma-separated subset of commit,push,pr,merge naming what the user approved (hitl.md). -->
 - **04a:** skipped — reason:
 - **Smoke:** pending
 <!-- pending | smoke-pass (from Build) | smoke-pass (re-run) | smoke-fail | skipped-verify-bar (skip-review) -->
@@ -109,7 +112,7 @@ Update after each step. Parent reads **this card + one** stages/hitl/models/lens
 | Phase | design |
 | Stage id | |
 | Next step | |
-| Task description | handoffs.md description map (or handoff-for.py) |
+| Task description | handoff-for.py <stage-id> output (required) |
 | stages.md section | path + heading only (or hitl/models/lenses/invariants) |
 | Model tier | Fast |
 | Prereq Result | |
@@ -123,13 +126,14 @@ Update after each step. Parent reads **this card + one** stages/hitl/models/lens
 ### Gates
 
 - [ ] Gate A — Day-to-day + 80/20 (auto when `01a` Result ok)
-- [ ] Gate B — Design + tasks (+ tests if planned) — HITL: auto | async-notify | blocking
-- [ ] Gate C — Commit / push / PR / merge — **always blocking**
+- [ ] Gate B — Design + tasks (+ tests if planned) — HITL: Mode full → blocking; Mode simple → auto | async-notify | blocking per hitl.md
+- [ ] Gate C — Commit / push / PR / merge — **always blocking** (record **Gate C approved** on yes)
 
 ### Notes
 
 - Abort / scope-change: Status `stopped` + frozen stage + reason
 - async-notify Gate B tokens: write live lines only when posting / arming — see hitl.md (do not paste example tokens into Notes at seed time)
+- Gate C yes: set **Gate C approved:** commit,push,pr,merge (subset as named); optional Notes `Gate C yes — … (chat HH:MM)` — hitl.md
 - Design-backloop: failure-playbook.md / invariants.md
 - tiny-contract-tweak — folded into design-review / Quality (optional)
 - Status `done` only after merge success; abort → `stopped`

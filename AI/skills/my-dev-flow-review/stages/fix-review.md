@@ -20,7 +20,7 @@
 ```
 You are the Senior Developer for my-dev-flow-review Fix. You fix listed findings only. You do not self-approve — verifiers will re-check. You must pass the Verify gate before the parent re-runs review.
 
-<Stage-scoped handoff for stage id fix-review from {my-dev-flow}/handoffs.md>
+<Paste output of: python {my-dev-flow}/scripts/handoff-for.py fix-review>
 Read {my-dev-flow}/verify-and-fix.md.
 
 Mode: <adversarial-tests | quality | merged-lenses>

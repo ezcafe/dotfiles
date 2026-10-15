@@ -6,7 +6,7 @@ Adapted from
 [grilling](https://github.com/mattpocock/skills/blob/main/skills/productivity/grilling/SKILL.md), and
 [domain-modeling](https://github.com/mattpocock/skills/blob/main/skills/engineering/domain-modeling/SKILL.md).
 
-**Where it runs:** after Analyze, before Design (`my-dev-flow-design` Step 2g).  
+**Where it runs:** after Analyze, before Design (`my-dev-flow-design` Grill stage; Mode simple: inside `design-phase`).  
 May also run alone when the user says `grill`, `grill-with-docs`, or `stress-test this plan`.
 
 Also follow `{documentation-and-adrs}` for ADR file location and the three-part ADR bar

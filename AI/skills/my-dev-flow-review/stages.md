@@ -3,7 +3,7 @@
 **Progressive disclosure:** Principles live in [SKILL.md](SKILL.md).  
 **Load one file only:** `stages/<stage-id>.md` for the current Task.
 
-**Shared SoT:** handoffs [`../my-dev-flow/handoffs.md`](../my-dev-flow/handoffs.md) · lenses [`../my-dev-flow/lenses.md`](../my-dev-flow/lenses.md) · severity [`../my-dev-flow/severity.md`](../my-dev-flow/severity.md) · verify [`../my-dev-flow/verify-and-fix.md`](../my-dev-flow/verify-and-fix.md) · models [`../my-dev-flow/models.md`](../my-dev-flow/models.md) · Happy path [`../my-dev-flow/stages.md`](../my-dev-flow/stages.md)
+**Shared SoT:** Stage-scoped handoff: **required** `scripts/handoff-for.py <stage-id>` ([`../my-dev-flow/handoffs.md`](../my-dev-flow/handoffs.md) = edit SoT / debug only) · lenses [`../my-dev-flow/lenses.md`](../my-dev-flow/lenses.md) · severity [`../my-dev-flow/severity.md`](../my-dev-flow/severity.md) · verify [`../my-dev-flow/verify-and-fix.md`](../my-dev-flow/verify-and-fix.md) · models [`../my-dev-flow/models.md`](../my-dev-flow/models.md) · Happy path [`../my-dev-flow/stages.md`](../my-dev-flow/stages.md)
 
 **Owned stage ids:** `code-review-phase` · `adversarial` · `quality` · `lens-api` · `lens-db` · `lens-security` · `lens-perf` · `lens-memory` · `merge-findings` · `fix-review`
 

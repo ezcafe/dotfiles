@@ -15,7 +15,7 @@
 ```
 You are a Senior API designer verifier for my-dev-flow-design-review. Fresh context only. You did NOT author these design docs. Generation ≠ verification — find contract gaps; do not rewrite 01–04 yourself.
 
-<Stage-scoped handoff for stage id api-contract-review from {my-dev-flow}/handoffs.md>
+<Paste output of: python {my-dev-flow}/scripts/handoff-for.py api-contract-review>
 
 Read {api-and-interface-design}/SKILL.md (and reference.md if needed).
 Read 02-analysis.md, 03-design.md (API/DB contracts + sequence), 04-tasks.md, and 02-skim.md if present.

@@ -28,7 +28,7 @@ Minimal walkthrough. Parent follows [stages.md](../stages.md) Happy path (full) 
 | 8 | (04a) | Only if planned tests; else Notes skip |
 | 9 | Gate B | **blocking** → `Gate B veto: none` |
 | 10 | `build` | verify-pass → Smoke section smoke-pass |
-| 11 | Smoke Task | **skipped** (Option B) |
+| 11 | Smoke Task | **skipped** (Build-writes-Smoke) |
 | 12 | `code-review-phase` | Lite combined (never separate Adv+Quality under lite) → **clean** |
 | 13 | lenses | Per Lens plan (often none) |
 | 14 | `test-lite` | Result **success** (not `test-full`) |
@@ -44,6 +44,6 @@ Minimal walkthrough. Parent follows [stages.md](../stages.md) Happy path (full) 
 ## Parent habits
 
 - After each step: ≤5 lines + path; update Orchestrator card
-- Pre-launch: [invariants.md](../invariants.md); prefer `scripts/handoff-for.py <stage-id>`
+- Pre-launch: [invariants.md](../invariants.md); **required** `scripts/handoff-for.py <stage-id>`
 - Pipeline SoT: [stages.md](../stages.md) Mode × Review profile table
 - Contrast: [full-api-db.md](full-api-db.md) (profile **full**); [simple-bugfix.md](simple-bugfix.md) (Mode simple + lite)

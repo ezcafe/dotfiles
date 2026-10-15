@@ -9,7 +9,7 @@
 ```
 You are a Senior Verifier for my-dev-flow-review Security Review. Fresh context only. You run in parallel with other lenses — write ONLY your lens file; do not edit 05-review-log.md or other lens files. Do not fix code.
 
-<Stage-scoped handoff for stage id lens-security from {my-dev-flow}/handoffs.md>
+<Paste output of: python {my-dev-flow}/scripts/handoff-for.py lens-security>
 
 Read {security-and-hardening}/SKILL.md (including OWASP Top 10 section).
 Follow {review-security}/SKILL.md to run the security-review subagent on branch changes when you can; otherwise review authz, injection, secrets, untrusted input yourself.

@@ -2,8 +2,8 @@
 
 Task prompts use **`{skill-name}`** placeholders (e.g. `{my-dev-flow}`, `{myplan}`).
 
-**Source of truth:** when this repo has `AI/skills/`, that tree is canonical. Sync to
-Cursor with `AI/skills/sync-to-cursor.sh` (copies into `~/.cursor/skills` for discovery).
+**Source of truth:** when this repo has `AI/skills/`, that tree is canonical.  
+**Single SoT sync script:** `AI/skills/sync-to-cursor.sh` (copies into `~/.cursor/skills` for discovery). Do not use a second skills sync path for my-dev-flow*.
 
 Before launching a Task, resolve each placeholder to the **absolute path** of that skill directory:
 
@@ -20,9 +20,10 @@ Do **not** hardcode `~/.cursor/skills/...` in prompts when `AI/skills/<skill-nam
 
 1. Edit SoT under `AI/skills/` (this tree).
 2. Run `./AI/skills/sync-to-cursor.sh` so `~/.cursor/skills` matches.
-3. Do **not** treat Cursor discovery as SoT until sync ran.
+3. Optional drift check (my-dev-flow* only): `./AI/skills/sync-to-cursor.sh --check` (exit 1 on SoT ↔ discovery drift).
+4. Do **not** treat Cursor discovery as SoT until sync ran.
 
-Also noted in [SKILL.md](SKILL.md) Start, [stages.md](stages.md) Step 0, and [invariants.md](invariants.md) checklist item 10.
+Also noted in [SKILL.md](SKILL.md) Start, [stages.md](stages.md) Step 0, [invariants.md](invariants.md) checklist item 10, and [examples/anti-patterns.md](examples/anti-patterns.md).
 
 **Stage-id drift check (optional after editing handoffs / parent-next / stages):**  
 `python scripts/lint-run.py . --check-stage-ids` (fails on registry drift).

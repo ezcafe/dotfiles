@@ -23,7 +23,7 @@ Minimal walkthrough. Parent follows [stages.md](../stages.md) Happy path (simple
 | 3 | (04a) | Notes `04a skipped — no planned test cases` (unless tasks list tests) |
 | 4 | Gate B | Prefer **auto** (or **async-notify** only if [hitl.md](../hitl.md) narrow rule allows — Mode simple + no API/DB/auth/PII/schema); `Gate B veto: none`. If async: one turn gap + **Build armed** then `build` |
 | 5 | `build` | Re-read veto = none → TDD → verify-pass → write Smoke section smoke-pass |
-| 6 | Smoke Task | **skipped** (Option B — [verify-and-fix.md](../verify-and-fix.md)) |
+| 6 | Smoke Task | **skipped** (Build-writes-Smoke — [verify-and-fix.md](../verify-and-fix.md)) |
 | 7 | `code-review-phase` | Lite combined → Result **clean** |
 | 8 | `test-lite` | Result **success** |
 | 9 | Gate C | blocking — user names commit / push / PR / merge |
@@ -36,7 +36,7 @@ If Mode **simple**, Review profile **skip-review**, and Has API=no **and** Has D
 ## Parent habits
 
 - After each step: ≤5 lines + path; update Orchestrator card (Stage id = position; Status = lifecycle)
-- Pre-launch: [invariants.md](../invariants.md) checklist; prefer `scripts/handoff-for.py <stage-id>`
+- Pre-launch: [invariants.md](../invariants.md) checklist; **required** `scripts/handoff-for.py <stage-id>`
 - Never commit without Gate C yes
 - Anti-patterns: [anti-patterns.md](anti-patterns.md)
 - Pipeline SoT: [stages.md](../stages.md) Simple pipeline order

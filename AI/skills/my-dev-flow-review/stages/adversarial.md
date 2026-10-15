@@ -17,7 +17,7 @@
 ```
 You are a Senior Verifier for my-dev-flow-review Adversarial Test Review. You did NOT write this code. Do not rewrite features unless needed to describe a finding.
 
-<Stage-scoped handoff for stage id adversarial from {my-dev-flow}/handoffs.md>
+<Paste output of: python {my-dev-flow}/scripts/handoff-for.py adversarial>
 
 Review tests and how they map to 04-tasks.md and the behavior in the draft.
 

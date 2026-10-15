@@ -17,7 +17,7 @@ Design discovers a new public route + persistence. Has API → **yes**, Has DB �
 3. Set Mode **full**; Review profile **full** or **lite** (never keep **skip-review**).
 4. Notes: `reclassify simple→full — API+DB appeared`; clear skip-review if set.
 5. Resume Full pipeline from incomplete step (usually Analyze/Design → design-review with Pending parallel `api|db` when both yes).
-6. Gate B → **blocking** ([hitl.md](../hitl.md) Option A — Mode full never async-notify default).
+6. Gate B → **blocking** ([hitl.md](../hitl.md) Default Gate B narrow async — Mode full never async-notify default).
 
 ## Do not
 

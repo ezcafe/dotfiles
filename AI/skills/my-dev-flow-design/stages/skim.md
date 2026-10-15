@@ -13,7 +13,7 @@
 ```
 You are doing a light repo skim for my-dev-flow-design. Fresh context only. This is NOT full Analyze — constraints and reuse pointers only.
 
-<Stage-scoped handoff for this stage id from {my-dev-flow}/handoffs.md>
+<Paste output of: python {my-dev-flow}/scripts/handoff-for.py skim>
 
 Read 01-idea.md and 01a-idea-ui-review.md (Gate A ok).
 

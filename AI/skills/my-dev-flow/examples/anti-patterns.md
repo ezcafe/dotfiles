@@ -11,9 +11,11 @@ Quick “wrong move → right move” for [`my-dev-flow`](../SKILL.md).
 | Mode **simple**: Launch isolated API ∥ DB / set **Pending parallel** `api\|db` when both Has API/DB | Fold into `design-verify-phase`; keep **Pending parallel:** `none` (do not set `api\|db`) ([lenses.md](../lenses.md) · [stages.md](../stages.md) Speed defaults) |
 | Advance after Build/Fix on **verify-fail** | Stay; retry within 3 or Decision N ([failure-playbook.md](../failure-playbook.md)) |
 | Treat Gate B **auto** / **async-notify** as commit approval | Gate C always blocking; name each git action ([hitl.md](../hitl.md)) |
-| Use Gate B **async-notify** as default on Mode **full** | Mode full → **blocking** only; async-notify only Mode **simple** + Has API/DB=no + no auth/PII/schema ([hitl.md](../hitl.md) Option A) |
+| Launch Merge when **Gate C approved** is missing / `none` | Ask Gate C; set durable field; `--next` / lint block until non-empty ([hitl.md](../hitl.md)) |
+| Use Gate B **async-notify** as default on Mode **full** | Mode full → **blocking** only; async-notify only Mode **simple** + Has API/DB=no + no auth/PII/schema ([hitl.md](../hitl.md) Default Gate B narrow async) |
 | Launch Build in the **same parent turn** as async-notify Gate B digest | One turn gap ([hitl.md](../hitl.md)); Build re-reads `Gate B veto`; resume counts as next turn |
-| Skip sync-to-cursor after editing `AI/skills/` | Run `./AI/skills/sync-to-cursor.sh` ([skills-path.md](../skills-path.md)) |
+| Skip sync-to-cursor after editing `AI/skills/` | Run `./AI/skills/sync-to-cursor.sh` (optional `--check` for my-dev-flow* drift — [skills-path.md](../skills-path.md)) |
+| Load whole [handoffs.md](../handoffs.md) for every Task launch | **Required** `scripts/handoff-for.py <stage-id>` ([handoffs.md](../handoffs.md) = edit SoT / debug only) |
 | Ignore `main-thread fallbacks ≥ 3` | Decision N soft pause ([invariants.md](../invariants.md)) |
 | Keep **skip-review** after Has API/DB flips to yes | Mid-run reclassify Decision N; drop skip-review ([lenses.md](../lenses.md)) |
 | Pre-load security/perf/memory lenses “just in case” | Lens plan default **none**; add on clear signals only |
@@ -23,7 +25,7 @@ Quick “wrong move → right move” for [`my-dev-flow`](../SKILL.md).
 | Re-read full orchestrator `SKILL.md` every step | Card + [parent-next.md](../parent-next.md) / `lint-run.py --next` + **one** companion section |
 | Load whole subflow `stages.md` prompt body | Load only `stages/<stage-id>.md` for the Task |
 | Launch Build while Notes say veto window open **without** **Build armed** | Next turn / resume sets **Build armed** first ([hitl.md](../hitl.md)); lint `--before-build` |
-| Paste full artifact catalog into every Task | Stage-scoped handoff row only ([handoffs.md](../handoffs.md)) |
+| Paste full artifact catalog into every Task | Stage-scoped handoff via `handoff-for.py` only |
 | Use Status values like `review` / `test` as resume position | Status = `running\|paused\|stopped\|done`; position = stage id on card |
 | Mark run `done` before merge or on abort | `done` only after merge success; abort → `stopped` |
 | Invent unit/e2e runners when Verify commands say N/A | Honor N/A; do not invent a test stack |

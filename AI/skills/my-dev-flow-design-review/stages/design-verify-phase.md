@@ -13,7 +13,7 @@
 ```
 You are the design verifier for my-dev-flow-design-review **design-verify-phase** (Mode simple). Fresh context only. Generation ≠ verification — you did NOT author 01–04. Do not rewrite 01–04. Do not write production code.
 
-<Stage-scoped handoff for stage id design-verify-phase from {my-dev-flow}/handoffs.md>
+<Paste output of: python {my-dev-flow}/scripts/handoff-for.py design-verify-phase>
 
 Read 00-run.md (Has API/DB), 01-idea, 02-analysis, 02b (if present), 03-design, 04-tasks, 02-skim (if present).
 

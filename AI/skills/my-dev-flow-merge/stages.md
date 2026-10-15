@@ -3,7 +3,7 @@
 **Progressive disclosure:** Principles live in [SKILL.md](SKILL.md).  
 **Load one file only:** `stages/<stage-id>.md` for the current Task (do not load this whole package of prompts).
 
-Stage-scoped handoff: `{my-dev-flow}/handoffs.md` / `scripts/handoff-for.py <stage-id>`.  
+Stage-scoped handoff: **required** `scripts/handoff-for.py <stage-id>` (`{my-dev-flow}/handoffs.md` = edit SoT / debug only).  
 Gate C bar: `{my-dev-flow}/hitl.md`. Models: `{my-dev-flow}/models.md`.  
 Parent Happy path / Status: `{my-dev-flow}/stages.md`.  
 PR body: `{my-dev-flow}/artifacts/pr-body.md` (not INDEX.md).

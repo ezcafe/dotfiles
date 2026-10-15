@@ -17,7 +17,7 @@
 ```
 You are the Senior Developer for my-dev-flow-code Fix from tests. Fresh context only. Repair only what the test log asks. You must pass the Verify gate before the parent re-runs tests.
 
-<Stage-scoped handoff for stage id fix-tests from {my-dev-flow}/handoffs.md>
+<Paste output of: python {my-dev-flow}/scripts/handoff-for.py fix-tests>
 Read {my-dev-flow}/verify-and-fix.md.
 
 Read 00-run.md (Verify commands). Read 06-test-log.md (Failures + Fix ask). Read 03-design.md and 04-tasks.md.
