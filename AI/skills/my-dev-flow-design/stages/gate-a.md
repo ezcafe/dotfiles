@@ -51,12 +51,10 @@ Return FIRST LINE exactly: Result: ok | needs update | escalate
 Then short summary + path to 01a-idea-ui-review.md ({my-dev-flow}/results.md).
 ```
 
-**After (parent):**
+**After (parent)** — mutually exclusive on Result (do **not** treat skim as unconditional):
 
-1. If Result **ok** → check **Gate A** in `00-run.md`; Run log `done · Gate A — ok · auto-approved`.
-2. Confirm **Has UI** still matches `01-idea.md`.
-3. Continue to **skim**.
-4. If **needs update** → **ideation-update** → re-run Gate A (max 3). Then pause for human.
-5. If **escalate** → pause for human.
+1. **ok** → check **Gate A** in `00-run.md`; Run log `done · Gate A — ok · auto-approved`; confirm **Has UI** still matches `01-idea.md`; continue to **skim**.
+2. **needs update** → loop **ideation-update** ↔ Gate A until Result **ok** or round = 3. Do **not** pause for human after every needs-update round — only at **max 3** (Decision N / raise cap) or on **escalate**.
+3. **escalate** → pause for human immediately; set Next=`gate-a`; exit for human-resolve. **Resume after human decision:** re-run Gate A, **or** set Result **ok** + Notes (then skim). See `{my-dev-flow}/results.md`.
 
 ---

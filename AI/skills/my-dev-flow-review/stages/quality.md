@@ -29,8 +29,10 @@ Do NOT deep-review API contracts here when Lens plan includes **api** — that i
 Do NOT deep-review schema/migrations/persistence queries here when Lens plan includes **db** — that is the dedicated DB lens. Tiny-tweak / no db in plan: fold light checks into Quality.
 
 Label every finding Critical / Major / Enhancement (Nit/FYI ok).
-Append to 05-review-log.md under “Quality”.
-Result = **needs fix** if any Critical/Major open; **clean** if none ({my-dev-flow}/results.md · severity.md).
+Append to 05-review-log.md under heading “Quality”.
+Under that same heading write **Result:** clean | needs fix (section Result is SoT for parent derive on Review profile full — Adv clean alone must not advance).
+
+Section Result = **needs fix** if any Critical/Major open; **clean** if none ({my-dev-flow}/results.md · severity.md).
 Do not fix.
 Return FIRST LINE exactly: Result: clean | needs fix
 Then finding table or clean status.

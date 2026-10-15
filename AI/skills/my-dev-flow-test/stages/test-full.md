@@ -6,7 +6,7 @@
 **model:** resolved Fast  
 **Task description:** `Full test suite`
 
-**Done when:** `06-test-log.md` has Coverage + Runs filled; Result **success** | **failure**.
+**Done when:** `06-test-log.md` has Coverage + Runs filled; Result **success** | **failure** and **Mode last run:** `full`.
 
 **Task prompt:**
 

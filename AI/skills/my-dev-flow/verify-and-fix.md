@@ -63,6 +63,17 @@ Then: commands run + pass/fail; what changed; risks / out of scope.
 
 **Docs-only Fix (review):** If no code/test files changed → note `TDD skipped — no behavior` and `Verify skipped — docs only`; treat as verify-pass for advance.
 
+## Stale review / test after rebuild (Notes tokens)
+
+When Build **verify-pass** rewrites a draft that already had review/test Results, **or** design-backloop Option 1 invalidates prior Gate B work, parent must not treat old `05`/`06` as paid:
+
+| Notes bullet | Meaning | Derive / `--next` |
+|--------------|---------|-------------------|
+| `- review-stale` | Prior `05-review-log` clean (and lenses) is invalid | Re-enter review path; block gate-c/merge until cleared |
+| `- test-stale` | Prior `06` success / Mode last run is invalid | Re-enter test-full/test-lite; block gate-c/merge until cleared |
+
+Clear each token only after a fresh clean/success. Same bullet style as `design-backloop` / `tiny-contract-tweak` ([stages.md](stages.md) Design-backloop · [build.md](../my-dev-flow-code/stages/build.md)).
+
 ## Smoke after Build (Build-writes-Smoke)
 
 On Build **verify-pass**, Build **writes** `06-test-log.md` Smoke section (commands, exits, **Smoke result: smoke-pass**) using Verify commands.
@@ -73,17 +84,17 @@ Parent then:
 |-----------|--------|
 | Smoke section complete + smoke-pass + commands match Verify commands | **Skip Smoke Task** — treat as smoke-pass; continue (review or Gate C) |
 | Smoke incomplete, mismatch, or Notes `smoke re-run` | Launch Smoke Task (independent re-run) — see **skip-review ordered recovery** below |
-| Review profile **skip-review** (legal only in **Mode simple** when Has API=no **and** Has DB=no — [lenses.md](lenses.md)) | Gate C test bar = Build verify-pass (+ Smoke section). No Smoke Task required by default. Mode full or Has API/DB = yes → must not stay skip-review |
+| Review profile **skip-review** (legality: [lenses.md](lenses.md)) | Gate C test bar = Build verify-pass (+ Smoke section). Fast path: no Smoke Task required by default. Prefer one independent Smoke re-run (Notes `smoke re-run`) or explicit Notes waive before Gate C |
 
 ### Skip-review + Smoke ordered recovery (SoT)
 
 When Review profile is **skip-review** and Smoke is incomplete / mismatched / needs re-proof, parent uses this order (lint `--next` aligns):
 
 1. **Prefer re-Build** — rewrites Smoke section; stay on legal skip-review → Gate C path.
-2. **Or** Notes `smoke re-run` → allow **one** Smoke Task under skip-review (exception; clear the Notes token after smoke-pass).
+2. **Or** Notes `smoke re-run` → allow **one** Smoke Task under skip-review (exception; clear the Notes token after smoke-pass). Prefer this independent re-run once before Gate C when Build-writes-Smoke feels thin.
 3. **Or** drop skip-review → **lite** → `code-review-phase` → `test-lite` → Gate C.
 
-Do **not** launch `smoke` under skip-review without Notes `smoke re-run` (lint warn). Independent verification for merge remains: **full** / **lite** test after review (or smoke-pass alone for Mode simple legal skip-review).
+Do **not** launch `smoke` under skip-review without Notes `smoke re-run` (lint warn). Explicit Notes waive (or `gate-c-test-override`) may skip the preference — not a hard lint block. Independent verification for merge remains: **full** / **lite** test after review (or smoke-pass alone for Mode simple legal skip-review).
 
 ## Fix rules (TDD)
 

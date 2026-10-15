@@ -23,7 +23,7 @@ If grill wrote an ADR path, link it in 03-design Domain / ADR notes; if ADR skip
 Write 03-design.md:
 - Mode **full:** Decision 1 with Option 1/2 (What / Example / Pros / Cons / Recommendation).
 - Mode **simple:** one recommended design (Option 1) + ≤3-line rejected alternative (full Option 1/2 only if 2+ approaches still unsettled).
-Also: **System design** (triggers in templates — Has API/DB → Overview required; else N/A OK; anti-dupe vs sequence/contracts; line budgets; optional Concept N), **Design patterns used** (code patterns only; teach shape or N/A; ≤3), sequence diagram, API/DB contracts, example queries, UI/UX/mobile when Has UI (align with Gate A / 01a — state Build must match Design UI specs; do not re-argue 80/20), OWASP table, aggressive challenges. Honor artifact size caps. Follow templates mini-example quality bar (do not paste the example verbatim).
+Also: **System design** (triggers in templates — Has API/DB → Overview required; else N/A OK; anti-dupe vs sequence/contracts; line budgets; optional Concept N), **Design patterns used** (code patterns only; teach shape or N/A; ≤3), sequence diagram, API/DB contracts, example queries, UI/UX/mobile when Has UI (align with Gate A / 01a — state Build must match Design UI specs; do not re-argue 80/20), OWASP table, aggressive challenges. Honor artifact size caps ([size-caps.md](../../my-dev-flow/size-caps.md)). Follow templates mini-example quality bar (do not paste the example verbatim).
 
 **User-first:** Recommendation must prefer day-to-day user value over system convenience; say so in one line.
 

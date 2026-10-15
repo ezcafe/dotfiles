@@ -1,8 +1,8 @@
 # my-dev-flow handoffs
 
-Stage-scoped handoffs, Decision options shape, artifact size caps, progress paths, and Task `description` map.  
+Stage-scoped handoffs, Decision options shape, progress paths, and Task `description` map.  
 **This file is SoT for:** stage R/W maps · progress path / stage-id aliases · Task descriptions.  
-Tiny-tweak / never invent empty `03a-api` / `03a-db`: [lenses.md](lenses.md) (do not treat this file as second SoT for that rule).  
+Artifact size caps: [size-caps.md](size-caps.md). Tiny-tweak / never invent empty `03a-api` / `03a-db`: [lenses.md](lenses.md) (do not treat this file as second SoT for that rule).  
 Templates: [artifacts/INDEX.md](artifacts/INDEX.md). Severity: [severity.md](severity.md). Paths: [skills-path.md](skills-path.md). Verify/Fix: [verify-and-fix.md](verify-and-fix.md). Parent checklist: [invariants.md](invariants.md). HITL / veto: [hitl.md](hitl.md). Pipeline order: [stages.md](stages.md).
 
 **Required for Task launch:** `python {my-dev-flow}/scripts/handoff-for.py <stage-id>` → prints base block template + that stage’s R/W row (resolve `{my-dev-flow}` per [skills-path.md](skills-path.md); optional `--skill-root` / `--slug`).  
@@ -54,7 +54,7 @@ Stage: <stage-id>
 Read only the artifacts listed for this stage (do not open others unless a listed file links to them).
 Write only: <write list for stage>
 Use simple plain words. Fresh context — do not assume prior chat or other agents' memory.
-Honor artifact size caps in my-dev-flow/handoffs.md.
+Honor artifact size caps in my-dev-flow/size-caps.md.
 Resolve skill paths per my-dev-flow/skills-path.md ({my-dev-flow}, {myplan}, etc.).
 Severity exit per my-dev-flow/severity.md (Critical/Major block clean; defer Enhancement).
 ```
@@ -75,9 +75,9 @@ Severity exit per my-dev-flow/severity.md (Critical/Major block clean; defer Enh
 | `design-verify-phase` | same reads as `design-review` — **Mode simple only** | `03a-design-review-log.md` + `03a-api-contract-review.md` when Has API **and** not Notes `tiny-contract-tweak` + `03a-db-design-review.md` when Has DB **and** not Notes `tiny-contract-tweak` — **never** invent empty `03a-api` / `03a-db` |
 | `api-contract-review` | `00-run.md`, `02-analysis.md`, `03-design.md` (API contracts), `04-tasks.md`, `02-skim.md` (if present), repo `AGENTS.md` / route patterns when present — stage N/A when Has API = no or Notes `tiny-contract-tweak` | `03a-api-contract-review.md` only (do not invent if skipped) |
 | `db-design-review` | `00-run.md`, `02-analysis.md`, `03-design.md` (Database contracts + example queries), `04-tasks.md`, `02-skim.md` (if present), repo `AGENTS.md` / `db/schema` / migration patterns when present — stage N/A when Has DB = no or Notes `tiny-contract-tweak` | `03a-db-design-review.md` only (do not invent if skipped) |
-| `design-update` | `00-run.md`, `03a-design-review-log.md`, `03a-api-contract-review.md` (if present — not Notes `tiny-contract-tweak` / skipped), `03a-db-design-review.md` (if present — not Notes `tiny-contract-tweak` / skipped), `01-idea.md`, `02-skim.md` (if present), `02-analysis.md`, `02b-grill.md` (if present), `03-design.md`, `04-tasks.md` | Fix-ask targets + round notes in `03a*` files (no empty `03a-api` / `03a-db`) |
+| `design-update` | `00-run.md`, `03a-design-review-log.md` (if present), `03a-api-contract-review.md` (if present — not Notes `tiny-contract-tweak` / skipped), `03a-db-design-review.md` (if present — not Notes `tiny-contract-tweak` / skipped), `01-idea.md`, `02-skim.md` (if present), `02-analysis.md`, `02b-grill.md` (if present), `03-design.md`, `04-tasks.md` | `03-design.md`, `04-tasks.md`, `00-run.md` Notes (backloop rounds), plus `03a*` round notes when present (no empty `03a-api` / `03a-db`) |
 | `tdd-review` | `00-run.md`, `03-design.md`, `04-tasks.md`, `03a-design-review-log.md` (if present) — **only when planned tests exist** | `04a-tdd-test-review.md` |
-| `build` | `00-run.md` (Verify commands + **Gate B veto** must be `none`; when HITL Gate B is **blocking** → **Gate B approved** `yes`/named pick; if Notes veto window open → **Build armed** required — [hitl.md](hitl.md) · [verify-and-fix.md](verify-and-fix.md)), `03-design.md`, `04-tasks.md`, `04a-tdd-test-review.md` (if present), when **Has UI**: Design UI specs in `03-design` / acceptance in `04-tasks` (+ `01a-idea-ui-review.md` if present for Gate A #1/#2), `06-test-log.md` (create/update Smoke) | code + Smoke section; first line Result **verify-pass** \| **verify-fail**; if veto `pending`, (blocking without **Gate B approved**), or (veto window open without **Build armed**) → stop without coding (`blocked — …`); parent skips Smoke Task on verify-pass |
+| `build` | `00-run.md` (Verify commands + **Gate B veto** must be `none`; when HITL Gate B is **blocking** → **Gate B approved** `yes`/named pick; if Notes veto window open → **Build armed** required — [hitl.md](hitl.md) · [verify-and-fix.md](verify-and-fix.md)), `03-design.md`, `04-tasks.md`, `04a-tdd-test-review.md` (if present), when **Has UI**: Design UI specs in `03-design` / acceptance in `04-tasks` (+ `01a-idea-ui-review.md` if present for Gate A #1/#2), `06-test-log.md` (create/update Smoke) | code + Smoke section; first line Result **verify-pass** \| **verify-fail**; if veto `pending`, (blocking without **Gate B approved**), (veto window open without **Build armed**), or Notes `design-backloop` → stop without coding (`blocked — …`); parent skips Smoke Task on verify-pass |
 | `smoke` | `00-run.md`, `06-test-log.md` | `06-test-log.md` (Smoke section) — only when Smoke re-run needed |
 | `adversarial` | `00-run.md`, `04-tasks.md`, `05-review-log.md` + draft code/tests | `05-review-log.md` (Adversarial section) |
 | `quality` | `00-run.md`, `01-idea.md`, `01a-idea-ui-review.md` (if present), `03-design.md`, `04-tasks.md`, `05-review-log.md` + draft code | `05-review-log.md` (Quality section) |
@@ -89,8 +89,8 @@ Severity exit per my-dev-flow/severity.md (Critical/Major block clean; defer Enh
 | `lens-memory` | `00-run.md`, `03-design.md`, `04-tasks.md` + draft code | `05-lens-memory.md` only |
 | `merge-findings` | `00-run.md`, active `05-lens-*.md` for this round, `05-review-log.md` | `05-review-log.md` (Merged lenses section) |
 | `fix-review` | `00-run.md` (Verify commands), `05-review-log.md` (Fix ask), `03-design.md`, `04-tasks.md` | code + fix notes; first line Result **verify-pass** \| **verify-fail** |
-| `test-full` | `00-run.md` (Verify commands), `03-design.md`, `04-tasks.md`, `06-test-log.md` — **one Task:** coverage + add missing e2e + run suite | `06-test-log.md` (Coverage + Runs + Result) |
-| `test-lite` | `00-run.md` (Verify commands), `04-tasks.md`, `06-test-log.md` | `06-test-log.md` (targeted e2e; unit if needed) |
+| `test-full` | `00-run.md` (Verify commands), `03-design.md`, `04-tasks.md`, `06-test-log.md` — **one Task:** coverage + add missing e2e + run suite | `06-test-log.md` (Coverage + Runs + Result; **Mode last run:** `full`) |
+| `test-lite` | `00-run.md` (Verify commands), `04-tasks.md`, `06-test-log.md` | `06-test-log.md` (targeted e2e; unit if needed; **Mode last run:** `lite`) |
 | `fix-tests` | `00-run.md` (Verify commands), `06-test-log.md` (Fix ask), `03-design.md`, `04-tasks.md` | code; first line Result **verify-pass** \| **verify-fail** |
 | `merge` | `00-run.md` (**Gate C approved** — abort if missing/`none`), `06-test-log.md`, `05-review-log.md` (if present), skim `03-design.md` (optional for PR risk summary); template `{my-dev-flow}/artifacts/pr-body.md` | PR body from template + merge (no secret files) |
 
@@ -108,22 +108,9 @@ Write: .my-docs/workflow/<slug>/03a-design-review-log.md
 
 ---
 
-## Artifact size caps (required)
+## Artifact size caps
 
-Keep artifacts short so later Tasks stay cheap. Soft caps (body content; headings OK):
-
-| Artifact | Cap | Rule |
-|----------|-----|------|
-| `02-skim.md` | ≤ ~40 lines | Project shape 1–3 sentences; ≤5 rows per table |
-| `01-idea.md` | Problem map ≤ ~25 lines (full); stub OK in simple | 3–5 bullets per WHAT branch; mind map ≤15 lines |
-| `02-analysis.md` | Overall What/Why/How short; ≤5 solution pieces | Prefer bullets; Spike ≤5 rows; Design tree ≤15 lines; Solution branches ≤12 lines |
-| `02b-grill.md` | ≤ ~60 lines | Frontier rounds + settled; glossary/ADR pointers only |
-| `03-design.md` | See Mode | **full:** two Decision options; **simple:** one recommended design + ≤3-line rejected alternative. **System design** Overview ≤ ~12 bullets (or `N/A`); ≤3 Concept N; each Pattern ≤ ~8 lines; ≤3 patterns — point to sequence/contracts instead of restating; cut prose elsewhere if needed |
-| `03a` / `04a` Fix ask | ≤10 bullets | Critical/Major first |
-| `05-review-log` Fix ask | ≤15 bullets | Critical/Major only; Enhancements → Deferred section ([severity.md](severity.md)) |
-| Parent post-step check | First ~40 lines | Read **Result** / Fix ask header only — do not re-read full design docs |
-
-If a cap would hide a Critical risk, keep the risk and cut prose elsewhere.
+Soft caps SoT: [size-caps.md](size-caps.md) (do not load this file for caps).
 
 ---
 

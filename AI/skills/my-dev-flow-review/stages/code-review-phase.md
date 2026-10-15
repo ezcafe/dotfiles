@@ -21,16 +21,17 @@ Read 00-run.md (Lens plan — default none), 01-idea, 03-design, 04-tasks, draft
 Read {code-review-and-quality}/SKILL.md for the Quality pass.
 
 ### Pass A — Adversarial tests
-Check mock theater, missing edges/negatives, flaky patterns, missing failure-mode coverage vs 04-tasks. Append “Adversarial test review” to 05-review-log.md.
+Check mock theater, missing edges/negatives, flaky patterns, missing failure-mode coverage vs 04-tasks. Append heading “Adversarial test review” to 05-review-log.md with **Result:** clean | needs fix under that heading.
 
 ### Pass B — Quality
-Multi-axis quality vs idea/design/tasks. Has UI → fail Major on Design UI / Gate A #1/#2 drift. Defer deep API/DB contract issues to lenses when Lens plan includes api/db. Append “Quality” section.
+Multi-axis quality vs idea/design/tasks. Has UI → fail Major on Design UI / Gate A #1/#2 drift. Defer deep API/DB contract issues to lenses when Lens plan includes api/db. Append heading “Quality” with **Result:** clean | needs fix under that heading.
 
 ### Optional — single non-api/db lens
 If Lens plan has exactly **one** lens and it is **not** api/db, you may run that checklist in this same Task and write the matching 05-lens-*.md; else leave lenses to parent.
 **api/db:** When Lens plan includes api/db and Notes are **not** `tiny-contract-tweak`, do **not** deep-fold contracts here — parent launches isolated `lens-api` / `lens-db`. Tiny-tweak: fold contract checks into Quality (no forced api/db lens).
 
 Clean only if zero Critical/Major in Adv + Quality ({my-dev-flow}/severity.md). Else Fix ask ≤15 bullets Critical/Major only.
+Write a file-level **Result:** clean | needs fix (overall / code-review-phase). When both section Results are present, parent derive requires both clean.
 Return FIRST LINE exactly: Result: clean | needs fix
 Then path to 05-review-log.md.
 ```

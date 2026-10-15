@@ -2,7 +2,9 @@
 
 Given `00-run.md` Orchestrator card **Stage id** / **Next step**, open **1–2 files** + handoff. Do **not** re-read orchestrator [SKILL.md](SKILL.md).
 
-**Also:** `python {my-dev-flow}/scripts/lint-run.py <run-dir> --next` prints the same hint from a live run (resolve `{my-dev-flow}` per [skills-path.md](skills-path.md)).
+**Also:** `python {my-dev-flow}/scripts/lint-run.py <run-dir> --next` prints the card Next hint from a live run (resolve `{my-dev-flow}` per [skills-path.md](skills-path.md)). Optional `--next --derive` also computes expected next from Mode/profile + artifacts and warns when it differs from the card (card remains the launch override).
+
+**Gate A fail-closed (Mode full):** `--next` emits `handoff: do-not-launch` when card Next is past Gate A (`skim`, `analyze`, …) while `01a` Result ≠ `ok` — same rule as `--derive` ([stages.md](stages.md) · [results.md](results.md)).
 
 **Handoff command (canonical):** `python {my-dev-flow}/scripts/handoff-for.py <stage-id>` (optional `--slug`, `--skill-root`).
 

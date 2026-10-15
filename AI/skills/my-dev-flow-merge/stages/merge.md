@@ -19,13 +19,14 @@ All review lenses are clean (or user explicitly overrode after warning).
 
 Hard rules:
 - FIRST: re-read durable **Gate C approved:** on `00-run.md`. If missing, `none`, or empty → stop immediately with Result: aborted (do not git/remote). Parent must ask Gate C and set the field.
+- Gate C test bar: honor [`hitl.md`](../../my-dev-flow/hitl.md) for this Review profile (parent should run `lint-run.py --before-merge` first). Notes `gate-c-test-override` may waive.
 - Do NOT git commit, git push, gh pr create, or gh pr merge unless that action is listed in **Gate C approved**.
 - Never commit secrets. Do not force-push. Do not skip hooks.
 - Honor subsets: if only “PR only” / “prepare PR”, stop after PR create. If only “commit only”, commit and stop (no push).
 
 Approved actions = parse **Gate C approved** (commit | push | pr | merge subset). Parent may also pass the same list; the durable field wins if they disagree.
 
-0. Read **Gate C approved** on `00-run.md`. Abort if none/empty/missing.
+0. Read **Gate C approved** on `00-run.md`. Abort if none/empty/missing. Confirm Gate C test bar (or Notes override).
 1. If commit approved and there are staged/unstaged changes worth committing: create commits with clear messages (no secrets). If commit was not approved, leave the working tree as-is and do not commit.
 2. If push approved: push branch with -u if needed. Otherwise skip push.
 3. If pr approved: create PR with gh pr create. Body must include:

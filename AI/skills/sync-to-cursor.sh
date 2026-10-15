@@ -6,6 +6,8 @@
 # Usage:
 #   ./AI/skills/sync-to-cursor.sh           # sync all skills with SKILL.md
 #   ./AI/skills/sync-to-cursor.sh --check   # diff my-dev-flow* SoT ↔ discovery; exit 1 on drift
+# Step 0 (my-dev-flow): --check (or sync) before classify when AI/skills/my-dev-flow exists;
+# drift is a hard stop (skills-path.md · stages.md).
 set -euo pipefail
 
 SRC="$(cd "$(dirname "$0")" && pwd)"

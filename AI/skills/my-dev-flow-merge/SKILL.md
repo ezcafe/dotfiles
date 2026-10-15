@@ -35,7 +35,7 @@ Merge subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). Human owns top risks.
 - Accountability, not rubber stamp. **Gate C** is **always blocking**.
 - **Name each action** in the Gate C ask: commit / push / PR / merge. Never run those without an **explicit user yes** naming them in this chat.
 - After yes: set durable **`Gate C approved:`** on `00-run.md` to the named subset (`commit,push,pr,merge`) — [`hitl.md`](../my-dev-flow/hitl.md). Prefer Notes `Gate C yes — …`. Lint: `lint-run.py --before-merge`.
-- Honor **Gate C test bar** in [`hitl.md`](../my-dev-flow/hitl.md) by Review profile. **Legal** skip-review only in **Mode simple** when Has API/DB = **no** (bar = Build verify-pass + Smoke section). Mode full or Has API/DB = yes → skip-review forbidden.
+- Honor **Gate C test bar** in [`hitl.md`](../my-dev-flow/hitl.md) by Review profile. skip-review legality: [`lenses.md`](../my-dev-flow/lenses.md).
 - PR body from [`artifacts/pr-body.md`](../my-dev-flow/artifacts/pr-body.md) — **not** INDEX.md.
 - Never commit secrets; never force-push; do not skip hooks.
 - Honor subsets: “PR only” → stop after `gh pr create`; “commit only” → commit and stop (no push).

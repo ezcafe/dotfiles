@@ -59,7 +59,7 @@ flowchart LR
   end
 ```
 
-*Footnote:* Mode **simple** + **skip-review** is legal only when Has API=no **and** Has DB=no ([lenses.md](lenses.md)). Mode **full** has no skip-review edge.
+*Footnote:* skip-review legality: [lenses.md](lenses.md). Mode **full** has no skip-review edge.
 
 ### Mode × Review profile → post-Build path
 
@@ -78,8 +78,8 @@ flowchart LR
 
 1. Step 0 — Mode full; profile full|lite; models + card + HITL; Lens plan **none**; Gate B veto **none**; **lint** `00-run.md`
 2. Ideation (set Has UI)
-3. Gate A — day-to-day + 80/20 → `01a` (auto when ok; max 3)
-4. Light skim → `02-skim.md`
+3. Gate A — day-to-day + 80/20 → `01a` (auto when ok; ideation-update ↔ gate-a until ok or round=3; pause for human only at max 3 or escalate)
+4. Light skim → `02-skim.md` — **fail-closed:** do not launch skim+ while `01a` ≠ `ok` (`lint-run.py --next` / `--derive` → `do-not-launch`; [parent-next.md](parent-next.md))
 5. Analyze → Grill (or skip) → Design (two options); refine Has API/DB
 6. Design ↔ review until clean — Has API **and** Has DB: **must** parallel API ∥ DB (unless tiny tweak), then general; max 3; **Pending parallel** ([artifacts/00-run.md](artifacts/00-run.md))
 7. 4a — TDD only if planned tests
@@ -132,16 +132,16 @@ Ambiguous → Decision N. API/DB rule: [lenses.md](lenses.md).
 
 ## Step 0 — Classify + resolve models + create run
 
-0. **When NOT to run / invent *what*:** ask invents product scope with no framing/spec/`01-idea` → **Decision N**: **myplan** first (`{myplan}` via [skills-path.md](skills-path.md)) vs Mode **full** Ideation. Do not invent scope silently.
-1. **Overrides:** resume keeps Mode + profile. User `simple`/`full` → Mode. User `skip-review` → profile skip-review (implies simple unless Decision N).
-2. Else **3-question classify** (map to Mode; Decision N only if still ambiguous):
+0. **Skills sync (hard stop when `AI/skills/my-dev-flow` exists):** run `./AI/skills/sync-to-cursor.sh --check` (or full sync). Drift → **stop**; do not classify until SoT ↔ `~/.cursor/skills` matches ([skills-path.md](skills-path.md)).
+1. **When NOT to run / invent *what*:** ask invents product scope with no framing/spec/`01-idea` → **Decision N**: **myplan** first (`{myplan}` via [skills-path.md](skills-path.md)) vs Mode **full** Ideation. Do not invent scope silently.
+2. **Overrides:** resume keeps Mode + profile. User `simple`/`full` → Mode. User `skip-review` → profile skip-review (implies simple unless Decision N).
+3. Else **3-question classify** (map to Mode; Decision N only if still ambiguous):
    1. **Outcome clear?** yes → lean simple; no → lean full (or myplan if inventing *what*).
    2. **API/DB?** new/changed public API or persistence → full (unless [tiny tweak](lenses.md)); no → lean simple.
    3. **Invent *what*?** yes → myplan Decision N or Mode full Ideation; no → proceed with Mode from (1)+(2) + cheap path.
-3. Create slug; write `00-run.md` from [artifacts/00-run.md](artifacts/00-run.md): Status `running`, Mode, profile, Complexity (one-line), Has UI/API/DB when known, Lens plan **none**, **Pending parallel: none**, Gate B veto **none**, models ([models.md](models.md)), card, HITL Gate B ([hitl.md](hitl.md) Default Gate B — full → **blocking**; simple low-risk → auto|async-notify), HITL Grill (full → async-notify; simple → auto), HITL Gate C **blocking**.
-4. **Lint (required):** `scripts/lint-run.py .my-docs/workflow/<slug>/` (again `--before-design-review` / `--before-build` / `--before-code-review`). Optional: `--check-stage-ids` after editing handoffs/parent-next/stages.
-5. Chat one line: Mode + profile + why.
-6. **Skills sync:** After SoT edits under `AI/skills/`, run `./AI/skills/sync-to-cursor.sh` (optional `--check` for my-dev-flow* drift) before Cursor discovery ([skills-path.md](skills-path.md)).
+4. Create slug; write `00-run.md` from [artifacts/00-run.md](artifacts/00-run.md): Status `running`, Mode, profile, Complexity (one-line), Has UI/API/DB when known, Lens plan **none**, **Pending parallel: none**, Gate B veto **none**, models ([models.md](models.md)), card, HITL Gate B ([hitl.md](hitl.md) Default Gate B — full → **blocking**; simple low-risk → auto|async-notify), HITL Grill (full → async-notify; simple → auto), HITL Gate C **blocking**.
+5. **Lint (required):** `scripts/lint-run.py .my-docs/workflow/<slug>/` (again `--before-design-review` / `--before-build` / `--before-code-review` / `--before-merge`). Optional: `--check-stage-ids` after editing handoffs/parent-next/stages; `--check-results` for Result tokens + size soft warns.
+6. Chat one line: Mode + profile + why.
 
 ### Mode selection
 
@@ -176,7 +176,7 @@ Scope grows (API/DB yes, auth/PII, multi-surface, blast radius): **Decision N** 
 1. Read `00-run.md`: Status, Last stage, card, Gates, profile, Mode, Gate B veto, Pending parallel.
 2. Do not re-classify unless asked or scope changed.
 3. Do not redo completed gates unless artifacts changed.
-4. Next = first incomplete Full/Simple step, or card Next step / Stage id ([LEGACY.md](LEGACY.md) for Status-as-stage).
+4. Next = first incomplete Full/Simple step, or card Next step / Stage id ([LEGACY.md](LEGACY.md) for Status-as-stage). Card is override; optional `lint-run.py <run-dir> --next --derive` diffs card vs derived next ([parent-next.md](parent-next.md)).
 5. One subflow `SKILL.md`; prompt = **required** `python {my-dev-flow}/scripts/handoff-for.py <stage-id>` + **`stages/<stage-id>.md`** ([parent-next.md](parent-next.md) · [skills-path.md](skills-path.md); handoffs.md = edit SoT / debug only).
 6. `stopped` → new Decision; `done` → new slug or explicit re-open.
 7. Gate B veto `pending` → do not Build. Blocking without **Gate B approved** → do not Build ([hitl.md](hitl.md)).
@@ -220,15 +220,16 @@ API ∥ DB both yes (not tiny): **same-turn** parallel isolated Tasks. Simple fo
 
 1. Log Notes bullet `- design-backloop`; prior Gate B **invalid**.
 2. Set **`Gate B approved: none`**; clear Notes **Build armed** and veto-window tokens.
-3. Card Next = `design-update` (not `build`). Decision N Option 1 is the entry — design-update accepts Notes `design-backloop` without a prior `03a` Fix ask ([design-update.md](../my-dev-flow-design/stages/design-update.md)).
-4. Resume design-update → design-review / design-verify-phase → **Gate B** (Next=`gate-b` while token still present) → Fix/Build.
-5. After fresh Gate B settle, clear Notes `- design-backloop` by HITL tier (same parent turn as settle):
+3. If prior `05-review-log` / `06-test-log` Results exist: add Notes `- review-stale` and `- test-stale` (or clear those Results) so derive will not treat old clean/success as paid before Gate C ([verify-and-fix.md](verify-and-fix.md)).
+4. Card Next = `design-update` (not `build`). Decision N Option 1 is the entry — design-update accepts Notes `design-backloop` without a prior `03a` Fix ask ([design-update.md](../my-dev-flow-design/stages/design-update.md)).
+5. Resume design-update → design-review / design-verify-phase → **Gate B** (Next=`gate-b` while token still present) → Fix/Build.
+6. After fresh Gate B settle, clear Notes `- design-backloop` by HITL tier (same parent turn as settle):
    - **blocking** — clear token + set **Gate B approved** `yes` / named pick
    - **auto** — clear token after digest settle; approved may stay `none`
    - **async-notify** — clear token + **Build armed** rules ([hitl.md](hitl.md))
-   Then Build when armed. Lint still errors while token present (blocks Build for all tiers).
+   Then Build when armed. Lint still errors while token present (blocks Build for all tiers). Clear `review-stale` / `test-stale` only after fresh review clean / test success.
 
-Lint: Notes `- design-backloop` → error (default / `--before-build`) until cleared — blocks Build even when Gate B is soft. `--next` redirects **`build`** only (not `gate-b`); Next=`gate-b` + token → normal Gate B digest / settle path.
+Lint: Notes `- design-backloop` → **error** on `--before-build` or Next=`build` until cleared (blocks Build even when Gate B is soft); default lint with Next in recovery (`design-update` / design-review / `design-verify-phase` / `gate-b` / …) → **warn** recovery in progress. `--next` redirects **`build`** only (not `gate-b`); Next=`gate-b` + token → normal Gate B digest / settle path. `--next --derive` mirrors this (token + `gate-b` / review clean → derive `gate-b`, not `design-update`).
 
 Gate B veto after Build is separate ([hitl.md](hitl.md) re-open Gate B).
 

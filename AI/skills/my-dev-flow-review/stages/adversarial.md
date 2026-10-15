@@ -28,9 +28,10 @@ Check:
 - Missing failure-mode coverage for critical paths
 - Prefer readable, deterministic tests tied to real failure modes
 
-Append findings to 05-review-log.md under “Adversarial test review” with severity Critical / Major / Enhancement (and Nit/FYI if useful).
+Append findings to 05-review-log.md under heading “Adversarial test review” with severity Critical / Major / Enhancement (and Nit/FYI if useful).
+Under that same heading write **Result:** clean | needs fix (section Result is SoT for parent derive on Review profile full — do not rely on a file-top Result alone).
 
-Result = **needs fix** if any Critical/Major open; **clean** if none ({my-dev-flow}/results.md · severity.md).
+Section Result = **needs fix** if any Critical/Major open; **clean** if none ({my-dev-flow}/results.md · severity.md).
 If not clean: list findings with file:line when possible. Do not fix them yourself.
 Return FIRST LINE exactly: Result: clean | needs fix
 Then finding table or clean status.

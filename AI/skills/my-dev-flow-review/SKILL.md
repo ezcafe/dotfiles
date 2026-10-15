@@ -56,7 +56,7 @@ If no draft → **stop** (run code first). If parent Gate B unchecked or smoke n
 ## Pipeline
 
 ```
-skip-review (Mode simple + Has API/DB=no only) → stop (parent Gate C)
+skip-review (legal per lenses.md) → stop (parent Gate C)
 
 Review profile lite (any Mode):  code-review-phase ⇄ Fix → lenses per plan → Merge if 2+ → test-lite
 Review profile full:             Adv ⇄ Fix → Quality ⇄ Fix → lenses → Merge if 2+ → Fix loop → test-full
@@ -70,7 +70,7 @@ Parent runtime order: [`../my-dev-flow/stages.md`](../my-dev-flow/stages.md) Hap
 
 ## Orchestrator rules
 
-- **skip-review** → stop immediately (nothing to do here). Parent Gate C only when Mode **simple** + Has API/DB = no.
+- **skip-review** → stop immediately (nothing to do here). Parent Gate C only when legal ([lenses.md](../my-dev-flow/lenses.md)).
 - **Review profile lite** (even if Mode full) → must launch `code-review-phase`; never separate Adv+Quality.
 - **Review profile full** → Adv then Quality, each with Fix loops; then Lens plan only.
 - Before lenses: read Lens plan (default **none**); auto-add api/db per [`lenses.md`](../my-dev-flow/lenses.md). Isolated Tasks for api/db when listed (not tiny-tweak). Parallel when 2+.

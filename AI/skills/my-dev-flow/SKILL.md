@@ -16,7 +16,7 @@ description: >-
 
 End-to-end **orchestrator only**. Stage prompts live in subflows.  
 **Runtime order (SoT):** [stages.md](stages.md) Happy path.  
-**Companions:** [hitl.md](hitl.md) · [models.md](models.md) · [lenses.md](lenses.md) · [invariants.md](invariants.md) · [failure-playbook.md](failure-playbook.md) · [grill.md](grill.md) · [verify-and-fix.md](verify-and-fix.md) · [parent-next.md](parent-next.md).
+**Companions:** [hitl.md](hitl.md) · [models.md](models.md) · [lenses.md](lenses.md) · [invariants.md](invariants.md) · [failure-playbook.md](failure-playbook.md) · [grill.md](grill.md) · [verify-and-fix.md](verify-and-fix.md) · [parent-next.md](parent-next.md) · [size-caps.md](size-caps.md) · [results.md](results.md).
 
 Practices: [AI-assisted engineering](https://newsletter.eng-leadership.com/p/how-to-do-ai-assisted-engineering) —
 design-heavy, never ship first draft, generation ≠ verification.
@@ -25,7 +25,7 @@ design-heavy, never ship first draft, generation ≠ verification.
 
 Follow **[stages.md](stages.md) Step 0** (classify, seed `00-run.md`, models, lint, chat one line). Do not restate Step 0 bullets here.
 
-**Skills sync (after SoT edits):** If you edited under `AI/skills/`, run `./AI/skills/sync-to-cursor.sh` (optional `--check`) before relying on Cursor discovery ([skills-path.md](skills-path.md)).
+**Skills sync:** Step 0 hard stop when `AI/skills/my-dev-flow` exists — `./AI/skills/sync-to-cursor.sh --check` (or sync) before classify; after SoT edits, sync then re-check ([skills-path.md](skills-path.md)).
 
 ## When to run
 
@@ -69,6 +69,7 @@ Follow **[stages.md](stages.md) Step 0** (classify, seed `00-run.md`, models, li
 | Resolve `{skill}` + sync | [skills-path.md](skills-path.md) |
 | Severity exit | [severity.md](severity.md) |
 | Result first-line tokens | [results.md](results.md) |
+| Artifact size / context budget | [size-caps.md](size-caps.md) |
 | Legacy resume aliases | [LEGACY.md](LEGACY.md) |
 
 Do **not** duplicate Happy path / Mode / veto / skip-review / Verify rules here — edit the SoT file in the table.  

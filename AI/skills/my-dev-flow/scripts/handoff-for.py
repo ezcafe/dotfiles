@@ -31,7 +31,7 @@ Stage: {stage_id}
 Read only the artifacts listed for this stage (do not open others unless a listed file links to them).
 Write only: <write list for stage>
 Use simple plain words. Fresh context — do not assume prior chat or other agents' memory.
-Honor artifact size caps in {handoffs_path}.
+Honor artifact size caps in {size_caps_path}.
 Resolve skill paths per {skills_path_path} ({{my-dev-flow}}, {{myplan}}, etc.).
 Severity exit per {severity_path} (Critical/Major block clean; defer Enhancement).
 """
@@ -91,7 +91,7 @@ def main() -> int:
         default=None,
         help=(
             "Resolved absolute my-dev-flow skill root (skills-path.md). "
-            "When set, base block uses absolute paths to handoffs / skills-path / severity"
+            "When set, base block uses absolute paths to size-caps / skills-path / severity"
         ),
     )
     args = p.parse_args()
@@ -111,11 +111,11 @@ def main() -> int:
 
     # Prefer absolute paths when --skill-root is set; else package-relative labels
     if args.skill_root is not None:
-        handoffs_ref = str(skill_root / "handoffs.md")
+        size_caps_ref = str(skill_root / "size-caps.md")
         skills_path_ref = str(skill_root / "skills-path.md")
         severity_ref = str(skill_root / "severity.md")
     else:
-        handoffs_ref = "my-dev-flow/handoffs.md"
+        size_caps_ref = "my-dev-flow/size-caps.md"
         skills_path_ref = "my-dev-flow/skills-path.md"
         severity_ref = "my-dev-flow/severity.md"
 
@@ -133,7 +133,7 @@ def main() -> int:
         BASE_BLOCK.format(
             slug=args.slug,
             stage_id=stage,
-            handoffs_path=handoffs_ref,
+            size_caps_path=size_caps_ref,
             skills_path_path=skills_path_ref,
             severity_path=severity_ref,
         ).rstrip()

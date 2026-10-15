@@ -54,7 +54,7 @@ When Gate B uses **async-notify** (only when Default Gate B allows it):
 5. **Build Task must re-read `00-run.md` first.** If `Gate B veto` is `pending` → stop with Result note `blocked — Gate B veto`; do not write code. If Notes still say veto window open **and** **Build armed** is missing → stop; parent must arm first.
 6. After Build **starts** with veto still `none` and **Build armed** present: set Status `running`; **clear** Notes “veto window open” and **Build armed** (Build in flight). Lint errors if Status=`running` while Notes still say veto window open, or if `--before-build` sees veto window without **Build armed**. A later veto uses **veto after Build** Decision below — do not silently continue to review.
 
-**Lint:** `scripts/lint-run.py <run-dir> --before-build` enforces veto `none` + veto-window / **Build armed** / Status consistency + **Gate B approved** when HITL Gate B is **blocking**. Notes `design-backloop` → error until cleared after fresh Gate B settle (blocks Build even when Gate B soft / approved `none`) — [stages.md](stages.md). Mode **full** + HITL Gate B ∈ {`auto`,`async-notify`} → lint error. Mode **simple** + Has API/DB = yes + HITL Gate B ∈ {`auto`,`async-notify`} → lint error (default and `--before-build`; hitl.md Default Gate B requires **blocking**). `--next` emits `handoff: do-not-launch` for Build until blocking **Gate B approved** is set (or until **Build armed** when async-notify); with Notes `design-backloop` and Next `build` → redirect to `design-update` (Next `gate-b` + token → normal Gate B digest / settle; clear token on settle).
+**Lint:** `scripts/lint-run.py <run-dir> --before-build` enforces veto `none` + veto-window / **Build armed** / Status consistency + **Gate B approved** when HITL Gate B is **blocking**. Notes `design-backloop` → **error** only on `--before-build` or Next=`build` (blocks Build even when Gate B soft / approved `none`); default lint with Next in recovery (`design-update` / re-review / `gate-b` / …) → **warn** recovery in progress — [stages.md](stages.md). Mode **full** + HITL Gate B ∈ {`auto`,`async-notify`} → lint error. Mode **simple** + Has API/DB = yes + HITL Gate B ∈ {`auto`,`async-notify`} → lint error (default and `--before-build`; hitl.md Default Gate B requires **blocking**). `--next` emits `handoff: do-not-launch` for Build until blocking **Gate B approved** is set (or until **Build armed** when async-notify); with Notes `design-backloop` and Next `build` → redirect to `design-update` (Next `gate-b` + token → normal Gate B digest / settle; clear token on settle).
 
 **Durable resume:** If Notes say veto window open / Last stage is Gate B async-notify / Status `paused` with Next step `build`, and `Gate B veto` is `none`, a later **resume** counts as the next parent turn — **set Build armed**, then launch Build after veto re-read. Do not require same-session memory. See [stages.md](stages.md) Resume.
 
@@ -109,11 +109,13 @@ Do **not** copy Gate B tier into Grill unless `00-run.md` explicitly sets them e
 
 | Review profile | Required |
 |----------------|----------|
-| **skip-review** | **Legal only** in **Mode simple** when Has API = **no** and Has DB = **no** ([lenses.md](lenses.md)). Then: Build **verify-pass** + Smoke section smoke-pass (no Smoke Task / full / lite required). Mode **full**, or Has API/DB = yes → skip-review **forbidden**; use lite/full bar. Smoke Task under skip-review: [verify-and-fix.md](verify-and-fix.md) ordered recovery |
-| **lite** | `06-test-log.md` Result **success** after lite run |
-| **full** | `06-test-log.md` Result **success** after full run |
+| **skip-review** | Legal only per [lenses.md](lenses.md). Then: Build **verify-pass** + Smoke section smoke-pass (no full/lite required). Prefer one independent Smoke Task re-run (or explicit Notes waive) before Gate C — fast path still OK. Smoke recovery: [verify-and-fix.md](verify-and-fix.md) |
+| **lite** | `06-test-log.md` Result **success** **and** **Mode last run:** `lite` (missing Mode last run → fail closed) |
+| **full** | `06-test-log.md` Result **success** **and** **Mode last run:** `full` (missing Mode last run → fail closed) |
 
-Explicit user override may waive green tests; log override in Notes.
+Explicit user override may waive green tests; log in Notes with token `gate-c-test-override` (or `Gate C test override`).
+
+**Lint:** `scripts/lint-run.py <run-dir> --before-merge` (also when `--next` and card Next=`merge`) enforces this bar from `00-run.md` + `06-test-log.md` unless Notes override is present; also runs `--check-results` (warn-only).
 
 After Merge Result **success** **and** `merge` ∈ **Gate C approved** → set Status **`done`**. Subset without `merge` (e.g. PR only) → stay `paused`; leave Next for remaining actions. Abort/reject → `stopped`, not `done` ([results.md](results.md) · [stages.md](stages.md) Done criteria).
 
@@ -136,5 +138,4 @@ After Merge Result **success** **and** `merge` ∈ **Gate C approved** → set S
 
 - Do **not** invent actions. Subset only what the user named (“PR only” → `pr` or `commit,push,pr` as said).
 - Merge Task / parent must re-read **Gate C approved** before git/remote actions.
-- Lint: default `scripts/lint-run.py <run-dir>` errors when card Next=`merge` and **Gate C approved** is missing / `none` / empty. `--before-merge` enforces the same check explicitly (prefer before launching Merge).
-)
+- Lint: default `scripts/lint-run.py <run-dir>` errors when card Next=`merge` and **Gate C approved** is missing / `none` / empty. `--before-merge` enforces approved-actions + Gate C test bar and runs `--check-results` warn-only (prefer before launching Merge).

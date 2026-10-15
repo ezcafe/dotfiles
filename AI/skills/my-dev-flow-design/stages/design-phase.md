@@ -28,7 +28,7 @@ If Grill yes: follow {my-dev-flow}/grill.md; write 02b-grill.md; HITL Grill auto
 
 ### C — Design
 Write 03-design.md: one recommended design + ≤3-line rejected alternative. System design + Design patterns headings (N/A OK per templates). Sequence, API/DB contracts, OWASP, UI locks when Has UI. Write 04-tasks.md with acceptance (+ TDD notes or clear “no automated tests”).
-Honor artifact size caps. Confirm Has API/DB again.
+Honor artifact size caps ([size-caps.md](../../my-dev-flow/size-caps.md)). Confirm Has API/DB again.
 
 Return: Has API/DB + Verify commands + Grill result + paths to 02-analysis, 02b (or skip), 03-design, 04-tasks.
 ```

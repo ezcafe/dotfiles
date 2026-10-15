@@ -25,11 +25,13 @@ Independent flags. Skills: `{api-and-interface-design}`, `{database-and-data-mod
 When **Has API = yes** or **Has DB = yes**:
 
 1. Always set the flag(s) **yes** (do not leave unknown).
-2. **Never** keep Review profile **`skip-review`**. Legal skip-review → Gate C is **Mode simple only** ([stages.md](stages.md)). Mid-run flip → Decision N reclassify; drop skip-review.
+2. **Never** keep Review profile **`skip-review`**. Legal skip-review → Gate C is **Mode simple only** ([stages.md](stages.md)). Mid-run flip → Decision N reclassify; drop skip-review. Before Gate C under legal skip-review: prefer one independent Smoke re-run (or Notes waive) — [verify-and-fix.md](verify-and-fix.md) · [hitl.md](hitl.md).
 3. Mode may stay **simple** only if [tiny tweak](#tiny-apidb-tweak) criteria all hold (Notes fold into Quality / code-review-phase; design-verify-phase covers contracts). Otherwise prefer **full** (or Decision N).
 4. Lint: `scripts/lint-run.py <run-dir>` errors on skip-review + Has API/DB yes on **default lint** (when profile is skip-review), and via `--before-build` / `--before-design-review` / `--check-skip-review`.
-5. Mode **full** + both Has API and Has DB **yes** (not tiny tweak): set **Pending parallel:** `api|db` until both isolated `03a-*` exist, then `none` ([artifacts/00-run.md](artifacts/00-run.md); lint `--before-design-review`).
-6. Before code review: Lens plan must include **api** / **db** when the matching Has flag is yes (unless Notes fold into Quality / code-review-phase — e.g. `tiny-contract-tweak`). Lint: `--before-code-review` (also auto when card Next is `adversarial` or `code-review-phase`).
+5. Mode **full** + both Has API and Has DB **yes** (not tiny tweak): set **Pending parallel:** `api|db` until both isolated `03a-*` exist, then `none` ([artifacts/00-run.md](artifacts/00-run.md); lint `--before-design-review`). Derive emits parallel hint when both `03a-*` missing; serializes only when one exists (resume).
+6. Mode **full** + single Has API or Has DB **yes** (not tiny): Pending parallel stays `none`, but derive still requires the matching `03a-*` before general design-review; lint `--before-design-review` errors when that file is missing (unless Next is the matching isolated stage).
+7. Before code review: Lens plan must include **api** / **db** when the matching Has flag is yes (unless Notes fold into Quality / code-review-phase — e.g. `tiny-contract-tweak`). Lint: `--before-code-review` (also auto when card Next is `adversarial` or `code-review-phase`).
+8. After review clean: if Lens plan ≠ `none`, matching `05-lens-*.md` must be **clean** (and **merge-findings** when 2+) before test / Gate C. `--next` prefers `do-not-launch` on test/merge when unpaid.
 
 ### Tiny API/DB tweak
 

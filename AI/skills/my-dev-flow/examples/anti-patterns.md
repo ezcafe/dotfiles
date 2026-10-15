@@ -32,3 +32,4 @@ Quick “wrong move → right move” for [`my-dev-flow`](../SKILL.md).
 | Invent unit/e2e runners when Verify commands say N/A | Honor N/A; do not invent a test stack |
 | Copy Gate B HITL tier into Grill | HITL Grill is independent ([grill.md](../grill.md) · [hitl.md](../hitl.md)) |
 | Mode **simple** `design-phase` skips Grill HITL when frontier open or Has API/DB | Still honor HITL Grill ([grill.md](../grill.md) · [hitl.md](../hitl.md)); bundle ≠ skip Grill |
+| Rush Gate C under **skip-review** with only Build-writes-Smoke and no independent check | Prefer one Notes `smoke re-run` (or explicit Notes waive / `gate-c-test-override`) before Gate C; fast path still legal ([verify-and-fix.md](../verify-and-fix.md) · [hitl.md](../hitl.md)) |

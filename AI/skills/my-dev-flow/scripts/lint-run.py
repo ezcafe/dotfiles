@@ -6,6 +6,7 @@ Status, Mode, Review profile, Gate B veto, Gate B approved, Pending parallel,
 Has API/DB, stage ids, Verify commands before Build, skip-review+API/DB error
 (always on default lint when profile is skip-review; also --before-build /
 --before-design-review / --check-skip-review),
+Mode full isolated 03a-* when Has API/DB yes not tiny (--before-design-review),
 Mode full+skip-review error, Mode simple+full error, Mode full + HITL Gate B
 auto/async-notify error, Mode simple + Has API/DB yes + soft Gate B error,
 Mode full API∥DB Pending parallel (simple keeps none),
@@ -13,6 +14,11 @@ async Gate B gap + Build armed, Gate B approved when HITL Gate B is blocking
 (--before-build / --next), Notes design-backloop → error until cleared after
 fresh Gate B settle (blocks Build even when Gate B soft / approved none),
 Gate C approved before merge (auto when card Next=merge, or with --before-merge),
+Gate C test bar from hitl.md (full/lite success + Mode last run matching
+profile; skip-review verify+smoke; Notes gate-c-test-override waives;
+Mode last run missing → fail closed),
+Notes design-backloop → error only --before-build / Next=build; else warn
+recovery when Next is design-update / re-review / gate-b / …,
 Lens plan api/db before code review (--before-code-review or Next in
 adversarial / code-review-phase).
 
@@ -20,10 +26,14 @@ Also:
   --next              print next incomplete stage hint + companion / handoff
                       (no Task handoff when Status done|stopped / blocked /
                       gate-b / gate-c / Build without Gate B approved when
-                      blocking / merge without Gate C approved)
+                      blocking / merge without Gate C approved / Gate C bar fail)
+  --next --derive     also compute expected next from Mode/profile + artifacts;
+                      warn when card Next differs (card remains launch override)
   Status=done         error unless merge ∈ Gate C approved
-  --before-merge      require Gate C approved actions (also auto when Next=merge)
+  --before-merge      require Gate C approved + Gate C test bar (also auto when
+                      Next=merge); also runs --check-results (warn-only)
   --before-code-review  require Lens plan api/db when Has API/DB yes (not tiny/fold)
+  --check-results     scan artifact Result headers + soft warn oversize bodies
   --dry-run-seed      create slug dir, seed 00-run.md from template, lint, stop
   --check-stage-ids   verify stage-id registry (handoffs / parent-next / VALID_STAGE_IDS / stages/*.md)
 """
@@ -40,8 +50,10 @@ from pathlib import Path
 PACKAGE = Path(__file__).resolve().parent.parent
 SKILLS_ROOT = PACKAGE.parent
 HANDOFFS_MD = PACKAGE / "handoffs.md"
+SIZE_CAPS_MD = PACKAGE / "size-caps.md"
 ARTIFACTS_00 = PACKAGE / "artifacts" / "00-run.md"
 PARENT_NEXT_MD = PACKAGE / "parent-next.md"
+RESULTS_MD = PACKAGE / "results.md"
 SUBFLOW_DIRS = (
     SKILLS_ROOT / "my-dev-flow-design",
     SKILLS_ROOT / "my-dev-flow-design-review",
@@ -223,7 +235,113 @@ TINY_TWEAK_RE = re.compile(r"(?i)tiny-contract-tweak")
 DESIGN_BACKLOOP_RE = re.compile(
     r"(?i)(?:^|\n)\s*[-*]\s*`?design-backloop`?(?:\s*$|\s*[—#–-]|\s*\n)"
 )
+# After rebuild / design-backloop Option 1 — derive honors before gate-c (verify-and-fix.md)
+REVIEW_STALE_RE = re.compile(
+    r"(?i)(?:^|\n)\s*[-*]\s*`?review-stale`?(?:\s*$|\s*[—#–-]|\s*\n)"
+)
+TEST_STALE_RE = re.compile(
+    r"(?i)(?:^|\n)\s*[-*]\s*`?test-stale`?(?:\s*$|\s*[—#–-]|\s*\n)"
+)
+GATE_C_TEST_OVERRIDE_RE = re.compile(
+    r"(?i)\bgate-c-test-override\b|\bGate C test override\b"
+)
+# Mode full stages that require 01a Result ok (Gate A fail-closed on --next)
+POST_GATE_A_STAGES = frozenset(
+    {
+        "skim",
+        "analyze",
+        "grill",
+        "design",
+        "design-review",
+        "api-contract-review",
+        "db-design-review",
+        "design-update",
+        "tdd-review",
+        "gate-b",
+        "build",
+        "smoke",
+        "adversarial",
+        "quality",
+        "code-review-phase",
+        "lens-security",
+        "lens-perf",
+        "lens-memory",
+        "lens-api",
+        "lens-db",
+        "merge-findings",
+        "fix-review",
+        "test-full",
+        "test-lite",
+        "fix-tests",
+        "gate-c",
+        "merge",
+    }
+)
+# Lens plan token → (stage id, artifact filename) — lenses.md
+LENS_PLAN_MAP: dict[str, tuple[str, str]] = {
+    "api": ("lens-api", "05-lens-api.md"),
+    "db": ("lens-db", "05-lens-db.md"),
+    "security": ("lens-security", "05-lens-security.md"),
+    "perf": ("lens-perf", "05-lens-performance.md"),
+    "performance": ("lens-perf", "05-lens-performance.md"),
+    "memory": ("lens-memory", "05-lens-memory.md"),
+}
+UNPAID_LENS_BLOCK_STAGES = frozenset(
+    {"test-full", "test-lite", "gate-c", "merge", "fix-tests"}
+)
+GRILL_SKIP_RE = re.compile(r"(?i)\bgrill\s+skipped\b")
+RESULT_HEADER_RE = re.compile(
+    r"(?im)^\*\*Result:\*\*\s*(.+)$|^Result:\s*(.+)$"
+)
+SMOKE_RESULT_RE = re.compile(
+    r"(?im)^\*\*Smoke result:\*\*\s*(.+)$"
+)
+MODE_LAST_RUN_RE = re.compile(
+    r"(?im)^\*\*Mode last run:\*\*\s*(.+)$"
+)
+LAST_STAGE_RE = re.compile(r"^\*\*Last stage:\*\*\s*(.+)$", re.M | re.I)
 SOFT_TASK_CAP = 20
+# Design-backloop recovery Next values → warn (not error) on default lint
+DESIGN_BACKLOOP_RECOVERY_STAGES = frozenset(
+    {
+        "design-update",
+        "design-review",
+        "design-verify-phase",
+        "api-contract-review",
+        "db-design-review",
+        "tdd-review",
+        "gate-b",
+    }
+)
+
+# Domain → allowed Result tokens (results.md). Soft check via --check-results.
+RESULT_TOKENS_BY_ARTIFACT: dict[str, frozenset[str]] = {
+    "01a-idea-ui-review.md": frozenset({"ok", "needs update", "escalate"}),
+    "02-skim.md": frozenset({"done", "skipped"}),
+    "02b-grill.md": frozenset({"frontier-empty", "needs-round", "skipped"}),
+    "03a-design-review-log.md": frozenset({"clean", "needs update", "skipped"}),
+    "03a-api-contract-review.md": frozenset({"clean", "needs update", "skipped"}),
+    "03a-db-design-review.md": frozenset({"clean", "needs update", "skipped"}),
+    "04a-tdd-test-review.md": frozenset({"clean", "needs more tests"}),
+    "05-review-log.md": frozenset({"clean", "needs fix"}),
+    "05-lens-api.md": frozenset({"clean", "needs fix", "has findings"}),
+    "05-lens-db.md": frozenset({"clean", "needs fix", "has findings"}),
+    "05-lens-security.md": frozenset({"clean", "needs fix", "has findings"}),
+    "05-lens-performance.md": frozenset({"clean", "needs fix", "has findings"}),
+    "05-lens-memory.md": frozenset({"clean", "needs fix", "has findings"}),
+    "06-test-log.md": frozenset(
+        {"success", "failure", "smoke-pass", "smoke-fail", "pending"}
+    ),
+}
+
+# Soft line caps for whole-file body (size-caps.md approximations)
+SIZE_CAP_LINES: dict[str, int] = {
+    "02-skim.md": 40,
+    "01-idea.md": 80,
+    "02-analysis.md": 120,
+    "02b-grill.md": 60,
+    "03-design.md": 200,
+}
 
 
 def _parse_gate_b_approved(text: str) -> str | None:
@@ -301,24 +419,44 @@ def _check_gate_b_approved(
 
 
 def _check_design_backloop_gate_b(
-    text: str, issues: list[Issue]
+    text: str, issues: list[Issue], *, before_build: bool = False
 ) -> None:
-    """Notes design-backloop → error until cleared after fresh Gate B settle.
+    """Notes design-backloop: error only when Build is armed; else soft warn.
 
-    After Option 1: Notes design-backloop + Gate B approved none + Next
-    design-update (not Build). Clear token only after fresh Gate B settle
-    (stages.md: blocking → clear + approved; auto → clear, approved may
-    stay none). Blocks Build even when HITL Gate B is soft.
+    Error on ``--before-build`` or card Next=`build` (blocks Build even when
+    HITL Gate B is soft). Default lint with Next in recovery stages → warn
+    "recovery in progress". Clear token only after fresh Gate B settle
+    (stages.md).
     """
     notes = _notes_blob(text)
     if not DESIGN_BACKLOOP_RE.search(notes):
         return
+    next_id = _card_next_stage_id(text)
+    if before_build or next_id == "build":
+        issues.append(
+            Issue(
+                "error",
+                "Notes design-backloop — do not Build; Next design-update → "
+                "re-review → Gate B; clear Notes design-backloop only after "
+                "fresh Gate B settle (stages.md)",
+            )
+        )
+        return
+    if next_id in DESIGN_BACKLOOP_RECOVERY_STAGES or not next_id:
+        issues.append(
+            Issue(
+                "warn",
+                "Notes design-backloop — recovery in progress "
+                f"(Next `{next_id or 'unset'}`); clear token only after "
+                "fresh Gate B settle (stages.md)",
+            )
+        )
+        return
     issues.append(
         Issue(
-            "error",
-            "Notes design-backloop — do not Build; Next design-update → "
-            "re-review → Gate B; clear Notes design-backloop only after "
-            "fresh Gate B settle (stages.md)",
+            "warn",
+            "Notes design-backloop present — prefer Next design-update → "
+            "re-review → gate-b (not Build) until settle (stages.md)",
         )
     )
 
@@ -711,6 +849,46 @@ def _check_pending_parallel(
         )
 
 
+def _check_isolated_api_db_files(
+    text: str,
+    issues: list[Issue],
+    *,
+    before_design_review: bool,
+    run_dir: Path | None,
+    mode_token: str | None,
+) -> None:
+    """H1: Mode full + Has API/DB yes (not tiny) → require matching 03a-* file.
+
+    Skip when card Next is the matching isolated stage (file not written yet).
+    """
+    if not before_design_review or mode_token != "full":
+        return
+    notes = _notes_blob(text)
+    if TINY_TWEAK_RE.search(notes):
+        return
+    next_id = _card_next_stage_id(text)
+    has_api = _parsed_yes_no(text, HAS_API_LINE_RE)
+    has_db = _parsed_yes_no(text, HAS_DB_LINE_RE)
+    if has_api == "yes" and next_id != "api-contract-review":
+        if not _artifact_exists(run_dir, "03a-api-contract-review.md"):
+            issues.append(
+                Issue(
+                    "error",
+                    "Has API = yes requires 03a-api-contract-review.md before "
+                    "design-review (or Notes tiny-contract-tweak) — lenses.md",
+                )
+            )
+    if has_db == "yes" and next_id != "db-design-review":
+        if not _artifact_exists(run_dir, "03a-db-design-review.md"):
+            issues.append(
+                Issue(
+                    "error",
+                    "Has DB = yes requires 03a-db-design-review.md before "
+                    "design-review (or Notes tiny-contract-tweak) — lenses.md",
+                )
+            )
+
+
 def _parse_hitl_gate_b(text: str) -> str | None:
     """Return HITL Gate B tier token, or None if missing/template."""
     m = HITL_GATE_B_RE.search(text)
@@ -785,6 +963,14 @@ def _card_next_stage_id(text: str) -> str:
     return _extract_stage_token(next_m.group(1))
 
 
+def _last_stage_id(text: str) -> str:
+    """Last stage field token (empty if missing)."""
+    m = LAST_STAGE_RE.search(text)
+    if not m:
+        return ""
+    return _extract_stage_token(m.group(1))
+
+
 def _check_gate_c_approved(
     text: str, issues: list[Issue], *, before_merge: bool
 ) -> None:
@@ -847,6 +1033,527 @@ def _check_status_done_requires_merge(
             "(stages.md · results.md · hitl.md)",
         )
     )
+
+
+def _parse_result_token(blob: str) -> str | None:
+    """Primary Result token from artifact body (first matching header)."""
+    m = RESULT_HEADER_RE.search(blob)
+    if not m:
+        return None
+    raw = (m.group(1) or m.group(2) or "").strip()
+    if not raw:
+        return None
+    # Template alternatives like "pending | smoke-pass | …"
+    if "|" in raw and not re.match(r"^[a-z0-9 _-]+$", raw.lower().strip("`*_")):
+        return None
+    # Take first alternative before | for filled single tokens only
+    primary = re.split(r"\s+[—#–-]\s+|\s{2,}", raw, maxsplit=1)[0].strip()
+    if "|" in primary:
+        return None
+    token = primary.strip("`*_").lower()
+    if token in ("", "none", "n/a", "-", "—"):
+        return None
+    return token
+
+
+def _read_artifact(run_dir: Path | None, name: str) -> str:
+    if run_dir is None:
+        return ""
+    path = run_dir / name
+    if not path.is_file():
+        return ""
+    return path.read_text(encoding="utf-8")
+
+
+def _smoke_pass(run_dir: Path | None) -> bool:
+    blob = _read_artifact(run_dir, "06-test-log.md")
+    if not blob:
+        return False
+    m = SMOKE_RESULT_RE.search(blob)
+    if m and _first_token(m.group(1)) == "smoke-pass":
+        return True
+    # Top-level Result may be smoke-pass when only Smoke ran
+    top = _parse_result_token(blob)
+    return top == "smoke-pass"
+
+
+def _test_log_success(run_dir: Path | None, *, expect_mode: str | None) -> bool:
+    """True when Result success; if expect_mode set, Mode last run must match.
+
+    Fail closed when expect_mode is full|lite and Mode last run is missing
+    or mismatched (hitl.md Gate C test bar).
+    """
+    blob = _read_artifact(run_dir, "06-test-log.md")
+    if not blob:
+        return False
+    if _parse_result_token(blob) != "success":
+        return False
+    if expect_mode is None:
+        return True
+    m = MODE_LAST_RUN_RE.search(blob)
+    if not m:
+        return False  # fail closed — Mode last run required for full/lite bar
+    mode = _first_token(m.group(1))
+    return mode == expect_mode
+
+
+def _last_verify_pass(text: str) -> bool:
+    m = REQUIRED_FIELD_PATTERNS["Last Verify"].search(text)
+    if not m:
+        return False
+    raw = m.group(1).strip()
+    if _looks_like_template(raw):
+        return False
+    return _first_token(raw) == "verify-pass"
+
+
+def _check_gate_c_test_bar(
+    text: str,
+    issues: list[Issue],
+    *,
+    before_merge: bool,
+    run_dir: Path | None,
+) -> None:
+    """Enforce hitl.md Gate C test bar from 00-run + 06-test-log.
+
+    Notes ``gate-c-test-override`` / ``Gate C test override`` waives.
+    """
+    enforce = before_merge or _card_next_stage_id(text) == "merge"
+    if not enforce:
+        return
+
+    notes = _notes_blob(text)
+    if GATE_C_TEST_OVERRIDE_RE.search(notes):
+        return
+
+    rp_m = REQUIRED_FIELD_PATTERNS["Review profile"].search(text)
+    if not rp_m:
+        return
+    review = _first_token(rp_m.group(1))
+    if review not in VALID_REVIEW_PROFILE or _looks_like_template(rp_m.group(1)):
+        return
+
+    mode_m = REQUIRED_FIELD_PATTERNS["Mode"].search(text)
+    mode = _first_token(mode_m.group(1)) if mode_m else None
+
+    if review == "full":
+        if not _test_log_success(run_dir, expect_mode="full"):
+            issues.append(
+                Issue(
+                    "error",
+                    "Gate C test bar (full): need 06-test-log.md Result success "
+                    "and Mode last run full (hitl.md) — or Notes "
+                    "gate-c-test-override",
+                )
+            )
+        return
+
+    if review == "lite":
+        if not _test_log_success(run_dir, expect_mode="lite"):
+            issues.append(
+                Issue(
+                    "error",
+                    "Gate C test bar (lite): need 06-test-log.md Result success "
+                    "and Mode last run lite (hitl.md) — or Notes "
+                    "gate-c-test-override",
+                )
+            )
+        return
+
+    if review == "skip-review":
+        # Illegal skip-review already errors via _check_skip_review_api_db;
+        # still require verify-pass + smoke-pass when profile is skip-review.
+        if mode == "full":
+            issues.append(
+                Issue(
+                    "error",
+                    "Gate C test bar: skip-review forbidden in Mode full "
+                    "(lenses.md · hitl.md)",
+                )
+            )
+            return
+        if (
+            _parsed_yes_no(text, HAS_API_LINE_RE) == "yes"
+            or _parsed_yes_no(text, HAS_DB_LINE_RE) == "yes"
+        ):
+            # skip-review+API/DB already errored elsewhere; bar still fails
+            issues.append(
+                Issue(
+                    "error",
+                    "Gate C test bar: skip-review forbidden when Has API/DB yes "
+                    "(lenses.md · hitl.md)",
+                )
+            )
+            return
+        if not _last_verify_pass(text):
+            issues.append(
+                Issue(
+                    "error",
+                    "Gate C test bar (skip-review): need Last Verify verify-pass "
+                    "(hitl.md) — or Notes gate-c-test-override",
+                )
+            )
+        if not _smoke_pass(run_dir):
+            issues.append(
+                Issue(
+                    "error",
+                    "Gate C test bar (skip-review): need 06-test-log Smoke "
+                    "result smoke-pass (hitl.md) — or Notes gate-c-test-override",
+                )
+            )
+
+
+def _review_clean(run_dir: Path | None, review: str | None = None) -> bool:
+    """True when 05-review-log shows review complete for the profile.
+
+    Review profile **full**: Adv + Quality section Results both ``clean``
+    (fail closed if either section Result is missing or not clean). Do not
+    trust the first file-level ``**Result:**`` alone — Adv often writes
+    ``clean`` before Quality runs.
+
+    Review profile **lite** (default): overall / code-review-phase Result
+    ``clean``; when both Adv and Quality section Results are present,
+    require both ``clean`` instead.
+    """
+    blob = _read_artifact(run_dir, "05-review-log.md")
+    if not blob:
+        return False
+    adv = _section_result(blob, r"Adversarial")
+    qual = _section_result(blob, r"Quality")
+    if review == "full":
+        return adv == "clean" and qual == "clean"
+    if adv is not None and qual is not None:
+        return adv == "clean" and qual == "clean"
+    return _parse_result_token(blob) == "clean"
+
+
+def _section_result(blob: str, heading_pat: str) -> str | None:
+    """Primary Result token under a ## section matching heading_pat (until next ##)."""
+    sec = re.search(
+        rf"(?ims)^##[^\n]*{heading_pat}[^\n]*\n(.*?)(?=^## |\Z)",
+        blob,
+    )
+    if not sec:
+        return None
+    return _parse_result_token(sec.group(1))
+
+
+def _merged_lenses_result(run_dir: Path | None) -> str | None:
+    blob = _read_artifact(run_dir, "05-review-log.md")
+    if not blob:
+        return None
+    return _section_result(blob, r"Merged lenses")
+
+
+def _adv_vs_quality_reentry(run_dir: Path | None, last_id: str) -> str:
+    """H6: needs fix after Adv → adversarial/fix-review; after Quality → quality."""
+    blob = _read_artifact(run_dir, "05-review-log.md")
+    if not blob:
+        return "adversarial"
+    adv = _section_result(blob, r"Adversarial")
+    qual = _section_result(blob, r"Quality")
+
+    if last_id == "fix-review":
+        if qual == "needs fix":
+            return "quality"
+        return "adversarial"
+
+    if last_id == "adversarial":
+        if adv == "needs fix":
+            return "fix-review"
+        if adv == "clean":
+            return "quality"
+        return "adversarial"
+
+    if last_id == "quality":
+        if qual == "needs fix":
+            return "fix-review"
+        if qual == "clean":
+            return "quality"  # overall may still need lenses
+        return "quality"
+
+    # Section-based (no useful Last stage)
+    if adv == "needs fix":
+        return "adversarial"
+    if adv != "clean":
+        return "adversarial"
+    if qual == "needs fix" or qual != "clean":
+        return "quality"
+    return "quality"
+
+
+def _lens_plan_entries(text: str) -> list[tuple[str, str, str]]:
+    """Return [(token, stage_id, artifact), ...] for Lens plan (skip none/unknown)."""
+    out: list[tuple[str, str, str]] = []
+    for tok in sorted(_parse_lens_plan_tokens(text)):
+        mapped = LENS_PLAN_MAP.get(tok)
+        if mapped:
+            stage_id, artifact = mapped
+            out.append((tok, stage_id, artifact))
+    return out
+
+
+def _lens_artifact_clean(run_dir: Path | None, name: str) -> bool:
+    blob = _read_artifact(run_dir, name)
+    if not blob:
+        return False
+    return _parse_result_token(blob) == "clean"
+
+
+def _unpaid_lens_stages(text: str, run_dir: Path | None) -> list[str]:
+    """H2: Lens plan stages whose 05-lens-*.md is missing or not clean."""
+    unpaid: list[str] = []
+    for _tok, stage_id, artifact in _lens_plan_entries(text):
+        if not _lens_artifact_clean(run_dir, artifact):
+            unpaid.append(stage_id)
+    return unpaid
+
+
+def _lenses_complete(text: str, run_dir: Path | None) -> bool:
+    """True when Lens plan is none, or all lens files clean (+ merge when 2+)."""
+    entries = _lens_plan_entries(text)
+    if not entries:
+        return True
+    if _unpaid_lens_stages(text, run_dir):
+        return False
+    if len(entries) >= 2:
+        return _merged_lenses_result(run_dir) == "clean"
+    return True
+
+
+def _design_review_result(run_dir: Path | None) -> str | None:
+    """Primary Result from 03a-design-review-log.md, or None if missing."""
+    blob = _read_artifact(run_dir, "03a-design-review-log.md")
+    if not blob:
+        return None
+    return _parse_result_token(blob)
+
+
+def _design_review_clean(run_dir: Path | None, _mode: str | None = None) -> bool:
+    return _design_review_result(run_dir) == "clean"
+
+
+def _any_03a_needs_update(run_dir: Path | None) -> bool:
+    """True when any present 03a* Result is needs update."""
+    for name in (
+        "03a-design-review-log.md",
+        "03a-api-contract-review.md",
+        "03a-db-design-review.md",
+    ):
+        blob = _read_artifact(run_dir, name)
+        if blob and _parse_result_token(blob) == "needs update":
+            return True
+    return False
+
+
+def _grill_done(text: str, run_dir: Path | None) -> bool:
+    """True when Notes grill skipped or 02b Result is frontier-empty|skipped."""
+    if GRILL_SKIP_RE.search(_notes_blob(text)):
+        return True
+    blob = _read_artifact(run_dir, "02b-grill.md")
+    if not blob:
+        return False
+    return _parse_result_token(blob) in ("frontier-empty", "skipped")
+
+
+def derive_expected_next(text: str, run_dir: Path | None) -> str | None:
+    """Best-effort next stage from Mode/profile + artifacts (card is override).
+
+    Returns None when indeterminate (e.g. mid Gate B settle).
+    """
+    status_m = REQUIRED_FIELD_PATTERNS["Status"].search(text)
+    status = _first_token(status_m.group(1)) if status_m else ""
+    if status in ("done", "stopped"):
+        return None
+
+    notes = _notes_blob(text)
+    mode_m = REQUIRED_FIELD_PATTERNS["Mode"].search(text)
+    mode = _first_token(mode_m.group(1)) if mode_m else None
+    rp_m = REQUIRED_FIELD_PATTERNS["Review profile"].search(text)
+    review = _first_token(rp_m.group(1)) if rp_m else None
+
+    has_design = _artifact_exists(run_dir, "03-design.md")
+    has_tasks = _artifact_exists(run_dir, "04-tasks.md")
+    design_result = _design_review_result(run_dir)
+    design_ok = design_result == "clean"
+    verify_ok = _last_verify_pass(text)
+    smoke_ok = _smoke_pass(run_dir)
+    review_ok = _review_clean(run_dir, review)
+    test_ok_full = _test_log_success(run_dir, expect_mode="full")
+    test_ok_lite = _test_log_success(run_dir, expect_mode="lite")
+    next_id = _card_next_stage_id(text)
+    last_id = _last_stage_id(text)
+
+    # N1: design-backloop — mirror --next (never force design-update over gate-b)
+    if DESIGN_BACKLOOP_RE.search(notes):
+        if next_id == "gate-b" or last_id == "gate-b":
+            return "gate-b"
+        if design_ok:
+            return "gate-b"  # re-review clean → awaiting Gate B settle
+        return "design-update"
+
+    def _gate_b_or_build() -> str:
+        tier = _parse_hitl_gate_b(text)
+        if tier == "blocking" and not _gate_b_approved_ok(text):
+            return "gate-b"
+        return "build"
+
+    def _after_verify_smoke_then_review() -> str | None:
+        """N6: verify-pass without smoke-pass → smoke (or build under skip-review).
+
+        H2: unpaid Lens plan before test/gate-c.
+        H5: Notes review-stale / test-stale invalidate prior clean/success.
+        H6: Adv vs Quality re-entry from sections / Last stage.
+        """
+        review_stale = bool(REVIEW_STALE_RE.search(notes))
+        test_stale = bool(TEST_STALE_RE.search(notes))
+        if not smoke_ok:
+            if review == "skip-review":
+                return "build"  # ordered recovery prefers re-Build
+            return "smoke"
+        if review == "skip-review":
+            return "gate-c"
+        effective_review_ok = review_ok and not review_stale
+        if not effective_review_ok:
+            if review == "lite":
+                return "code-review-phase"
+            if not _artifact_exists(run_dir, "05-review-log.md"):
+                return "adversarial"
+            return _adv_vs_quality_reentry(run_dir, last_id)
+        # H2: Lens plan unpaid → matching lens-* (parallel hint when 2+ unpaid)
+        unpaid = _unpaid_lens_stages(text, run_dir)
+        if unpaid:
+            if len(unpaid) >= 2:
+                return "||".join(unpaid)
+            return unpaid[0]
+        entries = _lens_plan_entries(text)
+        if len(entries) >= 2 and _merged_lenses_result(run_dir) != "clean":
+            return "merge-findings"
+        if review == "lite":
+            if test_stale or not test_ok_lite:
+                return "test-lite"
+            return "gate-c"
+        # profile full
+        if test_stale or not test_ok_full:
+            return "test-full"
+        return "gate-c"
+
+    if mode == "simple":
+        if not (has_design and has_tasks):
+            return "design-phase"
+        # N3: needs update → design-update; missing → first review stage
+        if _any_03a_needs_update(run_dir) or design_result == "needs update":
+            return "design-update"
+        if design_result is None:
+            return "design-verify-phase"
+        if not design_ok:
+            return "design-verify-phase"
+        if not verify_ok:
+            return _gate_b_or_build()
+        return _after_verify_smoke_then_review()
+
+    if mode == "full":
+        # N2: walk Gate A → skim → Analyze → Grill → Design (artifact presence)
+        if not _artifact_exists(run_dir, "01-idea.md"):
+            return "ideation"
+        if not _artifact_exists(run_dir, "01a-idea-ui-review.md"):
+            return "gate-a"
+        idea_ui = _parse_result_token(
+            _read_artifact(run_dir, "01a-idea-ui-review.md")
+        )
+        if idea_ui == "needs update":
+            return "ideation-update"
+        # Fail closed: advance to skim only on exact ok; escalate / pending /
+        # missing / other → hold gate-a (results.md)
+        if idea_ui != "ok":
+            return "gate-a"
+        if not _artifact_exists(run_dir, "02-skim.md"):
+            return "skim"
+        if not _artifact_exists(run_dir, "02-analysis.md"):
+            return "analyze"
+        if not _grill_done(text, run_dir):
+            return "grill"
+        if not has_design:
+            return "design"
+        # N3
+        if _any_03a_needs_update(run_dir) or design_result == "needs update":
+            return "design-update"
+        # H1/H3: isolated API/DB before general design-review (even if Pending parallel none)
+        tiny = bool(TINY_TWEAK_RE.search(notes))
+        has_api = _parsed_yes_no(text, HAS_API_LINE_RE)
+        has_db = _parsed_yes_no(text, HAS_DB_LINE_RE)
+        api_done = _artifact_exists(run_dir, "03a-api-contract-review.md")
+        db_done = _artifact_exists(run_dir, "03a-db-design-review.md")
+        needs_api = has_api == "yes" and not tiny
+        needs_db = has_db == "yes" and not tiny
+        if needs_api and needs_db:
+            # H3: both missing → parallel hint; one exists → serialize resume
+            if not api_done and not db_done:
+                return "api-contract-review||db-design-review"
+            if not api_done:
+                return "api-contract-review"
+            if not db_done:
+                return "db-design-review"
+        elif needs_api and not api_done:
+            return "api-contract-review"
+        elif needs_db and not db_done:
+            return "db-design-review"
+        if design_result is None:
+            return "design-review"
+        if not design_ok:
+            return "design-review"
+        if not verify_ok:
+            return _gate_b_or_build()
+        return _after_verify_smoke_then_review()
+
+    return None
+
+
+def check_results(run_dir: Path) -> list[Issue]:
+    """Scan known artifact Result headers; soft-warn oversize bodies."""
+    issues: list[Issue] = []
+    for name, allowed in RESULT_TOKENS_BY_ARTIFACT.items():
+        path = run_dir / name
+        if not path.is_file():
+            continue
+        blob = path.read_text(encoding="utf-8")
+        token = _parse_result_token(blob)
+        if token is None:
+            if "Result:" in blob or "**Result:**" in blob:
+                issues.append(
+                    Issue(
+                        "warn",
+                        f"{name}: Result header present but token empty/template "
+                        f"(results.md)",
+                    )
+                )
+            continue
+        allowed_l = {a.lower() for a in allowed}
+        if token not in allowed_l:
+            issues.append(
+                Issue(
+                    "warn",
+                    f"{name}: Result {token!r} not in {sorted(allowed)} "
+                    f"(results.md)",
+                )
+            )
+
+    for name, cap in SIZE_CAP_LINES.items():
+        path = run_dir / name
+        if not path.is_file():
+            continue
+        lines = path.read_text(encoding="utf-8").splitlines()
+        # Skip leading comment / copy-from template lines lightly
+        body_lines = [ln for ln in lines if ln.strip()]
+        if len(body_lines) > cap:
+            issues.append(
+                Issue(
+                    "warn",
+                    f"{name}: ~{len(body_lines)} non-empty lines > soft cap "
+                    f"~{cap} (size-caps.md)",
+                )
+            )
+    return issues
 
 
 def _next_stage_legality_warns(
@@ -1079,8 +1786,11 @@ def lint_run_md(
 
     _check_hitl_gate_b_mode(text, issues, mode_token)
     _check_gate_b_approved(text, issues, before_build=before_build)
-    _check_design_backloop_gate_b(text, issues)
+    _check_design_backloop_gate_b(text, issues, before_build=before_build)
     _check_gate_c_approved(text, issues, before_merge=before_merge)
+    _check_gate_c_test_bar(
+        text, issues, before_merge=before_merge, run_dir=run_dir
+    )
     _check_status_done_requires_merge(text, issues)
     _check_lens_plan_api_db(text, issues, before_code_review=before_code_review)
 
@@ -1110,6 +1820,13 @@ def lint_run_md(
             issues.append(Issue("error", "Has DB must be yes|no before design-review"))
 
     _check_pending_parallel(
+        text,
+        issues,
+        before_design_review=before_design_review,
+        run_dir=run_dir,
+        mode_token=mode_token,
+    )
+    _check_isolated_api_db_files(
         text,
         issues,
         before_design_review=before_design_review,
@@ -1184,7 +1901,7 @@ def _extract_stage_token(raw: str) -> str:
     return re.split(r"[\s(/]", s)[0].strip("`*_").lower()
 
 
-def print_next_hint(run_dir: Path) -> int:
+def print_next_hint(run_dir: Path, *, derive: bool = False) -> int:
     """Read 00-run.md card; print next stage + companion + handoff hint."""
     run_md = run_dir / "00-run.md"
     if not run_md.is_file():
@@ -1210,6 +1927,31 @@ def print_next_hint(run_dir: Path) -> int:
     print(f"Stage id (card): {stage_raw or '(empty)'}")
     print(f"Next step (card): {next_raw or '(empty)'}")
 
+    derived: str | None = None
+    if derive:
+        derived = derive_expected_next(text, run_dir)
+        print(f"derived next: {derived or '(indeterminate)'}")
+        # H3: parallel hint when derived uses ||
+        if derived and "||" in derived:
+            parts = derived.split("||")
+            print(
+                "warn: derived next is parallel — launch "
+                + " ∥ ".join(f"`{p}`" for p in parts)
+                + " same parent turn (stages.md · lenses.md)"
+            )
+            if stage_id and stage_id not in parts:
+                print(
+                    f"warn: card Next `{stage_id}` differs from derived `{derived}` "
+                    "— card remains launch override; confirm or update card "
+                    "(parent-next.md · stages.md Resume)"
+                )
+        elif derived and stage_id and derived != stage_id:
+            print(
+                f"warn: card Next `{stage_id}` differs from derived `{derived}` "
+                "— card remains launch override; confirm or update card "
+                "(parent-next.md · stages.md Resume)"
+            )
+
     # Terminal lifecycle: do not launch further pipeline Tasks
     if status in ("done", "stopped"):
         print("companion: stages.md · results.md (Done / abort)")
@@ -1228,6 +1970,8 @@ def print_next_hint(run_dir: Path) -> int:
 
     if not stage_id:
         print("hint: set Orchestrator card Next step / Stage id")
+        if derived:
+            print(f"hint: derived suggests `{derived}`")
         print(f"companion: {PARENT_NEXT_MD}")
         return 0
     print(f"next incomplete stage: {stage_id}")
@@ -1236,6 +1980,76 @@ def print_next_hint(run_dir: Path) -> int:
         stage_id, mode_token, review_token, notes=notes
     ):
         print(f"warn: {msg}")
+
+    # H4: Mode full + Next past Gate A while 01a ≠ ok → fail-closed (same as derive)
+    if mode_token == "full" and stage_id in POST_GATE_A_STAGES:
+        idea_ui = _parse_result_token(
+            _read_artifact(run_dir, "01a-idea-ui-review.md")
+        )
+        if idea_ui != "ok":
+            print(
+                f"warn: Gate A fail-closed — 01a Result is "
+                f"{idea_ui or 'missing'} (need ok) before `{stage_id}` "
+                "(stages.md · results.md)"
+            )
+            print("companion: stages.md · parent-next.md (row for `gate-a`)")
+            print("handoff: do-not-launch")
+            print(
+                "next action: set Next gate-a or ideation-update until "
+                "01a Result ok, then re-run --next"
+            )
+            return 0
+
+    # H2: unpaid Lens plan → do not launch test / gate-c / merge
+    if stage_id in UNPAID_LENS_BLOCK_STAGES:
+        unpaid = _unpaid_lens_stages(text, run_dir)
+        entries = _lens_plan_entries(text)
+        merge_needed = (
+            len(entries) >= 2 and _merged_lenses_result(run_dir) != "clean"
+        )
+        review_stale = bool(REVIEW_STALE_RE.search(notes))
+        test_stale = bool(TEST_STALE_RE.search(notes))
+        if unpaid or merge_needed:
+            reason = (
+                f"unpaid lenses {unpaid}"
+                if unpaid
+                else "merge-findings not clean (2+ lenses)"
+            )
+            print(
+                f"warn: Lens plan unpaid — {reason}; do not advance to "
+                f"`{stage_id}` (lenses.md)"
+            )
+            print("companion: lenses.md · parent-next.md")
+            print("handoff: do-not-launch")
+            print(
+                "next action: launch unpaid lens-* "
+                + ("∥ same turn; " if len(unpaid) >= 2 else "")
+                + ("then merge-findings; " if len(entries) >= 2 else "")
+                + "then re-run --next"
+            )
+            return 0
+        if review_stale and stage_id in ("gate-c", "merge"):
+            print(
+                "warn: Notes review-stale — re-run review before "
+                f"`{stage_id}` (verify-and-fix.md)"
+            )
+            print("companion: verify-and-fix.md · lenses.md")
+            print("handoff: do-not-launch")
+            print(
+                "next action: clear review-stale after review clean; re-run --next"
+            )
+            return 0
+        if test_stale and stage_id in ("gate-c", "merge"):
+            print(
+                "warn: Notes test-stale — re-run test before "
+                f"`{stage_id}` (verify-and-fix.md)"
+            )
+            print("companion: verify-and-fix.md · hitl.md")
+            print("handoff: do-not-launch")
+            print(
+                "next action: clear test-stale after test success; re-run --next"
+            )
+            return 0
 
     # Design-backloop: redirect Build only — gate-b after re-review is settle path
     # (token stays until settle; do not redirect Next=gate-b → design-update)
@@ -1300,6 +2114,21 @@ def print_next_hint(run_dir: Path) -> int:
                 "(non-empty commit|push|pr|merge subset), then re-run --next"
             )
             return 0
+        bar_issues: list[Issue] = []
+        _check_gate_c_test_bar(
+            text, bar_issues, before_merge=True, run_dir=run_dir
+        )
+        bar_errors = [i for i in bar_issues if i.severity == "error"]
+        if bar_errors:
+            for i in bar_errors:
+                print(f"warn: {i.message}")
+            print("companion: hitl.md · parent-next.md (row for `merge`)")
+            print("handoff: do-not-launch")
+            print(
+                "next action: meet Gate C test bar (or Notes gate-c-test-override), "
+                "then re-run --next"
+            )
+            return 0
 
     print(f"companion: parent-next.md (row for `{stage_id}`)")
     print(
@@ -1355,7 +2184,10 @@ def main() -> int:
     p.add_argument(
         "--before-design-review",
         action="store_true",
-        help="Enforce Has API/DB yes|no + Mode full Pending parallel + skip-review ban",
+        help=(
+            "Enforce Has API/DB yes|no + Mode full Pending parallel + "
+            "isolated 03a-* when Has API/DB yes (not tiny) + skip-review ban"
+        ),
     )
     p.add_argument(
         "--before-build",
@@ -1369,8 +2201,9 @@ def main() -> int:
         "--before-merge",
         action="store_true",
         help=(
-            "Require Gate C approved actions (commit|push|pr|merge); "
-            "also auto-enforced when card Next=merge"
+            "Require Gate C approved actions + Gate C test bar (hitl.md); "
+            "also auto-enforced when card Next=merge; "
+            "also runs --check-results (warn-only)"
         ),
     )
     p.add_argument(
@@ -1402,6 +2235,11 @@ def main() -> int:
         help="Print next incomplete stage id + companion + handoff-for.py hint",
     )
     p.add_argument(
+        "--derive",
+        action="store_true",
+        help="With --next: also derive expected next from Mode/profile + artifacts",
+    )
+    p.add_argument(
         "--dry-run-seed",
         action="store_true",
         help="Create run dir, seed 00-run.md from artifacts/00-run.md, lint, stop",
@@ -1410,6 +2248,11 @@ def main() -> int:
         "--check-stage-ids",
         action="store_true",
         help="Check stage-id registry alignment (handoffs / parent-next / VALID_STAGE_IDS / stages/*.md); run_dir optional",
+    )
+    p.add_argument(
+        "--check-results",
+        action="store_true",
+        help="Scan artifact Result headers + soft-warn oversize bodies (size-caps.md)",
     )
     p.add_argument(
         "--slug",
@@ -1432,8 +2275,19 @@ def main() -> int:
     if args.dry_run_seed:
         return dry_run_seed(args.run_dir, slug=args.slug)
 
+    if args.derive and not args.next:
+        p.error("--derive requires --next")
+
     if args.next:
-        return print_next_hint(args.run_dir)
+        return print_next_hint(args.run_dir, derive=args.derive)
+
+    if args.check_results:
+        issues = check_results(args.run_dir)
+        for i in issues:
+            print(f"{i.severity}: {i.message}")
+        if not issues:
+            print("ok: Result headers + size caps soft-check clean")
+        return 1 if (args.strict and issues) else 0
 
     run_md = args.run_dir / "00-run.md"
     if not run_md.is_file():
@@ -1441,15 +2295,20 @@ def main() -> int:
         return 2
 
     text = run_md.read_text(encoding="utf-8")
+    before_merge = args.before_merge or _card_next_stage_id(text) == "merge"
     issues = lint_run_md(
         text,
         before_design_review=args.before_design_review,
         before_build=args.before_build,
         check_skip_review=args.check_skip_review,
-        before_merge=args.before_merge,
+        before_merge=before_merge,
         before_code_review=args.before_code_review,
         run_dir=args.run_dir,
     )
+
+    # N9: --check-results (warn-only) with --before-merge / Next=merge
+    if before_merge:
+        issues.extend(check_results(args.run_dir))
 
     errors = [i for i in issues if i.severity == "error"]
     warns = [i for i in issues if i.severity == "warn"]

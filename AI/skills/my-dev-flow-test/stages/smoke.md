@@ -34,4 +34,4 @@ Return FIRST LINE exactly: Result: smoke-pass | smoke-fail
 Then short summary + path to 06-test-log.md ({my-dev-flow}/results.md).
 ```
 
-**After:** Parent: smoke-pass → `my-dev-flow-review` (or Gate C if **legal** skip-review — **Mode simple** + Has API/DB = **no** only; else must not be skip-review). smoke-fail → Fix-from-tests → verify-pass → re-smoke. Do not open Gate C/merge from this skill.
+**After:** Parent: smoke-pass → `my-dev-flow-review` (or Gate C if legal skip-review — [lenses.md](../../my-dev-flow/lenses.md)). smoke-fail → Fix-from-tests → verify-pass → re-smoke. Do not open Gate C/merge from this skill.

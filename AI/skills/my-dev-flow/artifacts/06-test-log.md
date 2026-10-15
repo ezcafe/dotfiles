@@ -1,4 +1,6 @@
-Copy into `.my-docs/workflow/<slug>/`. [handoffs.md](../handoffs.md) · [LEGACY.md](../LEGACY.md) · [verify-and-fix.md](../verify-and-fix.md).
+Copy into `.my-docs/workflow/<slug>/`. [handoffs.md](../handoffs.md) · [LEGACY.md](../LEGACY.md) · [verify-and-fix.md](../verify-and-fix.md) · [hitl.md](../hitl.md).
+
+Gate C (full|lite): when Result is **success**, **Mode last run** must be `full` or `lite` matching Review profile — missing → fail closed.
 
 # 06-test-log.md
 
