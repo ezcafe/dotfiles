@@ -53,6 +53,15 @@ FULL_ONLY_STAGES = frozenset(
     }
 )
 CODE_REVIEW_ENTRY_STAGES = frozenset({"adversarial", "code-review-phase"})
+# --before-design-review auto when card Next ∈ this set (MDF-R1)
+DESIGN_REVIEW_PHASE_STAGES = frozenset(
+    {
+        "design-review",
+        "design-verify-phase",
+        "api-contract-review",
+        "db-design-review",
+    }
+)
 SIMPLE_BUNDLE_STAGES = frozenset({"design-phase", "design-verify-phase"})
 PROFILE_FULL_ONLY_STAGES = frozenset({"adversarial", "quality", "test-full"})
 PROFILE_LITE_PATH_STAGES = frozenset({"code-review-phase", "test-lite"})
@@ -272,10 +281,12 @@ CLARITY_CHECK_STAGES = frozenset(
         "merge",
     }
 )
-# High-risk Next: boundary-matched clarity-check required (parent-next.md · R3)
-CLARITY_CHECK_HIGH_RISK = frozenset(
-    {"tdd-review", "build", "fix-review", "fix-tests", "merge"}
-)
+# All clarity Next stages: boundary-matched token required (parent-next.md · M1)
+CLARITY_CHECK_HIGH_RISK = frozenset(CLARITY_CHECK_STAGES)
+# Prefer new Gate A artifact; accept legacy filename for one resume cycle (E5)
+GATE_A_ARTIFACT_PREFERRED = "01a-gate-a.md"
+GATE_A_ARTIFACT_LEGACY = "01a-idea-ui-review.md"
+GATE_A_ARTIFACT_NAMES = (GATE_A_ARTIFACT_PREFERRED, GATE_A_ARTIFACT_LEGACY)
 # Consent / waiver provenance (hitl.md · R1) — quote length ≥ N, not filler
 PROVENANCE_MIN_QUOTE_LEN = 12
 PROVENANCE_FILLER_QUOTES = frozenset(
@@ -435,9 +446,11 @@ RESULT_HEADER_RE = re.compile(
 SMOKE_RESULT_RE = re.compile(
     r"(?im)^\*\*Smoke result:\*\*\s*(.+)$"
 )
-MODE_LAST_RUN_RE = re.compile(
-    r"(?im)^\*\*Mode last run:\*\*\s*(.+)$"
+# Prefer "Test path last run"; accept legacy "Mode last run" (M2 · LEGACY.md)
+TEST_PATH_LAST_RUN_RE = re.compile(
+    r"(?im)^\*\*(?:Test path last run|Mode last run):\*\*\s*(.+)$"
 )
+MODE_LAST_RUN_RE = TEST_PATH_LAST_RUN_RE  # alias for callers / one resume cycle
 LAST_STAGE_RE = re.compile(r"^\*\*Last stage:\*\*\s*(.+)$", re.M | re.I)
 SOFT_TASK_CAP = 25
 DESIGN_BACKLOOP_RECOVERY_STAGES = frozenset(
@@ -452,7 +465,8 @@ DESIGN_BACKLOOP_RECOVERY_STAGES = frozenset(
     }
 )
 RESULT_TOKENS_BY_ARTIFACT: dict[str, frozenset[str]] = {
-    "01a-idea-ui-review.md": frozenset({"ok", "needs update", "escalate"}),
+    "01a-gate-a.md": frozenset({"ok", "needs update", "escalate"}),
+    "01a-idea-ui-review.md": frozenset({"ok", "needs update", "escalate"}),  # LEGACY
     "02-skim.md": frozenset({"done", "skipped"}),
     "02b-grill.md": frozenset({"frontier-empty", "needs-round", "skipped"}),
     "03a-design-review-log.md": frozenset({"clean", "needs update", "skipped"}),
@@ -692,6 +706,31 @@ def _artifact_exists(run_dir: Path | None, name: str) -> bool:
     if run_dir is None:
         return False
     return (run_dir / name).is_file()
+
+
+def _gate_a_artifact_exists(run_dir: Path | None) -> bool:
+    """True when prefer ``01a-gate-a.md`` or legacy ``01a-idea-ui-review.md`` exists."""
+    return any(_artifact_exists(run_dir, n) for n in GATE_A_ARTIFACT_NAMES)
+
+
+def _gate_a_both_filenames_exist(run_dir: Path | None) -> bool:
+    """True when preferred and LEGACY Gate A files both exist (E9)."""
+    if run_dir is None:
+        return False
+    return _artifact_exists(run_dir, GATE_A_ARTIFACT_PREFERRED) and _artifact_exists(
+        run_dir, GATE_A_ARTIFACT_LEGACY
+    )
+
+
+def _read_gate_a_artifact(run_dir: Path | None) -> str:
+    """Read Gate A Result artifact; prefer new name, then legacy (E5)."""
+    for name in GATE_A_ARTIFACT_NAMES:
+        blob = _read_artifact(run_dir, name)
+        if blob:
+            return blob
+    return ""
+
+
 def _extract_stage_token(raw: str) -> str:
     s = raw.strip().strip("`*_")
     if not s:

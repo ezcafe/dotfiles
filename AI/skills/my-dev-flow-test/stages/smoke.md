@@ -24,7 +24,7 @@ Run in order:
 2. Unit tests (if not N/A)
 
 Rules:
-- Update 06-test-log.md → Smoke section + Mode last run: smoke.
+- Update 06-test-log.md → Smoke section + Test path last run: smoke (LEGACY alias Mode last run on resume only).
 - Result = smoke-pass only if all non-N/A Verify build/unit steps are green.
 - Otherwise Result = smoke-fail and fill Fix ask for my-dev-flow-code.
 - Do not fix product code. Do not merge or push.

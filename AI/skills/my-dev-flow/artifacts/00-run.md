@@ -3,7 +3,7 @@ Copy into `.my-docs/workflow/<slug>/`. [handoffs.md](../handoffs.md) · [LEGACY.
 # 00-run.md
 
 Fill **Required** at Step 0. Fill **Optional** when known.  
-**Lint (required):** `scripts/lint-run.py <run-dir>` at Step 0; `--before-design-review` before design-review; `--before-build` before Build; `--before-code-review` before Adv / code-review-phase; `--before-merge` before merge when Next=`merge`.
+**Lint (required):** `scripts/lint-run.py <run-dir>` at Step 0; before each Task `--next --derive` (phase gates auto from Next: design-review* → `--before-design-review`; Adv / `code-review-phase` → `--before-code-review`; `build` → `--before-build`; `merge` → `--before-merge`).
 
 **Enums (exact single token — no `|` templates in filled runs):**
 
@@ -113,7 +113,7 @@ Fill **Required** at Step 0. Fill **Optional** when known.
 
 ### Orchestrator card (parent — avoid re-ingest)
 
-Update after each step. Parent reads **this card + one** stages/hitl/models/lenses/invariants section. Load subflow `SKILL.md` once per phase.
+Update after each step. Parent load per stage: this card + [Load budget](../step-0.md#load-budget) (launch card, `--next --derive`, handoff, `stages/<id>.md`, [parent-next.md](../parent-next.md) Open 1–2, clarity file when Next ∈ clarity stages). Load subflow `SKILL.md` once per phase.
 
 | Field | Value |
 |-------|-------|
@@ -147,7 +147,7 @@ Update after each step. Parent reads **this card + one** stages/hitl/models/lens
 - Design backloop path: failure-playbook.md / invariants.md / stages.md
 - tiny-contract-tweak — Notes fold into Quality / code-review-phase (optional)
 - Status `done` only after Merge Result success **and** `merge` ∈ Gate C approved; subset without merge → stay paused; abort → `stopped`
-- Calibration (required after `done`, ≤3 lines): Mode OK? · Review profile OK? · Biggest friction stage? — append same lines to `.my-docs/workflow/_calibration.md` (stages.md Done criteria)
+- Calibration (strongly recommended after `done` — lint warn, ≤3 lines): Mode OK? · Review profile OK? · Biggest friction stage? — append same lines to `.my-docs/workflow/_calibration.md` (stages.md Done criteria)
 
 ### Run log
 

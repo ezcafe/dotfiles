@@ -17,7 +17,7 @@ You are a Senior Architect verifier for my-dev-flow-design-review. Fresh context
 
 <Paste output of: python3 {my-dev-flow}/scripts/handoff-for.py design-review>
 
-Read 01-idea.md, 01a-idea-ui-review.md (if present), 02-skim.md (if present), 02-analysis.md, 02b-grill.md (if present), 03-design.md, 04-tasks.md.
+Read 01-idea.md, 01a-gate-a.md if present (LEGACY fallback `01a-idea-ui-review.md` on resume only), 02-skim.md (if present), 02-analysis.md, 02b-grill.md (if present), 03-design.md, 04-tasks.md.
 Also read project AGENTS.md / docs/ARCHITECTURE.md / GLOSSARY.md when present.
 Follow useful bits from myplan, planning-and-task-breakdown, documentation-and-adrs, security-and-hardening (OWASP required), and UI skills when UI.
 

@@ -18,10 +18,10 @@ from lint_common import (
     CALIBRATION_PROFILE_OK_RE,
     CARD_NEXT_RE,
     CARD_STAGE_RE,
-    CLARITY_CHECK_HIGH_RISK,
     CLARITY_CHECK_STAGES,
     CODE_REVIEW_ENTRY_STAGES,
     DESIGN_BACKLOOP_RE,
+    DESIGN_REVIEW_PHASE_STAGES,
     FIX_ASK_RE,
     FOLD_API_DB_RE,
     HAS_API_LINE_RE,
@@ -60,6 +60,8 @@ from lint_common import (
     VERIFY_BLOCK_RE,
     VERIFY_FAIL_RE,
     VETO_WINDOW_RE,
+    GATE_A_ARTIFACT_LEGACY,
+    GATE_A_ARTIFACT_PREFERRED,
     _artifact_exists,
     _card_next_stage_id,
     _card_override_ok,
@@ -68,6 +70,7 @@ from lint_common import (
     _exact_enum_token,
     _extract_stage_token,
     _first_token,
+    _gate_a_both_filenames_exist,
     _has_provenance,
     _looks_like_template,
     _notes_blob,
@@ -75,7 +78,9 @@ from lint_common import (
     _parse_lens_plan_tokens,
     _parse_result_token,
     _read_artifact,
+    _read_gate_a_artifact,
     _run_log_blob,
+    _run_log_timestamped_entries,
     _write_async_gap_sidecar,
 )
 from lint_derive import (
@@ -304,19 +309,48 @@ def _check_isolated_api_db_files(
                 )
             )
 def _clarity_check_logged(text: str, *, stage_id: str = "") -> bool:
-    """True when clarity-check token satisfies soft or hard rule for stage.
+    """True when clarity-check token matches the Next stage boundary (M1).
 
-    Soft (design/analyze/grill/design-phase): presence-any once-per-run.
-    Hard (tdd-review / build / fix-* / merge): boundary must match Next
-    (parent-next.md · R3).
+    All CLARITY_CHECK_STAGES require boundary-matched
+    ``clarity-check ok — <exact Next>`` (parent-next.md). Presence-any
+    no longer unlocks Analyze/Grill/Design after an earlier soft token.
     """
     boundaries = _clarity_boundaries_logged(text)
     if not boundaries:
         return False
     target = (stage_id or "").strip().lower()
-    if not target or target not in CLARITY_CHECK_HIGH_RISK:
-        return True  # soft: any token unlocks
+    if not target:
+        return False
     return target in boundaries
+
+
+def _gate_b_auto_digest_logged(text: str) -> bool:
+    """True when Run log has a gate-b digest / settle line (E4)."""
+    for _ts, note in _run_log_timestamped_entries(text):
+        low = note.lower()
+        if "gate-b" in low or "gate b" in low:
+            return True
+    return False
+
+
+def _check_gate_b_auto_digest(
+    text: str, issues: list[Issue], *, before_build: bool
+) -> None:
+    """Soft-warn when HITL Gate B=auto and Next=build with no Run log digest."""
+    enforce = before_build or _card_next_stage_id(text) == "build"
+    if not enforce:
+        return
+    if _parse_hitl_gate_b(text) != "auto":
+        return
+    if _gate_b_auto_digest_logged(text):
+        return
+    issues.append(
+        Issue(
+            "warn",
+            "HITL Gate B=auto and Next=build without Run log gate-b digest "
+            "line — log digest/auto-pick settle (hitl.md)",
+        )
+    )
 
 
 def _review_profile_token(text: str) -> str | None:
@@ -430,7 +464,10 @@ def _calibration_evidence(text: str, run_dir: Path | None) -> bool:
 def _check_calibration_on_done(
     text: str, issues: list[Issue], *, run_dir: Path | None
 ) -> None:
-    """Warn when Status=done lacks calibration evidence (stages.md)."""
+    """Warn when Status=done lacks calibration evidence (stages.md · M4).
+
+    Calibration is strongly recommended; lint stays warn-only (not error).
+    """
     status_m = REQUIRED_FIELD_PATTERNS["Status"].search(text)
     if not status_m:
         return
@@ -446,13 +483,28 @@ def _check_calibration_on_done(
             "append _calibration.md (stages.md)",
         )
     )
+
+
+def _check_gate_a_duplicate_artifacts(
+    issues: list[Issue], *, run_dir: Path | None
+) -> None:
+    """Warn when both preferred and LEGACY Gate A files exist (E9)."""
+    if not _gate_a_both_filenames_exist(run_dir):
+        return
+    issues.append(
+        Issue(
+            "warn",
+            f"both {GATE_A_ARTIFACT_PREFERRED} and {GATE_A_ARTIFACT_LEGACY} "
+            f"exist — delete or rename the LEGACY file; prefer "
+            f"{GATE_A_ARTIFACT_PREFERRED} (LEGACY.md)",
+        )
+    )
 def _check_clarity_check_logged(
     text: str, issues: list[Issue], *, before_build: bool
 ) -> None:
     """Error when clarity-check token missing / mismatched before boundaries.
 
-    Soft stages: presence-any. High-risk (tdd-review/build/fix-*/merge):
-    boundary-matched.
+    All clarity stages require boundary-matched ``clarity-check ok — <Next>``.
     """
     next_id = _card_next_stage_id(text)
     if before_build:
@@ -463,24 +515,14 @@ def _check_clarity_check_logged(
         return
     if _clarity_check_logged(text, stage_id=target):
         return
-    if target in CLARITY_CHECK_HIGH_RISK:
-        issues.append(
-            Issue(
-                "error",
-                f"clarity-check ok — {target} missing from Notes/Run log "
-                f"(boundary-matched required for high-risk Next) — do not launch "
-                "(parent-next.md · invariants.md)",
-            )
+    issues.append(
+        Issue(
+            "error",
+            f"clarity-check ok — {target} missing from Notes/Run log "
+            f"(boundary-matched required) — do not launch "
+            "(parent-next.md · invariants.md)",
         )
-    else:
-        issues.append(
-            Issue(
-                "error",
-                f"clarity-check ok — <boundary> missing from Notes/Run log "
-                f"before `{target}` — do not launch "
-                "(parent-next.md · invariants.md)",
-            )
-        )
+    )
 def _check_design_review_clean_before_build(
     text: str,
     issues: list[Issue],
@@ -547,6 +589,21 @@ def _check_main_thread_fallbacks(text: str, issues: list[Issue]) -> None:
                 "Decision N soft pause (invariants.md)",
             )
         )
+def _phase_gate_flags(next_id: str | None) -> tuple[bool, bool, bool, bool]:
+    """Auto phase-gate flags from card Next (MDF-R1).
+
+    Returns
+    ``(before_design_review, before_build, before_code_review, before_merge)``.
+    """
+    nid = (next_id or "").strip()
+    return (
+        nid in DESIGN_REVIEW_PHASE_STAGES,
+        nid == "build",
+        nid in CODE_REVIEW_ENTRY_STAGES,
+        nid == "merge",
+    )
+
+
 def lint_run_md(
     text: str,
     *,
@@ -560,6 +617,13 @@ def lint_run_md(
     issues: list[Issue] = []
     mode_token: str | None = None
     review_token: str | None = None
+
+    # MDF-R1: auto-enable phase gates when card Next matches (habit is --next --derive)
+    auto_dr, auto_b, auto_cr, auto_m = _phase_gate_flags(_card_next_stage_id(text))
+    before_design_review = before_design_review or auto_dr
+    before_build = before_build or auto_b
+    before_code_review = before_code_review or auto_cr
+    before_merge = before_merge or auto_m
 
     for name, pat in REQUIRED_FIELD_PATTERNS.items():
         m = pat.search(text)
@@ -626,7 +690,9 @@ def lint_run_md(
     )
     _check_status_done_requires_merge(text, issues)
     _check_calibration_on_done(text, issues, run_dir=run_dir)
+    _check_gate_a_duplicate_artifacts(issues, run_dir=run_dir)
     _check_clarity_check_logged(text, issues, before_build=before_build)
+    _check_gate_b_auto_digest(text, issues, before_build=before_build)
     _check_design_review_clean_before_build(
         text, issues, before_build=before_build, run_dir=run_dir
     )
@@ -833,16 +899,31 @@ def print_next_hint(run_dir: Path, *, derive: bool = False) -> int:
         return 0
     print(f"next incomplete stage: {stage_id}")
 
-    for msg in _next_stage_legality_warns(
+    # H1/E6: Mode × profile / skip-review stage illegality → do-not-launch
+    legality = _next_stage_legality_warns(
         stage_id, mode_token, review_token, notes=notes
-    ):
-        print(f"warn: {msg}")
+    )
+    if legality:
+        if _card_override_ok(text):
+            for msg in legality:
+                print(
+                    f"warn: {msg} — Notes card-override + provenance present"
+                )
+        else:
+            for msg in legality:
+                print(f"error: {msg}")
+            print("companion: stages.md · lenses.md · parent-next.md")
+            print("handoff: do-not-launch")
+            print(
+                "next action: set Next to a legal Mode × Review profile stage, "
+                "or Notes `card-override — <reason>` + provenance card-override; "
+                "re-run --next"
+            )
+            return 1
 
     # H4: Mode full + Next past Gate A while 01a ≠ ok → fail-closed (same as derive)
     if mode_token == "full" and stage_id in POST_GATE_A_STAGES:
-        idea_ui = _parse_result_token(
-            _read_artifact(run_dir, "01a-idea-ui-review.md")
-        )
+        idea_ui = _parse_result_token(_read_gate_a_artifact(run_dir))
         if idea_ui != "ok":
             print(
                 f"warn: Gate A fail-closed — 01a Result is "
@@ -939,20 +1020,14 @@ def print_next_hint(run_dir: Path, *, derive: bool = False) -> int:
         )
         return 1
 
-    # Clarity-check: soft presence-any; hard boundary-matched for high-risk
+    # Clarity-check: boundary-matched for all clarity stages (M1)
     if stage_id in CLARITY_CHECK_STAGES and not _clarity_check_logged(
         text, stage_id=stage_id
     ):
-        if stage_id in CLARITY_CHECK_HIGH_RISK:
-            print(
-                f"error: clarity-check ok — {stage_id} missing "
-                "(boundary-matched required) (parent-next.md · invariants.md)"
-            )
-        else:
-            print(
-                f"error: clarity-check ok — <boundary> missing before `{stage_id}` "
-                "(parent-next.md · invariants.md)"
-            )
+        print(
+            f"error: clarity-check ok — {stage_id} missing "
+            "(boundary-matched required) (parent-next.md · invariants.md)"
+        )
         print("companion: parent-next.md · invariants.md")
         print("handoff: do-not-launch")
         print(
@@ -1109,6 +1184,27 @@ def print_next_hint(run_dir: Path, *, derive: bool = False) -> int:
             )
             return 1
 
+    # MDF-R1: phase-gate lint auto from Next (same flags as --before-*)
+    phase_issues = lint_run_md(
+        text,
+        before_design_review=False,
+        before_build=False,
+        before_code_review=False,
+        before_merge=False,
+        run_dir=run_dir,
+    )
+    phase_errors = [i for i in phase_issues if i.severity == "error"]
+    if phase_errors:
+        for i in phase_errors:
+            print(f"error: {i.message}")
+        print("companion: parent-next.md · scripts/README.md (phase gates)")
+        print("handoff: do-not-launch")
+        print(
+            "next action: fix phase-gate lint errors "
+            "(auto --before-* from card Next), then re-run --next --derive"
+        )
+        return 1
+
     print(f"companion: parent-next.md (row for `{stage_id}`)")
     print(
         f"handoff: python3 {PACKAGE / 'scripts' / 'handoff-for.py'} {stage_id}"
@@ -1161,7 +1257,9 @@ def main() -> int:
         action="store_true",
         help=(
             "Enforce Has API/DB yes|no + Mode full Pending parallel + "
-            "isolated 03a-* when Has API/DB yes (not tiny) + skip-review ban"
+            "isolated 03a-* when Has API/DB yes (not tiny) + skip-review ban; "
+            "also auto when card Next ∈ design-review / design-verify-phase / "
+            "api-contract-review / db-design-review"
         ),
     )
     p.add_argument(
@@ -1169,7 +1267,8 @@ def main() -> int:
         action="store_true",
         help=(
             "Enforce Verify commands + Gate B veto none + Build armed + async gap "
-            "+ Gate B approved when HITL Gate B is blocking"
+            "+ Gate B approved when HITL Gate B is blocking; "
+            "also auto when card Next=build"
         ),
     )
     p.add_argument(
@@ -1207,12 +1306,18 @@ def main() -> int:
     p.add_argument(
         "--next",
         action="store_true",
-        help="Print next incomplete stage id + companion + handoff-for.py hint",
+        help=(
+            "Print next incomplete stage id + companion + handoff-for.py hint; "
+            "auto-runs phase-gate lint from card Next (MDF-R1)"
+        ),
     )
     p.add_argument(
         "--derive",
         action="store_true",
-        help="With --next: also derive expected next from Mode/profile + artifacts",
+        help=(
+            "With --next: also derive expected next from Mode/profile + artifacts; "
+            "phase gates still auto from card Next"
+        ),
     )
     p.add_argument(
         "--dry-run-seed",
@@ -1270,14 +1375,19 @@ def main() -> int:
         return 2
 
     text = run_md.read_text(encoding="utf-8")
-    before_merge = args.before_merge or _card_next_stage_id(text) == "merge"
+    # MDF-R1: CLI flags OR auto from card Next (lint_run_md also ORs)
+    auto_dr, auto_b, auto_cr, auto_m = _phase_gate_flags(_card_next_stage_id(text))
+    before_design_review = args.before_design_review or auto_dr
+    before_build = args.before_build or auto_b
+    before_code_review = args.before_code_review or auto_cr
+    before_merge = args.before_merge or auto_m
     issues = lint_run_md(
         text,
-        before_design_review=args.before_design_review,
-        before_build=args.before_build,
+        before_design_review=before_design_review,
+        before_build=before_build,
         check_skip_review=args.check_skip_review,
         before_merge=before_merge,
-        before_code_review=args.before_code_review,
+        before_code_review=before_code_review,
         run_dir=args.run_dir,
     )
 

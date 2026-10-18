@@ -15,7 +15,7 @@ You are doing a light repo skim for my-dev-flow-design. Fresh context only. This
 
 <Paste output of: python3 {my-dev-flow}/scripts/handoff-for.py skim>
 
-Read 01-idea.md and 01a-idea-ui-review.md (Gate A ok).
+Read 01-idea.md and 01a-gate-a.md (Gate A ok; LEGACY fallback `01a-idea-ui-review.md` on resume only).
 
 Scan the repo for related screens, components, APIs, and hard constraints. Prefer concrete paths.
 

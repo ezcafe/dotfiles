@@ -11,7 +11,7 @@ After pass, log the **boundary-matched** token for the Next stage (high-risk set
 
 `clarity-check ok — tdd-review` | `clarity-check ok — build` | `clarity-check ok — fix-review` | `clarity-check ok — fix-tests` | `clarity-check ok — merge`
 
-Soft design-stage tokens do **not** unlock these.
+Design-boundary clarity tokens do **not** unlock these.
 
 ### Merge
 

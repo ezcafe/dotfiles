@@ -90,6 +90,6 @@ Update: Update from 03a or design-backloop → (parent) re-review
 ## Start checklist
 
 1. Confirm Full / Simple / Update + files; resolve models.
-2. Open [stages/clarity-check.md](stages/clarity-check.md); after pass log `clarity-check ok — <boundary>` (soft presence-any; [parent-next.md](../my-dev-flow/parent-next.md)); then launch.
+2. Clarity only when Next ∈ design clarity boundaries (full `analyze` / `grill` / `design`; simple `design-phase`): open [stages/clarity-check.md](stages/clarity-check.md); after pass log boundary-matched `clarity-check ok — <Next>` ([parent-next.md](../my-dev-flow/parent-next.md)); then launch. Update / `design-update`: skip clarity (parent-next intentional skip).
 3. Run stage prompts per Mode.
 4. Hand off to design-review / design-verify-phase (parent).

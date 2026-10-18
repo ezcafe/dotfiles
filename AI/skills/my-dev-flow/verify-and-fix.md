@@ -3,7 +3,7 @@
 **This file is SoT for:** Verify gate, Smoke after Build (Build-writes-Smoke), Fix rules.  
 Used by [`my-dev-flow-code`](../my-dev-flow-code/SKILL.md) (Build, Fix-from-tests) and
 [`my-dev-flow-review`](../my-dev-flow-review/SKILL.md) (Fix).  
-Pipeline pointer: [stages.md](stages.md). Parent checklist: [invariants.md](invariants.md).  
+Pipeline pointer: [stages.md](stages.md). Launch-time checklist: [orchestrator-rules.md](orchestrator-rules.md). Decision shapes / detailed checklist body: [invariants.md](invariants.md).  
 Gate B veto before Build: [hitl.md](hitl.md). Hard stops: [failure-playbook.md](failure-playbook.md).  
 **Lint (required) before Build:** `scripts/lint-run.py <run-dir> --before-build`.
 
@@ -71,7 +71,7 @@ When Build **verify-pass** rewrites a draft that already had review/test Results
 | Notes bullet | Meaning | Derive / `--next` / `--before-merge` |
 |--------------|---------|--------------------------------------|
 | `- review-stale` | Prior `05-review-log` clean (and lenses) is invalid | Re-enter review path; block gate-c/merge until cleared |
-| `- test-stale` | Prior `06` success / Mode last run is invalid | Re-enter test-full/test-lite; block gate-c/merge until cleared |
+| `- test-stale` | Prior `06` success / Test path last run is invalid | Re-enter test-full/test-lite; block gate-c/merge until cleared |
 
 Clear each token only after a fresh clean/success. Same bullet style as `design-backloop` / `tiny-contract-tweak` ([design-backloop.md](design-backloop.md) · [build.md](../my-dev-flow-code/stages/build.md)).
 
@@ -81,7 +81,7 @@ Clear each token only after a fresh clean/success. Same bullet style as `design-
 
 ## Smoke after Build (Build-writes-Smoke)
 
-On Build **verify-pass**, Build **writes** `06-test-log.md` Smoke section (commands, exits, **Smoke result: smoke-pass**) using Verify commands.
+On Build **verify-pass**, Build **writes** `06-test-log.md` Smoke section (commands, exits, **Smoke result: smoke-pass**) **and** **Test path last run:** `smoke` (same field the Smoke Task sets — [smoke.md](../my-dev-flow-test/stages/smoke.md)) using Verify commands.
 
 Parent then:
 
@@ -99,7 +99,7 @@ When Review profile is **skip-review** and Smoke is incomplete / mismatched / ne
 2. **Or** Notes `smoke re-run` → allow **one** Smoke Task under skip-review (exception; clear the Notes token after smoke-pass). Prefer this independent re-run once before Gate C when Build-writes-Smoke feels thin.
 3. **Or** drop skip-review → **lite** → `code-review-phase` → `test-lite` → Gate C.
 
-Do **not** launch `smoke` under skip-review without Notes `smoke re-run` (lint warn). Do **not** launch `test-full` / `test-lite` under legal skip-review — those follow review paths after drop. Escapes that skip independent Smoke must match [hitl.md](hitl.md) Gate C test bar / Provenance (same kinds + `provenance — <kind> — user: "…"`). After an independent re-run, record `smoke-pass (re-run)` **plus** provenance `smoke-pass-rerun`, then clear the `smoke re-run` token. Lint `--before-merge` **errors** when skip-review has only Build-writes-Smoke without those escapes; `docs-only` warn/allow applies **only after** provenance is present. Independent verification for merge remains: **full** / **lite** test after review (or Gate C escape + provenance for Mode simple legal skip-review).
+Do **not** launch `smoke` under skip-review without Notes `smoke re-run` (`--next` → `do-not-launch`). Do **not** launch `test-full` / `test-lite` under legal skip-review — those follow review paths after drop. Escapes that skip independent Smoke must match [hitl.md](hitl.md) Gate C test bar / Provenance (same kinds + `provenance — <kind> — user: "…"`). After an independent re-run, record `smoke-pass (re-run)` **plus** provenance `smoke-pass-rerun`, then clear the `smoke re-run` token. Lint `--before-merge` **errors** when skip-review has only Build-writes-Smoke without those escapes; `docs-only` warn/allow applies **only after** provenance is present. Independent verification for merge remains: **full** / **lite** test after review (or Gate C escape + provenance for Mode simple legal skip-review).
 
 ## Fix rules (TDD)
 

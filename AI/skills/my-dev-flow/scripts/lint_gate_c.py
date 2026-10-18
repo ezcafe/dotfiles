@@ -156,10 +156,10 @@ def _smoke_pass(run_dir: Path | None) -> bool:
     top = _parse_result_token(blob)
     return top == "smoke-pass"
 def _test_log_success(run_dir: Path | None, *, expect_mode: str | None) -> bool:
-    """True when Result success; if expect_mode set, Mode last run must match.
+    """True when Result success; if expect_mode set, Test path last run must match.
 
-    Fail closed when expect_mode is full|lite and Mode last run is missing
-    or mismatched (hitl.md Gate C test bar).
+    Fail closed when expect_mode is full|lite and Test path last run is missing
+    or mismatched (hitl.md Gate C test bar). Accepts legacy ``Mode last run``.
     """
     blob = _read_artifact(run_dir, "06-test-log.md")
     if not blob:
@@ -170,7 +170,7 @@ def _test_log_success(run_dir: Path | None, *, expect_mode: str | None) -> bool:
         return True
     m = MODE_LAST_RUN_RE.search(blob)
     if not m:
-        return False  # fail closed — Mode last run required for full/lite bar
+        return False  # fail closed — Test path last run required for full/lite bar
     mode = _first_token(m.group(1))
     return mode == expect_mode
 def _last_verify_pass(text: str) -> bool:
@@ -449,7 +449,7 @@ def _check_gate_c_test_bar(
                 Issue(
                     "error",
                     "Gate C test bar (full): need 06-test-log.md Result success "
-                    f"and Mode last run full (hitl.md) — {override_hint}",
+                    f"and Test path last run full (hitl.md) — {override_hint}",
                 )
             )
         return
@@ -460,7 +460,7 @@ def _check_gate_c_test_bar(
                 Issue(
                     "error",
                     "Gate C test bar (lite): need 06-test-log.md Result success "
-                    f"and Mode last run lite (hitl.md) — {override_hint}",
+                    f"and Test path last run lite (hitl.md) — {override_hint}",
                 )
             )
         return

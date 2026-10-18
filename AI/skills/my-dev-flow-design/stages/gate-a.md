@@ -6,7 +6,7 @@
 **model:** resolved Medium  
 **Task description:** `User day-to-day review`
 
-**Done when:** `01a-idea-ui-review.md` written with Result **ok** | **needs update** | **escalate**.
+**Done when:** `01a-gate-a.md` written with Result **ok** | **needs update** | **escalate**.
 
 **Task prompt:**
 
@@ -38,7 +38,7 @@ Also check **Problem map / Core problem** (product clarity, not engineering):
 
 Also review for: convenience, easy to use, understanding, mobile usability (or n/a), eye reading flow.
 
-Write .my-docs/workflow/<slug>/01a-idea-ui-review.md using the template from {my-dev-flow}/artifacts/INDEX.md.
+Write .my-docs/workflow/<slug>/01a-gate-a.md using the template from {my-dev-flow}/artifacts/INDEX.md (prefer `01a-gate-a.md`; do not create LEGACY `01a-idea-ui-review.md` on new runs).
 Fill all 80/20 sections and set **80/20 overall pass?** yes/no.
 
 Set Result:
@@ -48,7 +48,7 @@ Set Result:
 
 Do not write code. Do not rewrite 01-idea.md yourself.
 Return FIRST LINE exactly: Result: ok | needs update | escalate
-Then short summary + path to 01a-idea-ui-review.md ({my-dev-flow}/results.md).
+Then short summary + path to 01a-gate-a.md ({my-dev-flow}/results.md).
 ```
 
 **After (parent)** — mutually exclusive on Result (do **not** treat skim as unconditional):

@@ -15,7 +15,7 @@ You are the Product Owner updating ideation from the user-role day-to-day review
 
 <Paste output of: python3 {my-dev-flow}/scripts/handoff-for.py ideation-update>
 
-Read 01a-idea-ui-review.md (Findings + Fix ask). Read 01-idea.md.
+Read 01a-gate-a.md (Findings + Fix ask; LEGACY fallback `01a-idea-ui-review.md` on resume only). Read 01-idea.md.
 
 Rules:
 - Update only listed Fix-ask items in 01-idea.md.

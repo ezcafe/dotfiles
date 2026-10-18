@@ -5,10 +5,12 @@ Runtime Happy path: [stages.md](stages.md). HITL defaults: [hitl.md](hitl.md).
 
 ## Load budget
 
-| When | Open (max) | Do not |
-|------|------------|--------|
+Per-stage open set is **not** a hard “one companion” / “card + one section” cap. High-risk Next often needs the parent-next Open row **and** a clarity file — that is in budget.
+
+| When | Open | Do not |
+|------|------|--------|
 | **Step 0** | This file + [artifacts/00-run.md](artifacts/00-run.md) + [models.md](models.md) tier table + lint once | Whole SKILL.md · whole handoffs.md · all artifacts |
-| **Each stage** | Card + `lint-run.py --next --derive` + **one** companion section + `handoff-for.py` output + `stages/<id>.md` | Re-read orchestrator SKILL · full handoffs table · unrelated stage prompts |
+| **Each stage** | Orchestrator card + [orchestrator-rules.md](orchestrator-rules.md) launch card + `lint-run.py --next --derive` + `handoff-for.py` + `stages/<id>.md` + [parent-next.md](parent-next.md) **Open** row (1–2) + clarity file when Next ∈ clarity stages ([parent-next.md](parent-next.md)) | Re-read orchestrator SKILL · full handoffs table · unrelated stage prompts |
 
 Soft caps: [size-caps.md](size-caps.md) · [invariants.md](invariants.md) Task-count / main-thread.
 
@@ -22,7 +24,7 @@ Soft caps: [size-caps.md](size-caps.md) · [invariants.md](invariants.md) Task-c
    2. **API/DB?** new/changed public API or persistence → full (unless [tiny tweak](lenses.md)); no → lean simple.
    3. **Invent *what*?** yes → myplan Decision N or Mode full Ideation; no → proceed with Mode from (1)+(2) + [cheap path](stages.md#cheap-path-matrix).
 4. Create slug; write `00-run.md` from [artifacts/00-run.md](artifacts/00-run.md): Status `running`, Mode, profile, Complexity (one-line), Has UI/API/DB when known, Lens plan **none**, **Pending parallel: none**, Gate B veto **none**, models ([models.md](models.md)), card, HITL Gate B ([hitl.md](hitl.md) Default Gate B — full → **blocking**; simple low-risk → prefer **auto**; **async-notify** only when user asks for a veto window / async digest), HITL Grill (full → async-notify; simple → auto), HITL Gate C **blocking**.
-5. **Lint (required):** `scripts/lint-run.py .my-docs/workflow/<slug>/` (again `--before-design-review` / `--before-build` / `--before-code-review` / `--before-merge`). **Before each Task:** `--next --derive` ([parent-next.md](parent-next.md)). Optional: `--check-stage-ids` after editing handoffs/parent-next/stages; `--check-results` for Result tokens + size soft warns.
+5. **Lint (required):** `scripts/lint-run.py .my-docs/workflow/<slug>/`. **Before each Task:** `--next --derive` (phase gates auto from card Next — [parent-next.md](parent-next.md) · [scripts/README.md](scripts/README.md)). Optional: `--check-stage-ids` after editing handoffs/parent-next/stages; `--check-results` for Result tokens + size soft warns.
 6. Chat one line: Mode + profile + why.
 
 ### Mode selection

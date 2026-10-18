@@ -36,12 +36,14 @@ from lint_common import (
     _artifact_exists,
     _card_next_stage_id,
     _first_token,
+    _gate_a_artifact_exists,
     _last_stage_id,
     _notes_blob,
     _parse_lens_plan_tokens,
     _parse_result_token,
     _parsed_yes_no,
     _read_artifact,
+    _read_gate_a_artifact,
 )
 from lint_gate_b import (
     _gate_b_approved_ok,
@@ -298,11 +300,9 @@ def derive_expected_next(text: str, run_dir: Path | None) -> str | None:
         # N2: walk Gate A → skim → Analyze → Grill → Design (artifact presence)
         if not _artifact_exists(run_dir, "01-idea.md"):
             return "ideation"
-        if not _artifact_exists(run_dir, "01a-idea-ui-review.md"):
+        if not _gate_a_artifact_exists(run_dir):
             return "gate-a"
-        idea_ui = _parse_result_token(
-            _read_artifact(run_dir, "01a-idea-ui-review.md")
-        )
+        idea_ui = _parse_result_token(_read_gate_a_artifact(run_dir))
         if idea_ui == "needs update":
             return "ideation-update"
         # Fail closed: advance to skim only on exact ok; escalate / pending /
@@ -403,7 +403,12 @@ def _next_stage_legality_warns(
     review_token: str | None,
     notes: str = "",
 ) -> list[str]:
-    """Warn messages when Next stage is illegal for Mode × Review profile."""
+    """Illegal Mode × Review profile / skip-review Next messages (H1/E6).
+
+    On ``--next``, ``print_next_hint`` promotes these to ``error`` +
+    ``handoff: do-not-launch`` (exit 1) unless Notes ``card-override`` +
+    provenance. Name kept for callers; severity is enforced at print time.
+    """
     warns: list[str] = []
     if not stage_id:
         return warns
@@ -438,7 +443,7 @@ def _next_stage_legality_warns(
             "profile full uses Adv→Quality→test-full (stages.md)"
         )
     if review_token == "skip-review" and stage_id in SKIP_REVIEW_FORBIDDEN_STAGES:
-        # M3: smoke allowed once when Notes say smoke re-run; else prefer re-Build
+        # smoke allowed once when Notes say smoke re-run; else prefer re-Build
         if stage_id == "smoke" and SMOKE_RERUN_RE.search(notes or ""):
             return warns
         if stage_id == "smoke":

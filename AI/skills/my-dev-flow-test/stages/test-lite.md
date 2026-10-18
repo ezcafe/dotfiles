@@ -6,7 +6,7 @@
 **model:** resolved Fast  
 **Task description:** `Run build and tests`
 
-**Done when:** targeted e2e (and unit if needed) green; `06-test-log.md` has Result **success** | **failure** and **Mode last run:** `lite`.
+**Done when:** targeted e2e (and unit if needed) green; `06-test-log.md` has Result **success** | **failure** and **Test path last run:** `lite` (LEGACY alias **Mode last run** on resume only).
 
 **Task prompt:**
 
@@ -19,7 +19,7 @@ Read {my-dev-flow}/verify-and-fix.md for Verify commands rules.
 Read 00-run.md **Verify commands** (required). Use those cwd/build/unit/e2e only — do not invent a different stack. N/A → skip with note.
 Read 04-tasks.md for required e2e. Run the repo’s unit (if not already smoke-pass and unit not N/A) and only e2e that match this change / tasks (when e2e not N/A).
 Do NOT run a coverage Task. Do NOT add broad missing e2e unless 04-tasks explicitly requires a new e2e file.
-Write results into 06-test-log.md. Mode last run: lite. Result: success | failure. On failure include Fix ask.
+Write results into 06-test-log.md. Test path last run: lite. Result: success | failure. On failure include Fix ask.
 Do not fix product code. Do not merge, push, or open Gate C.
 
 Return FIRST LINE exactly: Result: success | failure

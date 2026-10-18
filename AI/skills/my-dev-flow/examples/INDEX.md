@@ -1,5 +1,7 @@
 # Golden path examples
 
+Every golden path includes a fixed **Parent before each Task** block: clarity boundary + boundary-matched token, `--next --derive`, `handoff-for.py`. SoT: [parent-next.md](../parent-next.md) · launch card [orchestrator-rules.md](../orchestrator-rules.md).
+
 | Example | When |
 |---------|------|
 | [simple-bugfix.md](simple-bugfix.md) | Mode simple + lite happy path |

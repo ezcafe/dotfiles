@@ -31,6 +31,8 @@ Prefer current names on new runs. Accept these when reading old `00-run.md` / ha
 | Old Status values without phase bundles | Map to card **Stage id** `design-phase` / `design-verify-phase` / `code-review-phase` / `test-full` / `test-lite` |
 | Status used as pipeline position (`ideation`, `review`, `test`, `gate-b`, …) | **Status** = `running\|paused\|stopped\|done` only; put position on **Last stage** / Orchestrator card Stage id |
 | **Complexity** as simple\|complex second classifier | Complexity = **one-line reason** only; Mode remains the classifier |
+| Artifact **`01a-idea-ui-review.md`** | Prefer **`01a-gate-a.md`** (same Gate A Result). Lint accepts the old filename for one resume cycle. If **both** files exist, lint **warns** — delete or rename the LEGACY file |
+| Field **`Mode last run`** on `06-test-log.md` | Prefer **`Test path last run`** (Review-profile test path: `full` \| `lite` \| `smoke`). Lint accepts the old field name for one resume cycle |
 
 ## Renamed subflow skills
 
@@ -52,4 +54,4 @@ Canonical skill text lives in the repo under **`AI/skills/`**. Cursor loads copi
 
 ## Doc layout note
 
-Runtime order: [stages.md](stages.md) **Full/Simple pipeline order**. Progress paths / Task descriptions → [handoffs.md](handoffs.md). HITL → [hitl.md](hitl.md). Models → [models.md](models.md). Lenses → [lenses.md](lenses.md). Parent checklist → [invariants.md](invariants.md). After Build: Mode × Review profile table in stages.md (legal skip-review → [lenses.md](lenses.md) · [hitl.md](hitl.md)).
+Runtime order: [stages.md](stages.md) **Full/Simple pipeline order**. Progress paths / Task descriptions → [handoffs.md](handoffs.md). HITL → [hitl.md](hitl.md). Models → [models.md](models.md). Lenses → [lenses.md](lenses.md). Launch-time card → [orchestrator-rules.md](orchestrator-rules.md); Decision shapes → [invariants.md](invariants.md). After Build: Mode × Review profile table in stages.md (legal skip-review → [lenses.md](lenses.md) · [hitl.md](hitl.md)).

@@ -1,6 +1,6 @@
 Copy into `.my-docs/workflow/<slug>/`. [handoffs.md](../handoffs.md) · [LEGACY.md](../LEGACY.md) · [verify-and-fix.md](../verify-and-fix.md) · [hitl.md](../hitl.md).
 
-Gate C (full|lite): when Result is **success**, **Mode last run** must be `full` or `lite` matching Review profile — missing → fail closed.
+Gate C (full|lite): when Result is **success**, **Test path last run** must be `full` or `lite` matching Review profile — missing → fail closed. LEGACY alias: **Mode last run** ([LEGACY.md](../LEGACY.md)).
 
 # 06-test-log.md
 
@@ -8,7 +8,8 @@ Gate C (full|lite): when Result is **success**, **Mode last run** must be `full`
 # Test log: <slug>
 
 **Result:** pending | smoke-pass | smoke-fail | success | failure
-**Mode last run:** smoke | full | lite
+**Test path last run:** smoke | full | lite
+<!-- LEGACY accept: Mode last run -->
 **Round:** 1
 **Updated:**
 **Smoke source:** Build-verify | Smoke-Task | pending

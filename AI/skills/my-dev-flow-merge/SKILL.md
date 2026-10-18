@@ -22,7 +22,8 @@ Merge subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). Human owns top risks.
 | Gate C (always blocking) + test bar + **Gate C approved** + Provenance | [`../my-dev-flow/hitl.md`](../my-dev-flow/hitl.md) |
 | Stage handoffs | **Required** `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>` ([`skills-path.md`](../my-dev-flow/skills-path.md)) · [`handoffs.md`](../my-dev-flow/handoffs.md) = edit SoT / debug only |
 | Models (Merge = Fast) | [`../my-dev-flow/models.md`](../my-dev-flow/models.md) |
-| Parent checklist | [`../my-dev-flow/invariants.md`](../my-dev-flow/invariants.md) |
+| Launch-time checklist | [`../my-dev-flow/orchestrator-rules.md`](../my-dev-flow/orchestrator-rules.md) |
+| Decision shapes / detailed checklist body | [`../my-dev-flow/invariants.md`](../my-dev-flow/invariants.md) |
 | PR body template | [`../my-dev-flow/artifacts/pr-body.md`](../my-dev-flow/artifacts/pr-body.md) |
 | Result first-line tokens | [`../my-dev-flow/results.md`](../my-dev-flow/results.md) (`success` \| `aborted`) |
 | Merge Task hard rules (execution SoT) | [`stages/merge.md`](stages/merge.md) |

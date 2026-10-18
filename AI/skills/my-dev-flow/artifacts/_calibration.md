@@ -1,5 +1,5 @@
 Template is **optional** to seed. Live file: `.my-docs/workflow/_calibration.md` (repo or workflow root).  
-After Status **`done`**, **append is required:** ≤3 calibration lines from that run’s Notes ([stages.md](../stages.md) Done / calibration). Lint warns when `done` lacks this evidence.
+After Status **`done`**, append is **strongly recommended** (lint warn): ≤3 calibration lines from that run’s Notes ([stages.md](../stages.md) Done / calibration). Lint warns (does not error) when `done` lacks this evidence.
 
 # _calibration.md
 

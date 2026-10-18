@@ -6,7 +6,8 @@ Read **one** template per stage. Size caps: [size-caps.md](../size-caps.md). Sev
 |-------------------|----------|
 | `00-run.md` | [00-run.md](00-run.md) |
 | `01-idea.md` | [01-idea.md](01-idea.md) |
-| `01a-idea-ui-review.md` | [01a-idea-ui-review.md](01a-idea-ui-review.md) |
+| `01a-gate-a.md` | [01a-gate-a.md](01a-gate-a.md) — Gate A Result (prefer) |
+| `01a-idea-ui-review.md` | [01a-idea-ui-review.md](01a-idea-ui-review.md) — **LEGACY** alias; resume only |
 | `02-skim.md` | [02-skim.md](02-skim.md) |
 | `02-analysis.md` | [02-analysis.md](02-analysis.md) |
 | `02b-grill.md` | [02b-grill.md](02b-grill.md) |
@@ -24,4 +25,4 @@ Read **one** template per stage. Size caps: [size-caps.md](../size-caps.md). Sev
 | `05-lens-memory.md` | [05-lens.md](05-lens.md) (copy; set lens = memory) |
 | `06-test-log.md` | [06-test-log.md](06-test-log.md) |
 | `pr-body.md` | [pr-body.md](pr-body.md) |
-| `_calibration.md` | [_calibration.md](_calibration.md) — template optional; **append required** after Status `done` ([stages.md](../stages.md) calibration) |
+| `_calibration.md` | [_calibration.md](_calibration.md) — template optional; append **strongly recommended** after Status `done` (lint warn — [stages.md](../stages.md) calibration) |

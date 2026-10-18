@@ -64,6 +64,7 @@ from lint_derive import (  # noqa: F401
     derive_expected_next,
 )
 from lint_core import (  # noqa: F401
+    _phase_gate_flags,
     dry_run_seed,
     lint_run_md,
     main,

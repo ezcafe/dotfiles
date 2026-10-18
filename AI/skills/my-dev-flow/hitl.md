@@ -58,6 +58,8 @@ Inventable tokens without a user quote are **rejected**. Before lint accepts **G
 
 Bare approved fields, waiver tokens, or card-override **without** matching quality provenance → lint **error** / `--next` → `do-not-launch` (exit **1**). Do **not** invent quotes.
 
+**Honesty:** lint provenance checks shape + quote quality — they are **not** proof the user said those words ([anti-patterns.md](examples/anti-patterns.md)).
+
 **Residual risk:** lint raises the cost of forged quotes (length ≥12, filler ban, kind match). It does **not** prove the quote was uttered in chat.
 
 ## async-notify + Gate B veto + Build armed (required)
@@ -107,7 +109,7 @@ When Gate B uses **async-notify** (only when Default Gate B allows it):
 | HITL Gate B | Before Build |
 |-------------|--------------|
 | **blocking** | **Gate B approved** must be `yes` or a named pick (not `none`) **plus** provenance `gate-b-approved`. Lint `--before-build` and `--next` → `do-not-launch` until both set. |
-| **auto** | Allow Build without user yes; **Gate B approved** may stay `none` (optional log of auto-pick). |
+| **auto** | Allow Build without user yes; **Gate B approved** may stay `none`. Log a Run log `gate-b` digest/auto-pick line (lint **warns** when Next=`build` / `--before-build` lacks it). |
 | **async-notify** | Do **not** use Gate B approved as the arm token — use **Build armed** + turn-boundary gap (arm later than digest + `async-gap-pending` + sidecar; above). |
 
 Gate B auto/async ≠ Gate C commit approval.
@@ -140,8 +142,8 @@ Do **not** copy Gate B tier into Grill unless `00-run.md` explicitly sets them e
 | Review profile | Required |
 |----------------|----------|
 | **skip-review** | **Fail-closed:** legal only per [lenses.md](lenses.md) **and** Build **verify-pass** + Smoke smoke-pass **and** one escape **with provenance**: Notes `smoke-pass (re-run)` + `smoke-pass-rerun`, Complexity/Notes `docs-only` + `docs-only`, or `smoke-waive` / `gate-c-test-override` with their kinds. Free-text Notes alone are **rejected**. Relying on Build-writes-Smoke alone → lint `--before-merge` **error** / `--next` → `do-not-launch` (exit **1**). Recovery: [verify-and-fix.md](verify-and-fix.md) |
-| **lite** | `06-test-log.md` Result **success** **and** **Mode last run:** `lite` (missing Mode last run → fail closed) |
-| **full** | `06-test-log.md` Result **success** **and** **Mode last run:** `full` (missing Mode last run → fail closed) |
+| **lite** | `06-test-log.md` Result **success** **and** **Test path last run:** `lite` (missing → fail closed; LEGACY alias `Mode last run`) |
+| **full** | `06-test-log.md` Result **success** **and** **Test path last run:** `full` (missing → fail closed; LEGACY alias `Mode last run`) |
 
 Explicit user override may waive green tests **only** with Notes `gate-c-test-override` **plus** provenance `gate-c-test-override`. Does **not** waive Notes `review-stale` / `test-stale` (or unpaid clean/success vs `Last verify-pass at` — [verify-and-fix.md](verify-and-fix.md) Stale).
 

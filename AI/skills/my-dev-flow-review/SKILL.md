@@ -35,11 +35,10 @@ Review + Fix subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). Generation ≠
 
 - Never trust the first draft. Writers (Fix) never self-approve; verifiers re-check after Fix.
 - **skip-review → do nothing** — legality: [`lenses.md`](../my-dev-flow/lenses.md) (parent Gate C).
-- **Review profile full:** Adv → Quality → lenses → then `test-full`. **Review profile lite** (any Mode, including Mode full): must one `code-review-phase` (never separate Adv+Quality) → then `test-lite`.
-- **Lenses / tiny-tweak / api·db:** [`lenses.md`](../my-dev-flow/lenses.md). Merge findings only if **2+** lenses.
+- **Post-Build path / Review profile:** [`../my-dev-flow/stages.md`](../my-dev-flow/stages.md) Mode × Review profile table (do not restate). Lenses / tiny-tweak: [`lenses.md`](../my-dev-flow/lenses.md). Merge findings only if **2+** lenses.
 - **Fix:** verify-pass before re-review; max 3 → Decision N ([`verify-and-fix.md`](../my-dev-flow/verify-and-fix.md) · [`invariants.md`](../my-dev-flow/invariants.md)).
 - **UI lock (Has UI):** Quality fails **Major** on Design UI / Gate A #1/#2 / chrome drift.
-- Result tokens: [`results.md`](../my-dev-flow/results.md). Paste `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>` output per Task (resolve per [`skills-path.md`](../my-dev-flow/skills-path.md)); plain words.
+- Result tokens: [`results.md`](../my-dev-flow/results.md). Paste `handoff-for.py <stage-id>` per Task ([`skills-path.md`](../my-dev-flow/skills-path.md)); plain words.
 
 ## Models
 
@@ -53,31 +52,15 @@ Review + Fix subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). Generation ≠
 
 If no draft → **stop** (run code first). If parent Gate B unchecked or smoke not smoke-pass → **stop**.
 
-## Pipeline
+## Pipeline / launch
 
-```
-skip-review (legal per lenses.md) → stop (parent Gate C)
+Parent Happy path + Mode × Review profile: [`../my-dev-flow/stages.md`](../my-dev-flow/stages.md). Load **`stages/<stage-id>.md` only**. Lens plan defaults / api·db: [`lenses.md`](../my-dev-flow/lenses.md).
 
-Review profile lite (any Mode):  code-review-phase ⇄ Fix → lenses per plan → Merge if 2+ → test-lite
-Review profile full:             Adv ⇄ Fix → Quality ⇄ Fix → lenses → Merge if 2+ → Fix loop → test-full
-```
-
-Parent runtime order: [`../my-dev-flow/stages.md`](../my-dev-flow/stages.md) Happy path (Mode × Review profile table).
+Owned here: Fix verify-pass before re-review; after Fix that changed tests/behavior → re-run Adv (or Lite) once (+ Quality if structure changed); when clean → parent `my-dev-flow-test` per Review profile (not Mode alone).
 
 ## Severity exit
 
 [`severity.md`](../my-dev-flow/severity.md) — Adv/Quality clean at zero Critical/Major; lens loop clean when Merge Result **clean** (or single-lens parent copy). Enhancements → Deferred.
-
-## Orchestrator rules
-
-- **skip-review** → stop immediately (nothing to do here). Parent Gate C only when legal ([lenses.md](../my-dev-flow/lenses.md)).
-- **Review profile lite** (even if Mode full) → must launch `code-review-phase`; never separate Adv+Quality.
-- **Review profile full** → Adv then Quality, each with Fix loops; then Lens plan only.
-- Before lenses: read Lens plan (default **none**); auto-add api/db per [`lenses.md`](../my-dev-flow/lenses.md). Isolated Tasks for api/db when listed (not tiny-tweak). Parallel when 2+.
-- Merge Task only if **2+** lenses; 1 lens → parent copies into Merged lenses.
-- After Fix: advance only on **verify-pass** (or docs-only skip); verify-fail max 3 → Decision N.
-- If Fix changed tests/behavior → re-run Adv (or Lite) once (+ Quality if structure changed).
-- When clean → `my-dev-flow-test` **test-full** (Review profile full) or **test-lite** (Review profile lite), then Gate C. Do not pick test mode from Mode alone.
 
 ## Skills used
 
@@ -101,4 +84,4 @@ Parent runtime order: [`../my-dev-flow/stages.md`](../my-dev-flow/stages.md) Hap
 1. Confirm draft + Smoke; init `05-review-log.md`; read Review profile + Lens plan.
 2. Resolve models (Fast-on-simple; Medium|Fast on full).
 3. Before `fix-review`: open code [clarity-check.md](../my-dev-flow-code/stages/clarity-check.md); log `clarity-check ok — fix-review`.
-4. Review profile lite → code-review-phase; Review profile full → Adv → Quality → lenses → Fix until clean ([stages.md](stages.md) · parent Happy path).
+4. Launch stages per parent Happy path ([`../my-dev-flow/stages.md`](../my-dev-flow/stages.md)).

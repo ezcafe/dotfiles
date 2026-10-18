@@ -15,13 +15,27 @@ Do **not** require `02-analysis.md` or Grill frontier yet — this Task writes t
 
 If no → ask the user; do not launch `design-phase`.
 
-### Analyze / Grill / Design (Mode **full** standalone stages)
+### Analyze (Mode **full**)
 
-Before Analyze and Design:
+Before launching **`analyze`**:
 
 > Are the instructions, dependencies, and reference files clear enough to proceed?
 
-Before Grill / Design, also confirm:
+Confirm:
+
+- `01-idea.md` **Problem map** — Steps 1–2 + mind map + Core problem present (or user-confirmed stubs enough to Analyze)
+
+Do **not** require `02-analysis.md` What/Why/How yet — Analyze writes those.
+
+If no → ask the user; do not launch `analyze`.
+
+### Grill (Mode **full**)
+
+Before launching **`grill`**:
+
+> Are the instructions, dependencies, and reference files clear enough to proceed?
+
+Confirm:
 
 - `01-idea.md` **Problem map** — Steps 1–2 + mind map + Core problem present
 - `02-analysis.md` Deep dive answers (or user-confirmed open questions for):
@@ -29,10 +43,22 @@ Before Grill / Design, also confirm:
   2. **Why do we need this?**
   3. **How to do this?** (other ways + best practices + **Solution branches** when Mode full)
 
-Before Design, confirm Grill is **frontier-empty** or **skipped** (see `02b-grill.md` / Notes). Do not start Design on `needs-round`.
+If no → ask the user; do not launch `grill`.
 
-**Checklist note:** soft clarity lint is a **floor** (once-per-run presence-any — [parent-next.md](../../my-dev-flow/parent-next.md)). A soft token already in Notes does **not** skip opening this file — still confirm Problem map / What-Why-How (and Grill frontier) before Design. Soft clarity also does **not** skip must-hold stage gates (open Grill still blocks Design via derive/lint).
+### Design (Mode **full**)
 
-If no → ask the user; do not launch the next stage.
+Before launching **`design`**:
 
-After pass, log `clarity-check ok — <boundary>` (e.g. `design-phase`, `analyze`, `grill`, `design`). Soft presence-any once-per-run: one token unlocks later soft lint boundaries; it does **not** unlock high-risk code stages (`tdd-review` / `build` / `fix-*` / `merge`).
+> Are the instructions, dependencies, and reference files clear enough to proceed?
+
+Confirm the same Problem map + What/Why/How as Grill above.
+
+Also confirm Grill is **frontier-empty** or **skipped** (see `02b-grill.md` / Notes). Do not start Design on `needs-round`.
+
+If no → ask the user; do not launch `design`.
+
+### Checklist note (all design boundaries)
+
+Clarity lint is **boundary-matched** ([parent-next.md](../../my-dev-flow/parent-next.md)). A prior token (e.g. `clarity-check ok — design-phase` or `analyze`) does **not** unlock a different Next — log `clarity-check ok — <exact Next>` for this launch. Opening this file for content checks is still required. Clarity tokens also do **not** skip must-hold stage gates (open Grill still blocks Design via derive/lint).
+
+After pass, log `clarity-check ok — <boundary>` matching the Next stage id (e.g. `design-phase`, `analyze`, `grill`, `design`). Design-boundary tokens do **not** unlock high-risk code stages (`tdd-review` / `build` / `fix-*` / `merge`).

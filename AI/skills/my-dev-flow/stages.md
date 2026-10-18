@@ -27,12 +27,12 @@ Do **not** store stage names in Status.
 
 **Done criteria:** `done` **only** after Merge Result **success** **and** `merge` ∈ **Gate C approved**. Abort/reject/cancel → `stopped`. Not `done` while paused at Gate C or after commit/PR-only subsets. Re-open `done` only with new slug or explicit Decision.
 
-**Calibration (required after `done`):** ≤3 structured Notes lines on `00-run.md`, **and** append the same ≤3 lines to `.my-docs/workflow/_calibration.md` (create if missing; newest block at bottom with slug + UTC date):
+**Calibration (strongly recommended after `done` — lint warn):** ≤3 structured Notes lines on `00-run.md`, **and** append the same ≤3 lines to `.my-docs/workflow/_calibration.md` (create if missing; newest block at bottom with slug + UTC date):
 1. `Mode OK?` yes|no — one-line why
 2. `Review profile OK?` yes|no — one-line why
 3. `Biggest friction stage?` `<stage-id>` — one-line why
 
-Template seed optional: [artifacts/_calibration.md](artifacts/_calibration.md). Append after `done` is required; lint **warns** when Status=`done` lacks Notes lines or a `_calibration.md` block.
+Template seed optional: [artifacts/_calibration.md](artifacts/_calibration.md). Lint **warns** (does not error) when Status=`done` lacks Notes lines or a `_calibration.md` block.
 
 ---
 
@@ -76,7 +76,7 @@ flowchart LR
 | **simple** | **lite** | Build-writes-Smoke skip → `code-review-phase` → lenses per plan → `test-lite` → Gate C → merge → `done` |
 | **simple** | **skip-review** | Legal path → Gate C → merge → `done` **only** when Gate C fail-closed bar met ([hitl.md](hitl.md)); else drop ([lenses.md](lenses.md)) |
 
-**Forbidden combos (lint error):** Mode **simple** + Review profile **full** (want Adv→Quality→`test-full` → use Mode **full**, or keep simple with **lite** / **skip-review**). Mode **full** + **skip-review**: [lenses.md](lenses.md). Hard stops: [failure-playbook.md](failure-playbook.md). Design wrong after Build → [design-backloop.md](design-backloop.md).
+**Forbidden combos (lint error / `--next` → `do-not-launch`):** Mode **simple** + Review profile **full**; Mode **full** + **skip-review**; card Next ∈ profile-full-only stages (`adversarial` / `quality` / `test-full`) while profile **lite** (and inverse lite-path stages while profile **full**); skip-review forbidden stages (except Notes `smoke re-run` for one `smoke`). Override only with Notes `card-override` + provenance. Hard stops: [failure-playbook.md](failure-playbook.md). Design wrong after Build → [design-backloop.md](design-backloop.md).
 
 ### Full pipeline order
 
@@ -96,7 +96,7 @@ flowchart LR
 12. Test ⇄ Fix (max 3; verify-pass before re-test) — **by Review profile:**
     - **full** — `test-full` (one Task)
     - **lite** — `test-lite`
-13. Gate C blocking → merge → Status **`done`** only when Merge Result **success** **and** `merge` ∈ Gate C approved **+ quality provenance** ([hitl.md](hitl.md)) + **calibration** Notes + append `_calibration.md` (PR-only → stay `paused`)
+13. Gate C blocking → merge → Status **`done`** only when Merge Result **success** **and** `merge` ∈ Gate C approved **+ quality provenance** ([hitl.md](hitl.md)) + strongly recommended **calibration** Notes + append `_calibration.md` (lint warn) (PR-only → stay `paused`)
 
 ### Simple pipeline order
 
@@ -110,7 +110,7 @@ Skip Ideation / Gate A / skim. Prefer phase bundles.
    - **(a) Legal skip-review** — per [lenses.md](lenses.md) → Gate C **only when** Gate C test bar escape **+ provenance** met ([hitl.md](hitl.md)); Build-writes-Smoke alone is not enough → merge → **`done`** when `merge` ∈ Gate C approved **+ quality provenance**
    - **(b)** drop skip-review ([lenses.md](lenses.md)) → `code-review-phase` → `test-lite` → Gate C → **`done`** when `merge` ∈ Gate C approved **+ quality provenance** ([hitl.md](hitl.md))
    - **Else (lite)** — `code-review-phase` → `test-lite` → Gate C → **`done`** when `merge` ∈ Gate C approved **+ quality provenance** ([hitl.md](hitl.md))
-6. After Merge Result **success** **and** `merge` ∈ Gate C approved **+ quality provenance** ([hitl.md](hitl.md)) → Status **`done`** + **calibration** Notes + append `_calibration.md` (PR-only → stay `paused`)
+6. After Merge Result **success** **and** `merge` ∈ Gate C approved **+ quality provenance** ([hitl.md](hitl.md)) → Status **`done`** + strongly recommended **calibration** Notes + append `_calibration.md` (lint warn) (PR-only → stay `paused`)
 
 Pointers: [verify-and-fix.md](verify-and-fix.md) · [grill.md](grill.md) · [invariants.md](invariants.md) · [parent-next.md](parent-next.md) · [step-0.md](step-0.md) · [resume-abort.md](resume-abort.md).
 

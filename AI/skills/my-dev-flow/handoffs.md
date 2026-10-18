@@ -3,7 +3,7 @@
 Stage-scoped handoffs, Decision options shape, progress paths, and Task `description` map.  
 **This file is SoT for:** stage R/W maps · progress path / stage-id aliases · Task descriptions.  
 Artifact size caps: [size-caps.md](size-caps.md). Tiny-tweak / never invent empty `03a-api` / `03a-db`: [lenses.md](lenses.md) (do not treat this file as second SoT for that rule).  
-Templates: [artifacts/INDEX.md](artifacts/INDEX.md). Severity: [severity.md](severity.md). Paths: [skills-path.md](skills-path.md). Verify/Fix: [verify-and-fix.md](verify-and-fix.md). Parent checklist: [invariants.md](invariants.md). HITL / veto: [hitl.md](hitl.md). Pipeline order: [stages.md](stages.md).
+Templates: [artifacts/INDEX.md](artifacts/INDEX.md). Severity: [severity.md](severity.md). Paths: [skills-path.md](skills-path.md). Verify/Fix: [verify-and-fix.md](verify-and-fix.md). Launch-time checklist: [orchestrator-rules.md](orchestrator-rules.md). Decision shapes / detailed checklist body: [invariants.md](invariants.md). HITL / veto: [hitl.md](hitl.md). Pipeline order: [stages.md](stages.md).
 
 **Required for Task launch:** `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>` → prints base block + that stage’s R/W row + **Description** from the Task description map below (resolve `{my-dev-flow}` per [skills-path.md](skills-path.md); optional `--skill-root` / `--slug`). Paste script output into the Orchestrator card **Task description**.  
 `handoff-for.py --check-descriptions` → exit 1 if any R/W stage id lacks a description row.  
@@ -67,12 +67,12 @@ Severity exit per my-dev-flow/severity.md (Critical/Major block clean; defer Enh
 | Stage id | Read (under `.my-docs/workflow/<slug>/`) | Write |
 |----------|------------------------------------------|-------|
 | `ideation` | `00-run.md` | `01-idea.md` |
-| `gate-a` | `00-run.md`, `01-idea.md` | `01a-idea-ui-review.md` |
-| `ideation-update` | `00-run.md`, `01-idea.md`, `01a-idea-ui-review.md` | `01-idea.md` (+ `01a` round notes) |
-| `skim` | `00-run.md`, `01-idea.md`, `01a-idea-ui-review.md` | `02-skim.md` |
-| `analyze` | `00-run.md`, `01-idea.md`, `01a-idea-ui-review.md` (if present), `02-skim.md` (if present) | `02-analysis.md` |
+| `gate-a` | `00-run.md`, `01-idea.md` | `01a-gate-a.md` (LEGACY: `01a-idea-ui-review.md`) |
+| `ideation-update` | `00-run.md`, `01-idea.md`, `01a-gate-a.md` (or LEGACY `01a-idea-ui-review.md`) | `01-idea.md` (+ `01a` round notes) |
+| `skim` | `00-run.md`, `01-idea.md`, `01a-gate-a.md` (or LEGACY) | `02-skim.md` |
+| `analyze` | `00-run.md`, `01-idea.md`, `01a-gate-a.md` (if present), `02-skim.md` (if present) | `02-analysis.md` |
 | `grill` | `00-run.md`, `01-idea.md`, `02-skim.md` (if present), `02-analysis.md`; also repo `GLOSSARY.md` / `GLOSSARY-MAP.md` / ADR dir when present | `02b-grill.md`; may update `02-analysis.md` Settled/Design tree; may update repo `GLOSSARY.md` and/or one ADR |
-| `design` | `00-run.md`, `01-idea.md`, `01a-idea-ui-review.md` (if present), `02-skim.md` (if present), `02-analysis.md`, `02b-grill.md` (if present) | `03-design.md`, `04-tasks.md` |
+| `design` | `00-run.md`, `01-idea.md`, `01a-gate-a.md` (if present), `02-skim.md` (if present), `02-analysis.md`, `02b-grill.md` (if present) | `03-design.md`, `04-tasks.md` |
 | `design-phase` | `00-run.md`, `01-idea.md`, `01a` (if present), `02-skim.md` (if present) — **Mode simple only** | `02-analysis.md`, `02b-grill.md` (or Notes skip), `03-design.md`, `04-tasks.md` |
 | `design-review` | `00-run.md`, `01-idea.md`, `01a` (if present), `02-skim.md` (if present), `02-analysis.md`, `02b-grill.md` (if present), `03-design.md`, `04-tasks.md`, `03a-api-contract-review.md` (if Has API **and** not Notes `tiny-contract-tweak` / if present), `03a-db-design-review.md` (if Has DB **and** not Notes `tiny-contract-tweak` / if present) | `03a-design-review-log.md` |
 | `design-verify-phase` | same reads as `design-review` — **Mode simple only** | `03a-design-review-log.md` + `03a-api-contract-review.md` when Has API **and** not Notes `tiny-contract-tweak` + `03a-db-design-review.md` when Has DB **and** not Notes `tiny-contract-tweak` — **never** invent empty `03a-api` / `03a-db` |
@@ -80,10 +80,10 @@ Severity exit per my-dev-flow/severity.md (Critical/Major block clean; defer Enh
 | `db-design-review` | `00-run.md`, `02-analysis.md`, `03-design.md` (Database contracts + example queries), `04-tasks.md`, `02-skim.md` (if present), repo `AGENTS.md` / `db/schema` / migration patterns when present — stage N/A when Has DB = no or Notes `tiny-contract-tweak` | `03a-db-design-review.md` only (do not invent if skipped) |
 | `design-update` | `00-run.md`, `03a-design-review-log.md` (if present), `03a-api-contract-review.md` (if present — not Notes `tiny-contract-tweak` / skipped), `03a-db-design-review.md` (if present — not Notes `tiny-contract-tweak` / skipped), `01-idea.md`, `02-skim.md` (if present), `02-analysis.md`, `02b-grill.md` (if present), `03-design.md`, `04-tasks.md` | `03-design.md`, `04-tasks.md`, `00-run.md` Notes (backloop rounds), plus `03a*` round notes when present (no empty `03a-api` / `03a-db`) |
 | `tdd-review` | `00-run.md`, `03-design.md`, `04-tasks.md`, `03a-design-review-log.md` (if present) — **only when planned tests exist** | `04a-tdd-test-review.md` |
-| `build` | `00-run.md`, `03-design.md`, `04-tasks.md`, `04a-tdd-test-review.md` (if present), when **Has UI**: Design UI specs in `03-design` / acceptance in `04-tasks` (+ `01a-idea-ui-review.md` if present), `06-test-log.md` (create/update Smoke) — honor [hitl.md](hitl.md) · [verify-and-fix.md](verify-and-fix.md) | code + Smoke section; first line Result **verify-pass** \| **verify-fail**; stop without coding when blocked (`blocked — …`) — honor [hitl.md](hitl.md) · [verify-and-fix.md](verify-and-fix.md); parent skips Smoke Task on verify-pass |
+| `build` | `00-run.md`, `03-design.md`, `04-tasks.md`, `04a-tdd-test-review.md` (if present), when **Has UI**: Design UI specs in `03-design` / acceptance in `04-tasks` (+ `01a-gate-a.md` if present), `06-test-log.md` (create/update Smoke) — honor [hitl.md](hitl.md) · [verify-and-fix.md](verify-and-fix.md) | code + Smoke section; first line Result **verify-pass** \| **verify-fail**; stop without coding when blocked (`blocked — …`) — honor [hitl.md](hitl.md) · [verify-and-fix.md](verify-and-fix.md); parent skips Smoke Task on verify-pass |
 | `smoke` | `00-run.md`, `06-test-log.md` | `06-test-log.md` (Smoke section) — only when Smoke re-run needed |
 | `adversarial` | `00-run.md`, `04-tasks.md`, `05-review-log.md` + draft code/tests | `05-review-log.md` (Adversarial section) |
-| `quality` | `00-run.md`, `01-idea.md`, `01a-idea-ui-review.md` (if present), `03-design.md`, `04-tasks.md`, `05-review-log.md` + draft code | `05-review-log.md` (Quality section) |
+| `quality` | `00-run.md`, `01-idea.md`, `01a-gate-a.md` (if present), `03-design.md`, `04-tasks.md`, `05-review-log.md` + draft code | `05-review-log.md` (Quality section) |
 | `code-review-phase` | `00-run.md`, `01-idea.md`, `01a` (if present), `03-design.md`, `04-tasks.md`, `05-review-log.md` + draft code/tests — **Review profile lite** (alias: Lite combined) | `05-review-log.md` (Adversarial + Quality; optional single-lens notes when Lens plan has one lens) |
 | `lens-api` | `00-run.md`, `03-design.md` (API contracts), `04-tasks.md` + draft API/route/validator code | `05-lens-api.md` only |
 | `lens-db` | `00-run.md`, `03-design.md` (Database contracts + example queries), `04-tasks.md` + draft schema/migration/query code | `05-lens-db.md` only |
@@ -92,8 +92,8 @@ Severity exit per my-dev-flow/severity.md (Critical/Major block clean; defer Enh
 | `lens-memory` | `00-run.md`, `03-design.md`, `04-tasks.md` + draft code | `05-lens-memory.md` only |
 | `merge-findings` | `00-run.md`, active `05-lens-*.md` for this round, `05-review-log.md` | `05-review-log.md` (Merged lenses section) |
 | `fix-review` | `00-run.md`, `05-review-log.md` (Fix ask), `03-design.md`, `04-tasks.md` — honor [verify-and-fix.md](verify-and-fix.md) | code + fix notes; first line Result **verify-pass** \| **verify-fail** |
-| `test-full` | `00-run.md` (Verify commands), `03-design.md`, `04-tasks.md`, `06-test-log.md` — **one Task:** coverage + add missing e2e + run suite | `06-test-log.md` (Coverage + Runs + Result; **Mode last run:** `full`) |
-| `test-lite` | `00-run.md` (Verify commands), `04-tasks.md`, `06-test-log.md` | `06-test-log.md` (targeted e2e; unit if needed; **Mode last run:** `lite`) |
+| `test-full` | `00-run.md` (Verify commands), `03-design.md`, `04-tasks.md`, `06-test-log.md` — **one Task:** coverage + add missing e2e + run suite | `06-test-log.md` (Coverage + Runs + Result; **Test path last run:** `full`) |
+| `test-lite` | `00-run.md` (Verify commands), `04-tasks.md`, `06-test-log.md` | `06-test-log.md` (targeted e2e; unit if needed; **Test path last run:** `lite`) |
 | `fix-tests` | `00-run.md`, `06-test-log.md` (Fix ask), `03-design.md`, `04-tasks.md` — honor [verify-and-fix.md](verify-and-fix.md) | code; first line Result **verify-pass** \| **verify-fail** |
 | `merge` | `00-run.md`, `06-test-log.md`, `05-review-log.md` (if present), skim `03-design.md` (optional for PR risk summary); template `{my-dev-flow}/artifacts/pr-body.md` — honor [hitl.md](hitl.md) Gate C | PR body from template + merge; **refuse** commit of `.env` / `.env.*` / `*.pem` / `credentials.json` / `*secret*` ([merge.md](../my-dev-flow-merge/stages/merge.md)) |
 
@@ -125,7 +125,7 @@ Orchestrator card uses **stage ids**. Alias column is for chat only.
 |-------------------|-------|------|
 | (classify) | Step 0 | `00-run.md` (Status `running`) |
 | `ideation` | Step 1 | `01-idea.md` |
-| `gate-a` | Gate A | `01a-idea-ui-review.md` |
+| `gate-a` | Gate A | `01a-gate-a.md` |
 | `skim` | Step 1s | `02-skim.md` |
 | `analyze` / `design-phase` | Step 2 | `02-analysis.md` (+ design bundle on simple) |
 | `grill` | Step 2g | `02b-grill.md` or skip note |

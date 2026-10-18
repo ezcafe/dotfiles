@@ -6,7 +6,7 @@
 **model:** resolved Fast  
 **Task description:** `Full test suite`
 
-**Done when:** `06-test-log.md` has Coverage + Runs filled; Result **success** | **failure** and **Mode last run:** `full`.
+**Done when:** `06-test-log.md` has Coverage + Runs filled; Result **success** | **failure** and **Test path last run:** `full` (LEGACY alias **Mode last run** on resume only).
 
 **Task prompt:**
 
@@ -19,7 +19,7 @@ Read {my-dev-flow}/verify-and-fix.md for Verify commands rules.
 ### 1 — Coverage
 Read 03-design.md (success criteria, flows) and 04-tasks.md. Scan existing e2e + how to run them.
 Map each main flow → covered (file + test name) or MISSING. Note stack or “no e2e stack”.
-Write 06-test-log.md Coverage section. Mode last run: full.
+Write 06-test-log.md Coverage section. Test path last run: full.
 
 ### 2 — Add missing e2e
 If MISSING items exist **and** an e2e stack exists: add tests only for those flows using repo patterns. Do not change product behavior. If a gap cannot be automated safely, mark blocked with why.

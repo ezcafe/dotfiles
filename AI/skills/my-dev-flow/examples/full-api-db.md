@@ -18,26 +18,34 @@ Anti-patterns: [anti-patterns.md](anti-patterns.md). API/DB rules: [lenses.md](.
 - **Never** skip-review when Has API or Has DB = yes
 - **Lint (required):** `scripts/lint-run.py …` then `--before-design-review` / `--before-build`
 
+## Parent before each Task (fixed)
+
+1. Open clarity boundary when Next ∈ clarity stages ([parent-next.md](../parent-next.md)); log `clarity-check ok — <Next>`.
+2. Boundary-matched: before `analyze` / `grill` / `design` → matching token each time (a prior token does **not** unlock the next).
+3. Boundary-matched: before `build` → `clarity-check ok — build`.
+4. `python3 {my-dev-flow}/scripts/lint-run.py <run-dir> --next --derive`
+5. On handoff (exit 0): `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>`.
+
 ## Pipeline
 
 | # | Stage id | Result |
 |---|----------|--------|
 | 1 | `ideation` | `01-idea.md`; Has UI as needed |
-| 2 | `gate-a` | `01a` Result ok (auto) |
+| 2 | `gate-a` | `01a-gate-a.md` Result ok (auto) |
 | 3 | `skim` | `02-skim.md` |
-| 4 | `analyze` | `02-analysis.md`; frontier may list contract/authz choices |
-| 5 | `grill` | `02b-grill.md` frontier-empty (or skip only if frontier empty) |
-| 6 | `design` | Two options in `03-design.md` + `04-tasks.md`; Verify commands; Has API/DB **yes** |
+| 4 | `analyze` | Boundary-matched clarity + `--next --derive` + handoff → `02-analysis.md`; frontier may list contract/authz choices |
+| 5 | `grill` | Boundary-matched clarity + `--next --derive` → `02b-grill.md` frontier-empty (or skip only if frontier empty) |
+| 6 | `design` | Boundary-matched clarity + `--next --derive` → two options in `03-design.md` + `04-tasks.md`; Verify commands; Has API/DB **yes** |
 | 7 | `api-contract-review` ∥ `db-design-review` | Both `03a-*` missing → **same parent turn** (parallel); one `03a-*` exists → launch **missing only** (resume serialize — do not re-parallel); Pending parallel `api|db` → `none` when both done; both clean or Fix ask ([lenses.md](../lenses.md)) |
 | 8 | `design-review` | General clean (after isolated clean); Deferred Enhancements OK |
 | 9 | (04a) | Only if `04-tasks` lists concrete tests; else skip Notes |
 | 10 | Gate B | **blocking** required as default (Mode **full** — never async-notify default; [hitl.md](../hitl.md) Default Gate B narrow async); on approve set `Gate B approved: yes` (or named pick) + `Gate B veto: none` **+** Notes `- provenance — gate-b-approved — user: "yes go build"` ([hitl.md](../hitl.md) Provenance) |
-| 11 | `build` | Veto check → TDD → verify-pass → Smoke section |
+| 11 | `build` | Boundary-matched clarity + `--next --derive` + handoff → veto check → TDD → verify-pass → Smoke section |
 | 12 | Smoke Task | **skipped** (Build-writes-Smoke) |
 | 13 | Lens plan | Set `api+db` (+ **security** when authz/PII in scope) |
 | 14 | `adversarial` → `quality` | Separate Tasks; clean |
 | 15 | `lens-api` ∥ `lens-db` (∥ `lens-security` if planned) | Parallel when 2+ → `merge-findings` |
-| 16 | `test-full` | One Task; Result **success** |
+| 16 | `test-full` | One Task; Result **success** (**Test path last run:** `full`) |
 | 17 | Gate C | blocking — user names commit / push / PR / merge; set `Gate C approved: commit,push,pr,merge` **+** Notes `- provenance — gate-c-approved — user: "commit push PR and merge"` ([hitl.md](../hitl.md) Provenance) |
 | 18 | `merge` | Only approved actions; Status **`done`** only when Result **success** **and** `merge` ∈ Gate C approved (PR-only / commit-only → stay **paused**) + calibration Notes (≤3) + append same ≤3 lines to `_calibration.md` ([stages.md](../stages.md) Done criteria) |
 
@@ -48,7 +56,7 @@ If the change is **one field / one column / one validator**, no new auth/PII/cro
 ## Parent habits
 
 - After each step: ≤5 lines + path; update Orchestrator card
-- Pre-launch: [invariants.md](../invariants.md) checklist; **required** `scripts/handoff-for.py <stage-id>`
+- Pre-launch: **Parent before each Task** block above · [orchestrator-rules.md](../orchestrator-rules.md) (Decision shapes → [invariants.md](../invariants.md))
 - Never commit without Gate C yes
 - On design invalid after Build → [failure-playbook.md](../failure-playbook.md) design-backloop
 - Pipeline SoT: [stages.md](../stages.md) Full pipeline order
