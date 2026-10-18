@@ -44,12 +44,13 @@ Rules:
 - Simple plain words.
 - Do not edit 01–04 or 03a-design-review-log.md. Do not write production code.
 - Do not run the general design review or API contract review — those are separate Tasks.
+- Re-entry: do **not** invent or bump **Round** — parent increments before re-launch (`{my-dev-flow}/parent-next.md` · `{my-dev-flow}/invariants.md`).
 
 Return FIRST LINE exactly: Result: clean | needs update | skipped
 Then short summary + path to 03a-db-design-review.md ({my-dev-flow}/results.md).
 ```
 
-**If needs update:** parent may run design Update for DB Fix ask items, then re-run this stage before or with general design review (re-run isolated only when present and not tiny-tweak).
+**If needs update:** parent may run design Update for DB Fix ask items, then **parent bumps Round** and re-runs this stage before or with general design review (re-run isolated only when present and not tiny-tweak). Max 3 → Decision N (`{my-dev-flow}/invariants.md`).
 
 **If Has DB = no:** skip this stage — Notes skip only; **never** invent an empty `03a-db-design-review.md`.
 

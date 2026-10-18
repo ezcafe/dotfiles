@@ -9,12 +9,14 @@ import re
 from pathlib import Path
 
 from lint_common import (
+    ASYNC_NOTIFY_REQUESTED_RE,
     BUILD_ARMED_RE,
     CARD_NEXT_RE,
     DESIGN_BACKLOOP_RE,
     DESIGN_BACKLOOP_RECOVERY_STAGES,
     GATE_B_APPROVED_RE,
     HAS_API_LINE_RE,
+    HAS_AUTH_LINE_RE,
     HAS_DB_LINE_RE,
     HITL_GATE_B_RE,
     Issue,
@@ -31,6 +33,7 @@ from lint_common import (
     _looks_like_template,
     _notes_blob,
     _parsed_yes_no,
+    _provenance_quote_ok,
     _read_async_gap_sidecar,
     _run_log_blob,
     _run_log_timestamped_entries,
@@ -155,10 +158,41 @@ def _parse_hitl_gate_b(text: str) -> str | None:
     if first in VALID_HITL_TIER:
         return first
     return None
+def _async_notify_requested_ok(text: str) -> bool:
+    """True when Notes have quality ``async-notify requested — user: "…"`` (E4)."""
+    blob = _notes_blob(text) + "\n" + _run_log_blob(text)
+    for m in ASYNC_NOTIFY_REQUESTED_RE.finditer(blob):
+        if _provenance_quote_ok(m.group("quote")):
+            return True
+    return False
+
+
+def _check_async_notify_requested(text: str, issues: list[Issue]) -> None:
+    """HITL Gate B async-notify requires explicit user request Notes (E4).
+
+    Template seeds HITL Gate B **auto**. Switching to async-notify needs
+    ``async-notify requested — user: "<quote ≥12, non-filler>"`` (shape only —
+    not chat-proof).
+    """
+    if _parse_hitl_gate_b(text) != "async-notify":
+        return
+    if _async_notify_requested_ok(text):
+        return
+    issues.append(
+        Issue(
+            "error",
+            "HITL Gate B async-notify without Notes "
+            '`async-notify requested — user: "<quote ≥12 chars>"` — '
+            "seed defaults to auto; only set async-notify after user asks "
+            "for a veto window (hitl-gate-b.md · E4)",
+        )
+    )
+
+
 def _check_hitl_gate_b_mode(
     text: str, issues: list[Issue], mode_token: str | None
 ) -> None:
-    """Mode full / simple+API/DB must use blocking Gate B (hitl.md)."""
+    """Mode full / simple+API/DB/auth must use blocking Gate B (hitl-gate-b.md)."""
     tier = _parse_hitl_gate_b(text)
     if tier is None:
         return
@@ -167,21 +201,29 @@ def _check_hitl_gate_b_mode(
             Issue(
                 "error",
                 f"Mode full + HITL Gate B {tier!r} is forbidden — "
-                "use blocking (hitl.md Default Gate B narrow async)",
+                "use blocking (hitl-gate-b.md Default Gate B narrow async)",
             )
         )
         return
     if mode_token == "simple" and tier in ("auto", "async-notify"):
         has_api = _parsed_yes_no(text, HAS_API_LINE_RE)
         has_db = _parsed_yes_no(text, HAS_DB_LINE_RE)
-        if has_api == "yes" or has_db == "yes":
+        has_auth = _parsed_yes_no(text, HAS_AUTH_LINE_RE)
+        if has_api == "yes" or has_db == "yes" or has_auth == "yes":
+            parts: list[str] = []
+            if has_api == "yes" or has_db == "yes":
+                parts.append("Has API/DB yes")
+            if has_auth == "yes":
+                parts.append("Has auth/PII/schema yes")
+            which = " + ".join(parts)
             issues.append(
                 Issue(
                     "error",
-                    "Mode simple + Has API/DB yes + non-blocking HITL Gate B — "
-                    "use blocking (hitl.md Default Gate B narrow async)",
+                    f"Mode simple + {which} + non-blocking HITL Gate B — "
+                    "use blocking (hitl-gate-b.md Default Gate B narrow async)",
                 )
             )
+    _check_async_notify_requested(text, issues)
 def _async_turn_gap_ok(text: str, run_dir: Path | None = None) -> bool:
     """True when async arm evidence meets turn-boundary bar (hitl.md · S2).
 

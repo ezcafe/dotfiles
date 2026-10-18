@@ -6,7 +6,9 @@ stage-id checks. Policy SoT: hitl.md · stages.md · parent-next.md · invariant
 from __future__ import annotations
 
 import datetime as _dt
+import json
 import re
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -26,6 +28,38 @@ SUBFLOW_DIRS = (
     SKILLS_ROOT / "my-dev-flow-merge",
 )
 SOFT_MAIN_THREAD_CAP = 3
+MAX_ROUND_CAP = 3
+ROUND_HEADER_RE = re.compile(r"^\*\*Round:\*\*\s*(\d+)\s*$", re.M | re.I)
+VERIFY_ATTEMPTS_RE = re.compile(
+    r"^\*\*Verify attempts:\*\*\s*(\d+)\s*$", re.M | re.I
+)
+TEST_FIX_ROUNDS_RE = re.compile(
+    r"(?i)smoke↔fix\s*/\s*test↔fix\s*rounds:\s*(\d+)"
+)
+# Match ONLY "review fix rounds:" — never design-review rounds (H1)
+REVIEW_FIX_ROUNDS_RE = re.compile(
+    r"(?i)review\s+fix\s+rounds:\s*(\d+)"
+)
+# Decision N raise-cap unlock (invariants.md · M2)
+# Shape: max-round-cap — <domain> — <N> — user: "…"
+MAX_ROUND_CAP_DOMAINS = frozenset(
+    {
+        "design-review",
+        "gate-a",
+        "verify",
+        "review-fix",
+        "test-fix",
+    }
+)
+MAX_ROUND_CAP_RE = re.compile(
+    r"(?im)(?:^|\n)\s*[-*]?\s*`?max-round-cap`?\s*[—–-]\s*"
+    r"(?P<domain>design-review|gate-a|verify|review-fix|test-fix)"
+    r"\s*[—–-]\s*(?P<n>\d+)\s*[—–-]\s*"
+    r"user:\s*\"(?P<quote>[^\"]+)\""
+)
+FIX_ASK_SECTION_RE = re.compile(
+    r"(?im)^##\s*Fix ask\b",
+)
 
 VALID_STATUS = frozenset({"running", "paused", "stopped", "done"})
 VALID_MODE = frozenset({"simple", "full"})
@@ -53,6 +87,27 @@ FULL_ONLY_STAGES = frozenset(
     }
 )
 CODE_REVIEW_ENTRY_STAGES = frozenset({"adversarial", "code-review-phase"})
+# Mode full + profile full E1: independent Smoke before these (verify-and-fix.md)
+# fix-tests: fail-closed when Build smoke-pass unpaid; smoke-fail→Fix exempt
+# (lint_core · _check_smoke_pass_before_post_smoke / jump-ahead exception)
+FULL_PROFILE_E1_GATE_STAGES = frozenset(
+    {
+        "adversarial",
+        "quality",
+        "code-review-phase",
+        "fix-review",
+        "merge-findings",
+        "lens-security",
+        "lens-perf",
+        "lens-memory",
+        "lens-api",
+        "lens-db",
+        "test-full",
+        "fix-tests",
+        "merge",
+        "gate-c",
+    }
+)
 # --before-design-review auto when card Next ∈ this set (MDF-R1)
 DESIGN_REVIEW_PHASE_STAGES = frozenset(
     {
@@ -153,6 +208,9 @@ PENDING_PARALLEL_RE = re.compile(
 )
 HAS_API_LINE_RE = re.compile(r"^[-*]?\s*\*\*Has API:\*\*\s*(.+)$", re.M | re.I)
 HAS_DB_LINE_RE = re.compile(r"^[-*]?\s*\*\*Has DB:\*\*\s*(.+)$", re.M | re.I)
+HAS_AUTH_LINE_RE = re.compile(
+    r"^[-*]?\s*\*\*Has auth/PII/schema:\*\*\s*(.+)$", re.M | re.I
+)
 HITL_GATE_B_RE = re.compile(r"^[-*]?\s*\*\*HITL Gate B:\*\*\s*(.+)$", re.M | re.I)
 GATE_B_APPROVED_RE = re.compile(
     r"^[-*]?\s*\*\*Gate B approved:\*\*\s*(.+)$", re.M | re.I
@@ -171,6 +229,10 @@ SMOKE_RERUN_DONE_RE = re.compile(
     r"(?i)smoke-pass\s*\(\s*re-?run\s*\)|"
     r"smoke\s+re-?run\s+(?:done|pass|ok|complete)|"
     r"independent\s+smoke\s+(?:pass|ok|done)"
+)
+# Run log: - **HH:MM** · status · smoke · note (stage column = smoke)
+RUN_LOG_SMOKE_STAGE_RE = re.compile(
+    r"(?im)^\s*[-*]\s*\*\*\d{1,2}:\d{2}(?::\d{2})?\*\*\s*·\s*[^\n·]+·\s*smoke\s*·"
 )
 FOLD_API_DB_RE = re.compile(
     r"(?i)(?:fold|folded).{0,40}(?:api|db|contract)|"
@@ -343,6 +405,27 @@ ASYNC_GAP_PENDING_RE = re.compile(
     r"(\d{1,2}:\d{2}(?::\d{2})?)"
 )
 ASYNC_GAP_SIDECAR = ".lint-async-gap"
+CONSENT_SNAP_SIDECAR = ".lint-consent-snap"
+# Parent Run-log ack when consent fields change after a Task (hitl.md · M1)
+PARENT_CONSENT_WRITE_RE = re.compile(
+    r"(?i)\bparent\s+consent\s+write\b"
+)
+# Mode simple async-notify requires explicit user request (hitl-gate-b.md · E4)
+ASYNC_NOTIFY_REQUESTED_RE = re.compile(
+    r"(?im)(?:^|\n)\s*[-*]?\s*`?async-notify\s+requested`?\s*[—–-]\s*"
+    r"user:\s*\"(?P<quote>[^\"]+)\""
+)
+# Optional parent-only consent scratchpad (Tasks never Write) — hitl.md · H1
+CONSENT_SIDECAR = ".consent.md"
+FIX_REVIEW_RUN_LOG_RE = re.compile(
+    r"(?i)·\s*(?:done|running|paused)\s*·\s*fix-review\b"
+)
+REVIEW_RESULT_RANK = {
+    "needs fix": 3,
+    "has findings": 3,
+    "pending": 2,
+    "clean": 1,
+}
 # Run log line: - **HH:MM** · status · stage · note
 RUN_LOG_ENTRY_RE = re.compile(
     r"(?im)^\s*[-*]\s*\*\*(\d{1,2}:\d{2}(?::\d{2})?)\*\*\s*·\s*[^\n·]+·\s*[^\n·]+·\s*(.+)$"
@@ -430,6 +513,50 @@ LENS_JUMP_AHEAD_CARDS = frozenset(
         "lens-api",
         "lens-db",
         "merge-findings",
+    }
+)
+# H1: verify-fail + Last stage post-Build → Fix / same-stage (not build)
+# smoke/test-* → fix-tests; review pipeline → fix-review; already fix-* → same
+VERIFY_FAIL_FIX_TESTS_STAGES = frozenset(
+    {"smoke", "test-lite", "test-full", "fix-tests"}
+)
+VERIFY_FAIL_FIX_REVIEW_STAGES = frozenset(
+    {
+        "adversarial",
+        "quality",
+        "code-review-phase",
+        "lens-security",
+        "lens-perf",
+        "lens-memory",
+        "lens-api",
+        "lens-db",
+        "merge-findings",
+        "fix-review",
+    }
+)
+# Jump-ahead while Smoke unpaid (derived=smoke) → unsafe (M1 · same class as merge)
+# Derive returns fix-tests on smoke-fail|failure (incl. skip-review) until Last
+# stage=fix-tests + verify-pass → re-smoke. JUMP_AHEAD allows Next=fix-tests
+# on smoke-fail ONLY when Last stage ≠ fix-tests (before Fix unlock). After Fix
+# verify-pass, derived=smoke|test-* + Next=fix-tests → unsafe do-not-launch.
+# Unpaid/missing → derived=smoke (or build under skip-review) blocks fix-tests.
+# gate-c vs derived=smoke fail-closed (E1).
+JUMP_AHEAD_FROM_SMOKE = frozenset(
+    {
+        "adversarial",
+        "quality",
+        "code-review-phase",
+        "lens-security",
+        "lens-perf",
+        "lens-memory",
+        "lens-api",
+        "lens-db",
+        "merge-findings",
+        "fix-review",
+        "test-full",
+        "test-lite",
+        "fix-tests",
+        "gate-c",
     }
 )
 # Review entry (Adv / lite combined) — smoke / fix-tests blocked unless Notes (T2)
@@ -693,6 +820,229 @@ def _write_async_gap_sidecar(run_dir: Path | None, digest_ts: str) -> None:
     path.write_text(f"{digest_ts.strip()}\n", encoding="utf-8")
 
 
+def _consent_fingerprint(text: str) -> dict[str, object]:
+    """Stable fingerprint of parent-only consent / waiver fields (hitl.md · M1)."""
+    notes = _notes_blob(text)
+    run_log = _run_log_blob(text)
+    notes_and_log = notes + "\n" + run_log
+    gate_b_m = GATE_B_APPROVED_RE.search(text)
+    gate_c_m = GATE_C_APPROVED_RE.search(text)
+    gate_b = (
+        _first_token(gate_b_m.group(1)) if gate_b_m else ""
+    )
+    gate_c = (
+        gate_c_m.group(1).strip() if gate_c_m else ""
+    )
+    build_armed = bool(BUILD_ARMED_RE.search(notes_and_log))
+    waivers: list[str] = []
+    if GATE_C_TEST_OVERRIDE_RE.search(notes):
+        waivers.append("gate-c-test-override")
+    if SMOKE_WAIVE_RE.search(notes):
+        waivers.append("smoke-waive")
+    cm = COMPLEXITY_RE.search(text)
+    if DOCS_ONLY_RE.search(notes) or (
+        cm is not None and DOCS_ONLY_RE.search(cm.group(1))
+    ):
+        waivers.append("docs-only")
+    # Notes section only — Run-log DONE alone must not flip the fingerprint
+    if SMOKE_RERUN_DONE_RE.search(notes):
+        waivers.append("smoke-pass-rerun")
+    if CARD_OVERRIDE_RE.search(notes):
+        waivers.append("card-override")
+    # Count occurrences for change detection (line may repeat)
+    ack_count = len(PARENT_CONSENT_WRITE_RE.findall(run_log))
+    return {
+        "gate_b_approved": gate_b.lower(),
+        "gate_c_approved": gate_c.lower(),
+        "build_armed": build_armed,
+        "provenance_kinds": sorted(_provenance_kinds(text)),
+        "waivers": sorted(waivers),
+        "parent_consent_ack_count": ack_count,
+    }
+
+
+def _consent_fields_changed(
+    before: dict[str, object], after: dict[str, object]
+) -> bool:
+    """True when Gate B/C / Build armed / provenance / waivers differ."""
+    keys = (
+        "gate_b_approved",
+        "gate_c_approved",
+        "build_armed",
+        "provenance_kinds",
+        "waivers",
+    )
+    return any(before.get(k) != after.get(k) for k in keys)
+
+
+def _consent_snap_path(run_dir: Path | None) -> Path | None:
+    if run_dir is None:
+        return None
+    return run_dir / CONSENT_SNAP_SIDECAR
+
+
+def snapshot_consent(run_dir: Path) -> int:
+    """Write ``.lint-consent-snap`` before Task launch. Exit 0 on success."""
+    run_md = run_dir / "00-run.md"
+    if not run_md.is_file():
+        print(f"error: missing {run_md}", file=sys.stderr)
+        return 2
+    text = run_md.read_text(encoding="utf-8")
+    fp = _consent_fingerprint(text)
+    path = _consent_snap_path(run_dir)
+    assert path is not None
+    path.write_text(json.dumps(fp, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    print(f"consent-snap: wrote {path.name}")
+    return 0
+
+
+def check_consent_writes(
+    run_dir: Path, *, require_snap: bool = True
+) -> list[Issue]:
+    """Error if consent fields changed since snap without parent Run-log ack.
+
+    Habit: ``--snapshot-consent`` before Task; ``--check-consent-writes`` after.
+    Machine path (``--next`` / ``--before-build`` / ``--before-merge``): call with
+    ``require_snap=False`` so missing snap is a no-op; dirty snap still errors.
+    Residual: a Task can still forge both fields and a fake Run-log ack —
+    raises cost only (hitl.md).
+    """
+    issues: list[Issue] = []
+    path = _consent_snap_path(run_dir)
+    run_md = run_dir / "00-run.md"
+    if path is None or not path.is_file():
+        if require_snap:
+            issues.append(
+                Issue(
+                    "error",
+                    "missing .lint-consent-snap — run --snapshot-consent before Task "
+                    "(hitl.md Parent-only consent · M1)",
+                )
+            )
+        return issues
+    if not run_md.is_file():
+        if require_snap:
+            issues.append(Issue("error", f"missing {run_md.name} for consent check"))
+        return issues
+    try:
+        before = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        issues.append(
+            Issue("error", f"unreadable .lint-consent-snap: {exc}")
+        )
+        return issues
+    text = run_md.read_text(encoding="utf-8")
+    after = _consent_fingerprint(text)
+    if not _consent_fields_changed(before, after):
+        return issues
+    before_acks = int(before.get("parent_consent_ack_count") or 0)
+    after_acks = int(after.get("parent_consent_ack_count") or 0)
+    if after_acks > before_acks:
+        return issues
+    issues.append(
+        Issue(
+            "error",
+            "consent fields changed since --snapshot-consent without new Run log "
+            "`parent consent write` line — parent must record Gate B/C / Build "
+            "armed / provenance / waivers (never from Task returns) (hitl.md · M1)",
+        )
+    )
+    return issues
+
+
+def _parse_last_verify_pass_at(text: str) -> float | None:
+    """Unix timestamp from **Last verify-pass at:** ISO-8601, or None."""
+    m = LAST_VERIFY_PASS_AT_RE.search(text)
+    if not m:
+        return None
+    raw = m.group(1).strip().strip("`*")
+    if not raw or _looks_like_template(raw):
+        return None
+    token = _first_token(raw).lower()
+    if token in ("none", "n/a", "-", "—", "pending"):
+        return None
+    # Allow trailing notes after ISO (e.g. "2026-10-18T12:00:00Z — rebuild")
+    iso = raw.split()[0] if raw.split() else raw
+    try:
+        dt = _dt.datetime.fromisoformat(iso.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=_dt.timezone.utc)
+    return dt.timestamp()
+
+
+def _artifact_mtime(run_dir: Path | None, name: str) -> float | None:
+    if run_dir is None:
+        return None
+    path = run_dir / name
+    if not path.is_file():
+        return None
+    try:
+        return path.stat().st_mtime
+    except OSError:
+        return None
+
+
+def _run_log_has_smoke_stage(text: str) -> bool:
+    """True when Run log has a line with stage column ``smoke``."""
+    return bool(RUN_LOG_SMOKE_STAGE_RE.search(_run_log_blob(text)))
+
+
+def _smoke_section_after_verify_pass(
+    text: str, run_dir: Path | None
+) -> bool:
+    """True when 06 Smoke result is smoke-pass and mtime > Last verify-pass at."""
+    if run_dir is None:
+        return False
+    blob = _read_artifact(run_dir, "06-test-log.md")
+    if not blob:
+        return False
+    m = SMOKE_RESULT_RE.search(blob)
+    ok = bool(m and _first_token(m.group(1)) == "smoke-pass")
+    if not ok:
+        ok = _parse_result_token(blob) == "smoke-pass"
+    if not ok:
+        return False
+    epoch = _parse_last_verify_pass_at(text)
+    if epoch is None:
+        return False
+    mt = _artifact_mtime(run_dir, "06-test-log.md")
+    if mt is None:
+        return False
+    return mt > epoch
+
+
+def _full_profile_independent_smoke(
+    text: str, run_dir: Path | None = None
+) -> bool:
+    """True when Notes show smoke-pass (re-run) **and** Smoke-stage evidence.
+
+    Mode full + Review profile full (verify-and-fix.md E1):
+
+    1. Notes section must contain ``smoke-pass (re-run)`` (or equivalent).
+       Do **not** accept the token anywhere else in ``00-run.md`` (Run log
+       alone is forgeable).
+    2. Separate Smoke-stage evidence (must **not** be satisfied solely by the
+       same Notes/DONE line):
+
+       - Run log line with stage ``smoke``, and/or
+       - ``06-test-log.md`` Smoke section mtime after **Last verify-pass at**
+         with Result smoke-pass
+
+    Provenance is **not** required here (provenance is the skip-review Gate C
+    escape — Mode full never uses skip-review).
+    """
+    notes = _notes_blob(text)
+    if not SMOKE_RERUN_DONE_RE.search(notes):
+        return False
+    if _run_log_has_smoke_stage(text):
+        return True
+    if _smoke_section_after_verify_pass(text, run_dir):
+        return True
+    return False
+
+
 def _run_log_timestamped_entries(text: str) -> list[tuple[str, str]]:
     """Return [(HH:MM, note), ...] from Run log (machine-checkable turn sep)."""
     blob = _run_log_blob(text)
@@ -787,6 +1137,267 @@ def _parse_result_token(blob: str) -> str | None:
     if token in ("", "none", "n/a", "-", "—"):
         return None
     return token
+
+
+def _parse_round(blob: str) -> int | None:
+    """Parse **Round:** N from an artifact body.
+
+    Prefer a top-of-file Round (before the first ``##``) so multi-section
+    ``05-review-log.md`` is reliable (invariants.md · M2). Fall back to the
+    first ``**Round:**`` anywhere in the file.
+    """
+    if not blob:
+        return None
+    top = blob.split("\n## ", 1)[0]
+    m = ROUND_HEADER_RE.search(top)
+    if m:
+        return int(m.group(1))
+    m = ROUND_HEADER_RE.search(blob)
+    if not m:
+        return None
+    return int(m.group(1))
+
+
+def _parse_review_overall_result(blob: str) -> str | None:
+    """Overall / worst-section Result for multi-section ``05-review-log.md``.
+
+    Prefer top-level Result (before first ``##``). Else take the worst among
+    section Results (``needs fix`` / ``has findings`` > ``pending`` > ``clean``).
+    """
+    if not blob:
+        return None
+    top = blob.split("\n## ", 1)[0]
+    top_r = _parse_result_token(top)
+    section_results: list[str] = []
+    for m in re.finditer(
+        r"(?ims)^##[^\n]+\n(.*?)(?=^## |\Z)", blob
+    ):
+        tok = _parse_result_token(m.group(1))
+        if tok:
+            section_results.append(tok)
+    candidates = [t for t in ([top_r] if top_r else []) + section_results if t]
+    if not candidates:
+        # Legacy single Result anywhere in file
+        return _parse_result_token(blob)
+    return max(
+        candidates,
+        key=lambda t: REVIEW_RESULT_RANK.get(t, 0),
+    )
+
+
+def _count_fix_review_cycles(text: str) -> int:
+    """Count ``fix-review`` stage lines in Run log (max-round fallback · M2)."""
+    return len(FIX_REVIEW_RUN_LOG_RE.findall(_run_log_blob(text)))
+
+
+def _count_run_log_stage_cycles(text: str, stage_id: str) -> int:
+    """Count Run log lines whose stage column matches ``stage_id``."""
+    if not stage_id:
+        return 0
+    pat = re.compile(
+        rf"(?im)·\s*(?:done|running|paused)\s*·\s*{re.escape(stage_id)}\b"
+    )
+    return len(pat.findall(_run_log_blob(text)))
+
+
+# Stage id → artifact for Round-stuck-at-1 warn (invariants.md · M3)
+_ROUND_STUCK_CHECKS: tuple[tuple[str, str], ...] = (
+    ("design-review", "03a-design-review-log.md"),
+    ("design-verify-phase", "03a-design-review-log.md"),
+    ("api-contract-review", "03a-api-contract-review.md"),
+    ("db-design-review", "03a-db-design-review.md"),
+)
+
+
+def _round_stuck_at_one_warns(text: str, run_dir: Path | None) -> list[str]:
+    """Warn when ≥3 same-stage Run-log cycles but artifact Round still 1.
+
+    Cheap habit check — does not block. Parent must bump Round on re-entry
+    so max-round lint can fire (invariants.md).
+    """
+    if run_dir is None:
+        return []
+    msgs: list[str] = []
+    warned_artifacts: set[str] = set()
+    for stage_id, artifact in _ROUND_STUCK_CHECKS:
+        cycles = _count_run_log_stage_cycles(text, stage_id)
+        if cycles < MAX_ROUND_CAP:
+            continue
+        if artifact in warned_artifacts:
+            continue
+        blob = _read_artifact(run_dir, artifact)
+        if not blob:
+            continue
+        if _parse_round(blob) == 1:
+            msgs.append(
+                f"Run log has ≥{MAX_ROUND_CAP} `{stage_id}` cycles but "
+                f"{artifact} Round still 1 — bump Round on re-entry "
+                "(invariants.md)"
+            )
+            warned_artifacts.add(artifact)
+    ga_cycles = _count_run_log_stage_cycles(text, "gate-a")
+    if ga_cycles >= MAX_ROUND_CAP:
+        ga = _read_gate_a_artifact(run_dir)
+        if ga and _parse_round(ga) == 1:
+            msgs.append(
+                f"Run log has ≥{MAX_ROUND_CAP} `gate-a` cycles but 01a "
+                "Round still 1 — bump Round on re-entry (invariants.md)"
+            )
+    return msgs
+
+
+def _parse_verify_attempts(text: str) -> int | None:
+    m = VERIFY_ATTEMPTS_RE.search(text)
+    if not m:
+        return None
+    return int(m.group(1))
+
+
+def _raised_max_round_cap(text: str, domain: str) -> int | None:
+    """Return raised cap N for domain when Notes have quality max-round-cap.
+
+    Shape (invariants.md): ``max-round-cap — <domain> — <N> — user: "…"``
+    Quote quality matches provenance (≥12 chars, non-filler). Lint checks
+    shape only — parent habit binds the quote to the latest user message.
+    """
+    if domain not in MAX_ROUND_CAP_DOMAINS:
+        return None
+    best: int | None = None
+    for m in MAX_ROUND_CAP_RE.finditer(text):
+        if m.group("domain").lower() != domain:
+            continue
+        if not _provenance_quote_ok(m.group("quote")):
+            continue
+        n = int(m.group("n"))
+        if n < MAX_ROUND_CAP:
+            continue
+        if best is None or n > best:
+            best = n
+    return best
+
+
+def _effective_max_round(text: str, domain: str) -> int:
+    """Default MAX_ROUND_CAP, or raised N from max-round-cap Notes."""
+    raised = _raised_max_round_cap(text, domain)
+    return raised if raised is not None else MAX_ROUND_CAP
+
+
+def _max_round_block_reason(text: str, run_dir: Path | None) -> str | None:
+    """Return Decision N reason when a max-round cap is hit (invariants.md).
+
+    Parent must increment Round / Run metrics after each cycle so this can fire.
+    Notes ``max-round-cap — <domain> — <N> — user: "…"`` raises the effective
+    cap for that domain (M2).
+    """
+    if run_dir is None:
+        return None
+
+    # design-review / design-verify: Round ≥ cap + needs update
+    design_blob = _read_artifact(run_dir, "03a-design-review-log.md")
+    if design_blob:
+        d_round = _parse_round(design_blob)
+        d_result = _parse_result_token(design_blob)
+        d_cap = _effective_max_round(text, "design-review")
+        if (
+            d_round is not None
+            and d_round >= d_cap
+            and d_result == "needs update"
+        ):
+            return (
+                f"design-review Round {d_round} >= {d_cap} with "
+                "Result needs update — Decision N (invariants.md)"
+            )
+
+    # Gate A: Round ≥ cap + non-ok
+    gate_a = _read_gate_a_artifact(run_dir)
+    if gate_a:
+        ga_round = _parse_round(gate_a)
+        ga_result = _parse_result_token(gate_a)
+        ga_cap = _effective_max_round(text, "gate-a")
+        if (
+            ga_round is not None
+            and ga_round >= ga_cap
+            and ga_result is not None
+            and ga_result != "ok"
+        ):
+            return (
+                f"Gate A Round {ga_round} >= {ga_cap} with Result "
+                f"{ga_result} — Decision N (invariants.md)"
+            )
+
+    # Verify attempts ≥ cap + verify-fail
+    attempts = _parse_verify_attempts(text)
+    last_m = REQUIRED_FIELD_PATTERNS["Last Verify"].search(text)
+    last_verify = _first_token(last_m.group(1)) if last_m else ""
+    v_cap = _effective_max_round(text, "verify")
+    if (
+        attempts is not None
+        and attempts >= v_cap
+        and last_verify == "verify-fail"
+    ):
+        return (
+            f"Verify attempts {attempts} >= {v_cap} with "
+            "verify-fail — Decision N (invariants.md)"
+        )
+
+    # review Fix: Round ≥ cap on 05 with not clean, or metrics, or Run log
+    # cycles when Round missing (metrics key is "review fix rounds" only —
+    # not design-review rounds). Result = overall / worst-section (M2).
+    review_blob = _read_artifact(run_dir, "05-review-log.md")
+    r_cap = _effective_max_round(text, "review-fix")
+    if review_blob:
+        r_round = _parse_round(review_blob)
+        r_result = _parse_review_overall_result(review_blob)
+        not_clean = r_result is not None and r_result != "clean"
+        if r_round is not None and r_round >= r_cap and not_clean:
+            return (
+                f"review Round {r_round} >= {r_cap} "
+                f"(Result {r_result}) — Decision N (invariants.md)"
+            )
+        # Round missing: count fix-review cycles from Run log when feasible
+        if r_round is None and not_clean:
+            cycles = _count_fix_review_cycles(text)
+            if cycles >= r_cap:
+                return (
+                    f"review fix-review Run log cycles {cycles} >= {r_cap} "
+                    "(Round missing on 05) — Decision N (invariants.md)"
+                )
+    m_rev = REVIEW_FIX_ROUNDS_RE.search(text)
+    if m_rev:
+        if int(m_rev.group(1)) >= r_cap:
+            return (
+                f"review fix rounds {m_rev.group(1)} >= {r_cap} — "
+                "Decision N (invariants.md)"
+            )
+
+    # test↔fix: Round ≥ cap on 06 with not success, or metrics
+    test_blob = _read_artifact(run_dir, "06-test-log.md")
+    if test_blob:
+        t_round = _parse_round(test_blob)
+        t_result = _parse_result_token(test_blob)
+        t_cap = _effective_max_round(text, "test-fix")
+        if (
+            t_round is not None
+            and t_round >= t_cap
+            and t_result is not None
+            and t_result not in ("success", "smoke-pass", "pending")
+        ):
+            return (
+                f"test Round {t_round} >= {t_cap} "
+                f"(Result {t_result}) — Decision N (invariants.md)"
+            )
+    m_tf = TEST_FIX_ROUNDS_RE.search(text)
+    if m_tf:
+        t_cap = _effective_max_round(text, "test-fix")
+        if int(m_tf.group(1)) >= t_cap:
+            return (
+                f"test↔fix rounds {m_tf.group(1)} >= {t_cap} — "
+                "Decision N (invariants.md)"
+            )
+
+    return None
+
+
 def _read_artifact(run_dir: Path | None, name: str) -> str:
     if run_dir is None:
         return ""

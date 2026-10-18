@@ -29,6 +29,7 @@ If Has DB = no: Notes skip only — do not invent an empty DB file. Treat as **s
 
 ### Always
 Write 03a-design-review-log.md using the general design-review checklist from stage design-review (gaps, System design, patterns, OWASP light). If API/DB isolated files exist, do not deep-duplicate those checks — point to them. Overall clean only if API/DB are **clean|skipped** (skipped = Has no, or Notes `tiny-contract-tweak`) AND this log has zero Critical/Major ({my-dev-flow}/severity.md).
+On re-entry after Update: do **not** invent or bump **Round** — parent increments before re-launch (`{my-dev-flow}/parent-next.md` · `{my-dev-flow}/invariants.md`).
 
 ### If Has UI = yes (Mode simple — thin UI-alignment; not full Gate A)
 In the general log, add a short **UI alignment** subsection (fail Major on drift):
@@ -41,6 +42,6 @@ Return FIRST LINE exactly: Result: clean | needs update
 Then short summary + paths to 03a files written ({my-dev-flow}/results.md).
 ```
 
-**After:** needs update → design Update → re-run this stage (max 3 → Decision N in `{my-dev-flow}/invariants.md`). Clean → TDD / Gate B path.
+**After:** needs update → design Update → **parent bumps Round** (+ Run metrics) before re-launch ([parent-next.md](../../my-dev-flow/parent-next.md)) → re-run this stage (max 3 → Decision N in `{my-dev-flow}/invariants.md`). Clean → TDD / Gate B → Build verify-pass + Smoke section → then Smoke per [stages.md](../../my-dev-flow/stages.md) Mode × Review profile / [verify-and-fix.md](../../my-dev-flow/verify-and-fix.md) E1 independent Smoke (Mode simple usually skips independent Smoke; do **not** invent a blanket skip for Mode full + profile full).
 
 ---

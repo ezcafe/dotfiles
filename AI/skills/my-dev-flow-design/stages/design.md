@@ -32,11 +32,12 @@ Write 04-tasks.md: S/M tasks with acceptance + TDD test notes when tests are nee
 Ask: “Is this design clear? Which option do you approve? Any concerns before build?”
 Confirm **Has API** yes/no (public HTTP/GraphQL/server-action/contracts changed?).
 Confirm **Has DB** yes/no (schema / migrations / persistence queries changed?).
+Confirm **Has auth/PII/schema** yes/no (auth, PII handling, or schema trust-boundary in scope?).
 No production code.
-Return: options summary + Recommendation + Has API (yes/no) + Has DB (yes/no) + path to design/tasks.
+Return: options summary + Recommendation + Has API (yes/no) + Has DB (yes/no) + Has auth/PII/schema (yes/no) + path to design/tasks.
 ```
 
 **After (standalone):** Prefer design-review → TDD → **Gate B** → Build.  
-**After (parent my-dev-flow):** Parent sets/refines **Has API** and **Has DB** in `00-run.md`. Do **not** Gate B yet — design-review loop (with **API contract review** when Has API **and** not Notes `tiny-contract-tweak`; **DB design review** when Has DB **and** not Notes `tiny-contract-tweak`; tiny-tweak folds into general design-review / design-verify-phase — `{my-dev-flow}/lenses.md`), then TDD, then Gate B, then Build.
+**After (parent my-dev-flow):** Parent sets/refines **Has API**, **Has DB**, and **Has auth/PII/schema** in `00-run.md` (auth yes → Mode simple Gate B **blocking** — `{my-dev-flow}/hitl-gate-b.md`). Do **not** Gate B yet — design-review loop (with **API contract review** when Has API **and** not Notes `tiny-contract-tweak`; **DB design review** when Has DB **and** not Notes `tiny-contract-tweak`; tiny-tweak folds into general design-review / design-verify-phase — `{my-dev-flow}/lenses.md`), then TDD, then Gate B, then Build.
 
 ---

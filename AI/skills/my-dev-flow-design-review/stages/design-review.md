@@ -69,16 +69,18 @@ Write 03a-design-review-log.md (template: {my-dev-flow}/artifacts/03a-design-rev
 - Fix ask for my-dev-flow-design: Critical/Major only; merge pointers to API/DB Fix ask files when those are open
 - **Deferred Enhancements:** optional bullet list (do not block clean)
 - Round notes
+- **Round:** do **not** invent or bump — parent increments on re-entry (`{my-dev-flow}/parent-next.md` · `{my-dev-flow}/invariants.md`)
 
 Rules:
 - Clean only if zero Critical and Major (Enhancements → Deferred).
 - Simple plain words.
 - Do not edit 01–04. Do not write production code.
+- Re-entry: leave **Round** for parent (parent also increments Run metrics `design-review rounds`).
 
 Return FIRST LINE exactly: Result: clean | needs update
 Then short summary + path to 03a-design-review-log.md ({my-dev-flow}/results.md).
 ```
 
-**If needs update:** parent runs `my-dev-flow-design` Update, then **re-runs** from API contract review (when Has API **and** isolated file was required — not Notes `tiny-contract-tweak` / skipped) and/or DB design review (when Has DB **and** isolated file was required), then this stage. Tiny-tweak: re-run this stage only (folded checks). Max 3 rounds → Decision N (`{my-dev-flow}/invariants.md`).
+**If needs update:** parent runs `my-dev-flow-design` Update, then **re-runs** from API contract review (when Has API **and** isolated file was required — not Notes `tiny-contract-tweak` / skipped) and/or DB design review (when Has DB **and** isolated file was required), then this stage. **Parent:** bump artifact **Round** (+ Run metrics) before each re-launch ([parent-next.md](../../my-dev-flow/parent-next.md)). Tiny-tweak: re-run this stage only (folded checks). Max 3 rounds → Decision N (`{my-dev-flow}/invariants.md`).
 
-**If clean:** parent continues (TDD → Gate B → Build verify-pass + Smoke section → skip Smoke Task → review/test per Review profile). Lens plan: may set **api**/**db** now when Has API/DB and **not** tiny-tweak; **must** finalize before code review (`{my-dev-flow}/lenses.md`).
+**If clean:** parent continues (TDD → Gate B → Build verify-pass + Smoke section → then per [stages.md](../../my-dev-flow/stages.md) Mode × Review profile / [verify-and-fix.md](../../my-dev-flow/verify-and-fix.md) E1: **skip Smoke Task only when the table allows**; Mode **full** + profile **full** → independent Smoke first → review/test). Lens plan: may set **api**/**db** now when Has API/DB and **not** tiny-tweak; **must** finalize before code review (`{my-dev-flow}/lenses.md`).

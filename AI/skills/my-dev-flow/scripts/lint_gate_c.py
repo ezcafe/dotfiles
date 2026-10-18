@@ -7,8 +7,6 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-import datetime as _dt
-
 from lint_common import (
     COMPLEXITY_RE,
     DOCS_ONLY_RE,
@@ -17,7 +15,6 @@ from lint_common import (
     HAS_API_LINE_RE,
     HAS_DB_LINE_RE,
     Issue,
-    LAST_VERIFY_PASS_AT_RE,
     MODE_LAST_RUN_RE,
     REQUIRED_FIELD_PATTERNS,
     REVIEW_STALE_RE,
@@ -28,11 +25,13 @@ from lint_common import (
     TEST_STALE_RE,
     VALID_GATE_C_ACTIONS,
     VALID_REVIEW_PROFILE,
+    _artifact_mtime,
     _card_next_stage_id,
     _first_token,
     _has_provenance,
     _looks_like_template,
     _notes_blob,
+    _parse_last_verify_pass_at,
     _parse_result_token,
     _parsed_yes_no,
     _read_artifact,
@@ -145,26 +144,142 @@ def _check_status_done_requires_merge(
             "(stages.md · results.md · hitl.md)",
         )
     )
-def _smoke_pass(run_dir: Path | None) -> bool:
+# Smoke section body (## Smoke … until next ##) — SoT for smoke-pass/fail tokens
+_SMOKE_SECTION_RE = re.compile(
+    r"(?ims)^##\s*Smoke\b[^\n]*\n(.*?)(?=^## |\Z)"
+)
+_SMOKE_FAIL_TOKENS = frozenset({"smoke-fail", "failure"})
+
+
+def _smoke_evidence_tokens(blob: str) -> list[str]:
+    """Smoke-section tokens only — never top-level test ``**Result:**``.
+
+    Sources: ``**Smoke result:**`` (file-wide; lives under Smoke) and any
+    ``**Result:**`` inside the ``## Smoke`` section body. Top-level
+    ``**Result:** failure`` / ``success`` is test-full/lite, not smoke.
+    """
+    tokens: list[str] = []
+    for m in SMOKE_RESULT_RE.finditer(blob):
+        tok = _first_token(m.group(1))
+        if tok:
+            tokens.append(tok)
+    sec_m = _SMOKE_SECTION_RE.search(blob)
+    if sec_m:
+        for m in RESULT_HEADER_RE.finditer(sec_m.group(1)):
+            raw = (m.group(1) or m.group(2) or "").strip()
+            if not raw or ("|" in raw and not re.match(
+                r"^[a-z0-9 _-]+$", raw.lower().strip("`*_")
+            )):
+                continue
+            primary = re.split(r"\s+[—#–-]\s+|\s{2,}", raw, maxsplit=1)[0].strip()
+            if "|" in primary:
+                continue
+            tok = primary.strip("`*_").lower()
+            if tok and tok not in ("", "none", "n/a", "-", "—"):
+                tokens.append(tok)
+    return tokens
+
+
+def _smoke_fail_or_failure(run_dir: Path | None) -> bool:
+    """True when 06 Smoke section shows smoke-fail or failure (Fix path).
+
+    Smoke fail tokens only from Smoke section evidence (``**Smoke result:**``
+    and/or ``**Result:**`` under ``## Smoke``). Top-level ``**Result:**
+    failure`` is test Result → use ``_test_log_failure``, not this helper.
+    Any Smoke-section fail token wins (M2 fail-closed vs conflicting pass).
+    Missing 06 → False (fail-closed; jump-ahead still blocks fix-tests).
+    """
     blob = _read_artifact(run_dir, "06-test-log.md")
     if not blob:
         return False
-    m = SMOKE_RESULT_RE.search(blob)
-    if m and _first_token(m.group(1)) == "smoke-pass":
+    return any(t in _SMOKE_FAIL_TOKENS for t in _smoke_evidence_tokens(blob))
+
+
+def _smoke_pass(run_dir: Path | None) -> bool:
+    """True when 06 Smoke evidence shows smoke-pass and no fail token (M2).
+
+    Prefer ``**Smoke result:** smoke-pass`` (Build-writes-Smoke SoT). Also
+    accepts ``**Result:** smoke-pass`` under ``## Smoke``. E1: when ``## Smoke``
+    exists, do **not** fall back to top-level ``**Result:** smoke-pass`` —
+    test-full/lite may overwrite top-level to failure/success without clearing
+    Smoke; that must not flip unpaid-smoke. Legacy top-level fallback only when
+    no ``## Smoke`` section (pre-Build-SoT logs).
+    """
+    blob = _read_artifact(run_dir, "06-test-log.md")
+    if not blob:
+        return False
+    tokens = _smoke_evidence_tokens(blob)
+    # M2: conflicting Smoke-section smoke-pass + smoke-fail|failure → unpaid
+    if any(t in _SMOKE_FAIL_TOKENS for t in tokens):
+        return False
+    if any(t == "smoke-pass" for t in tokens):
         return True
-    # Top-level Result may be smoke-pass when only Smoke ran
+    # E1: ## Smoke present → require Smoke evidence; no legacy top-level
+    if _SMOKE_SECTION_RE.search(blob):
+        return False
+    # Legacy: top-level Result smoke-pass when only Smoke ran (no ## Smoke)
     top = _parse_result_token(blob)
     return top == "smoke-pass"
+_TEST_RESULT_TOKENS = frozenset({"success", "failure", "pending"})
+
+
+def _test_result_token(blob: str) -> str | None:
+    """Test-full/lite Result: prefer outside ``## Smoke``, else test tokens.
+
+    Smoke evidence uses ``**Smoke result:**`` and/or ``**Result:**`` under
+    ``## Smoke``. Those must not mask top-level test ``failure`` / ``success``
+    (E1 — prefer Smoke result; parse test Result outside Smoke).
+
+    1. First ``**Result:**`` after stripping ``## Smoke`` (canonical).
+    2. Else first ``success``|``failure``|``pending`` anywhere — so a trailing
+       test Result still inside a Smoke section (no following ``##``) is not
+       lost to an earlier Smoke-section ``smoke-pass``.
+    """
+    stripped = _SMOKE_SECTION_RE.sub("\n", blob)
+    tok = _parse_result_token(stripped)
+    if tok:
+        return tok
+    for m in RESULT_HEADER_RE.finditer(blob):
+        raw = (m.group(1) or m.group(2) or "").strip()
+        if not raw:
+            continue
+        if "|" in raw and not re.match(
+            r"^[a-z0-9 _-]+$", raw.lower().strip("`*_")
+        ):
+            continue
+        primary = re.split(r"\s+[—#–-]\s+|\s{2,}", raw, maxsplit=1)[0].strip()
+        if "|" in primary:
+            continue
+        candidate = primary.strip("`*_").lower()
+        if candidate in _TEST_RESULT_TOKENS:
+            return candidate
+    return None
+
+
+def _test_log_failure(run_dir: Path | None) -> bool:
+    """True when 06 top-level Result is ``failure`` (test-full/lite → Fix path).
+
+    Reads first ``**Result:**`` outside ``## Smoke`` so Smoke-section
+    ``**Result:** smoke-pass`` cannot mask test failure (E1). Missing 06 or
+    other tokens → False (derive re-test / unpaid smoke instead).
+    """
+    blob = _read_artifact(run_dir, "06-test-log.md")
+    if not blob:
+        return False
+    return _test_result_token(blob) == "failure"
+
+
 def _test_log_success(run_dir: Path | None, *, expect_mode: str | None) -> bool:
     """True when Result success; if expect_mode set, Test path last run must match.
 
+    Uses first ``**Result:**`` outside ``## Smoke`` (same as ``_test_log_failure``).
     Fail closed when expect_mode is full|lite and Test path last run is missing
     or mismatched (hitl.md Gate C test bar). Accepts legacy ``Mode last run``.
     """
     blob = _read_artifact(run_dir, "06-test-log.md")
     if not blob:
         return False
-    if _parse_result_token(blob) != "success":
+    if _test_result_token(blob) != "success":
         return False
     if expect_mode is None:
         return True
@@ -181,36 +296,6 @@ def _last_verify_pass(text: str) -> bool:
     if _looks_like_template(raw):
         return False
     return _first_token(raw) == "verify-pass"
-def _parse_last_verify_pass_at(text: str) -> float | None:
-    """Unix timestamp from **Last verify-pass at:** ISO-8601, or None."""
-    m = LAST_VERIFY_PASS_AT_RE.search(text)
-    if not m:
-        return None
-    raw = m.group(1).strip().strip("`*")
-    if not raw or _looks_like_template(raw):
-        return None
-    token = _first_token(raw).lower()
-    if token in ("none", "n/a", "-", "—", "pending"):
-        return None
-    # Allow trailing notes after ISO (e.g. "2026-10-18T12:00:00Z — rebuild")
-    iso = raw.split()[0] if raw.split() else raw
-    try:
-        dt = _dt.datetime.fromisoformat(iso.replace("Z", "+00:00"))
-    except ValueError:
-        return None
-    if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=_dt.timezone.utc)
-    return dt.timestamp()
-def _artifact_mtime(run_dir: Path | None, name: str) -> float | None:
-    if run_dir is None:
-        return None
-    path = run_dir / name
-    if not path.is_file():
-        return None
-    try:
-        return path.stat().st_mtime
-    except OSError:
-        return None
 def _review_profile(text: str) -> str | None:
     rp_m = REQUIRED_FIELD_PATTERNS["Review profile"].search(text)
     if not rp_m or _looks_like_template(rp_m.group(1)):
@@ -316,9 +401,9 @@ def _independent_smoke_done(text: str) -> bool:
     notes = _notes_blob(text)
     if SMOKE_WAIVE_RE.search(notes) and _has_provenance(text, "smoke-waive"):
         return True
-    if (
-        SMOKE_RERUN_DONE_RE.search(notes) or SMOKE_RERUN_DONE_RE.search(text)
-    ) and _has_provenance(text, "smoke-pass-rerun"):
+    if SMOKE_RERUN_DONE_RE.search(notes) and _has_provenance(
+        text, "smoke-pass-rerun"
+    ):
         return True
     return False
 def _docs_only_marked(text: str) -> bool:
@@ -387,9 +472,9 @@ def _check_skip_review_build_only_smoke(
             )
         )
         return
-    if (
-        SMOKE_RERUN_DONE_RE.search(notes) or SMOKE_RERUN_DONE_RE.search(text)
-    ) and not _has_provenance(text, "smoke-pass-rerun"):
+    if SMOKE_RERUN_DONE_RE.search(notes) and not _has_provenance(
+        text, "smoke-pass-rerun"
+    ):
         issues.append(
             Issue(
                 "error",

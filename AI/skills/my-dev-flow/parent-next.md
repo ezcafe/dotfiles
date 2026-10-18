@@ -2,7 +2,9 @@
 
 Given `00-run.md` Orchestrator card **Stage id** / **Next step**, open the **Open (1–2)** row below + handoff (+ clarity file when Next ∈ clarity stages). Full per-stage set: [Load budget](step-0.md#load-budget). Do **not** re-read orchestrator [SKILL.md](SKILL.md).
 
-**Also (required habit):** before every Task, follow the [orchestrator-rules.md](orchestrator-rules.md) **Pre-launch checklist card**, then run `python3 {my-dev-flow}/scripts/lint-run.py <run-dir> --next --derive` (resolve `{my-dev-flow}` per [skills-path.md](skills-path.md)). Derive computes expected next from Mode/profile + artifacts. Phase gates **auto** from card Next (design-review* → `--before-design-review`; Adv / `code-review-phase` → `--before-code-review`; `build` → `--before-build`; `merge` → `--before-merge`). Soft mismatches (peer/parallel / minor reorder) stay warn. After design **clean**, derive returns `tdd-review` until `04a` exists or Notes `04a skipped` ([lenses.md](lenses.md)); `--next` / `--before-build` require `03a` Result **clean** before Build.
+**Also (required habit):** before every Task, follow the [orchestrator-rules.md](orchestrator-rules.md) **Pre-launch checklist card**, then prefer one **launch pack**: `python3 {my-dev-flow}/scripts/preflight.py <run-dir>` (card + Open ≤2 + clarity + lint + **always** `--snapshot-consent`) **or** `python3 {my-dev-flow}/scripts/lint-run.py <run-dir> --next --derive` then `--snapshot-consent` (resolve `{my-dev-flow}` per [skills-path.md](skills-path.md)). Soft-cap companion opens to the Open row (1–2). Derive computes expected next from Mode/profile + artifacts. Phase gates **auto** from card Next. Soft mismatches stay warn. After design **clean**, derive returns `tdd-review` until `04a` exists or Notes `04a skipped` ([lenses.md](lenses.md)); `--next` / `--before-build` require `03a` Result **clean** before Build. Consent: when `.lint-consent-snap` exists, `--next` / `--before-build` / `--before-merge` **error** if consent fields changed without Run log `parent consent write` ([hitl.md](hitl.md) · M1). Notes `smoke-pass (re-run)` is a consent waiver (kind `smoke-pass-rerun`) — after writing it, ack with `parent consent write` ([smoke.md](../my-dev-flow-test/stages/smoke.md) After).
+
+**After each cycle (required habit — sole Round owner):** parent increments artifact **Round** (file-top on `01a` / `03a-*` / `05-review-log` / `06` as applicable) and/or **Run metrics** (design-review rounds, **review fix rounds** for code-review Fix cycles, smoke↔fix / test↔fix rounds, verify-fail count, Verify attempts) so `--next` can enforce max-round caps ([invariants.md](invariants.md)). Tasks must **not** invent or bump Round — leave for parent. Do **not** treat `design-review rounds` as review-fix. **Required:** run `--check-consent-writes` after Task return (machine path also fails on next `--next` / `--before-build` / `--before-merge` when snap is dirty).
 
 **Unsafe** card vs derived → **error** + `do-not-launch` (exit **1**) unless Notes `card-override — <reason>` **and** `provenance — card-override — user: "…"` (+ optional Decision N):
 
@@ -12,6 +14,8 @@ Given `00-run.md` Orchestrator card **Stage id** / **Next step**, open the **Ope
 | `build` | design not clean / pre-Build | |
 | `code-review-phase` / `adversarial` / `quality` / `test-*` / `fix-*` / `smoke` / `gate-c` | still pre-Build or `build` | |
 | `test-*` / `fix-tests` / `gate-c` / `merge` (post-Build) | still in review (`adversarial` / `quality` / `code-review-phase` / `lens-*` / `merge-findings` / `fix-review`) | skip-review profile exempt |
+| `adversarial` / `quality` / `test-*` / `fix-tests` / `gate-c` / lenses / `fix-review` | `smoke` (Smoke unpaid / E1 unpaid / re-smoke after Fix) | **Exception:** `fix-tests` only when `06` Smoke-section Result is `smoke-fail` or `failure` **and** Last stage ≠ `fix-tests` (smoke-fail→Fix; derive also returns `fix-tests`). After Fix verify-pass, derive returns `smoke` (re-smoke) or `test-*` (re-test) — set Next to that. Top-level test `failure` with Smoke `smoke-pass` is not Smoke unpaid — derive `fix-tests` via test-failure path (then re-test after Fix). Else set Next to `smoke` first ([verify-and-fix.md](verify-and-fix.md) M1/E1) |
+| `gate-c` | `test-full` / `test-lite` | finish test bar before Gate C ask (same class as merge) |
 | `quality` | `adversarial` | |
 | `smoke` / `fix-tests` | review-entry | OK with Notes `smoke re-run` / Fix ask |
 | `lens-*` / `merge-findings` | still `adversarial` / `quality` / `code-review-phase` / `fix-review` (pre-lens) | OK when derived is that lens (unpaid Lens plan) or card-override + provenance |
@@ -32,18 +36,18 @@ Given `00-run.md` Orchestrator card **Stage id** / **Next step**, open the **Ope
 
 If clarity-check fails → ask the user; do **not** launch the Task.
 
-**Log token:** after a passing clarity-check, add to Notes or Run log: `clarity-check ok — <boundary>` where `<boundary>` is the stage id (e.g. `design-phase`, `build`, `fix-review`, `merge`).
+**Log token (parent-only):** after a passing clarity-check, **parent** adds to Notes or Run log: `clarity-check ok — <boundary>` where `<boundary>` is the stage id (e.g. `design-phase`, `build`, `fix-review`, `merge`). Tasks must **not** write this token (handoff ban). Residual: lint cannot prove the parent opened the clarity file — token + open-file habit raise cost only ([hitl.md](hitl.md)).
 
 | Next class | Lint rule |
 |------------|-----------|
 | **Design boundaries** (`design-phase`, `analyze`, `grill`, `design`) | **Boundary-matched:** must have `clarity-check ok — <exact Next>` (e.g. Next `analyze` needs `clarity-check ok — analyze`; a prior `design-phase` token does **not** unlock later Analyze/Grill/Design). Parent still opens the clarity file for content checks (Problem map / What-Why-How). Clarity tokens ≠ stage gates (derive/lint still enforce e.g. open Grill blocks Design). |
 | **High-risk** (`tdd-review`, `build`, `fix-review`, `fix-tests`, `merge`) | **Boundary-matched:** must have `clarity-check ok — <exact Next>` (e.g. Next `build` needs `clarity-check ok — build`) |
 
-Fail-closed: Lint **errors** / `--next` → `do-not-launch` when the rule above is not met ([invariants.md](invariants.md)).
+Fail-closed: Lint **errors** / `--next` → `do-not-launch` when the rule above is not met ([invariants.md](invariants.md)). Keep open-file habit even when the token is present.
 
 | Stage id / Next | Open (1–2) | Handoff |
 |-----------------|------------|---------|
-| (Step 0 / classify) | [step-0.md](step-0.md) · [artifacts/00-run.md](artifacts/00-run.md) | — seed + `lint-run.py` |
+| (Step 0 / classify) | [step-0.md](step-0.md) · [artifacts/00-run.md](artifacts/00-run.md) | — seed + `lint-run.py` (+ optional `preflight.py`) |
 | `ideation` | [../my-dev-flow-design/stages/ideation.md](../my-dev-flow-design/stages/ideation.md) · design [SKILL.md](../my-dev-flow-design/SKILL.md) once | `python3 {my-dev-flow}/scripts/handoff-for.py ideation` |
 | `gate-a` | [../my-dev-flow-design/stages/gate-a.md](../my-dev-flow-design/stages/gate-a.md) | `python3 {my-dev-flow}/scripts/handoff-for.py gate-a` |
 | `ideation-update` | [../my-dev-flow-design/stages/ideation-update.md](../my-dev-flow-design/stages/ideation-update.md) | `python3 {my-dev-flow}/scripts/handoff-for.py ideation-update` |
@@ -58,10 +62,10 @@ Fail-closed: Lint **errors** / `--next` → `do-not-launch` when the rule above 
 | `design-review` | [../my-dev-flow-design-review/stages/design-review.md](../my-dev-flow-design-review/stages/design-review.md) | `python3 {my-dev-flow}/scripts/handoff-for.py design-review` |
 | `design-verify-phase` | [../my-dev-flow-design-review/stages/design-verify-phase.md](../my-dev-flow-design-review/stages/design-verify-phase.md) | `python3 {my-dev-flow}/scripts/handoff-for.py design-verify-phase` |
 | `tdd-review` | [../my-dev-flow-code/stages/tdd-review.md](../my-dev-flow-code/stages/tdd-review.md) · [verify-and-fix.md](verify-and-fix.md) | `python3 {my-dev-flow}/scripts/handoff-for.py tdd-review` |
-| `gate-b` | [hitl.md](hitl.md) · card Next | digest only — set **Gate B approved** when blocking **+ provenance**; no handoff Task |
-| `build` (armed / approved) | [../my-dev-flow-code/stages/build.md](../my-dev-flow-code/stages/build.md) · [verify-and-fix.md](verify-and-fix.md) · [hitl.md](hitl.md) if async gap | `python3 {my-dev-flow}/scripts/handoff-for.py build` |
-| `build` (async gap, not armed) | [hitl.md](hitl.md) — set **Build armed** on this resume turn; do not launch yet if veto pending | — |
-| `build` (blocking, Gate B approved none) | [hitl.md](hitl.md) — set **Gate B approved** yes / named pick **+ provenance**; do not launch | — |
+| `gate-b` | [hitl-gate-b.md](hitl-gate-b.md) · [hitl.md](hitl.md) Provenance · card Next | digest only — **parent** sets **Gate B approved** when blocking **+ provenance**; no handoff Task |
+| `build` (armed / approved) | [../my-dev-flow-code/stages/build.md](../my-dev-flow-code/stages/build.md) · [verify-and-fix.md](verify-and-fix.md) · [hitl-gate-b.md](hitl-gate-b.md) if async gap | `python3 {my-dev-flow}/scripts/handoff-for.py build` |
+| `build` (async gap, not armed) | [hitl-gate-b.md](hitl-gate-b.md) — **parent** sets **Build armed** on this resume turn; do not launch yet if veto pending | — |
+| `build` (blocking, Gate B approved none) | [hitl-gate-b.md](hitl-gate-b.md) · [hitl.md](hitl.md) Provenance — **parent** sets **Gate B approved** yes / named pick **+ provenance**; do not launch | — |
 | `smoke` | [../my-dev-flow-test/stages/smoke.md](../my-dev-flow-test/stages/smoke.md) | `python3 {my-dev-flow}/scripts/handoff-for.py smoke` |
 | `code-review-phase` | [../my-dev-flow-review/stages/code-review-phase.md](../my-dev-flow-review/stages/code-review-phase.md) · Lens plan ([lenses.md](lenses.md)) | `python3 {my-dev-flow}/scripts/handoff-for.py code-review-phase` |
 | `adversarial` | [../my-dev-flow-review/stages/adversarial.md](../my-dev-flow-review/stages/adversarial.md) · Lens plan ([lenses.md](lenses.md)) | `python3 {my-dev-flow}/scripts/handoff-for.py adversarial` |
@@ -72,8 +76,8 @@ Fail-closed: Lint **errors** / `--next` → `do-not-launch` when the rule above 
 | `test-full` | [../my-dev-flow-test/stages/test-full.md](../my-dev-flow-test/stages/test-full.md) · [verify-and-fix.md](verify-and-fix.md) | `python3 {my-dev-flow}/scripts/handoff-for.py test-full` |
 | `test-lite` | [../my-dev-flow-test/stages/test-lite.md](../my-dev-flow-test/stages/test-lite.md) · [verify-and-fix.md](verify-and-fix.md) | `python3 {my-dev-flow}/scripts/handoff-for.py test-lite` |
 | `fix-tests` | [../my-dev-flow-code/stages/fix-tests.md](../my-dev-flow-code/stages/fix-tests.md) · [verify-and-fix.md](verify-and-fix.md) | `python3 {my-dev-flow}/scripts/handoff-for.py fix-tests` |
-| `gate-c` | [hitl.md](hitl.md) Gate C bar | blocking ask — no merge yet |
-| `merge` (Gate C approved set) | [../my-dev-flow-merge/stages/merge.md](../my-dev-flow-merge/stages/merge.md) · [hitl.md](hitl.md) | `python3 {my-dev-flow}/scripts/handoff-for.py merge` |
-| `merge` (approved missing or none) | [hitl.md](hitl.md) Gate C — ask + set **Gate C approved** **+ provenance**; do not launch | — |
+| `gate-c` | [hitl-gate-c.md](hitl-gate-c.md) Gate C bar | blocking ask — no merge yet |
+| `merge` (Gate C approved set) | [../my-dev-flow-merge/stages/merge.md](../my-dev-flow-merge/stages/merge.md) · [hitl-gate-c.md](hitl-gate-c.md) | `python3 {my-dev-flow}/scripts/handoff-for.py merge` |
+| `merge` (approved missing or none) | [hitl-gate-c.md](hitl-gate-c.md) · [hitl.md](hitl.md) Provenance — ask + **parent** sets **Gate C approved** **+ provenance**; do not launch | — |
 
-**Resume:** [resume-abort.md](resume-abort.md) · async Build arm: [hitl.md](hitl.md).
+**Resume:** [resume-abort.md](resume-abort.md) · async Build arm: [hitl-gate-b.md](hitl-gate-b.md).

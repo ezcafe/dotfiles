@@ -30,6 +30,10 @@ Stage: {stage_id}
 00-run.md: .my-docs/workflow/{slug}/00-run.md
 Read only the artifacts listed for this stage (do not open others unless a listed file links to them).
 Write only: {write_list}
+Do not write Gate B/C approved, Build armed, or provenance — * lines.
+Do not write card-override or smoke-waive (or other waiver tokens) on 00-run.md.
+Do not write clarity-check ok lines, parent consent write lines, or .consent.md (parent-only).
+Do not write .lint-consent-snap or .lint-async-gap.
 Use simple plain words. Fresh context — do not assume prior chat or other agents' memory.
 Honor artifact size caps in {size_caps_path}.
 Resolve skill paths per {skills_path_path} ({{my-dev-flow}}, {{myplan}}, etc.).

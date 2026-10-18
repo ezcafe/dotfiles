@@ -31,11 +31,11 @@ If Lens plan has exactly **one** lens and it is **not** api/db, you may run that
 **api/db:** When Lens plan includes api/db and Notes are **not** `tiny-contract-tweak`, do **not** deep-fold contracts here — parent launches isolated `lens-api` / `lens-db`. Tiny-tweak: fold contract checks into Quality (no forced api/db lens).
 
 Clean only if zero Critical/Major in Adv + Quality ({my-dev-flow}/severity.md). Else Fix ask ≤15 bullets Critical/Major only.
-Write a file-level **Result:** clean | needs fix (overall / code-review-phase). When both section Results are present, parent derive requires both clean.
+Keep / update file-top **Result:** clean | needs fix (overall SoT — [artifacts/05-review-log.md](../../my-dev-flow/artifacts/05-review-log.md)). **Round:** do **not** invent or bump — parent increments on re-entry (`{my-dev-flow}/parent-next.md` · `{my-dev-flow}/invariants.md`). When both section Results are present, parent derive requires both clean; max-round lint uses overall / worst-section Result.
 Return FIRST LINE exactly: Result: clean | needs fix
 Then path to 05-review-log.md.
 ```
 
-**If findings:** Fix → re-run this stage until clean → then lenses per Lens plan (api/db isolated when listed and not tiny-tweak; 2+ → parallel + Merge).
+**If findings:** Fix → re-run this stage until clean (parent increments Round + review fix rounds) → then lenses per Lens plan (api/db isolated when listed and not tiny-tweak; 2+ → parallel + Merge).
 
 ---

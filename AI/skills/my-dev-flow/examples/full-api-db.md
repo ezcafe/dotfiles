@@ -23,8 +23,10 @@ Anti-patterns: [anti-patterns.md](anti-patterns.md). API/DB rules: [lenses.md](.
 1. Open clarity boundary when Next ∈ clarity stages ([parent-next.md](../parent-next.md)); log `clarity-check ok — <Next>`.
 2. Boundary-matched: before `analyze` / `grill` / `design` → matching token each time (a prior token does **not** unlock the next).
 3. Boundary-matched: before `build` → `clarity-check ok — build`.
-4. `python3 {my-dev-flow}/scripts/lint-run.py <run-dir> --next --derive`
-5. On handoff (exit 0): `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>`.
+4. `python3 {my-dev-flow}/scripts/lint-run.py <run-dir> --next --derive` (or `preflight.py` launch pack)
+5. `--snapshot-consent` before launch; `--check-consent-writes` after ([hitl.md](../hitl.md))
+6. After any parent consent/waiver write: Run log `parent consent write — <kind>` → re-snapshot
+7. On handoff (exit 0): `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>`.
 
 ## Pipeline
 
@@ -39,14 +41,14 @@ Anti-patterns: [anti-patterns.md](anti-patterns.md). API/DB rules: [lenses.md](.
 | 7 | `api-contract-review` ∥ `db-design-review` | Both `03a-*` missing → **same parent turn** (parallel); one `03a-*` exists → launch **missing only** (resume serialize — do not re-parallel); Pending parallel `api|db` → `none` when both done; both clean or Fix ask ([lenses.md](../lenses.md)) |
 | 8 | `design-review` | General clean (after isolated clean); Deferred Enhancements OK |
 | 9 | (04a) | Only if `04-tasks` lists concrete tests; else skip Notes |
-| 10 | Gate B | **blocking** required as default (Mode **full** — never async-notify default; [hitl.md](../hitl.md) Default Gate B narrow async); on approve set `Gate B approved: yes` (or named pick) + `Gate B veto: none` **+** Notes `- provenance — gate-b-approved — user: "yes go build"` ([hitl.md](../hitl.md) Provenance) |
+| 10 | Gate B | **blocking** required as default (Mode **full** — never async-notify default; [hitl-gate-b.md](../hitl-gate-b.md)); on approve **parent** sets `Gate B approved: yes` (or named pick) + `Gate B veto: none` **+** Notes `- provenance — gate-b-approved — user: "yes go build"` + Run log `parent consent write — gate-b-approved` → re-snapshot ([hitl.md](../hitl.md)) |
 | 11 | `build` | Boundary-matched clarity + `--next --derive` + handoff → veto check → TDD → verify-pass → Smoke section |
-| 12 | Smoke Task | **skipped** (Build-writes-Smoke) |
+| 12 | Smoke Task | Notes `smoke re-run` **once** → independent Smoke → Run log stage `smoke` / 06 after Last verify-pass at → Notes `smoke-pass (re-run)` + Run log `parent consent write — smoke-pass-rerun` → re-snapshot (Mode full + profile full — required; bare Notes alone do not unlock Adv; [verify-and-fix.md](../verify-and-fix.md) E1); Build-writes-Smoke alone blocked before Adv |
 | 13 | Lens plan | Set `api+db` (+ **security** when authz/PII in scope) |
 | 14 | `adversarial` → `quality` | Separate Tasks; clean |
 | 15 | `lens-api` ∥ `lens-db` (∥ `lens-security` if planned) | Parallel when 2+ → `merge-findings` |
 | 16 | `test-full` | One Task; Result **success** (**Test path last run:** `full`) |
-| 17 | Gate C | blocking — user names commit / push / PR / merge; set `Gate C approved: commit,push,pr,merge` **+** Notes `- provenance — gate-c-approved — user: "commit push PR and merge"` ([hitl.md](../hitl.md) Provenance) |
+| 17 | Gate C | blocking — user names commit / push / PR / merge; set `Gate C approved: commit,push,pr,merge` **+** Notes `- provenance — gate-c-approved — user: "commit push PR and merge"` + Run log `parent consent write — gate-c-approved` → re-snapshot ([hitl.md](../hitl.md)) |
 | 18 | `merge` | Only approved actions; Status **`done`** only when Result **success** **and** `merge` ∈ Gate C approved (PR-only / commit-only → stay **paused**) + calibration Notes (≤3) + append same ≤3 lines to `_calibration.md` ([stages.md](../stages.md) Done criteria) |
 
 ## Tiny-tweak variant (not this ask)

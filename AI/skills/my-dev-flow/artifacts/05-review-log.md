@@ -5,11 +5,18 @@ Copy into `.my-docs/workflow/<slug>/`. [handoffs.md](../handoffs.md) · [LEGACY.
 ```markdown
 # Review log: <short title>
 
+**Round:** 1
+<!-- File-top Round is SoT for max-round lint. Fix/re-review: parent increments Round — Task must not. -->
+**Result:** pending | clean | needs fix
+<!-- File-top Result is overall SoT. When section Results exist, lint uses worst-of (needs fix > pending > clean). -->
+
 ## Adversarial test review
 
 | Severity | Location | Finding | Status |
 |----------|----------|---------|--------|
 | | | | open / fixed |
+
+**Result:** pending | clean | needs fix
 
 **Round notes:**
 
@@ -21,6 +28,8 @@ Copy into `.my-docs/workflow/<slug>/`. [handoffs.md](../handoffs.md) · [LEGACY.
 |----------|----------|---------|--------|
 | | | | |
 
+**Result:** pending | clean | needs fix
+
 **Round notes:**
 
 ---
@@ -29,7 +38,6 @@ Copy into `.my-docs/workflow/<slug>/`. [handoffs.md](../handoffs.md) · [LEGACY.
 
 Filled by the **Merge findings** arbiter after each parallel round. Lens raw output lives in `05-lens-*.md` (only files for lenses in **Lens plan** this round).
 
-**Round:** 1
 **Result:** pending | clean | needs fix
 
 ### Winners (fix these)

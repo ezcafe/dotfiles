@@ -4,7 +4,7 @@ description: >-
   After explicit user Gate C approval, commits (if approved), pushes the branch,
   opens a PR, then merges. Never commit or push without that yes. Use when the
   user says run my-dev-flow-merge, merge the workflow, or after the Gate C test
-  bar for this Review profile is met (hitl.md).
+  bar for this Review profile is met (hitl-gate-c.md).
 ---
 
 # my-dev-flow-merge
@@ -19,7 +19,8 @@ Merge subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). Human owns top risks.
 | Concern | File |
 |---------|------|
 | Pipeline order / Status `done` | [`../my-dev-flow/stages.md`](../my-dev-flow/stages.md) |
-| Gate C (always blocking) + test bar + **Gate C approved** + Provenance | [`../my-dev-flow/hitl.md`](../my-dev-flow/hitl.md) |
+| Gate C (always blocking) + test bar + **Gate C approved** | [`../my-dev-flow/hitl-gate-c.md`](../my-dev-flow/hitl-gate-c.md) |
+| Provenance / parent-only consent | [`../my-dev-flow/hitl.md`](../my-dev-flow/hitl.md) |
 | Stage handoffs | **Required** `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>` ([`skills-path.md`](../my-dev-flow/skills-path.md)) · [`handoffs.md`](../my-dev-flow/handoffs.md) = edit SoT / debug only |
 | Models (Merge = Fast) | [`../my-dev-flow/models.md`](../my-dev-flow/models.md) |
 | Launch-time checklist | [`../my-dev-flow/orchestrator-rules.md`](../my-dev-flow/orchestrator-rules.md) |
@@ -30,14 +31,14 @@ Merge subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). Human owns top risks.
 
 ## When to run
 
-`run my-dev-flow-merge`, merge the workflow, or when parent reaches merge after the **Gate C test bar** for this Review profile ([`hitl.md`](../my-dev-flow/hitl.md)).
+`run my-dev-flow-merge`, merge the workflow, or when parent reaches merge after the **Gate C test bar** for this Review profile ([`hitl-gate-c.md`](../my-dev-flow/hitl-gate-c.md)).
 
 ## Principles
 
 - Accountability, not rubber stamp. **Gate C** is **always blocking**.
 - **Name each action** in the Gate C ask: commit / push / PR / merge. Never run those without an **explicit user yes** naming them in this chat.
 - After yes: set durable **`Gate C approved:`** on `00-run.md` to the named subset (`commit,push,pr,merge`) **and** Notes `provenance — gate-c-approved — user: "…"` — [`hitl.md`](../my-dev-flow/hitl.md) Provenance. Prefer Notes `Gate C yes — …`. Then run `lint-run.py --before-merge`.
-- Honor **Gate C test bar** in [`hitl.md`](../my-dev-flow/hitl.md) by Review profile. Waivers (`gate-c-test-override` / `smoke-waive` / `docs-only` / `smoke-pass (re-run)`) require matching Notes kind **plus** `provenance — <kind> — user: "…"`. skip-review legality: [`lenses.md`](../my-dev-flow/lenses.md).
+- Honor **Gate C test bar** in [`hitl-gate-c.md`](../my-dev-flow/hitl-gate-c.md) by Review profile. Waivers (`gate-c-test-override` / `smoke-waive` / `docs-only` / `smoke-pass (re-run)`) require matching Notes kind **plus** `provenance — <kind> — user: "…"`. skip-review legality: [`lenses.md`](../my-dev-flow/lenses.md).
 - PR body from [`artifacts/pr-body.md`](../my-dev-flow/artifacts/pr-body.md) — **not** INDEX.md.
 - Never commit secrets; never force-push; do not skip hooks.
 - Honor subsets: “PR only” → stop after `gh pr create`; “commit only” → commit and stop (no push).
@@ -50,7 +51,7 @@ Merge subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). Human owns top risks.
 
 ## Prerequisites
 
-- Check `06-test-log.md` / Build result against Gate C test bar for this Review profile ([`hitl.md`](../my-dev-flow/hitl.md)). If below bar: **stop** and run the missing test mode or fix via `my-dev-flow-code`. Override only with Notes kind (`gate-c-test-override` / `smoke-waive` / `docs-only` / `smoke-pass (re-run)`) **plus** `provenance — <kind> — user: "…"` ([`hitl.md`](../my-dev-flow/hitl.md) Provenance).
+- Check `06-test-log.md` / Build result against Gate C test bar for this Review profile ([`hitl-gate-c.md`](../my-dev-flow/hitl-gate-c.md)). If below bar: **stop** and run the missing test mode or fix via `my-dev-flow-code`. Override only with Notes kind (`gate-c-test-override` / `smoke-waive` / `docs-only` / `smoke-pass (re-run)`) **plus** `provenance — <kind> — user: "…"` ([`hitl.md`](../my-dev-flow/hitl.md) Provenance).
 - Prefer all review lenses clean (`05-review-log.md`). If not clean: **warn** and only continue if the user explicitly overrides **with** matching provenance kind.
 - **Gate C yes** for the listed actions — durable **`Gate C approved`** on `00-run.md` (not `none`) **with** `provenance — gate-c-approved — user: "…"` ([`hitl.md`](../my-dev-flow/hitl.md) Provenance). Silence / “continue pipeline” / Gate B auto ≠ approval.
 - **Required before launch:** `scripts/lint-run.py <run-dir> --before-merge` (enforces approved-actions + provenance + Gate C test bar).
@@ -74,7 +75,7 @@ GATE C (blocking user yes — parent may ask) → Merge Task (only approved: com
 
 ## Start checklist
 
-1. Confirm Gate C test bar ([`hitl.md`](../my-dev-flow/hitl.md)) — or Notes waiver kind **+** matching `provenance — <kind> — user: "…"`; summarize top risks; ensure **Gate C approved** + provenance `gate-c-approved` set (ask if needed).
+1. Confirm Gate C test bar ([`hitl-gate-c.md`](../my-dev-flow/hitl-gate-c.md)) — or Notes waiver kind **+** matching `provenance — <kind> — user: "…"`; summarize top risks; ensure **Gate C approved** + provenance `gate-c-approved` set (ask if needed).
 2. Open code [clarity-check.md](../my-dev-flow-code/stages/clarity-check.md) **Merge** section; log `clarity-check ok — merge` before launch ([parent-next.md](../my-dev-flow/parent-next.md)).
 3. Run `lint-run.py --before-merge` (required; fail-closed on missing provenance / bar).
 4. Resolve Fast model.

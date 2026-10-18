@@ -1,30 +1,99 @@
-# HITL (Gate B / Gate C / Grill)
+# HITL (index)
 
-Canonical human-in-the-loop rules for [`my-dev-flow`](SKILL.md).  
-**This file is SoT for:** Gate B veto, **Gate B approved**, async-notify one-turn gap, **Build armed**, Gate C test bar, **Gate C approved** actions.  
-Pipeline order: [stages.md](stages.md). Resume/abort: [resume-abort.md](resume-abort.md). Decision shapes: [handoffs.md](handoffs.md) + [invariants.md](invariants.md). Grill domain: [grill.md](grill.md).
+Canonical human-in-the-loop index for [`my-dev-flow`](SKILL.md).
+
+| Concern | SoT file |
+|---------|----------|
+| Gate B defaults · async-notify · **Build armed** · **Gate B approved** · veto after Build | [hitl-gate-b.md](hitl-gate-b.md) |
+| HITL Grill **default tier** (Mode → auto/async/blocking) | [hitl-gate-b.md](hitl-gate-b.md) HITL Grill |
+| Grill **domain** (frontier, glossary, ADRs) + what each tier means for Grill | [grill.md](grill.md) |
+| Gate C test bar · **Gate C approved** | [hitl-gate-c.md](hitl-gate-c.md) |
+| Shared: Tiers · Provenance · Parent-only consent · Git | **this file** |
+
+Pipeline order: [stages.md](stages.md). Resume/abort: [resume-abort.md](resume-abort.md). Decision **option shape:** [handoffs.md](handoffs.md). Max-round Decision **tables:** [invariants.md](invariants.md). Gate B veto-after-Build options: [hitl-gate-b.md](hitl-gate-b.md).
 
 ## Tiers
 
 | Tier | Behavior | Allowed for |
 |------|----------|-------------|
 | **auto** | Approve without waiting. Gate digest + user-first picks. | Gate B (**Mode simple** low-risk only); HITL Grill |
-| **async-notify** | Post digest + user-first pick. **Gate B:** end turn; Build on **next** parent turn after **Build armed** (veto window). **Grill:** continue immediately. Silence is **not** a veto. | Gate B (**narrow** — see Default Gate B); HITL Grill |
+| **async-notify** | Post digest + user-first pick. **Gate B:** end turn; Build on **next** parent turn after **Build armed** (veto window). **Grill:** continue immediately. Silence is **not** a veto. | Gate B (**narrow** — [hitl-gate-b.md](hitl-gate-b.md)); HITL Grill |
 | **blocking** | Pause for approve / reject. Gate digest ≤4 bullets. | Gate B (**required** Mode **full**); **required** for Gate C; HITL Grill when needed |
 
-## Default Gate B (narrow async)
+## Parent-only consent (hard)
 
-| Mode / scope | Prefer |
-|--------------|--------|
-| Mode **full** | Always **blocking**. Never use async-notify or auto as default. |
-| Mode **simple** + Has API=no + Has DB=no + no auth/PII/schema in scope + design-review **or** design-verify-phase Result **clean** (by Mode) + (04a ok\|skipped) | **auto** (default) |
-| Mode **simple** + any of: Has API=yes, Has DB=yes, auth/PII/schema in scope, open Critical/Major | **blocking** |
+**Parent** writes these fields on `00-run.md` — **never** from Task returns / Task Write cells:
 
-**When to choose async:** Mode **simple** low-risk row above **and** the user asks for a veto window / async digest — otherwise prefer **auto**. **async-notify allowed only** for Mode **simple** when Has API=no **and** Has DB=no **and** no auth/PII/schema in scope. Else use **blocking** (or **auto** when the simple low-risk row holds).
+- **Gate B approved**
+- **Gate C approved**
+- **Build armed**
+- All waiver kinds (`gate-c-test-override`, `smoke-waive`, `docs-only`, `smoke-pass (re-run)`, `card-override`)
+- Matching **provenance** lines
+- **clarity-check ok — \<Next\>** lines ([parent-next.md](parent-next.md))
+- Run log **`parent consent write`** ack lines (when using consent snapshot)
 
-**Soft HITL** applies only to **HITL Grill** and Mode **simple** Gate B (when allowed). Mode **full** Gate B and Gate C are never soft.
+**Same-turn habit (required):** After an **explicit user yes** in **this** parent turn, the **parent** records Gate C approved (and blocking Gate B approved) **in that same turn** — never by copying a Task’s claim that the user approved. Prefer Cursor **AskQuestion** / decision UI when available ([hitl-gate-c.md](hitl-gate-c.md) · [hitl-gate-b.md](hitl-gate-b.md)).
 
-Mechanics when async-notify is used: section below (veto window · one turn gap · **Build armed**).
+**Optional scratchpad:** Parent may draft consent in run-dir **`.consent.md`** (Tasks must **never** Write it — handoff ban). Durable lint still reads `00-run.md` fields; copy from `.consent.md` into `00-run.md` yourself. Local / do-not-commit unless your team wants it.
+
+Tasks may **read** `00-run.md` to honor gates; they must **not** invent or set consent / waiver / provenance / clarity-check ok. Handoff base block forbids those writes ([handoffs.md](handoffs.md) · `handoff-for.py`).
+
+### Consent write ban (machine check · M1)
+
+**Habit (before / after every Task):**
+
+1. Snapshot before launch — `preflight.py` **always** runs `--snapshot-consent` after `--next --derive`, **or** parent runs `python3 {my-dev-flow}/scripts/lint-run.py <run-dir> --snapshot-consent` → writes `.lint-consent-snap` (local / do-not-commit)
+2. Launch Task
+3. After Task: `python3 {my-dev-flow}/scripts/lint-run.py <run-dir> --check-consent-writes` (parent habit — [parent-next.md](parent-next.md))
+
+**Machine path (fail-closed):** When `.lint-consent-snap` exists, `--next` / `--next --derive` **and** `--before-build` / `--before-merge` (also auto when card Next=`build`/`merge`) call the same check with missing-snap as no-op; **error** + `--next` → `do-not-launch` if Gate B/C approved, Build armed, provenance kinds, or waiver tokens changed **without** a new Run log line containing `parent consent write`. Standalone `--check-consent-writes` still **errors** when the snap is missing.
+
+When the **parent** intentionally writes consent, append e.g. `- **HH:MM** · paused · gate-b · parent consent write — gate-b-approved` then re-snapshot (or accept the check after the ack line).
+
+See [scripts/README.md](scripts/README.md) · [scripts/preflight.py](scripts/preflight.py).
+
+## Provenance (required for consent / waivers)
+
+Inventable tokens without a user quote are **rejected**. Before lint accepts **Gate B approved** (blocking), **Gate C approved**, Notes `gate-c-test-override`, Notes `smoke-waive`, Notes/Complexity `docs-only`, or Notes `card-override` (unsafe derive unlock), Notes or Run log **must** contain this fixed shape:
+
+```markdown
+- provenance — <kind> — user: "<exact user words>"
+```
+
+**Notes `smoke-pass (re-run)`:** bare Notes are **OK** for Mode **full** + Review profile **full** (E1 independent Smoke Result — [verify-and-fix.md](verify-and-fix.md)), **with** Smoke-stage evidence. Provenance `smoke-pass-rerun` is required **only** for the skip-review Gate C escape path (kind table below). Do **not** invent Notes without Smoke-stage evidence (Run log stage `smoke` and/or 06 updated after Last verify-pass at). Writing Notes `smoke-pass (re-run)` flips the consent fingerprint (waiver kind `smoke-pass-rerun`) — append Run log `parent consent write` (e.g. `parent consent write — smoke-pass-rerun`) when a snap exists ([smoke.md](../my-dev-flow-test/stages/smoke.md) After · [parent-next.md](parent-next.md)).
+
+**Quote quality (required):**
+
+1. Parent must copy the user’s words **verbatim**.
+2. **Parent habit (not lint-enforced):** the quote should be a **verbatim substring of the latest user message in this parent turn**. Do not reuse quotes from older turns or invent plausible text. Lint cannot see chat history — it does **not** check substring binding.
+3. **Lint (shape only):** accepts a quote only when length ≥ **12** characters and the normalized quote is **not** a known filler (`yes`, `ok`, `approved`, `merge`, `lgtm`, `ship it`, …). Short or filler-only quotes → treat as missing provenance.
+
+| `<kind>` | When required |
+|----------|---------------|
+| `gate-b-approved` | HITL Gate B **blocking** and **Gate B approved** is `yes` / named pick (before Build) |
+| `gate-c-approved` | **Gate C approved** is a non-empty action subset (before merge) |
+| `gate-c-test-override` | Notes include `gate-c-test-override` (waive only with this line) |
+| `smoke-waive` | Notes include `smoke-waive` (waive only with this line) |
+| `docs-only` | Complexity/Notes `docs-only` escape under skip-review (bare token alone rejected) |
+| `smoke-pass-rerun` | Notes `smoke-pass (re-run)` **escape under skip-review** only (bare token alone rejected there; Mode full + profile full E1 needs Notes + Smoke-stage evidence, **not** this provenance) |
+| `card-override` | Notes `card-override — <reason>` unlocking unsafe card vs derived (merge/build/jump-ahead) |
+
+Bare approved fields, waiver tokens, or card-override **without** matching quality provenance → lint **error** / `--next` → `do-not-launch` (exit **1**). Do **not** invent quotes.
+
+**Honesty — provenance + lint are NOT consent proof:**
+
+- Lint provenance checks **shape + quote quality only**. They are **not** proof the user said those words.
+- They do **not** enforce latest-message substring binding ([anti-patterns.md](examples/anti-patterns.md)).
+- Passing lint with a forged quote is still a process failure — treat provenance as a **cost raiser**, not machine-proof of chat speech.
+- This skill system **cannot** implement chat-utterance verification without IDE/chat integration. Do **not** claim otherwise.
+- **E1 dual-forge (Mode full + profile full):** Notes `smoke-pass (re-run)` **plus** inventing Run log stage `smoke` and/or touching `06-test-log.md` after **Last verify-pass at** raises cost and unlocks lint — it is **not** proof an independent Smoke Task ran. Same honesty class as Gate C provenance (cost raiser, not chat/process proof).
+
+**Residual risk (overall):**
+
+1. **Forged quotes:** length ≥12 + filler ban raises cost; does not prove utterance.
+2. **Task consent writes:** handoff ban + `--check-consent-writes` raise cost; a Task that forges fields **and** a fake `parent consent write` Run-log line can still cheat.
+3. **Async gap / AskQuestion:** preferred channels and sidecars raise cost; they are not cryptographic consent.
+4. **E1 Smoke dual-forge:** Notes DONE + forged Run-log stage `smoke` / touched `06` Smoke section satisfy the machine gate; they do not prove a real independent Smoke Task (verify-and-fix.md E1).
 
 ## Gate digest
 
@@ -36,140 +105,12 @@ Mechanics when async-notify is used: section below (veto window · one turn gap 
 
 No `git commit` / `git push` / `gh pr create` / `gh pr merge` without explicit yes naming each action. Reject / silence at Gate C → stop. Gate B auto ≠ commit approval.
 
-## Provenance (required for consent / waivers)
+## Local sidecars (do not commit)
 
-Inventable tokens without a user quote are **rejected**. Before lint accepts **Gate B approved** (blocking), **Gate C approved**, Notes `gate-c-test-override`, Notes `smoke-waive`, Notes/Complexity `docs-only`, Notes `smoke-pass (re-run)`, or Notes `card-override` (unsafe derive unlock), Notes or Run log **must** contain this fixed shape:
+| File | Role |
+|------|------|
+| `.lint-async-gap` | Written by `--next` during async Gate B gap |
+| `.lint-consent-snap` | Written by `--snapshot-consent` before Task |
+| `.consent.md` | Optional parent-only consent scratchpad |
 
-```markdown
-- provenance — <kind> — user: "<exact user words>"
-```
-
-**Quote quality (required):** parent must copy the user’s words **verbatim**. Lint accepts a quote only when length ≥ **12** characters and the normalized quote is **not** a known filler (`yes`, `ok`, `approved`, `merge`, `lgtm`, `ship it`, …). Short or filler-only quotes → treat as missing provenance.
-
-| `<kind>` | When required |
-|----------|---------------|
-| `gate-b-approved` | HITL Gate B **blocking** and **Gate B approved** is `yes` / named pick (before Build) |
-| `gate-c-approved` | **Gate C approved** is a non-empty action subset (before merge) |
-| `gate-c-test-override` | Notes include `gate-c-test-override` (waive only with this line) |
-| `smoke-waive` | Notes include `smoke-waive` (waive only with this line) |
-| `docs-only` | Complexity/Notes `docs-only` escape under skip-review (bare token alone rejected) |
-| `smoke-pass-rerun` | Notes `smoke-pass (re-run)` escape under skip-review (bare token alone rejected) |
-| `card-override` | Notes `card-override — <reason>` unlocking unsafe card vs derived (merge/build/jump-ahead) |
-
-Bare approved fields, waiver tokens, or card-override **without** matching quality provenance → lint **error** / `--next` → `do-not-launch` (exit **1**). Do **not** invent quotes.
-
-**Honesty:** lint provenance checks shape + quote quality — they are **not** proof the user said those words ([anti-patterns.md](examples/anti-patterns.md)).
-
-**Residual risk:** lint raises the cost of forged quotes (length ≥12, filler ban, kind match). It does **not** prove the quote was uttered in chat.
-
-## async-notify + Gate B veto + Build armed (required)
-
-When Gate B uses **async-notify** (only when Default Gate B allows it):
-
-1. Parent posts digest + auto-pick, then sets on `00-run.md`:
-   - **`Gate B veto: none`**
-   - Notes: `async-notify posted — veto window open until Build starts`
-   - **Run log (required):** `- **HH:MM** · paused · gate-b · async-notify posted — veto window open`
-   - Status **`paused`** (card Next step = `build` but do **not** launch yet)
-   - Do **not** write **Build armed** yet
-2. **One parent turn gap (required):** do **not** launch Build in the **same** parent turn as the async-notify Gate B digest. Run `lint-run.py <run-dir> --next` → expect `handoff: do-not-launch` and a line `async-gap-pending — <digest-HH:MM>` (also writes sidecar `.lint-async-gap`). **Copy that line into Notes.** End the turn after posting.
-3. **Arm Build on the next parent turn (or resume):** before launching Build, set durable token **`Build armed`** and append a **second** Run log line whose `HH:MM` is **strictly later** than the digest timestamp, e.g. `- **HH:MM** · paused · gate-b · Build armed`. Lint fail-closed unless **all** of: arm later than digest, Notes `async-gap-pending — <digest-ts>` matching Run log digest, and `.lint-async-gap` from a prior `--next` pause. Inventing Notes `parent turn gap observed` or forging two HH:MM values in one edit **without** the prior `--next` token/sidecar is **not** enough ([anti-patterns.md](examples/anti-patterns.md)).
-4. If the user vetoes (reject / change pick) in chat **before or while Build is pending**:
-   - Parent sets **`Gate B veto: pending`** + Notes with the veto pick
-   - Clear / do not set **Build armed**
-   - Status `stopped` **or** re-open Gate B (do not start Build)
-5. **Build Task must re-read `00-run.md` first.** If `Gate B veto` is `pending` → stop with Result note `blocked — Gate B veto`; do not write code. If Notes still say veto window open **and** **Build armed** is missing → stop; parent must arm first.
-6. After Build **starts** with veto still `none` and **Build armed** present: set Status `running`; **clear** Notes “veto window open”, **Build armed**, and `async-gap-pending` (Build in flight). Lint errors if Status=`running` while Notes still say veto window open, or if `--before-build` / Next=`build` sees veto window without **Build armed** / incomplete gap.
-
-**Lint:** `scripts/lint-run.py <run-dir> --before-build` **and** default lint when card Next=`build` enforce veto `none` + veto-window / **Build armed** / Status consistency + **async turn-boundary gap** (arm later than digest + pending token + sidecar) + **Gate B approved** + provenance when HITL Gate B is **blocking**. `--next` with Next=`build` on the async path runs the **same** gap check and emits `do-not-launch` (exit **1**) until the gap is complete — including when **Build armed** is present but timestamps/token/sidecar fail. Notes `design-backloop` → **error** only on `--before-build` or Next=`build` (blocks Build even when Gate B soft / approved `none`); default lint with Next in recovery (`design-update` / re-review / `gate-b` / …) → **warn** recovery in progress — [design-backloop.md](design-backloop.md). Mode **full** + HITL Gate B ∈ {`auto`,`async-notify`} → lint error. Mode **simple** + Has API/DB = yes + HITL Gate B ∈ {`auto`,`async-notify`} → lint error (default and `--before-build`; hitl.md Default Gate B requires **blocking**). `--next` emits `handoff: do-not-launch` (exit **1**) for Build until blocking **Gate B approved** + provenance is set (or until **Build armed** + turn-boundary gap when async-notify); with Notes `design-backloop` and Next `build` → redirect to `design-update` (Next `gate-b` + token → normal Gate B digest / settle; clear token on settle).
-
-**Residual risk:** wall-clock HH:MM and a Notes token cannot prove a real chat turn boundary without IDE/chat integration. A determined agent can still invent sidecar + pending line + later HH:MM in one edit. The bar raises the cost (must run `--next` once on digest-only state) but does not eliminate forgeability.
-
-**Durable resume:** If Notes say veto window open / Last stage is Gate B async-notify / Status `paused` with Next step `build`, and `Gate B veto` is `none`, a later **resume** counts as the next parent turn — run `--next` if sidecar missing, copy `async-gap-pending`, append **Build armed** Run log line (later timestamp), then launch Build after veto re-read. Do not require same-session memory. See [resume-abort.md](resume-abort.md).
-
-## Gate B approved (durable)
-
-**Required when HITL Gate B is `blocking` before Build:** record the user’s explicit yes (or named pick) on `00-run.md` **and** provenance:
-
-```markdown
-**Gate B approved:** yes
-
-### Notes
-- provenance — gate-b-approved — user: "yes go build"
-```
-
-| Value | Meaning |
-|-------|---------|
-| `none` | No Gate B yes yet (default until Gate B settles) |
-| `yes` | User approved the Gate B digest / default pick |
-| named pick (e.g. `Option 2`) | User chose that option; treat as approved |
-
-**Rules by HITL Gate B tier:**
-
-| HITL Gate B | Before Build |
-|-------------|--------------|
-| **blocking** | **Gate B approved** must be `yes` or a named pick (not `none`) **plus** provenance `gate-b-approved`. Lint `--before-build` and `--next` → `do-not-launch` until both set. |
-| **auto** | Allow Build without user yes; **Gate B approved** may stay `none`. Log a Run log `gate-b` digest/auto-pick line (lint **warns** when Next=`build` / `--before-build` lacks it). |
-| **async-notify** | Do **not** use Gate B approved as the arm token — use **Build armed** + turn-boundary gap (arm later than digest + `async-gap-pending` + sidecar; above). |
-
-Gate B auto/async ≠ Gate C commit approval.
-
-**Example:** Turn N — Gate B posts digest + auto-pick; sets `Gate B veto: none`; veto window Notes + Run log digest line; ends turn. Turn N+1 — no veto → Run log **`Build armed`** (new `HH:MM`) → launch Build (re-read veto = none). If user says “stop — use Option 2” → set `Gate B veto: pending`; do not arm; stop or re-open Gate B.
-
-### async-notify veto after Build started
-
-Do not silently continue to review. Pause with **Decision N** ([handoffs.md](handoffs.md) shape):
-
-| Option | What |
-|--------|------|
-| 1 | Discard draft; re-open Gate B with veto pick |
-| 2 | Keep draft; re-open Gate B (amend design/tasks only) |
-| 3 | Stop (Status `stopped`) |
-
-**On re-open Gate B (Option 1 or 2):** set **`Gate B approved: none`**; clear Notes **Build armed** and veto-window tokens; card Next = `gate-b`; require a **fresh** Gate B digest + yes (or named pick) before Build. Do not reuse the prior approved token. Design-backloop Option 1 uses the same approved/armed reset but Next = `design-update` first ([design-backloop.md](design-backloop.md)).
-
-## HITL Grill (independent of Gate B)
-
-| Mode | Default Grill tier |
-|------|--------------------|
-| **full** | `async-notify` (prefer human-visible picks; blocking when auth/PII/schema forks) |
-| **simple** | `auto` |
-
-Do **not** copy Gate B tier into Grill unless `00-run.md` explicitly sets them equal. Domain rules: [grill.md](grill.md).
-
-## Gate C test bar (before merge subflow)
-
-| Review profile | Required |
-|----------------|----------|
-| **skip-review** | **Fail-closed:** legal only per [lenses.md](lenses.md) **and** Build **verify-pass** + Smoke smoke-pass **and** one escape **with provenance**: Notes `smoke-pass (re-run)` + `smoke-pass-rerun`, Complexity/Notes `docs-only` + `docs-only`, or `smoke-waive` / `gate-c-test-override` with their kinds. Free-text Notes alone are **rejected**. Relying on Build-writes-Smoke alone → lint `--before-merge` **error** / `--next` → `do-not-launch` (exit **1**). Recovery: [verify-and-fix.md](verify-and-fix.md) |
-| **lite** | `06-test-log.md` Result **success** **and** **Test path last run:** `lite` (missing → fail closed; LEGACY alias `Mode last run`) |
-| **full** | `06-test-log.md` Result **success** **and** **Test path last run:** `full` (missing → fail closed; LEGACY alias `Mode last run`) |
-
-Explicit user override may waive green tests **only** with Notes `gate-c-test-override` **plus** provenance `gate-c-test-override`. Does **not** waive Notes `review-stale` / `test-stale` (or unpaid clean/success vs `Last verify-pass at` — [verify-and-fix.md](verify-and-fix.md) Stale).
-
-**Lint:** `scripts/lint-run.py <run-dir> --before-merge` (also when `--next` and card Next=`merge`) enforces this bar from `00-run.md` + `06-test-log.md` unless Notes override **with provenance** is present; **errors** on `review-stale` / `test-stale` and on unpaid `05`/`06` vs `Last verify-pass at`; skip-review Build-only smoke → **error** unless the fail-closed escape above; also runs `--check-results` (warn-only).
-
-After Merge Result **success** **and** `merge` ∈ **Gate C approved** → set Status **`done`**. Subset without `merge` (e.g. PR only) → stay `paused`; leave Next for remaining actions. Abort/reject → `stopped`, not `done` ([results.md](results.md) · [stages.md](stages.md) Done criteria).
-
-## Gate C approved actions (durable)
-
-**Required when at Gate C / before merge:** record the user’s explicit yes as a durable field on `00-run.md` **and** provenance:
-
-```markdown
-**Gate C approved:** commit,push,pr,merge
-
-### Notes
-- provenance — gate-c-approved — user: "commit push PR and merge"
-```
-
-| Value | Meaning |
-|-------|---------|
-| `none` | No Gate C yes yet (default until ask settles) |
-| comma-separated subset of `commit` \| `push` \| `pr` \| `merge` | Actions the user named in this chat |
-
-**Rules:**
-
-- Do **not** invent actions. Subset only what the user named (“PR only” → `pr` or `commit,push,pr` as said).
-- Provenance quote must match the user’s words (see Provenance section).
-- Merge Task / parent must re-read **Gate C approved** before git/remote actions.
-- Lint: default `scripts/lint-run.py <run-dir>` errors when card Next=`merge` and **Gate C approved** is missing / `none` / empty **or** provenance missing. `--before-merge` enforces approved-actions + provenance + Gate C test bar and runs `--check-results` warn-only (prefer before launching Merge).
+**Local only — do not commit** (unless team policy says otherwise for `.consent.md`). See [hitl-gate-b.md](hitl-gate-b.md) · [scripts/README.md](scripts/README.md).

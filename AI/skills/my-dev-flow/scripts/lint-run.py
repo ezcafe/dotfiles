@@ -19,6 +19,11 @@ if str(_SCRIPTS) not in sys.path:
 
 # Re-export public + test-facing API (tests load this file via importlib)
 from lint_common import *  # noqa: F403
+from lint_common import (  # noqa: F401
+    check_consent_writes,
+    snapshot_consent,
+    _full_profile_independent_smoke,
+)
 from lint_stage_ids import (  # noqa: F401
     check_stage_id_registry,
     stage_ids_from_handoffs,
@@ -27,8 +32,10 @@ from lint_stage_ids import (  # noqa: F401
 )
 from lint_gate_b import (  # noqa: F401
     _async_gap_pending_digest_ts,
+    _async_notify_requested_ok,
     _async_turn_gap_ok,
     _check_async_gate_b_gap,
+    _check_async_notify_requested,
     _check_design_backloop_gate_b,
     _check_gate_b_approved,
     _check_hitl_gate_b_mode,
@@ -50,7 +57,9 @@ from lint_gate_c import (  # noqa: F401
     _last_verify_pass,
     _parse_gate_c_approved,
     _review_profile,
+    _smoke_fail_or_failure,
     _smoke_pass,
+    _test_log_failure,
     _test_log_success,
 )
 from lint_derive import (  # noqa: F401
@@ -65,6 +74,7 @@ from lint_derive import (  # noqa: F401
 )
 from lint_core import (  # noqa: F401
     _phase_gate_flags,
+    _unsafe_card_derive_mismatch,
     dry_run_seed,
     lint_run_md,
     main,

@@ -15,7 +15,7 @@ Fill **Required** at Step 0. Fill **Optional** when known.
 | Gate B veto | `none` \| `pending` |
 | Gate B approved | `none` \| `yes` \| named pick (e.g. `Option 2`) |
 | Pending parallel | `none` \| `api` \| `db` \| `api\|db` |
-| Has UI / API / DB | `yes` \| `no` |
+| Has UI / API / DB / auth/PII/schema | `yes` \| `no` |
 | Last Verify | `pending` \| `verify-pass` \| `verify-fail` |
 | Last verify-pass at | `none` \| ISO-8601 (set on verify-pass — [verify-and-fix.md](../verify-and-fix.md) Stale) |
 | Gate C approved | `none` \| comma-separated subset of `commit`,`push`,`pr`,`merge` |
@@ -72,6 +72,7 @@ Fill **Required** at Step 0. Fill **Optional** when known.
 - verify-fail count:
 - main-thread fallbacks:
 - design-review rounds:
+- review fix rounds:
 - smoke↔fix / test↔fix rounds:
 - Gate B HITL / Grill HITL:
 - inherit retries:
@@ -102,11 +103,13 @@ Fill **Required** at Step 0. Fill **Optional** when known.
 - **Has UI:** no
 - **Has API:** no
 - **Has DB:** no
-<!-- Has API/DB must be exact yes|no before design-review (not unknown; not "yes | no" template). -->
+- **Has auth/PII/schema:** no
+<!-- Has API/DB and Has auth/PII/schema must be exact yes|no before design-review (not unknown; not "yes | no" template). auth/PII/schema yes → Mode simple Gate B blocking (hitl-gate-b.md). -->
 - **HITL Gate B:** auto
+<!-- Seed `auto` for Mode **simple** low-risk only. Mode **full** MUST set **blocking** at Step 0 (never leave auto/async-notify). Mode simple + Has API/DB/auth yes → flip to blocking. Gate B async-notify only when user asks for a veto window on low-risk simple (hitl-gate-b.md). -->
 - **HITL Grill:** auto
 - **HITL Gate C:** blocking
-<!-- Gate C always blocking. Gate B: Mode full → blocking (never auto/async-notify); Mode simple low-risk → prefer auto; async-notify only when user asks for a veto window / async digest (Has API/DB=no + no auth/PII/schema — hitl.md Default Gate B). HITL Grill independent of Gate B. Soft HITL = Grill + simple Gate B only. -->
+<!-- Gate C always blocking. HITL Grill soft/auto by default — independent of Gate B (not async-notify scope). Soft HITL = Grill + simple Gate B only. -->
 - **04a:** skipped — reason:
 - **Smoke:** pending
 <!-- pending | smoke-pass (from Build) | smoke-pass (re-run) | smoke-fail | skipped-verify-bar (skip-review) -->
@@ -140,8 +143,9 @@ Update after each step. Parent load per stage: this card + [Load budget](../step
 ### Notes
 
 - Abort / scope-change: Status `stopped` + frozen stage + reason
-- async-notify Gate B tokens: write live lines only when posting / arming — see hitl.md (do not paste example tokens into Notes at seed time)
-- Consent / waivers: quality provenance required for approved fields, waive kinds, docs-only, smoke-pass-rerun, card-override — hitl.md (do not paste bare tokens at seed)
+- async-notify Gate B tokens: write live lines only when posting / arming — see hitl.md (do not paste example tokens into Notes at seed time). Switching from seeded **auto** → async-notify requires Notes `async-notify requested — user: "…"` first
+- Consent / waivers: quality provenance required for approved fields, waive kinds, docs-only, smoke-pass-rerun, card-override — hitl.md (do not paste bare tokens at seed). Parent-only; `--snapshot-consent` / `--check-consent-writes`; optional `.consent.md` scratchpad
+- clarity-check ok — parent-only (Tasks must not write)
 - Gate C yes: set **Gate C approved:** commit,push,pr,merge (subset as named) + provenance — hitl.md
 - Card vs derive: unsafe mismatch → card-override Notes + provenance card-override, or fix Next — parent-next.md
 - Design backloop path: failure-playbook.md / invariants.md / stages.md

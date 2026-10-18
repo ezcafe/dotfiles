@@ -18,8 +18,10 @@ Minimal walkthrough. Parent follows [stages.md](../stages.md) Happy path (full) 
 
 1. Clarity boundary + `clarity-check ok — <Next>` when required ([parent-next.md](../parent-next.md)).
 2. Boundary-matched: `design` → `clarity-check ok — design`. Boundary-matched: `build` → `clarity-check ok — build`.
-3. `python3 {my-dev-flow}/scripts/lint-run.py <run-dir> --next --derive` (illegal Next e.g. `adversarial` under lite → `do-not-launch`).
-4. `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>` on exit 0.
+3. `python3 {my-dev-flow}/scripts/lint-run.py <run-dir> --next --derive` (or `preflight.py`; illegal Next e.g. `adversarial` under lite → `do-not-launch`).
+4. `--snapshot-consent` before launch; `--check-consent-writes` after ([hitl.md](../hitl.md))
+5. After any parent consent/waiver write: Run log `parent consent write — <kind>` → re-snapshot
+6. `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>` on exit 0.
 
 ## Pipeline
 
@@ -33,13 +35,13 @@ Minimal walkthrough. Parent follows [stages.md](../stages.md) Happy path (full) 
 | 6 | `design` | Boundary-matched clarity + `--next --derive` → two options in `03-design.md` + `04-tasks.md`; Verify commands; Has API/DB |
 | 7 | design-review path | Isolated API∥DB when flagged, then general → overall **clean** (or `design-verify-phase` only if reclassified simple) |
 | 8 | (04a) | Only if planned tests; else Notes skip |
-| 9 | Gate B | **blocking** → `Gate B approved: yes` (or named pick) + `Gate B veto: none` **+** Notes `- provenance — gate-b-approved — user: "yes go build"` ([hitl.md](../hitl.md) Provenance) |
+| 9 | Gate B | **blocking** → `Gate B approved: yes` (or named pick) + `Gate B veto: none` **+** Notes `- provenance — gate-b-approved — user: "yes go build"` + Run log `parent consent write — gate-b-approved` → re-snapshot ([hitl.md](../hitl.md)) |
 | 10 | `build` | Boundary-matched clarity + `--next --derive` → verify-pass → Smoke section smoke-pass |
 | 11 | Smoke Task | **skipped** (Build-writes-Smoke) |
 | 12 | `code-review-phase` | Lite combined (never separate Adv+Quality under lite) → **clean** |
 | 13 | lenses | Per Lens plan (often none) |
 | 14 | `test-lite` | Result **success** (**Test path last run:** `lite`; not `test-full`) |
-| 15 | Gate C | blocking — user names commit / push / PR / merge; set `Gate C approved: commit,push,pr,merge` **+** Notes `- provenance — gate-c-approved — user: "commit push PR and merge"` ([hitl.md](../hitl.md) Provenance) |
+| 15 | Gate C | blocking — user names commit / push / PR / merge; set `Gate C approved: commit,push,pr,merge` **+** Notes `- provenance — gate-c-approved — user: "commit push PR and merge"` + Run log `parent consent write — gate-c-approved` → re-snapshot ([hitl.md](../hitl.md)) |
 | 16 | `merge` | Only approved actions; Status **`done`** only when Result **success** **and** `merge` ∈ Gate C approved (PR-only / commit-only → stay **paused**) + calibration Notes (≤3) + append same ≤3 lines to `_calibration.md` ([stages.md](../stages.md) Done criteria) |
 
 ## Do not

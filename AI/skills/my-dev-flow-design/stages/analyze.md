@@ -49,14 +49,14 @@ Optional spike: throwaway exploration only to reduce uncertainty. Same What/Why/
 Write 02-analysis.md (template) including Deep dive (+ Solution branches), **Design tree (frontier)** (Settled / Open frontier / Blocked), **Reusable patterns**, **System shape candidates**, and optional Spike notes.
 Ask: “Are the instructions and reference files clear enough to design? Any gaps in What / Why / How?”
 
-Also state whether this change touches public APIs / contracts (**Has API** yes/no) and whether it touches schema / migrations / persistence queries (**Has DB** yes/no) so the parent can set 00-run.md.
+Also state whether this change touches public APIs / contracts (**Has API** yes/no), schema / migrations / persistence queries (**Has DB** yes/no), and auth / PII / schema trust boundaries (**Has auth/PII/schema** yes/no) so the parent can set 00-run.md.
 Confirm or refine **Verify commands** (cwd, build, unit, e2e, or N/A + reason) for 00-run.md — see {my-dev-flow}/verify-and-fix.md.
 State whether Grill should run: **yes** if Open frontier or unsettled Decisions remain; **no** if frontier already empty (simple clear asks).
 
 Do not write production code. Do not finalize design yet.
-Return: short summary + deep-dive highlights + open questions + Design tree summary + Grill recommended? + Has API/DB + Verify commands.
+Return: short summary + deep-dive highlights + open questions + Design tree summary + Grill recommended? + Has API/DB + Has auth/PII/schema + Verify commands.
 ```
 
-**After:** Parent may answer Q&A, sets/refines **Has API**, **Has DB**, and **Verify commands** in `00-run.md` from Analyze return, then **grill** (or skip per `{my-dev-flow}/grill.md`), then Design (or pause if blocked).
+**After:** Parent may answer Q&A, sets/refines **Has API**, **Has DB**, **Has auth/PII/schema**, and **Verify commands** in `00-run.md` from Analyze return, then **grill** (or skip per `{my-dev-flow}/grill.md`), then Design (or pause if blocked).
 
 ---

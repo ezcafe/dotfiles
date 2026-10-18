@@ -12,19 +12,20 @@ Before every Task — this is the only launch-time card; details live in linked 
 
 1. Card Mode / profile / Status — [invariants.md](invariants.md) (card matches Mode / profile / Status)
 2. Clarity boundary + `clarity-check ok — <Next>` — [parent-next.md](parent-next.md)
-3. `lint-run.py <run-dir> --next --derive` — phase gates **auto** from card Next (design-review* → `--before-design-review`; Adv / `code-review-phase` → `--before-code-review`; `build` → `--before-build`; `merge` → `--before-merge`) — [parent-next.md](parent-next.md) · [scripts/README.md](scripts/README.md)
+3. Launch pack: `scripts/preflight.py <run-dir>` **or** `lint-run.py <run-dir> --next --derive` — phase gates **auto** from card Next; preflight prints card + Open (≤2) + clarity + lint exit ([parent-next.md](parent-next.md) · [scripts/README.md](scripts/README.md))
 4. Illegal Mode × profile / skip-review Next → `do-not-launch` unless `card-override` + provenance — [stages.md](stages.md)
 5. Unsafe card vs derived → fix card or override — [parent-next.md](parent-next.md)
-6. `handoff-for.py <stage-id>` + load `stages/<id>.md` only — [skills-path.md](skills-path.md)
-7. Gate B / Build armed / provenance when Next=`build` — [hitl.md](hitl.md)
-8. Gate C approved + provenance when Next=`merge` — [hitl.md](hitl.md)
-9. Has API/DB + skip-review ban / Pending parallel — [lenses.md](lenses.md)
+6. `handoff-for.py <stage-id>` + load `stages/<id>.md` only — [skills-path.md](skills-path.md). Soft-cap Open paths ≤2 ([step-0.md](step-0.md#load-budget))
+7. Gate B / Build armed / provenance when Next=`build` — [hitl-gate-b.md](hitl-gate-b.md) · [hitl.md](hitl.md) Provenance. Prefer AskQuestion for blocking yes.
+8. Gate C approved + provenance when Next=`merge` — [hitl-gate-c.md](hitl-gate-c.md) · [hitl.md](hitl.md) Provenance. Prefer AskQuestion.
+9. Has API/DB/**auth/PII/schema** yes\|no + skip-review ban / Pending parallel — [lenses.md](lenses.md) · [invariants.md](invariants.md) checklist item 3
 10. Verify commands before build/fix/test — [verify-and-fix.md](verify-and-fix.md)
 11. Honor [Load budget](step-0.md#load-budget) — card + launch card + `--next --derive` + handoff + `stages/<id>.md` + parent-next Open (1–2) + clarity file when Next ∈ clarity stages (not a hard “one companion” cap)
-12. After return: Result first line → update card — [results.md](results.md)
+12. After return: Result first line → update card — [results.md](results.md). Parent-only consent; `--snapshot-consent` before Task / `--check-consent-writes` after ([hitl.md](hitl.md)).
 
 ## Also
 
-- Design-review update → re-review. Smoke/test fail → Fix (verify-pass) → re-run.
-- No advance on verify-fail; max 3 → Decision N. Design invalid → [design-backloop.md](design-backloop.md).
+- Design-review update → re-review. Smoke/test fail → Fix (`--derive` → `fix-tests`; verify-pass) → re-smoke / re-test. Gate C only after test bar paid (Next=`gate-c` while derived `test-full`/`test-lite` → `do-not-launch`).
+- No advance on verify-fail; max 3 → Decision N ([invariants.md](invariants.md) max-round tables). Design invalid → [design-backloop.md](design-backloop.md).
 - Mode full Task count ≥25 → Decision N ([invariants.md](invariants.md)).
+- Consent / waivers / provenance: parent-only write ([hitl.md](hitl.md)).

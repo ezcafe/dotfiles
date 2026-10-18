@@ -17,7 +17,7 @@ Design-boundary clarity tokens do **not** unlock these.
 
 Before launching **`merge`**:
 
-- **Gate C approved** is a non-empty action subset **+** provenance `gate-c-approved` ([hitl.md](../../my-dev-flow/hitl.md))
+- **Gate C approved** is a non-empty action subset **+** provenance `gate-c-approved` ([hitl-gate-c.md](../../my-dev-flow/hitl-gate-c.md) · [hitl.md](../../my-dev-flow/hitl.md))
 - Gate C **test bar** met for this Review profile (or waiver + matching provenance)
 - No secrets in the commit set
 

@@ -26,7 +26,8 @@ Build subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). First output is a **d
 |-------|------|
 | Runtime order | [`../my-dev-flow/stages.md`](../my-dev-flow/stages.md) |
 | Verify / Smoke after Build (Build-writes-Smoke) / Fix | [`../my-dev-flow/verify-and-fix.md`](../my-dev-flow/verify-and-fix.md) |
-| Gate B veto / Build armed / provenance / async gap | [`../my-dev-flow/hitl.md`](../my-dev-flow/hitl.md) |
+| Gate B veto / Build armed / async gap | [`../my-dev-flow/hitl-gate-b.md`](../my-dev-flow/hitl-gate-b.md) |
+| Provenance / parent-only consent | [`../my-dev-flow/hitl.md`](../my-dev-flow/hitl.md) |
 | skip-review legality | [`../my-dev-flow/lenses.md`](../my-dev-flow/lenses.md) |
 | Design-backloop / max rounds | [`../my-dev-flow/invariants.md`](../my-dev-flow/invariants.md) |
 | Result tokens | [`../my-dev-flow/results.md`](../my-dev-flow/results.md) |
@@ -39,7 +40,7 @@ Build subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). First output is a **d
 ## Principles (owned here)
 
 - **TDD review before Gate B** only if `04-tasks` lists planned tests; else Notes skip.
-- **Build after Gate B** (when parent is my-dev-flow). Re-read veto + Notes first — blocked tokens: [results.md](../my-dev-flow/results.md) / [hitl.md](../my-dev-flow/hitl.md).
+- **Build after Gate B** (when parent is my-dev-flow). Re-read veto + Notes first — blocked tokens: [results.md](../my-dev-flow/results.md) / [hitl-gate-b.md](../my-dev-flow/hitl-gate-b.md).
 - **Verify gate:** first line `Result: verify-pass | verify-fail`; max 3; on pass Build writes Smoke (Build-writes-Smoke).
 - **Fix-from-tests:** repair from `06` Fix ask only; verify-pass before re-test.
 - **Design-backloop** if `03`/`04` must change — never silently rewrite (invariants.md).
@@ -55,7 +56,7 @@ Build subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). First output is a **d
 | Mode | Need |
 |------|------|
 | **TDD review** | `03`+`04` with planned tests; Gate B not required yet |
-| **Build** | Gate B settled per [hitl.md](../my-dev-flow/hitl.md); veto `none`; when HITL Gate B is **blocking**, **Gate B approved** `yes` (or named pick) **+ provenance**; **Build armed** + turn-boundary gap if async window open (**auto** may leave Gate B approved `none`); Verify commands; prefer `04a` or Notes skip |
+| **Build** | Gate B settled per [hitl-gate-b.md](../my-dev-flow/hitl-gate-b.md); veto `none`; when HITL Gate B is **blocking**, **Gate B approved** `yes` (or named pick) **+ provenance** ([hitl.md](../my-dev-flow/hitl.md)); **Build armed** + turn-boundary gap if async window open (**auto** may leave Gate B approved `none`); Verify commands; prefer `04a` or Notes skip |
 | **Fix-from-tests** | `06` smoke-fail/failure + Fix ask; Verify commands |
 
 If not ready → **stop**.
@@ -70,7 +71,7 @@ Fix-from-tests    → Fix → Verify → verify-pass → re-test
 ## Orchestrator rules
 
 - Detect: no planned tests → skip 04a; `06` failure → fix-tests; else Build (require Gate B when parent is my-dev-flow).
-- Advance only on **verify-pass**. Skip Smoke Task after Build-writes-Smoke unless Notes `smoke re-run`.
+- Advance only on **verify-pass**. Post-Build Smoke: parent [stages.md](../my-dev-flow/stages.md) Mode × Review profile · [verify-and-fix.md](../my-dev-flow/verify-and-fix.md) — **Mode full + profile full requires** independent Smoke before Adv; Skip Smoke Task (Build-writes-Smoke) only when independent smoke is not required.
 - After 3 verify-fail → Decision N (parent). Persist Last Verify on card.
 - Post-Build routing (skip-review vs review): parent [stages.md](../my-dev-flow/stages.md) · [lenses.md](../my-dev-flow/lenses.md).
 

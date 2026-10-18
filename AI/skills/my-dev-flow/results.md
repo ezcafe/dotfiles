@@ -28,7 +28,7 @@ Parent reads the first ~40 lines; do not bury the token.
 | **Skim** | `done` \| `skipped` | either | — |
 | **TDD review** (`04a`) | `clean` \| `needs more tests` | `clean` or Notes skip | `needs more tests` |
 | **Code review** (`05*` — Adv, Quality, Lite combined, lenses, Merge findings) | `clean` \| `needs fix` | `clean` | `needs fix` → Fix → re-review (legacy lens text `has findings` → `needs fix`) |
-| **Test / Smoke** (`06`) | `success` \| `failure` \| `smoke-pass` \| `smoke-fail` | `success` / `smoke-pass` | `failure` / `smoke-fail` → Fix |
+| **Test / Smoke** (`06`) | `success` \| `failure` \| `smoke-pass` \| `smoke-fail` | `success` / `smoke-pass` (`**Smoke result:**` preferred when `## Smoke` exists; do not rely on `**Result:**` under `## Smoke` alone when a top-level test Result also exists — lint reads test Result outside Smoke) | Smoke-section `smoke-fail`\|`failure` **or** top-level test `failure` (first `**Result:**` outside `## Smoke`) → Fix (`--derive` → `fix-tests`); after Fix verify-pass → re-smoke / re-test ([verify-and-fix.md](verify-and-fix.md) M1); unpaid/missing Smoke → `smoke` (or `build` under skip-review) |
 | **Merge** | `success` \| `aborted` | `success` **and** `merge` ∈ **Gate C approved** → Status `done` | `aborted` → `stopped`; `success` without `merge` in approved → stay `paused`, leave Next for remaining actions |
 
 **Clean** for review stages = zero open Critical/Major ([severity.md](severity.md)).

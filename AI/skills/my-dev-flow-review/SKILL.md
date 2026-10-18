@@ -48,9 +48,10 @@ Review + Fix subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). Generation ≠
 
 - Draft exists (after `my-dev-flow-code` or equivalent).
 - Prefer Gate B checked; prefer Smoke **smoke-pass** in `06-test-log.md` when parent is `my-dev-flow`.
+- Mode **full** + Review profile **full:** require independent Smoke re-run (Notes `smoke-pass (re-run)` + Smoke-stage evidence) before Adv — do **not** start on Build-writes-Smoke alone ([`verify-and-fix.md`](../my-dev-flow/verify-and-fix.md) E1 · [`stages.md`](../my-dev-flow/stages.md)).
 - Prefer `03`/`04` for intent checks; create `05-review-log.md` from templates if missing.
 
-If no draft → **stop** (run code first). If parent Gate B unchecked or smoke not smoke-pass → **stop**.
+If no draft → **stop** (run code first). If parent Gate B unchecked or smoke not smoke-pass → **stop**. If Mode full + profile full without independent re-run evidence → **stop** (parent launches Smoke first).
 
 ## Pipeline / launch
 

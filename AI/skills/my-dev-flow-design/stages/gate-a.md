@@ -46,6 +46,8 @@ Set Result:
 - **needs update** — Fix ask lists concrete changes to 01-idea.md
 - **escalate** — only if unsafe, unethical, or too unclear without a human
 
+On re-entry after ideation-update: do **not** invent or bump **Round** — parent increments before re-launch (`{my-dev-flow}/parent-next.md` · `{my-dev-flow}/invariants.md`).
+
 Do not write code. Do not rewrite 01-idea.md yourself.
 Return FIRST LINE exactly: Result: ok | needs update | escalate
 Then short summary + path to 01a-gate-a.md ({my-dev-flow}/results.md).
@@ -54,7 +56,7 @@ Then short summary + path to 01a-gate-a.md ({my-dev-flow}/results.md).
 **After (parent)** — mutually exclusive on Result (do **not** treat skim as unconditional):
 
 1. **ok** → check **Gate A** in `00-run.md`; Run log `done · Gate A — ok · auto-approved`; confirm **Has UI** still matches `01-idea.md`; continue to **skim**.
-2. **needs update** → loop **ideation-update** ↔ Gate A until Result **ok** or round = 3. Do **not** pause for human after every needs-update round — only at **max 3** (Decision N / raise cap) or on **escalate**.
-3. **escalate** → pause for human immediately; set Next=`gate-a`; exit for human-resolve. **Decision N** ([invariants.md](../../my-dev-flow/invariants.md)): re-run Gate A · human override Result **ok** + Notes · Stop. **Resume only after Decision N + explicit user yes** — never invent Result **ok**. Then: re-run Gate A, **or** set Result **ok** + Notes (then skim). See `{my-dev-flow}/results.md` · `{my-dev-flow}/failure-playbook.md`.
+2. **needs update** → loop **ideation-update** ↔ Gate A until Result **ok** or round = 3. **Parent bumps Round** on `01a` before each re-launch ([parent-next.md](../../my-dev-flow/parent-next.md)). Do **not** pause for human after every needs-update round — only at **max 3** (Decision N / raise cap) or on **escalate**.
+3. **escalate** → pause for human immediately; set Next=`gate-a`; exit for human-resolve. **Decision N** ([invariants.md](../../my-dev-flow/invariants.md)): re-run Gate A · human override Result **ok** + Notes · Stop. **Resume only after Decision N + explicit user yes** — never invent Result **ok**. Then: re-run Gate A (**parent** bumps Round), **or** set Result **ok** + Notes (then skim). See `{my-dev-flow}/results.md` · `{my-dev-flow}/failure-playbook.md` · [gate-a-escalate.md](../../my-dev-flow/examples/gate-a-escalate.md).
 
 ---

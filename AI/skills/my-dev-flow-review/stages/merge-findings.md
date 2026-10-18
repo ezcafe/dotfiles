@@ -41,12 +41,11 @@ Rules for merging:
 6. Result = **needs fix** if any Critical/Major remain — write numbered Fix ask (what to change, which files, which lens ids). If Fix needs design/contract change → parent Design-backloop ([design-backloop.md](../../my-dev-flow/design-backloop.md)), not silent design rewrite.
 
 Write/update 05-review-log.md section “Merged lenses” using the template shape:
-- Round number
 - Result: clean | needs fix
 - Winners table (Severity, Sources, Finding, Decision) — Sources may include api/db/security/perf/memory
 - Conflicts resolved (what lost and why)
 - Fix ask (numbered) — empty if clean
-- Round notes
+- Round notes (Merged lenses section only — do **not** invent or bump file-top **Round**; parent increments on re-entry)
 
 Do not edit the 05-lens-*.md files. Do not write production code.
 Return FIRST LINE exactly: Result: clean | needs fix

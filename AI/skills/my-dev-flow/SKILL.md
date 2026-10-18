@@ -3,20 +3,22 @@ name: my-dev-flow
 description: >-
   Orchestrates the AI-assisted delivery pipeline (design → review → build →
   test → merge). Classifies simple vs full. Gate C always blocking; Mode full
-  Gate B blocking; Mode simple Gate B soft (prefer auto; async-notify
-  when user asks for a veto window); Grill soft by default. Use when the
-  user says run my-dev-flow, start my-dev-flow, run my-plan-flow /
-  my-workflow (legacy), simple mode, ideate → build → merge, grill /
-  stress-test this plan, or wants the end-to-end delivery pipeline.
+  Gate B blocking; Mode simple Gate B: prefer auto only when Has API=no AND
+  Has DB=no AND no auth/PII/schema (else blocking); Gate B async-notify only
+  when user asks for a veto window on that low-risk path (not Grill); Grill
+  soft/auto by default (independent of Gate B). Use when the user says run
+  my-dev-flow, start my-dev-flow, run my-plan-flow / my-workflow (legacy),
+  simple mode, ideate → build → merge, grill / stress-test this plan, or
+  wants the end-to-end delivery pipeline.
 ---
 
 # my-dev-flow
 
-**TL;DR:** (1) Classify Mode simple vs full. (2) Seed `.my-docs/workflow/<slug>/` from artifacts. (3) Run **Full/Simple pipeline order** in [stages.md](stages.md). (4) Gate C always **blocking**. Mode **full** Gate B **blocking**. Mode **simple** Gate B soft (prefer **auto**; **async-notify** when user asks for a veto window). Grill soft by default. Soft HITL → Grill + Mode simple Gate B only — [hitl.md](hitl.md).
+**TL;DR:** (1) Classify Mode simple vs full. (2) Seed `.my-docs/workflow/<slug>/` from artifacts. (3) Run **Full/Simple pipeline order** in [stages.md](stages.md). (4) Gate C always **blocking**. Mode **full** Gate B **blocking**. Mode **simple** Gate B: prefer **auto** only when Has API=no **and** Has DB=no **and** no auth/PII/schema; else **blocking** — [hitl-gate-b.md](hitl-gate-b.md). **Gate B async-notify** only when user asks for a veto window on that low-risk path (does **not** apply to Grill). **Grill** soft/auto by default — independent of Gate B ([grill.md](grill.md) · [hitl.md](hitl.md)). Soft HITL → Grill + Mode simple Gate B only.
 
 End-to-end **orchestrator only**. Stage prompts live in subflows.  
 **Runtime order (SoT):** [stages.md](stages.md) Happy path.  
-**Companions:** [hitl.md](hitl.md) · [models.md](models.md) · [lenses.md](lenses.md) · [invariants.md](invariants.md) · [failure-playbook.md](failure-playbook.md) · [grill.md](grill.md) · [verify-and-fix.md](verify-and-fix.md) · [parent-next.md](parent-next.md) · [size-caps.md](size-caps.md) · [results.md](results.md) · [step-0.md](step-0.md) · [resume-abort.md](resume-abort.md) · [design-backloop.md](design-backloop.md) · [orchestrator-rules.md](orchestrator-rules.md).
+**Companions:** [hitl.md](hitl.md) · [hitl-gate-b.md](hitl-gate-b.md) · [hitl-gate-c.md](hitl-gate-c.md) · [models.md](models.md) · [lenses.md](lenses.md) · [invariants.md](invariants.md) · [failure-playbook.md](failure-playbook.md) · [grill.md](grill.md) · [verify-and-fix.md](verify-and-fix.md) · [parent-next.md](parent-next.md) · [size-caps.md](size-caps.md) · [results.md](results.md) · [step-0.md](step-0.md) · [resume-abort.md](resume-abort.md) · [design-backloop.md](design-backloop.md) · [orchestrator-rules.md](orchestrator-rules.md).
 
 Practices: [AI-assisted engineering](https://newsletter.eng-leadership.com/p/how-to-do-ai-assisted-engineering) —
 design-heavy, never ship first draft, generation ≠ verification.
@@ -57,7 +59,7 @@ Follow **[step-0.md](step-0.md)** (classify, seed `00-run.md`, models, lint, cha
 | Design-backloop after Build | [design-backloop.md](design-backloop.md) |
 | Pre-launch checklist card / orchestrator rules | [orchestrator-rules.md](orchestrator-rules.md) |
 | Card Stage id / Next → which 1–2 files | [parent-next.md](parent-next.md) · `lint-run.py --next --derive` (required habit) |
-| Gate B/C · veto · **Gate B approved** · provenance · async gap · **Build armed** · Gate C bar | [hitl.md](hitl.md) |
+| Gate B/C · veto · **Gate B approved** · provenance · async gap · **Build armed** · Gate C bar | [hitl.md](hitl.md) · [hitl-gate-b.md](hitl-gate-b.md) · [hitl-gate-c.md](hitl-gate-c.md) |
 | Models + usage-limit | [models.md](models.md) |
 | Has API/DB · tiny-tweak · Lens plan · skip-review ban | [lenses.md](lenses.md) |
 | Decision shapes · Task-count budget · detailed checklist body | [invariants.md](invariants.md) |

@@ -4,7 +4,7 @@
 Used by [`my-dev-flow-code`](../my-dev-flow-code/SKILL.md) (Build, Fix-from-tests) and
 [`my-dev-flow-review`](../my-dev-flow-review/SKILL.md) (Fix).  
 Pipeline pointer: [stages.md](stages.md). Launch-time checklist: [orchestrator-rules.md](orchestrator-rules.md). Decision shapes / detailed checklist body: [invariants.md](invariants.md).  
-Gate B veto before Build: [hitl.md](hitl.md). Hard stops: [failure-playbook.md](failure-playbook.md).  
+Gate B veto before Build: [hitl-gate-b.md](hitl-gate-b.md). Gate C bar: [hitl-gate-c.md](hitl-gate-c.md). Hard stops: [failure-playbook.md](failure-playbook.md).  
 **Lint (required) before Build:** `scripts/lint-run.py <run-dir> --before-build`.
 
 ## Verify commands (00-run.md)
@@ -29,7 +29,7 @@ Build, Fix, Smoke, and full/lite test **must** use these commands (same cwd). Do
 
 ## Gate B veto check (before Build coding)
 
-Build Task **first action:** read `00-run.md` **Gate B veto**, **Gate B approved**, and Notes. Full async rules: [hitl.md](hitl.md). Aligns with [`my-dev-flow-code/stages/build.md`](../my-dev-flow-code/stages/build.md).
+Build Task **first action:** read `00-run.md` **Gate B veto**, **Gate B approved**, and Notes. Full async rules: [hitl-gate-b.md](hitl-gate-b.md). Aligns with [`my-dev-flow-code/stages/build.md`](../my-dev-flow-code/stages/build.md).
 
 | Condition | Action |
 |-----------|--------|
@@ -60,7 +60,16 @@ Result: verify-pass | verify-fail
 
 Then: commands run + pass/fail; what changed; risks / out of scope.
 
-**Parent:** Advance **only** on **verify-pass**. On **verify-fail** → re-launch same stage (if attempts remain) or Decision N. Persist on Orchestrator card: Last Verify, Verify attempts, commands.
+**Parent:** Advance **only** on **verify-pass**. On **verify-fail** → re-launch same stage (if attempts remain) or Decision N. Persist on Orchestrator card: Last Verify, Verify attempts, commands. **Lint derive (H1):** when Last Verify ≠ `verify-pass` and Last stage is **not** Build / pre-Build, `--derive` must **not** return `build` / `gate-b`. Map post-Build Last stage → Fix / same-stage (same-stage retry — [resume-abort.md](resume-abort.md)):
+
+| Last stage | Derive |
+|------------|--------|
+| `fix-tests` / `fix-review` | same stage |
+| `smoke` / `test-lite` / `test-full` | `fix-tests` |
+| `adversarial` / `quality` / `code-review-phase` / `lens-*` / `merge-findings` | `fix-review` |
+| Build / pre-Build (`tdd-review`, `gate-b`, design… ) | existing pre-Build fall-through |
+
+Pre-Build fall-through applies only when Last stage is Build / pre-Build.
 
 **Docs-only Fix (review):** If no code/test files changed → note `TDD skipped — no behavior` and `Verify skipped — docs only`; treat as verify-pass for advance.
 
@@ -81,25 +90,52 @@ Clear each token only after a fresh clean/success. Same bullet style as `design-
 
 ## Smoke after Build (Build-writes-Smoke)
 
+### Build-writes-Smoke claim
+
 On Build **verify-pass**, Build **writes** `06-test-log.md` Smoke section (commands, exits, **Smoke result: smoke-pass**) **and** **Test path last run:** `smoke` (same field the Smoke Task sets — [smoke.md](../my-dev-flow-test/stages/smoke.md)) using Verify commands.
 
-Parent then:
+Build-writes-Smoke is a **claim from the Build Task**, not an independent Smoke Task (generation ≠ verification). Keep the skip habit for tiny / Mode simple / Mode full + Review profile **lite**. Do **not** rename Build’s Smoke section to `smoke-claim` (breaks skip-review fail-closed contracts). Mode full forbids skip-review.
+
+### Mode full + profile full (E1 independent Smoke)
+
+Lint **requires** an independent Smoke path before Adv / `code-review-phase`:
+
+1. Parent adds Notes `smoke re-run` **once** → `--next --derive` returns `smoke` → launch Smoke Task
+2. Smoke Task updates `06-test-log.md` Smoke section (Result smoke-pass) **after** Build verify-pass / **Last verify-pass at**; parent logs Run log stage `smoke`
+3. Parent records Notes `smoke-pass (re-run)` → clear `smoke re-run` → continue Adv → Quality → `test-full`
+
+Provenance `smoke-pass-rerun` is **not** required for this E1 path (that kind is skip-review Gate C only — [hitl.md](hitl.md)). Writing Notes `smoke-pass (re-run)` still flips the consent fingerprint — append Run log `parent consent write` when a snap exists. Bare Notes alone are forgeable and **do not** unlock Adv / Quality / `test-full` / `fix-tests` / `gate-c`. Presence of `05-review-log` does **not** waive E1.
+
+### Lint / evidence rules (E1)
+
+- **When:** `--next` / `--before-code-review` (**auto** only when Next ∈ Adv / `code-review-phase` — [scripts/README.md](scripts/README.md)) **error** if Mode full + profile full + verify-pass + Build smoke-pass **without** independent Smoke evidence. E1 also applies when Next ∈ `FULL_PROFILE_E1_GATE_STAGES` (Quality / lenses / `test-full` / `fix-tests` / `merge` / `gate-c` / …).
+- **Derive:** returns `smoke` until Notes `smoke-pass (re-run)` **and** Smoke-stage evidence (Run log stage `smoke` and/or 06 Smoke section mtime after **Last verify-pass at** with Result smoke-pass).
+- **Smoke-pass evidence:** prefer `**Smoke result:** smoke-pass`. When `## Smoke` exists, do **not** treat top-level `**Result:** smoke-pass` as paid. Legacy top-level fallback only when no `## Smoke` section.
+- **Test Result:** first `**Result:**` **outside** `## Smoke` — Smoke-section `**Result:** smoke-pass` must not mask top-level `failure`.
+- **M1 smoke-fail:** `06` Smoke Result `smoke-fail`|`failure` → derive `fix-tests` (not `smoke` / not `build` under skip-review). Unpaid/missing Smoke → `smoke` (or `build` under skip-review). Top-level test `failure` with Smoke `smoke-pass` → `fix-tests` via test-failure path.
+- **After Fix:** Last stage=`fix-tests` + Last Verify=`verify-pass` unlocks re-smoke / re-test even if 06 still holds failure tokens. Next=`fix-tests` while derived is `smoke`/`test-*` → **unsafe** / `do-not-launch`. Smoke-fail→`fix-tests` JUMP_AHEAD exception only when Last stage ≠ `fix-tests`.
+- **M2 conflict:** Smoke-section smoke-pass + smoke-fail|failure → fail-closed. Card Next ∈ jump-ahead-from-smoke while derived=`smoke` → **unsafe** ([parent-next.md](parent-next.md)), except legitimate smoke-fail→Fix.
+
+### Parent action table
 
 | Condition | Action |
 |-----------|--------|
-| Smoke section complete + smoke-pass + commands match Verify commands | **Skip Smoke Task** — treat as smoke-pass; continue (review or Gate C) |
-| Smoke incomplete, mismatch, or Notes `smoke re-run` | Launch Smoke Task (independent re-run) — see **skip-review ordered recovery** below |
-| Review profile **skip-review** (legality: [lenses.md](lenses.md)) | Gate C test bar + escape **with provenance** — [hitl.md](hitl.md) Gate C test bar / Provenance. Bare waiver tokens alone are rejected. `docs-only` warn/allow applies **only after** matching provenance is present. Else Lint `--before-merge` **errors** when only Build-writes-Smoke (fail-closed) |
+| Smoke section complete + smoke-pass + commands match Verify commands | **Skip Smoke Task** when Mode simple / Mode full + profile **lite** / tiny — continue (review or Gate C). **Exception:** Mode full + profile full → independent Smoke first (above) |
+| Smoke incomplete, mismatch, Notes `smoke re-run`, or Mode full + profile full E1 unpaid | Launch Smoke Task — see skip-review recovery below when profile is skip-review |
+| Review profile **skip-review** (legality: [lenses.md](lenses.md)) | Gate C escape **with provenance** — [hitl-gate-c.md](hitl-gate-c.md). Bare waiver tokens rejected. Else `--before-merge` **errors** on Build-writes-Smoke alone |
 
 ### Skip-review + Smoke ordered recovery (SoT)
 
-When Review profile is **skip-review** and Smoke is incomplete / mismatched / needs re-proof, parent uses this order (lint `--next` aligns):
+When Review profile is **skip-review** and Smoke is incomplete / mismatched / needs re-proof **or** Gate C needs independent proof (lint `--next` aligns; [stages.md](stages.md) Simple (a)):
 
-1. **Prefer re-Build** — rewrites Smoke section; stay on legal skip-review → Gate C path.
-2. **Or** Notes `smoke re-run` → allow **one** Smoke Task under skip-review (exception; clear the Notes token after smoke-pass). Prefer this independent re-run once before Gate C when Build-writes-Smoke feels thin.
+1. **Prefer Notes `smoke re-run` once** — one Smoke Task under skip-review; clear token after smoke-pass. Do this **before** re-Build or Gate C waivers when Build-writes-Smoke alone is thin.
+2. **Or re-Build** — rewrites Smoke section; stay on legal skip-review → Gate C (after step 1 if still needed).
 3. **Or** drop skip-review → **lite** → `code-review-phase` → `test-lite` → Gate C.
+4. **Waivers last** — Notes `smoke-waive` / `gate-c-test-override` / `docs-only` **each with parent-written provenance** ([hitl.md](hitl.md)).
 
-Do **not** launch `smoke` under skip-review without Notes `smoke re-run` (`--next` → `do-not-launch`). Do **not** launch `test-full` / `test-lite` under legal skip-review — those follow review paths after drop. Escapes that skip independent Smoke must match [hitl.md](hitl.md) Gate C test bar / Provenance (same kinds + `provenance — <kind> — user: "…"`). After an independent re-run, record `smoke-pass (re-run)` **plus** provenance `smoke-pass-rerun`, then clear the `smoke re-run` token. Lint `--before-merge` **errors** when skip-review has only Build-writes-Smoke without those escapes; `docs-only` warn/allow applies **only after** provenance is present. Independent verification for merge remains: **full** / **lite** test after review (or Gate C escape + provenance for Mode simple legal skip-review).
+**smoke-fail → Fix vs re-Build:** `06` Smoke Result `smoke-fail`|`failure` → derive `fix-tests` (not `build`) even under skip-review ([results.md](results.md)). Parent may still **choose** re-Build from ordered recovery. Unpaid/missing Smoke under skip-review still derives `build`.
+
+Do **not** launch `smoke` under skip-review without Notes `smoke re-run` (`--next` → `do-not-launch`). Do **not** launch `test-full` / `test-lite` under legal skip-review. Escapes that skip independent Smoke must match [hitl-gate-c.md](hitl-gate-c.md) / [hitl.md](hitl.md) Provenance. After independent re-run: **parent** records `smoke-pass (re-run)` **plus** provenance `smoke-pass-rerun`, then clear `smoke re-run`. Lint `--before-merge` **errors** when skip-review has only Build-writes-Smoke without those escapes; `docs-only` warn/allow only after provenance. Independent verification for merge: **full** / **lite** test after review (or Gate C escape + provenance for Mode simple legal skip-review).
 
 ## Fix rules (TDD)
 

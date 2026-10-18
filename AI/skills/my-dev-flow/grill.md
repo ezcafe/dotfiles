@@ -21,8 +21,7 @@ Reach a **shared understanding** of open design decisions, then capture durable
 **domain language** (glossary) and **hard-to-reverse choices** (sparse ADRs).
 
 **HITL:** Honor **`HITL Grill`** in `00-run.md` only — **independent of Gate B**.
-Prefer user-first recommended answers. Defaults: Mode full → `async-notify`; Mode simple → `auto`.
-Tier behavior: [hitl.md](hitl.md) (Grill section).
+Prefer user-first recommended answers. **Default tier SoT:** [hitl-gate-b.md](hitl-gate-b.md) HITL Grill (Mode full → `async-notify`; Mode simple → `auto`). Shared Tiers table: [hitl.md](hitl.md).
 
 ## Facts vs decisions
 
@@ -128,17 +127,17 @@ Optionally update:
 
 **Result values:** `frontier-empty` | `needs-round` | `skipped`
 
-## HITL Grill (independent of Gate B)
+## HITL Grill — domain tier behavior (SoT)
 
 Read **HITL Grill** from `00-run.md` — do **not** inherit Gate B tier unless explicitly set equal.
 
-| Tier | Grill behavior |
-|------|----------------|
+**Default tier by Mode:** [hitl-gate-b.md](hitl-gate-b.md) HITL Grill only (do not duplicate Defaults tables here).
+
+| Tier | Grill behavior (domain) |
+|------|-------------------------|
 | **auto** | Settle recommended answers now; log user-first auto-picks; continue to Design |
 | **async-notify** | Post Grill digest + picks; continue immediately; user may veto in **next** message |
 | **blocking** | Pause for human answers on open frontier; Result **needs-round** until answered |
-
-**Defaults (Step 0):** Mode **full** → `async-notify` (use **blocking** when auth/PII/schema forks). Mode **simple** → `auto`.
 
 ## Completion
 

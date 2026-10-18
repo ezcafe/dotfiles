@@ -10,7 +10,7 @@
 
 **Done when:** `02b-grill.md` Result **frontier-empty** or **skipped**; glossary/ADR updated when terms/decisions qualify.
 
-**HITL:** Honor **HITL Grill** in `00-run.md` (independent of Gate B). Defaults: Mode full → `async-notify`; Mode simple → `auto`. **auto** / **async-notify** → apply user-first recommendations and settle the frontier in this Task (do not wait). **blocking** → write open frontier with recommendations; parent pauses for human answers, then re-run or parent applies answers. See `{my-dev-flow}/grill.md` · `{my-dev-flow}/hitl.md`.
+**HITL:** Honor **HITL Grill** in `00-run.md` (independent of Gate B). Default tier by Mode: `{my-dev-flow}/hitl-gate-b.md` (HITL Grill — default tier only). **auto** / **async-notify** → apply user-first recommendations and settle the frontier in this Task (do not wait). **blocking** → write open frontier with recommendations; parent pauses for human answers, then re-run or parent applies answers. See `{my-dev-flow}/grill.md` · `{my-dev-flow}/hitl.md`.
 
 **Task prompt:**
 

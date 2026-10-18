@@ -31,11 +31,15 @@ from lint_common import (
     TDD_04A_SKIP_RE,
     TEST_STALE_RE,
     TINY_TWEAK_RE,
+    PRE_BUILD_DERIVED,
     VALID_MODE,
     VALID_REVIEW_PROFILE,
+    VERIFY_FAIL_FIX_REVIEW_STAGES,
+    VERIFY_FAIL_FIX_TESTS_STAGES,
     _artifact_exists,
     _card_next_stage_id,
     _first_token,
+    _full_profile_independent_smoke,
     _gate_a_artifact_exists,
     _last_stage_id,
     _notes_blob,
@@ -54,7 +58,9 @@ from lint_gate_c import (
     _implied_test_stale,
     _last_verify_pass,
     _review_profile,
+    _smoke_fail_or_failure,
     _smoke_pass,
+    _test_log_failure,
     _test_log_success,
 )
 
@@ -234,9 +240,50 @@ def derive_expected_next(text: str, run_dir: Path | None) -> str | None:
             return "gate-b"
         return "build"
 
+    def _verify_fail_retry_or_fix() -> str | None:
+        """H1: Last Verify ≠ verify-pass + post-Build Last stage → Fix/same-stage.
+
+        Do **not** fall through to ``gate-b`` / ``build`` (pre-Build path).
+        Map: smoke|test-* → ``fix-tests``; review pipeline → ``fix-review``;
+        already ``fix-*`` → same stage. Build / pre-Build → None (caller
+        continues tdd-review / gate-b / build). Other post-Build (gate-c,
+        merge, …) → same-stage retry. Aligns with resume-abort same-stage
+        retry + verify-and-fix.md H1.
+        """
+        if not last_id:
+            return None
+        if last_id in VERIFY_FAIL_FIX_TESTS_STAGES:
+            return "fix-tests"
+        if last_id in VERIFY_FAIL_FIX_REVIEW_STAGES:
+            return "fix-review"
+        if last_id == "build" or last_id in PRE_BUILD_DERIVED:
+            return None  # Build / pre-Build → tdd-review / gate-b / build
+        # Other post-Build (gate-c, merge, …): same-stage, never build
+        return last_id
+
+    def _after_fix_verify_pass() -> bool:
+        """True when Last stage is fix-tests (Fix completed; Last Verify already pass).
+
+        Unlocks re-smoke / re-test while 06 may still hold failure tokens.
+        Parent may clear/pending those tokens on re-entry; machine derive
+        prefers this unlock over looping fix-tests (verify-and-fix.md M1).
+        """
+        return last_id == "fix-tests"
+
     def _after_verify_smoke_then_review() -> str | None:
         """N6: verify-pass without smoke-pass → smoke (or build under skip-review).
 
+        M1: Smoke-section smoke-fail|failure → fix-tests (not smoke/build)
+        even under skip-review; unpaid Smoke → smoke (or build under
+        skip-review). Top-level test Result failure is not a smoke-fail
+        token — smoke-pass + Result failure still advances past Smoke then
+        returns fix-tests via _test_log_failure.
+        After Last stage=fix-tests + verify-pass: smoke-fail → smoke
+        (re-smoke); test Result failure → test-lite|test-full (re-test).
+        Parent ordered recovery may still choose re-Build (step 2 after
+        Notes smoke re-run); machine derive must not soft-block Fix.
+        M1: test-full/lite Result failure → fix-tests (not re-test) until Fix
+        verify-pass unlocks re-test.
         H2: unpaid Lens plan before test/gate-c.
         H5: Notes review-stale / test-stale invalidate prior clean/success.
         E2: unpaid clean/success vs Last verify-pass at (same as Notes stale).
@@ -249,11 +296,32 @@ def derive_expected_next(text: str, run_dir: Path | None) -> str | None:
             text, run_dir
         )
         if not smoke_ok:
+            # M1: Smoke-section smoke-fail|failure → Fix (results.md ·
+            # smoke.md After); includes skip-review (do not soft-block Fix
+            # with re-Build). After Fix verify-pass → re-smoke. Top-level
+            # Result failure alone is not smoke fail — unpaid/missing Smoke
+            # still → smoke (or build under skip-review) and blocks fix-tests.
+            if _smoke_fail_or_failure(run_dir):
+                if _after_fix_verify_pass():
+                    return "smoke"
+                return "fix-tests"
             if review == "skip-review":
-                return "build"  # ordered recovery prefers re-Build
+                # unpaid → derive build; parent ordered recovery still
+                # prefers Notes smoke re-run once before re-Build
+                return "build"
             return "smoke"
         if review == "skip-review":
             return "gate-c"
+        # E1: Mode full + profile full — Build-writes-Smoke alone is not enough;
+        # derive smoke until Notes smoke-pass (re-run) + Smoke-stage evidence.
+        # Do **not** skip when 05-review-log exists (forged Adv+Quality would
+        # otherwise unlock quality / test-full — verify-and-fix.md E1).
+        if (
+            mode == "full"
+            and review == "full"
+            and not _full_profile_independent_smoke(text, run_dir)
+        ):
+            return "smoke"
         effective_review_ok = review_ok and not review_stale
         if not effective_review_ok:
             if review == "lite":
@@ -271,11 +339,24 @@ def derive_expected_next(text: str, run_dir: Path | None) -> str | None:
         if len(entries) >= 2 and _merged_lenses_result(run_dir) != "clean":
             return "merge-findings"
         if review == "lite":
-            if test_stale or not test_ok_lite:
+            if test_stale:
+                return "test-lite"
+            # M1: Result failure → Fix; after Fix verify-pass → re-test
+            if _test_log_failure(run_dir):
+                if _after_fix_verify_pass():
+                    return "test-lite"
+                return "fix-tests"
+            if not test_ok_lite:
                 return "test-lite"
             return "gate-c"
         # profile full
-        if test_stale or not test_ok_full:
+        if test_stale:
+            return "test-full"
+        if _test_log_failure(run_dir):
+            if _after_fix_verify_pass():
+                return "test-full"
+            return "fix-tests"
+        if not test_ok_full:
             return "test-full"
         return "gate-c"
 
@@ -290,7 +371,11 @@ def derive_expected_next(text: str, run_dir: Path | None) -> str | None:
         if not design_ok:
             return "design-verify-phase"
         # M1: optional 04a after design clean, before Gate B / Build
+        # H1: verify-fail + post-Build Last stage → Fix/same-stage (not build)
         if not verify_ok:
+            retry = _verify_fail_retry_or_fix()
+            if retry is not None:
+                return retry
             if not _tdd_04a_settled(text, run_dir):
                 return "tdd-review"
             return _gate_b_or_build()
@@ -345,7 +430,11 @@ def derive_expected_next(text: str, run_dir: Path | None) -> str | None:
         if not design_ok:
             return "design-review"
         # M1: optional 04a after design clean, before Gate B / Build
+        # H1: verify-fail + post-Build Last stage → Fix/same-stage (not build)
         if not verify_ok:
+            retry = _verify_fail_retry_or_fix()
+            if retry is not None:
+                return retry
             if not _tdd_04a_settled(text, run_dir):
                 return "tdd-review"
             return _gate_b_or_build()
@@ -443,15 +532,15 @@ def _next_stage_legality_warns(
             "profile full uses Adv→Quality→test-full (stages.md)"
         )
     if review_token == "skip-review" and stage_id in SKIP_REVIEW_FORBIDDEN_STAGES:
-        # smoke allowed once when Notes say smoke re-run; else prefer re-Build
+        # smoke allowed once when Notes say smoke re-run (ordered recovery #1)
         if stage_id == "smoke" and SMOKE_RERUN_RE.search(notes or ""):
             return warns
         if stage_id == "smoke":
             warns.append(
                 "Next `smoke` illegal under skip-review without Notes "
-                "`smoke re-run` — prefer re-Build to rewrite Smoke, or Notes "
-                "`smoke re-run` once, or drop skip-review → lite "
-                "(verify-and-fix.md)"
+                "`smoke re-run` — prefer Notes `smoke re-run` once, then "
+                "re-Build, or drop skip-review → lite, or waivers last "
+                "(verify-and-fix.md Skip-review + Smoke ordered recovery)"
             )
         else:
             warns.append(

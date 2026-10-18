@@ -1,0 +1,7 @@
+# my-dev-flow local sidecars (do-not-commit)
+.lint-async-gap
+**/.lint-async-gap
+.lint-consent-snap
+**/.lint-consent-snap
+.consent.md
+**/.consent.md

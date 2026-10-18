@@ -21,15 +21,18 @@ from lint_common import (
     CLARITY_CHECK_STAGES,
     CODE_REVIEW_ENTRY_STAGES,
     DESIGN_BACKLOOP_RE,
+    FULL_PROFILE_E1_GATE_STAGES,
     DESIGN_REVIEW_PHASE_STAGES,
     FIX_ASK_RE,
     FOLD_API_DB_RE,
     HAS_API_LINE_RE,
+    HAS_AUTH_LINE_RE,
     HAS_DB_LINE_RE,
     IN_REVIEW_DERIVED,
     Issue,
     JUMP_AHEAD_FROM_PRE_BUILD,
     JUMP_AHEAD_FROM_REVIEW,
+    JUMP_AHEAD_FROM_SMOKE,
     LEGACY_STATUS_HINTS,
     LENS_JUMP_AHEAD_CARDS,
     LENS_PLAN_RE,
@@ -43,6 +46,7 @@ from lint_common import (
     REQUIRED_FIELD_PATTERNS,
     REVIEW_ENTRY_DERIVED,
     REVIEW_STALE_RE,
+    SMOKE_RERUN_DONE_RE,
     SMOKE_RERUN_RE,
     SOFT_MAIN_THREAD_CAP,
     SOFT_TASK_CAP,
@@ -66,19 +70,24 @@ from lint_common import (
     _card_next_stage_id,
     _card_override_ok,
     _check_yes_no_flag,
+    check_consent_writes,
     _clarity_boundaries_logged,
     _exact_enum_token,
     _extract_stage_token,
     _first_token,
+    _full_profile_independent_smoke,
     _gate_a_both_filenames_exist,
     _has_provenance,
+    _last_stage_id,
     _looks_like_template,
+    _max_round_block_reason,
     _notes_blob,
     _parsed_yes_no,
     _parse_lens_plan_tokens,
     _parse_result_token,
     _read_artifact,
     _read_gate_a_artifact,
+    _round_stuck_at_one_warns,
     _run_log_blob,
     _run_log_timestamped_entries,
     _write_async_gap_sidecar,
@@ -111,9 +120,125 @@ from lint_gate_c import (
     _check_waiver_provenance,
     _implied_review_stale,
     _implied_test_stale,
+    _last_verify_pass,
     _parse_gate_c_approved,
+    _smoke_fail_or_failure,
+    _smoke_pass,
 )
 from lint_stage_ids import check_stage_id_registry
+
+def _check_smoke_pass_before_post_smoke(
+    text: str,
+    issues: list[Issue],
+    *,
+    before_code_review: bool,
+    run_dir: Path | None,
+) -> None:
+    """M1: fail-closed when Adv/test/lenses/fix-tests/gate-c Next without smoke-pass.
+
+    Missing ``06`` or non-pass Smoke while card Next ∈
+    ``JUMP_AHEAD_FROM_SMOKE`` → error (same unpaid-Smoke class as derive
+    ``smoke`` + unsafe card). Independent of Mode/profile; E1 unpaid is
+    separate when Build-writes smoke-pass is already present.
+
+    Exception: Next ``fix-tests`` when 06 Smoke Result is smoke-fail or
+    failure **and** Last stage ≠ ``fix-tests`` (smoke-fail→Fix before unlock).
+    After Fix verify-pass (Last stage=``fix-tests``), re-smoke — do not allow
+    lingering Next=``fix-tests``.
+    """
+    next_id = _card_next_stage_id(text)
+    enforce = before_code_review or next_id in JUMP_AHEAD_FROM_SMOKE
+    if not enforce:
+        return
+    if not _last_verify_pass(text):
+        return
+    if _smoke_pass(run_dir):
+        return
+    # Legitimate Fix path: smoke-fail → fix-tests only before Fix unlock
+    if (
+        next_id == "fix-tests"
+        and _smoke_fail_or_failure(run_dir)
+        and _last_stage_id(text) != "fix-tests"
+    ):
+        return
+    issues.append(
+        Issue(
+            "error",
+            "Smoke unpaid — require smoke-pass on `06-test-log.md` before "
+            "Adv / Quality / code-review-phase / lenses / fix-review / "
+            "test-full / test-lite / fix-tests / gate-c (set Next to `smoke`; "
+            "exception: fix-tests when Smoke Result smoke-fail|failure and "
+            "Last stage ≠ fix-tests — verify-and-fix.md · M1)",
+        )
+    )
+
+
+def _check_full_profile_smoke_rerun(
+    text: str,
+    issues: list[Issue],
+    *,
+    before_code_review: bool,
+    run_dir: Path | None,
+    mode_token: str | None,
+    review_token: str | None,
+) -> None:
+    """E1: Mode full + profile full — require independent Smoke before post-Build.
+
+    Build-writes-Smoke alone is not enough. Accept Notes ``smoke re-run`` only
+    as the signal to launch Smoke (Next must be ``smoke``); Adv / Quality /
+    lenses / code-review / test-full / fix-tests / merge / gate-c require Notes
+    ``smoke-pass (re-run)`` **plus** Smoke-stage evidence (Run log stage
+    ``smoke`` and/or 06 after Last verify-pass at). Bare Notes alone are
+    forgeable. Presence of ``05-review-log`` does **not** waive this gate.
+    Does not apply to skip-review (Mode full forbids it) or profile lite.
+    ``fix-tests`` with Smoke Result smoke-fail|failure is exempt (no
+    smoke-pass → this gate does not fire; jump-ahead exception applies).
+    """
+    next_id = _card_next_stage_id(text)
+    enforce = before_code_review or next_id in FULL_PROFILE_E1_GATE_STAGES
+    if not enforce:
+        return
+    if mode_token != "full" or review_token != "full":
+        return
+    if not _last_verify_pass(text) or not _smoke_pass(run_dir):
+        return
+    if _full_profile_independent_smoke(text, run_dir):
+        return
+    notes = _notes_blob(text)
+    if SMOKE_RERUN_RE.search(notes) and not SMOKE_RERUN_DONE_RE.search(notes):
+        issues.append(
+            Issue(
+                "error",
+                "Mode full + Review profile full: Notes `smoke re-run` pending — "
+                "set Next to `smoke` (independent Smoke Task) before Adv / "
+                "Quality / lenses / test-full / fix-tests / merge / gate-c; "
+                "then record `smoke-pass (re-run)` after Smoke-stage evidence "
+                "(verify-and-fix.md E1 · Build-writes-Smoke)",
+            )
+        )
+        return
+    if SMOKE_RERUN_DONE_RE.search(notes):
+        issues.append(
+            Issue(
+                "error",
+                "Mode full + Review profile full: Notes `smoke-pass (re-run)` "
+                "without Smoke-stage evidence — require Run log stage `smoke` "
+                "and/or 06 Smoke section updated after Last verify-pass at "
+                "(verify-and-fix.md E1 · Notes alone are forgeable)",
+            )
+        )
+        return
+    issues.append(
+        Issue(
+            "error",
+            "Mode full + Review profile full: Build-writes-Smoke alone is not "
+            "enough before Adv / Quality / lenses / test-full / fix-tests / "
+            "merge / gate-c — require Notes `smoke re-run` once → independent "
+            "Smoke Task → record `smoke-pass (re-run)` with Smoke-stage "
+            "evidence (verify-and-fix.md E1)",
+        )
+    )
+
 
 def _check_lens_plan_api_db(
     text: str, issues: list[Issue], *, before_code_review: bool
@@ -401,9 +526,39 @@ def _unsafe_card_derive_mismatch(
             )
         if derived in PRE_BUILD_DERIVED or derived.startswith("design"):
             return f"card Next `build` while derived `{derived}`"
+    # M1: Adv / Quality / lite / lenses / Fix / test / gate-c while Smoke unpaid
+    # Exception: fix-tests when smoke-fail|failure AND Last stage ≠ fix-tests
+    # (before Fix unlock). After Fix verify-pass → derived smoke (re-smoke);
+    # Next=fix-tests is unsafe do-not-launch.
+    if derived == "smoke" and card in JUMP_AHEAD_FROM_SMOKE:
+        if (
+            card == "fix-tests"
+            and _smoke_fail_or_failure(run_dir)
+            and _last_stage_id(text) != "fix-tests"
+        ):
+            return None
+        return (
+            f"card Next `{card}` while derived `smoke` "
+            "(Smoke unpaid — same class as merge vs derived smoke)"
+        )
+    # M1: after Fix unlock, derived test-* + lingering Next=fix-tests → unsafe
+    if derived in ("test-lite", "test-full") and card == "fix-tests":
+        return (
+            f"card Next `fix-tests` while derived `{derived}` "
+            "(after Fix unlock — re-test; set Next to derived)"
+        )
     # S3: review/test/fix/merge while still pre-Build or awaiting Build
+    # M1: skip-review smoke-fail → fix-tests allowed even if derived were
+    # still `build` (ordered-recovery preference) when Last stage ≠ fix-tests;
+    # unpaid stays blocked. After Fix unlock derived is smoke/test-*, not build.
     if derived in PRE_BUILD_DERIVED or derived == "build":
         if card in JUMP_AHEAD_FROM_PRE_BUILD:
+            if (
+                card == "fix-tests"
+                and _smoke_fail_or_failure(run_dir)
+                and _last_stage_id(text) != "fix-tests"
+            ):
+                return None
             return (
                 f"card Next `{card}` while derived `{derived}` "
                 "(pre-Build / pre-verify jump-ahead)"
@@ -439,6 +594,12 @@ def _unsafe_card_derive_mismatch(
         return (
             f"card Next `{card}` while derived `{derived}` "
             "(post-Build review still unpaid)"
+        )
+    # E2: gate-c while test bar unpaid (derived test-full / test-lite)
+    if card == "gate-c" and derived in ("test-full", "test-lite"):
+        return (
+            f"card Next `gate-c` while derived `{derived}` "
+            "(test bar unpaid — same class as merge; finish test before Gate C)"
         )
     return None
 def _calibration_blob(run_dir: Path | None) -> str:
@@ -655,6 +816,10 @@ def lint_run_md(
         _check_yes_no_flag(text, HAS_API_LINE_RE, "Has API", issues)
     if HAS_DB_LINE_RE.search(text):
         _check_yes_no_flag(text, HAS_DB_LINE_RE, "Has DB", issues)
+    if HAS_AUTH_LINE_RE.search(text):
+        _check_yes_no_flag(
+            text, HAS_AUTH_LINE_RE, "Has auth/PII/schema", issues
+        )
 
     if mode_token == "full" and review_token == "skip-review":
         issues.append(
@@ -697,6 +862,23 @@ def lint_run_md(
         text, issues, before_build=before_build, run_dir=run_dir
     )
     _check_lens_plan_api_db(text, issues, before_code_review=before_code_review)
+    _check_smoke_pass_before_post_smoke(
+        text,
+        issues,
+        before_code_review=before_code_review,
+        run_dir=run_dir,
+    )
+    _check_full_profile_smoke_rerun(
+        text,
+        issues,
+        before_code_review=before_code_review,
+        run_dir=run_dir,
+        mode_token=mode_token,
+        review_token=review_token,
+    )
+    # M1: when a consent snap exists, dirty fields without parent ack → error
+    if run_dir is not None and (before_build or before_merge):
+        issues.extend(check_consent_writes(run_dir, require_snap=False))
 
     cm = CARD_STAGE_RE.search(text)
     if cm:
@@ -722,6 +904,13 @@ def lint_run_md(
             issues.append(Issue("error", "Has API must be yes|no before design-review"))
         if not HAS_DB_LINE_RE.search(text):
             issues.append(Issue("error", "Has DB must be yes|no before design-review"))
+        if not HAS_AUTH_LINE_RE.search(text):
+            issues.append(
+                Issue(
+                    "error",
+                    "Has auth/PII/schema must be yes|no before design-review",
+                )
+            )
 
     _check_pending_parallel(
         text,
@@ -797,6 +986,10 @@ def lint_run_md(
     ):
         issues.append(Issue("warn", "Complexity one-line reason missing under Required"))
 
+    # M3: ≥3 same-stage Run-log cycles with Round still 1 → warn (habit)
+    for msg in _round_stuck_at_one_warns(text, run_dir):
+        issues.append(Issue("warn", msg))
+
     return issues
 
 
@@ -825,6 +1018,20 @@ def print_next_hint(run_dir: Path, *, derive: bool = False) -> int:
     print(f"Status: {status}")
     print(f"Stage id (card): {stage_raw or '(empty)'}")
     print(f"Next step (card): {next_raw or '(empty)'}")
+
+    # M1: fail-closed when consent snap exists and fields changed without ack
+    consent_issues = check_consent_writes(run_dir, require_snap=False)
+    consent_errors = [i for i in consent_issues if i.severity == "error"]
+    if consent_errors:
+        for i in consent_errors:
+            print(f"error: {i.message}")
+        print("companion: hitl.md · parent-next.md (consent snapshot)")
+        print("handoff: do-not-launch")
+        print(
+            "next action: parent records Run log `parent consent write` "
+            "(or restore fields), then --snapshot-consent; re-run --next"
+        )
+        return 1
 
     derived: str | None = None
     if derive:
@@ -889,6 +1096,18 @@ def print_next_hint(run_dir: Path, *, derive: bool = False) -> int:
                 "next action: run stopped — freeze stage; require Decision "
                 "to resume or new slug"
             )
+        return 1
+
+    # Max-round caps (invariants.md) — parent must increment Round / metrics
+    max_round = _max_round_block_reason(text, run_dir)
+    if max_round:
+        print(f"error: {max_round}")
+        print("companion: invariants.md · failure-playbook.md · parent-next.md")
+        print("handoff: do-not-launch")
+        print(
+            "next action: pause with Decision N (raise cap / proceed if clean / "
+            "stop); increment Round / Run metrics after each cycle"
+        )
         return 1
 
     if not stage_id:
@@ -1256,8 +1475,9 @@ def main() -> int:
         "--before-design-review",
         action="store_true",
         help=(
-            "Enforce Has API/DB yes|no + Mode full Pending parallel + "
-            "isolated 03a-* when Has API/DB yes (not tiny) + skip-review ban; "
+            "Enforce Has API/DB + Has auth/PII/schema yes|no + Mode full Pending "
+            "parallel + isolated 03a-* when Has API/DB yes (not tiny) + "
+            "skip-review ban; "
             "also auto when card Next ∈ design-review / design-verify-phase / "
             "api-contract-review / db-design-review"
         ),
@@ -1335,6 +1555,22 @@ def main() -> int:
         help="Scan artifact Result headers + soft-warn oversize bodies (size-caps.md)",
     )
     p.add_argument(
+        "--snapshot-consent",
+        action="store_true",
+        help=(
+            "Write .lint-consent-snap of Gate B/C / Build armed / provenance / "
+            "waivers before Task launch (hitl.md · M1)"
+        ),
+    )
+    p.add_argument(
+        "--check-consent-writes",
+        action="store_true",
+        help=(
+            "Error if consent fields changed since --snapshot-consent without a "
+            "new Run log `parent consent write` line (hitl.md · M1)"
+        ),
+    )
+    p.add_argument(
         "--slug",
         default=None,
         help="With --dry-run-seed: slug under run_dir (default: run_dir itself)",
@@ -1354,6 +1590,21 @@ def main() -> int:
 
     if args.dry_run_seed:
         return dry_run_seed(args.run_dir, slug=args.slug)
+
+    if args.snapshot_consent:
+        from lint_common import snapshot_consent
+
+        return snapshot_consent(args.run_dir.resolve())
+
+    if args.check_consent_writes:
+        from lint_common import check_consent_writes
+
+        issues = check_consent_writes(args.run_dir.resolve())
+        for i in issues:
+            print(f"{i.severity}: {i.message}")
+        if not issues:
+            print("ok: consent fields unchanged or parent-acked")
+        return 1 if issues else 0
 
     if args.derive and not args.next:
         p.error("--derive requires --next")

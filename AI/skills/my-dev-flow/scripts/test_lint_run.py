@@ -62,6 +62,15 @@ def _write_async_gap_sidecar(run_dir: Path, digest_ts: str = "14:00") -> None:
     (run_dir / ".lint-async-gap").write_text(f"{digest_ts}\n", encoding="utf-8")
 
 
+def _independent_smoke_run_log(stage_id: str = "adversarial") -> str:
+    """Run log with stage ``smoke`` so E1 Notes smoke-pass (re-run) unlocks Adv."""
+    return (
+        "- **12:00** · running · build · verify-pass\n"
+        "- **12:05** · running · smoke · Result smoke-pass\n"
+        f"- **12:10** · running · {stage_id} · fixture"
+    )
+
+
 def _base(
     *,
     status: str = "running",
@@ -70,6 +79,7 @@ def _base(
     veto: str = "none",
     has_api: str = "no",
     has_db: str = "no",
+    has_auth: str = "no",
     pending_parallel: str | None = "none",
     last_verify: str = "pending",
     last_verify_pass_at: str | None = None,
@@ -134,6 +144,14 @@ def _base(
             "provenance — card-override" not in notes.lower()
         ):
             notes = f"{notes}\n{_prov('card-override', 'user insisted on this next')}"
+        # E4: async-notify requires explicit user request Notes
+        if hitl_gate_b == "async-notify" and not re.search(
+            r"(?i)async-notify\s+requested", notes
+        ):
+            notes = (
+                f'{notes}\n- async-notify requested — user: '
+                '"please open a veto window before build"'
+            )
     if run_log is None:
         run_log = f"- **12:00** · running · {stage_id} · fixture"
     pp = (
@@ -192,6 +210,7 @@ def _base(
 - **Has UI:** no
 - **Has API:** {has_api}
 - **Has DB:** {has_db}
+- **Has auth/PII/schema:** {has_auth}
 - **HITL Gate B:** {hitl_gate_b}
 - **HITL Grill:** auto
 - **HITL Gate C:** blocking
@@ -694,6 +713,345 @@ class TestHandoffFor(unittest.TestCase):
             )
             self.assertIn(str(skill_root / "size-caps.md"), block)
             self.assertTrue(str(skill_root).startswith("/"))
+            self.assertIn(
+                "Do not write Gate B/C approved, Build armed, or provenance",
+                block,
+            )
+
+
+class TestRoundStuckAtOneWarn(unittest.TestCase):
+    """M3: warn when ≥3 same-stage cycles but artifact Round still 1."""
+
+    def test_design_review_cycles_round_still_1(self):
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            run_log = "\n".join(
+                f"- **12:0{i}** · running · design-review · needs update"
+                for i in range(3)
+            )
+            text = _base(
+                mode="full",
+                review="full",
+                hitl_gate_b="blocking",
+                next_step="design-update",
+                stage_id="design-update",
+                run_log=run_log,
+            )
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            (run_dir / "03a-design-review-log.md").write_text(
+                "# Design review\n\n**Result:** needs update\n**Round:** 1\n",
+                encoding="utf-8",
+            )
+            issues = lint_run_md(
+                text,
+                before_design_review=False,
+                before_build=False,
+                run_dir=run_dir,
+            )
+            warns = [i.message for i in issues if i.severity == "warn"]
+            self.assertTrue(
+                any("Round still 1" in m and "design-review" in m for m in warns),
+                warns,
+            )
+
+    def test_no_warn_when_round_bumped(self):
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            run_log = "\n".join(
+                f"- **12:0{i}** · running · design-review · needs update"
+                for i in range(3)
+            )
+            text = _base(
+                mode="full",
+                review="full",
+                hitl_gate_b="blocking",
+                next_step="design-update",
+                stage_id="design-update",
+                run_log=run_log,
+            )
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            (run_dir / "03a-design-review-log.md").write_text(
+                "# Design review\n\n**Result:** needs update\n**Round:** 3\n",
+                encoding="utf-8",
+            )
+            issues = lint_run_md(
+                text,
+                before_design_review=False,
+                before_build=False,
+                run_dir=run_dir,
+            )
+            warns = [i.message for i in issues if i.severity == "warn"]
+            self.assertFalse(
+                any("Round still 1" in m for m in warns),
+                warns,
+            )
+
+
+class TestMaxRoundCaps(unittest.TestCase):
+    """M1: --next do-not-launch when max-round caps are hit."""
+
+    def _write_run(self, run_dir: Path, text: str) -> None:
+        run_dir.mkdir(parents=True, exist_ok=True)
+        (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+
+    def test_design_review_round_3_needs_update(self):
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            self._write_run(
+                run_dir,
+                _base(next_step="design-update", stage_id="design-update"),
+            )
+            (run_dir / "03a-design-review-log.md").write_text(
+                "# Design review\n\n**Result:** needs update\n**Round:** 3\n",
+                encoding="utf-8",
+            )
+            from io import StringIO
+            import contextlib
+
+            buf = StringIO()
+            with contextlib.redirect_stdout(buf):
+                code = lint_run.print_next_hint(run_dir, derive=False)
+            out = buf.getvalue()
+            self.assertEqual(code, 1)
+            self.assertIn("do-not-launch", out)
+            self.assertIn("design-review Round 3", out)
+            self.assertIn("Decision N", out)
+
+    def test_gate_a_round_3_non_ok(self):
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            self._write_run(
+                run_dir,
+                _base(
+                    mode="full",
+                    review="full",
+                    hitl_gate_b="blocking",
+                    next_step="gate-a",
+                    stage_id="gate-a",
+                ),
+            )
+            (run_dir / "01a-gate-a.md").write_text(
+                "# Gate A\n\n**Result:** needs update\n**Round:** 3\n",
+                encoding="utf-8",
+            )
+            from io import StringIO
+            import contextlib
+
+            buf = StringIO()
+            with contextlib.redirect_stdout(buf):
+                code = lint_run.print_next_hint(run_dir, derive=False)
+            out = buf.getvalue()
+            self.assertEqual(code, 1)
+            self.assertIn("Gate A Round 3", out)
+            self.assertIn("do-not-launch", out)
+
+    def test_verify_attempts_3_verify_fail(self):
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            text = _base(
+                next_step="build",
+                stage_id="build",
+                last_verify="verify-fail",
+            )
+            text = text.replace("**Verify attempts:** 0", "**Verify attempts:** 3")
+            self._write_run(run_dir, text)
+            from io import StringIO
+            import contextlib
+
+            buf = StringIO()
+            with contextlib.redirect_stdout(buf):
+                code = lint_run.print_next_hint(run_dir, derive=False)
+            out = buf.getvalue()
+            self.assertEqual(code, 1)
+            self.assertIn("Verify attempts 3", out)
+            self.assertIn("do-not-launch", out)
+
+    def test_review_round_3_not_clean(self):
+        """M2: multi-section 05 with file-top Round + needs fix blocks."""
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            self._write_run(
+                run_dir,
+                _base(next_step="fix-review", stage_id="fix-review"),
+            )
+            (run_dir / "05-review-log.md").write_text(
+                "# Review log\n\n"
+                "**Round:** 3\n"
+                "**Result:** needs fix\n\n"
+                "## Adversarial test review\n\n"
+                "**Result:** clean\n\n"
+                "## Quality\n\n"
+                "**Result:** needs fix\n\n"
+                "## Merged lenses\n\n"
+                "**Result:** pending\n",
+                encoding="utf-8",
+            )
+            from io import StringIO
+            import contextlib
+
+            buf = StringIO()
+            with contextlib.redirect_stdout(buf):
+                code = lint_run.print_next_hint(run_dir, derive=False)
+            out = buf.getvalue()
+            self.assertEqual(code, 1)
+            self.assertIn("review Round 3", out)
+            self.assertIn("do-not-launch", out)
+
+    def test_review_round_missing_uses_run_log_cycles(self):
+        """M2: Round missing → count fix-review Run log cycles."""
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            self._write_run(
+                run_dir,
+                _base(
+                    next_step="fix-review",
+                    stage_id="fix-review",
+                    run_log=(
+                        "- **10:00** · done · fix-review · cycle 1\n"
+                        "- **10:10** · done · fix-review · cycle 2\n"
+                        "- **10:20** · done · fix-review · cycle 3\n"
+                    ),
+                ),
+            )
+            (run_dir / "05-review-log.md").write_text(
+                "# Review log\n\n"
+                "## Adversarial test review\n\n"
+                "**Result:** needs fix\n\n"
+                "## Quality\n\n"
+                "**Result:** clean\n",
+                encoding="utf-8",
+            )
+            from io import StringIO
+            import contextlib
+
+            buf = StringIO()
+            with contextlib.redirect_stdout(buf):
+                code = lint_run.print_next_hint(run_dir, derive=False)
+            out = buf.getvalue()
+            self.assertEqual(code, 1)
+            self.assertIn("fix-review Run log cycles 3", out)
+            self.assertIn("do-not-launch", out)
+
+    def test_test_fix_rounds_metric(self):
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            text = _base(next_step="fix-tests", stage_id="fix-tests")
+            text = text.replace(
+                "- main-thread fallbacks: 0",
+                "- main-thread fallbacks: 0\n- smoke↔fix / test↔fix rounds: 3",
+            )
+            self._write_run(run_dir, text)
+            from io import StringIO
+            import contextlib
+
+            buf = StringIO()
+            with contextlib.redirect_stdout(buf):
+                code = lint_run.print_next_hint(run_dir, derive=False)
+            out = buf.getvalue()
+            self.assertEqual(code, 1)
+            self.assertIn("test↔fix rounds 3", out)
+            self.assertIn("do-not-launch", out)
+
+    def test_design_review_rounds_metric_alone_does_not_block(self):
+        """H1: design-review rounds: 3 must NOT false-positive as review fix."""
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            text = _base(next_step="design-update", stage_id="design-update")
+            text = text.replace(
+                "- main-thread fallbacks: 0",
+                "- main-thread fallbacks: 0\n- design-review rounds: 3",
+            )
+            self._write_run(run_dir, text)
+            from io import StringIO
+            import contextlib
+
+            buf = StringIO()
+            with contextlib.redirect_stdout(buf):
+                code = lint_run.print_next_hint(run_dir, derive=False)
+            out = buf.getvalue()
+            self.assertNotIn("review fix rounds", out)
+            # No 03a Round cap → should not do-not-launch for max-round
+            self.assertNotIn("Decision N", out)
+            self.assertEqual(code, 0)
+
+    def test_review_fix_rounds_metric_blocks(self):
+        """H1: review fix rounds: 3 must block via --next."""
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            text = _base(next_step="fix-review", stage_id="fix-review")
+            text = text.replace(
+                "- main-thread fallbacks: 0",
+                "- main-thread fallbacks: 0\n- review fix rounds: 3",
+            )
+            self._write_run(run_dir, text)
+            from io import StringIO
+            import contextlib
+
+            buf = StringIO()
+            with contextlib.redirect_stdout(buf):
+                code = lint_run.print_next_hint(run_dir, derive=False)
+            out = buf.getvalue()
+            self.assertEqual(code, 1)
+            self.assertIn("review fix rounds 3", out)
+            self.assertIn("do-not-launch", out)
+
+    def test_max_round_cap_raise_unlocks_review_fix(self):
+        """M2: max-round-cap — review-fix — 5 unlocks rounds 3–4."""
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            text = _base(
+                next_step="fix-review",
+                stage_id="fix-review",
+                notes=(
+                    "- ok\n"
+                    '- max-round-cap — review-fix — 5 — user: '
+                    '"raise review fix cap to five rounds"'
+                ),
+            )
+            text = text.replace(
+                "- main-thread fallbacks: 0",
+                "- main-thread fallbacks: 0\n- review fix rounds: 3",
+            )
+            self._write_run(run_dir, text)
+            from io import StringIO
+            import contextlib
+
+            buf = StringIO()
+            with contextlib.redirect_stdout(buf):
+                code = lint_run.print_next_hint(run_dir, derive=False)
+            out = buf.getvalue()
+            self.assertNotIn("review fix rounds 3", out)
+            self.assertNotIn("do-not-launch", out)
+            self.assertEqual(code, 0)
+
+    def test_max_round_cap_still_blocks_at_raised_n(self):
+        """M2: raised cap still blocks when metrics >= N."""
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            text = _base(
+                next_step="fix-review",
+                stage_id="fix-review",
+                notes=(
+                    "- ok\n"
+                    '- max-round-cap — review-fix — 5 — user: '
+                    '"raise review fix cap to five rounds"'
+                ),
+            )
+            text = text.replace(
+                "- main-thread fallbacks: 0",
+                "- main-thread fallbacks: 0\n- review fix rounds: 5",
+            )
+            self._write_run(run_dir, text)
+            from io import StringIO
+            import contextlib
+
+            buf = StringIO()
+            with contextlib.redirect_stdout(buf):
+                code = lint_run.print_next_hint(run_dir, derive=False)
+            out = buf.getvalue()
+            self.assertEqual(code, 1)
+            self.assertIn("review fix rounds 5", out)
+            self.assertIn("do-not-launch", out)
 
 
 class TestValidStageIdsSync(unittest.TestCase):
@@ -810,6 +1168,59 @@ class TestHitlGateBAndGateC(unittest.TestCase):
         self.assertTrue(
             any(
                 "Has API/DB yes" in e and "non-blocking" in e
+                for e in _errors(issues)
+            )
+        )
+
+    def test_mode_simple_auth_yes_soft_gate_b_errors(self):
+        """M1: Has auth/PII/schema yes forces blocking Gate B on Mode simple."""
+        text = _base(
+            mode="simple",
+            review="lite",
+            has_api="no",
+            has_db="no",
+            has_auth="yes",
+            hitl_gate_b="auto",
+        )
+        issues = lint_run_md(
+            text, before_design_review=False, before_build=False
+        )
+        self.assertTrue(
+            any(
+                "Has auth/PII/schema yes" in e and "non-blocking" in e
+                for e in _errors(issues)
+            )
+        )
+
+    def test_mode_simple_auth_yes_blocking_gate_b_ok(self):
+        text = _base(
+            mode="simple",
+            review="lite",
+            has_auth="yes",
+            hitl_gate_b="blocking",
+        )
+        issues = lint_run_md(
+            text, before_design_review=False, before_build=False
+        )
+        self.assertFalse(
+            any("non-blocking" in e for e in _errors(issues))
+        )
+
+    def test_before_design_review_requires_has_auth(self):
+        text = _base(has_api="no", has_db="no", has_auth="no")
+        # Strip the auth line to simulate missing field
+        text = re.sub(
+            r"^- \*\*Has auth/PII/schema:\*\*.*\n",
+            "",
+            text,
+            flags=re.M,
+        )
+        issues = lint_run_md(
+            text, before_design_review=True, before_build=False
+        )
+        self.assertTrue(
+            any(
+                "Has auth/PII/schema must be yes|no" in e
                 for e in _errors(issues)
             )
         )
@@ -2694,8 +3105,9 @@ class TestDeriveAndCheckResults(unittest.TestCase):
             handoff_for.HANDOFFS.read_text(encoding="utf-8")
         )
         read_cell, write_cell = rows["build"]
-        self.assertIn("hitl.md", read_cell)
+        self.assertIn("hitl-gate-b.md", read_cell)
         self.assertIn("verify-and-fix.md", write_cell)
+        self.assertIn("never write Gate B approved", write_cell)
 
     def test_handoff_base_substitutes_write_list(self):
         rows = handoff_for._parse_stage_table(
@@ -3052,6 +3464,11 @@ class TestH1H7Findings(unittest.TestCase):
             last_verify="verify-pass",
             hitl_gate_b="blocking",
             gate_b_approved="yes",
+            notes=(
+                "- 04a skipped — no planned test cases\n"
+                "- Smoke: smoke-pass (re-run)"
+            ),
+            run_log=_independent_smoke_run_log("adversarial"),
         )
         with tempfile.TemporaryDirectory() as td:
             run_dir = Path(td)
@@ -3083,6 +3500,11 @@ class TestH1H7Findings(unittest.TestCase):
             last_verify="verify-pass",
             hitl_gate_b="blocking",
             gate_b_approved="yes",
+            notes=(
+                "- 04a skipped — no planned test cases\n"
+                "- Smoke: smoke-pass (re-run)"
+            ),
+            run_log=_independent_smoke_run_log("quality"),
         )
         with tempfile.TemporaryDirectory() as td:
             run_dir = Path(td)
@@ -3124,6 +3546,11 @@ class TestH1H7Findings(unittest.TestCase):
                 last_verify="verify-pass",
                 hitl_gate_b="blocking",
                 gate_b_approved="yes",
+                notes=(
+                    "- 04a skipped — no planned test cases\n"
+                    "- Smoke: smoke-pass (re-run)"
+                ),
+                run_log=_independent_smoke_run_log("adversarial"),
             )
             _seed_full_pre_design(run_dir)
             (run_dir / "03a-design-review-log.md").write_text(
@@ -3155,6 +3582,11 @@ class TestH1H7Findings(unittest.TestCase):
                 last_verify="verify-pass",
                 hitl_gate_b="blocking",
                 gate_b_approved="yes",
+                notes=(
+                    "- 04a skipped — no planned test cases\n"
+                    "- Smoke: smoke-pass (re-run)"
+                ),
+                run_log=_independent_smoke_run_log("quality"),
             )
             _seed_full_pre_design(run_dir)
             (run_dir / "03a-design-review-log.md").write_text(
@@ -3186,6 +3618,11 @@ class TestH1H7Findings(unittest.TestCase):
                 last_verify="verify-pass",
                 hitl_gate_b="blocking",
                 gate_b_approved="yes",
+                notes=(
+                    "- 04a skipped — no planned test cases\n"
+                    "- Smoke: smoke-pass (re-run)"
+                ),
+                run_log=_independent_smoke_run_log("quality"),
             )
             _seed_full_pre_design(run_dir)
             (run_dir / "03a-design-review-log.md").write_text(
@@ -4176,7 +4613,11 @@ class TestM1M2E1E2Findings(unittest.TestCase):
             last_verify="verify-pass",
             hitl_gate_b="blocking",
             gate_b_approved="yes",
-            notes="- 04a skipped — no planned test cases",
+            notes=(
+                "- 04a skipped — no planned test cases\n"
+                "- Smoke: smoke-pass (re-run)"
+            ),
+            run_log=_independent_smoke_run_log("quality"),
         )
         with tempfile.TemporaryDirectory() as td:
             run_dir = Path(td)
@@ -4186,7 +4627,7 @@ class TestM1M2E1E2Findings(unittest.TestCase):
             (run_dir / "06-test-log.md").write_text(
                 "**Smoke result:** smoke-pass\n", encoding="utf-8"
             )
-            # No 05 → derive adversarial
+            # No 05 → derive adversarial (E1 independent smoke present)
             buf = __import__("io").StringIO()
             with __import__("contextlib").redirect_stdout(buf):
                 rc = lint_run.print_next_hint(run_dir, derive=True)
@@ -4264,7 +4705,11 @@ class TestM1M2E1E2Findings(unittest.TestCase):
             hitl_gate_b="blocking",
             gate_b_approved="yes",
             lens_plan="api",
-            notes="- 04a skipped — no planned test cases",
+            notes=(
+                "- 04a skipped — no planned test cases\n"
+                "- Smoke: smoke-pass (re-run)"
+            ),
+            run_log=_independent_smoke_run_log("lens-api"),
         )
         with tempfile.TemporaryDirectory() as td:
             run_dir = Path(td)
@@ -4274,7 +4719,7 @@ class TestM1M2E1E2Findings(unittest.TestCase):
             (run_dir / "06-test-log.md").write_text(
                 "**Smoke result:** smoke-pass\n", encoding="utf-8"
             )
-            # No 05 → derive adversarial
+            # No 05 → derive adversarial (E1 independent smoke present)
             buf = __import__("io").StringIO()
             with __import__("contextlib").redirect_stdout(buf):
                 rc = lint_run.print_next_hint(run_dir, derive=True)
@@ -4295,7 +4740,11 @@ class TestM1M2E1E2Findings(unittest.TestCase):
             hitl_gate_b="blocking",
             gate_b_approved="yes",
             lens_plan="api,security",
-            notes="- 04a skipped — no planned test cases",
+            notes=(
+                "- 04a skipped — no planned test cases\n"
+                "- Smoke: smoke-pass (re-run)"
+            ),
+            run_log=_independent_smoke_run_log("merge-findings"),
         )
         with tempfile.TemporaryDirectory() as td:
             run_dir = Path(td)
@@ -4333,8 +4782,10 @@ class TestM1M2E1E2Findings(unittest.TestCase):
             lens_plan="api",
             notes=(
                 "- 04a skipped — no planned test cases\n"
+                "- Smoke: smoke-pass (re-run)\n"
                 "- card-override — run api lens early for fixture"
             ),
+            run_log=_independent_smoke_run_log("lens-api"),
         )
         with tempfile.TemporaryDirectory() as td:
             run_dir = Path(td)
@@ -4514,6 +4965,1951 @@ class TestHandoffDescription(unittest.TestCase):
                 sys.argv = old
         self.assertEqual(rc, 0)
         self.assertIn("ok:", buf.getvalue())
+
+    def test_handoff_bans_consent_and_clarity_writes(self):
+        """H1/E5: base block forbids clarity-check / .consent.md writes."""
+        from io import StringIO
+        import contextlib
+
+        buf = StringIO()
+        with contextlib.redirect_stdout(buf):
+            old = sys.argv
+            try:
+                sys.argv = ["handoff-for.py", "build"]
+                rc = handoff_for.main()
+            finally:
+                sys.argv = old
+        self.assertEqual(rc, 0)
+        out = buf.getvalue()
+        self.assertIn("clarity-check ok", out)
+        self.assertIn(".consent.md", out)
+        self.assertIn(".lint-consent-snap", out)
+
+
+class TestConsentWriteBan(unittest.TestCase):
+    """M1: --snapshot-consent / --check-consent-writes."""
+
+    def test_unchanged_ok(self):
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(
+                _base(next_step="build", stage_id="build"), encoding="utf-8"
+            )
+            self.assertEqual(lint_run.snapshot_consent(run_dir), 0)
+            issues = lint_run.check_consent_writes(run_dir)
+            self.assertEqual(issues, [])
+
+    def test_change_without_ack_errors(self):
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            text = _base(
+                next_step="build",
+                stage_id="build",
+                hitl_gate_b="blocking",
+                gate_b_approved="none",
+                auto_provenance=False,
+            )
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            self.assertEqual(lint_run.snapshot_consent(run_dir), 0)
+            # Simulate Task (or forged) consent write without parent ack
+            forged = text.replace(
+                "**Gate B approved:** none",
+                "**Gate B approved:** yes",
+            )
+            forged = (
+                forged
+                + "\n"
+                + _prov("gate-b-approved", "yes go build the feature now")
+            )
+            # Inject into Notes section carefully
+            forged = forged.replace(
+                "### Notes\n\n- ok",
+                "### Notes\n\n- ok\n"
+                + _prov("gate-b-approved", "yes go build the feature now"),
+            )
+            (run_dir / "00-run.md").write_text(forged, encoding="utf-8")
+            issues = lint_run.check_consent_writes(run_dir)
+            self.assertTrue(
+                any("parent consent write" in i.message for i in issues)
+            )
+
+    def test_change_with_ack_ok(self):
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            text = _base(
+                next_step="build",
+                stage_id="build",
+                hitl_gate_b="blocking",
+                gate_b_approved="none",
+                auto_provenance=False,
+                run_log="- **12:00** · running · gate-b · digest",
+            )
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            self.assertEqual(lint_run.snapshot_consent(run_dir), 0)
+            updated = text.replace(
+                "**Gate B approved:** none",
+                "**Gate B approved:** yes",
+            )
+            updated = updated.replace(
+                "### Notes\n\n- ok",
+                "### Notes\n\n- ok\n"
+                + _prov("gate-b-approved", "yes go build the feature now"),
+            )
+            updated = updated.replace(
+                "- **12:00** · running · gate-b · digest",
+                "- **12:00** · running · gate-b · digest\n"
+                "- **12:05** · paused · gate-b · parent consent write — "
+                "gate-b-approved",
+            )
+            (run_dir / "00-run.md").write_text(updated, encoding="utf-8")
+            issues = lint_run.check_consent_writes(run_dir)
+            self.assertEqual(issues, [])
+
+    def test_missing_snap_errors(self):
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(_base(), encoding="utf-8")
+            issues = lint_run.check_consent_writes(run_dir)
+            self.assertTrue(
+                any(".lint-consent-snap" in i.message for i in issues)
+            )
+
+    def test_missing_snap_noop_when_require_snap_false(self):
+        """M1 machine path: missing snap is no-op on --next / --before-build."""
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(_base(), encoding="utf-8")
+            issues = lint_run.check_consent_writes(run_dir, require_snap=False)
+            self.assertEqual(issues, [])
+
+    def test_before_build_errors_when_snap_dirty(self):
+        """M1: --before-build fails when consent snap dirty without ack."""
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            text = _base(
+                next_step="build",
+                stage_id="build",
+                hitl_gate_b="blocking",
+                gate_b_approved="none",
+                auto_provenance=False,
+                notes="- clarity-check ok — build",
+            )
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            self.assertEqual(lint_run.snapshot_consent(run_dir), 0)
+            forged = text.replace(
+                "**Gate B approved:** none",
+                "**Gate B approved:** yes",
+            ).replace(
+                "### Notes\n\n- clarity-check ok — build",
+                "### Notes\n\n- clarity-check ok — build\n"
+                + _prov("gate-b-approved", "yes go build the feature now"),
+            )
+            (run_dir / "00-run.md").write_text(forged, encoding="utf-8")
+            _write_03a_clean(run_dir)
+            issues = lint_run_md(
+                forged,
+                before_design_review=False,
+                before_build=True,
+                run_dir=run_dir,
+            )
+            self.assertTrue(
+                any("parent consent write" in e for e in _errors(issues))
+            )
+
+    def test_next_do_not_launch_when_snap_dirty(self):
+        """M1: --next → do-not-launch when consent snap dirty without ack."""
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            text = _base(
+                next_step="design-phase",
+                stage_id="design-phase",
+                hitl_gate_b="auto",
+                gate_b_approved="none",
+                auto_provenance=False,
+            )
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            self.assertEqual(lint_run.snapshot_consent(run_dir), 0)
+            forged = text.replace(
+                "**Gate C approved:** none",
+                "**Gate C approved:** merge",
+            ).replace(
+                "### Notes\n\n- ok",
+                "### Notes\n\n- ok\n"
+                + _prov("gate-c-approved", "commit push PR and merge now"),
+            )
+            (run_dir / "00-run.md").write_text(forged, encoding="utf-8")
+            buf = __import__("io").StringIO()
+            with __import__("contextlib").redirect_stdout(buf):
+                rc = lint_run.print_next_hint(run_dir, derive=True)
+            out = buf.getvalue()
+            self.assertEqual(rc, 1)
+            self.assertIn("handoff: do-not-launch", out)
+            self.assertIn("parent consent write", out)
+
+
+class TestFullProfileSmokeRerun(unittest.TestCase):
+    """E1: Mode full + profile full require independent smoke before Adv."""
+
+    def test_derive_smoke_after_build_writes_smoke(self):
+        """E1: derive returns smoke until independent Smoke Result."""
+        text = _base(
+            mode="full",
+            review="full",
+            next_step="adversarial",
+            stage_id="adversarial",
+            last_verify="verify-pass",
+            hitl_gate_b="blocking",
+            gate_b_approved="yes",
+            notes="- 04a skipped — no planned test cases",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            _seed_full_pre_design(run_dir)
+            _write_03a_clean(run_dir)
+            (run_dir / "06-test-log.md").write_text(
+                "**Smoke result:** smoke-pass\n", encoding="utf-8"
+            )
+            derived = lint_run.derive_expected_next(text, run_dir)
+            self.assertEqual(derived, "smoke")
+
+    def test_derive_adversarial_after_independent_smoke(self):
+        """E1: smoke-pass (re-run) + Smoke-stage evidence unlocks Adv derive."""
+        text = _base(
+            mode="full",
+            review="full",
+            next_step="adversarial",
+            stage_id="adversarial",
+            last_verify="verify-pass",
+            hitl_gate_b="blocking",
+            gate_b_approved="yes",
+            notes=(
+                "- 04a skipped — no planned test cases\n"
+                "- Smoke: smoke-pass (re-run)"
+            ),
+            run_log=_independent_smoke_run_log("adversarial"),
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            _seed_full_pre_design(run_dir)
+            _write_03a_clean(run_dir)
+            (run_dir / "06-test-log.md").write_text(
+                "**Smoke result:** smoke-pass\n", encoding="utf-8"
+            )
+            derived = lint_run.derive_expected_next(text, run_dir)
+            self.assertEqual(derived, "adversarial")
+
+    def test_notes_alone_do_not_unlock_adv(self):
+        """E1/M1: bare Notes smoke-pass (re-run) without Smoke-stage evidence."""
+        text = _base(
+            mode="full",
+            review="full",
+            next_step="adversarial",
+            stage_id="adversarial",
+            last_verify="verify-pass",
+            hitl_gate_b="blocking",
+            gate_b_approved="yes",
+            notes=(
+                "- 04a skipped — no planned test cases\n"
+                "- Smoke: smoke-pass (re-run)"
+            ),
+            # default run_log has stage adversarial only — no smoke stage
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            _seed_full_pre_design(run_dir)
+            _write_03a_clean(run_dir)
+            (run_dir / "06-test-log.md").write_text(
+                "**Smoke result:** smoke-pass\n", encoding="utf-8"
+            )
+            derived = lint_run.derive_expected_next(text, run_dir)
+            self.assertEqual(derived, "smoke")
+            self.assertFalse(
+                lint_run._full_profile_independent_smoke(text, run_dir)
+            )
+            issues = lint_run_md(
+                text,
+                before_design_review=False,
+                before_build=False,
+                before_code_review=True,
+                run_dir=run_dir,
+            )
+            self.assertTrue(
+                any(
+                    "without Smoke-stage evidence" in e
+                    or "Build-writes-Smoke alone" in e
+                    for e in _errors(issues)
+                )
+            )
+
+    def test_run_log_done_alone_does_not_unlock_adv(self):
+        """E1/M1: Run-log smoke-pass (re-run) without Notes section must FAIL."""
+        text = _base(
+            mode="full",
+            review="full",
+            next_step="adversarial",
+            stage_id="adversarial",
+            last_verify="verify-pass",
+            hitl_gate_b="blocking",
+            gate_b_approved="yes",
+            notes="- 04a skipped — no planned test cases",
+            # Single forged line: stage smoke + DONE token — no Notes entry
+            run_log=(
+                "- **12:00** · running · build · verify-pass\n"
+                "- **12:05** · running · smoke · smoke-pass (re-run)\n"
+                "- **12:10** · running · adversarial · fixture"
+            ),
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            _seed_full_pre_design(run_dir)
+            _write_03a_clean(run_dir)
+            (run_dir / "06-test-log.md").write_text(
+                "**Smoke result:** smoke-pass\n", encoding="utf-8"
+            )
+            self.assertFalse(
+                lint_run._full_profile_independent_smoke(text, run_dir)
+            )
+            derived = lint_run.derive_expected_next(text, run_dir)
+            self.assertEqual(derived, "smoke")
+            issues = lint_run_md(
+                text,
+                before_design_review=False,
+                before_build=False,
+                before_code_review=True,
+                run_dir=run_dir,
+            )
+            self.assertTrue(
+                any(
+                    "Build-writes-Smoke alone" in e or "smoke re-run" in e
+                    for e in _errors(issues)
+                )
+            )
+
+    def test_notes_plus_stage_evidence_unlocks_adv(self):
+        """E1/M1: Notes smoke-pass (re-run) + separate Smoke-stage evidence PASS."""
+        text = _base(
+            mode="full",
+            review="full",
+            next_step="adversarial",
+            stage_id="adversarial",
+            last_verify="verify-pass",
+            hitl_gate_b="blocking",
+            gate_b_approved="yes",
+            notes=(
+                "- 04a skipped — no planned test cases\n"
+                "- Smoke: smoke-pass (re-run)"
+            ),
+            run_log=_independent_smoke_run_log("adversarial"),
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            _seed_full_pre_design(run_dir)
+            _write_03a_clean(run_dir)
+            (run_dir / "06-test-log.md").write_text(
+                "**Smoke result:** smoke-pass\n", encoding="utf-8"
+            )
+            self.assertTrue(
+                lint_run._full_profile_independent_smoke(text, run_dir)
+            )
+            derived = lint_run.derive_expected_next(text, run_dir)
+            self.assertEqual(derived, "adversarial")
+
+    def test_before_code_review_errors_without_independent_smoke(self):
+        """E1: --before-code-review errors on Build-writes-Smoke alone."""
+        text = _base(
+            mode="full",
+            review="full",
+            next_step="adversarial",
+            stage_id="adversarial",
+            last_verify="verify-pass",
+            hitl_gate_b="blocking",
+            gate_b_approved="yes",
+            notes="- 04a skipped — no planned test cases",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "06-test-log.md").write_text(
+                "**Smoke result:** smoke-pass\n", encoding="utf-8"
+            )
+            issues = lint_run_md(
+                text,
+                before_design_review=False,
+                before_build=False,
+                before_code_review=True,
+                run_dir=run_dir,
+            )
+            self.assertTrue(
+                any(
+                    "Build-writes-Smoke alone" in e or "smoke re-run" in e
+                    for e in _errors(issues)
+                )
+            )
+
+    def test_before_code_review_ok_with_independent_smoke(self):
+        """E1: independent Smoke Result + stage evidence clears Adv gate."""
+        text = _base(
+            mode="full",
+            review="full",
+            next_step="adversarial",
+            stage_id="adversarial",
+            last_verify="verify-pass",
+            hitl_gate_b="blocking",
+            gate_b_approved="yes",
+            notes=(
+                "- 04a skipped — no planned test cases\n"
+                "- Smoke: smoke-pass (re-run)"
+            ),
+            run_log=_independent_smoke_run_log("adversarial"),
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "06-test-log.md").write_text(
+                "**Smoke result:** smoke-pass\n", encoding="utf-8"
+            )
+            issues = lint_run_md(
+                text,
+                before_design_review=False,
+                before_build=False,
+                before_code_review=True,
+                run_dir=run_dir,
+            )
+            self.assertFalse(
+                any(
+                    "Build-writes-Smoke alone" in e
+                    or "smoke re-run" in e
+                    or "without Smoke-stage evidence" in e
+                    for e in _errors(issues)
+                )
+            )
+
+    def test_mtime_after_verify_unlocks_without_run_log_smoke(self):
+        """E1/M2: 06 mtime after Last verify-pass at + Notes unlocks Adv."""
+        import time
+
+        past = "2020-01-01T00:00:00+00:00"
+        text = _base(
+            mode="full",
+            review="full",
+            next_step="adversarial",
+            stage_id="adversarial",
+            last_verify="verify-pass",
+            last_verify_pass_at=past,
+            hitl_gate_b="blocking",
+            gate_b_approved="yes",
+            notes=(
+                "- 04a skipped — no planned test cases\n"
+                "- Smoke: smoke-pass (re-run)"
+            ),
+            # no smoke stage in default run_log
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            _seed_full_pre_design(run_dir)
+            _write_03a_clean(run_dir)
+            six = run_dir / "06-test-log.md"
+            six.write_text("**Smoke result:** smoke-pass\n", encoding="utf-8")
+            # Ensure mtime is after 2020
+            time.sleep(0.01)
+            six.touch()
+            derived = lint_run.derive_expected_next(text, run_dir)
+            self.assertEqual(derived, "adversarial")
+
+    def test_lite_profile_skips_independent_smoke_gate(self):
+        """E1: Mode full + profile lite keeps Build-writes-Smoke skip."""
+        text = _base(
+            mode="full",
+            review="lite",
+            next_step="code-review-phase",
+            stage_id="code-review-phase",
+            last_verify="verify-pass",
+            hitl_gate_b="blocking",
+            gate_b_approved="yes",
+            notes="- 04a skipped — no planned test cases",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            _seed_full_pre_design(run_dir)
+            _write_03a_clean(run_dir)
+            (run_dir / "06-test-log.md").write_text(
+                "**Smoke result:** smoke-pass\n", encoding="utf-8"
+            )
+            derived = lint_run.derive_expected_next(text, run_dir)
+            self.assertEqual(derived, "code-review-phase")
+            issues = lint_run_md(
+                text,
+                before_design_review=False,
+                before_build=False,
+                before_code_review=True,
+                run_dir=run_dir,
+            )
+            self.assertFalse(
+                any("Build-writes-Smoke alone" in e for e in _errors(issues))
+            )
+
+    def test_m1_forged_05_clean_still_derives_smoke(self):
+        """M1: Adv+Quality clean on 05 without E1 Notes+evidence → derive smoke."""
+        text = _base(
+            mode="full",
+            review="full",
+            next_step="test-full",
+            stage_id="quality",
+            last_verify="verify-pass",
+            hitl_gate_b="blocking",
+            gate_b_approved="yes",
+            notes="- 04a skipped — no planned test cases",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            _seed_full_pre_design(run_dir)
+            _write_03a_clean(run_dir)
+            (run_dir / "06-test-log.md").write_text(
+                "**Smoke result:** smoke-pass\n", encoding="utf-8"
+            )
+            (run_dir / "05-review-log.md").write_text(
+                "# Review\n\n"
+                "## Adversarial test review\n\n"
+                "**Result:** clean\n\n"
+                "## Quality\n\n"
+                "**Result:** clean\n",
+                encoding="utf-8",
+            )
+            derived = lint_run.derive_expected_next(text, run_dir)
+            self.assertEqual(derived, "smoke")
+            self.assertFalse(
+                lint_run._full_profile_independent_smoke(text, run_dir)
+            )
+
+    def test_m1_forged_05_next_test_full_do_not_launch(self):
+        """M1: forged 05 + Next=test-full without E1 → --next do-not-launch."""
+        text = _base(
+            mode="full",
+            review="full",
+            next_step="test-full",
+            stage_id="quality",
+            last_verify="verify-pass",
+            hitl_gate_b="blocking",
+            gate_b_approved="yes",
+            notes="- 04a skipped — no planned test cases",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            _seed_full_pre_design(run_dir)
+            _write_03a_clean(run_dir)
+            (run_dir / "06-test-log.md").write_text(
+                "**Smoke result:** smoke-pass\n", encoding="utf-8"
+            )
+            (run_dir / "05-review-log.md").write_text(
+                "# Review\n\n"
+                "## Adversarial test review\n\n"
+                "**Result:** clean\n\n"
+                "## Quality\n\n"
+                "**Result:** clean\n",
+                encoding="utf-8",
+            )
+            buf = __import__("io").StringIO()
+            with __import__("contextlib").redirect_stdout(buf):
+                rc = lint_run.print_next_hint(run_dir, derive=True)
+            out = buf.getvalue()
+            self.assertEqual(rc, 1)
+            self.assertIn("handoff: do-not-launch", out)
+            self.assertTrue(
+                "Build-writes-Smoke alone" in out
+                or "derived next: smoke" in out
+                or "smoke re-run" in out
+            )
+
+    def test_m1_forged_05_next_quality_errors(self):
+        """M1: forged 05 + Next=quality without E1 → lint error / derive smoke."""
+        text = _base(
+            mode="full",
+            review="full",
+            next_step="quality",
+            stage_id="adversarial",
+            last_verify="verify-pass",
+            hitl_gate_b="blocking",
+            gate_b_approved="yes",
+            notes="- 04a skipped — no planned test cases",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            _seed_full_pre_design(run_dir)
+            _write_03a_clean(run_dir)
+            (run_dir / "06-test-log.md").write_text(
+                "**Smoke result:** smoke-pass\n", encoding="utf-8"
+            )
+            (run_dir / "05-review-log.md").write_text(
+                "# Review\n\n"
+                "## Adversarial test review\n\n"
+                "**Result:** clean\n\n"
+                "## Quality\n\n"
+                "**Result:** pending\n",
+                encoding="utf-8",
+            )
+            derived = lint_run.derive_expected_next(text, run_dir)
+            self.assertEqual(derived, "smoke")
+            issues = lint_run_md(
+                text,
+                before_design_review=False,
+                before_build=False,
+                before_code_review=False,
+                run_dir=run_dir,
+            )
+            self.assertTrue(
+                any(
+                    "Build-writes-Smoke alone" in e or "smoke re-run" in e
+                    for e in _errors(issues)
+                )
+            )
+
+    def test_m1_missing_06_next_adversarial_do_not_launch(self):
+        """M1: missing 06 + Next=adversarial → do-not-launch, no handoff."""
+        text = _base(
+            mode="full",
+            review="full",
+            next_step="adversarial",
+            stage_id="adversarial",
+            last_verify="verify-pass",
+            hitl_gate_b="blocking",
+            gate_b_approved="yes",
+            notes="- 04a skipped — no planned test cases",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            _seed_full_pre_design(run_dir)
+            _write_03a_clean(run_dir)
+            # no 06-test-log.md
+            derived = lint_run.derive_expected_next(text, run_dir)
+            self.assertEqual(derived, "smoke")
+            buf = __import__("io").StringIO()
+            with __import__("contextlib").redirect_stdout(buf):
+                rc = lint_run.print_next_hint(run_dir, derive=True)
+            out = buf.getvalue()
+            self.assertEqual(rc, 1)
+            self.assertIn("handoff: do-not-launch", out)
+            self.assertNotIn("handoff-for.py", out)
+            self.assertTrue(
+                "unsafe card vs derived" in out or "Smoke unpaid" in out
+            )
+
+    def test_m1_smoke_fail_next_test_full_do_not_launch(self):
+        """M1: smoke-fail + Next=test-full → do-not-launch (derive fix-tests)."""
+        text = _base(
+            mode="full",
+            review="full",
+            next_step="test-full",
+            stage_id="test-full",
+            last_verify="verify-pass",
+            hitl_gate_b="blocking",
+            gate_b_approved="yes",
+            notes="- 04a skipped — no planned test cases",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            _seed_full_pre_design(run_dir)
+            _write_03a_clean(run_dir)
+            (run_dir / "06-test-log.md").write_text(
+                "**Smoke result:** smoke-fail\n", encoding="utf-8"
+            )
+            derived = lint_run.derive_expected_next(text, run_dir)
+            self.assertEqual(derived, "fix-tests")
+            buf = __import__("io").StringIO()
+            with __import__("contextlib").redirect_stdout(buf):
+                rc = lint_run.print_next_hint(run_dir, derive=True)
+            out = buf.getvalue()
+            self.assertEqual(rc, 1)
+            self.assertIn("handoff: do-not-launch", out)
+            self.assertNotIn("handoff-for.py", out)
+            self.assertTrue(
+                "unsafe card vs derived" in out
+                or "Smoke unpaid" in out
+                or "derived next: fix-tests" in out
+            )
+
+    def test_m1_missing_06_lint_errors_without_derive(self):
+        """M1: missing 06 + Next=adversarial → lint error even without --derive."""
+        text = _base(
+            mode="full",
+            review="full",
+            next_step="adversarial",
+            stage_id="adversarial",
+            last_verify="verify-pass",
+            hitl_gate_b="blocking",
+            gate_b_approved="yes",
+            notes="- 04a skipped — no planned test cases",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            _seed_full_pre_design(run_dir)
+            _write_03a_clean(run_dir)
+            issues = lint_run_md(
+                text,
+                before_design_review=False,
+                before_build=False,
+                before_code_review=False,
+                run_dir=run_dir,
+            )
+            self.assertTrue(any("Smoke unpaid" in e for e in _errors(issues)))
+
+    def test_m1_missing_06_next_fix_tests_do_not_launch(self):
+        """M1: missing 06 + Next=fix-tests → do-not-launch (no Fix exception)."""
+        text = _base(
+            mode="full",
+            review="full",
+            next_step="fix-tests",
+            stage_id="fix-tests",
+            last_verify="verify-pass",
+            hitl_gate_b="blocking",
+            gate_b_approved="yes",
+            notes="- 04a skipped — no planned test cases",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            _seed_full_pre_design(run_dir)
+            _write_03a_clean(run_dir)
+            # no 06-test-log.md
+            derived = lint_run.derive_expected_next(text, run_dir)
+            self.assertEqual(derived, "smoke")
+            buf = __import__("io").StringIO()
+            with __import__("contextlib").redirect_stdout(buf):
+                rc = lint_run.print_next_hint(run_dir, derive=True)
+            out = buf.getvalue()
+            self.assertEqual(rc, 1)
+            self.assertIn("handoff: do-not-launch", out)
+            self.assertNotIn("handoff-for.py", out)
+            self.assertTrue(
+                "unsafe card vs derived" in out or "Smoke unpaid" in out
+            )
+
+    def test_m1_build_smoke_pass_e1_unpaid_next_fix_tests_do_not_launch(self):
+        """M1: Build smoke-pass + E1 unpaid + Next=fix-tests → do-not-launch."""
+        text = _base(
+            mode="full",
+            review="full",
+            next_step="fix-tests",
+            stage_id="fix-tests",
+            last_verify="verify-pass",
+            hitl_gate_b="blocking",
+            gate_b_approved="yes",
+            notes="- 04a skipped — no planned test cases",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            _seed_full_pre_design(run_dir)
+            _write_03a_clean(run_dir)
+            (run_dir / "06-test-log.md").write_text(
+                "**Smoke result:** smoke-pass\n", encoding="utf-8"
+            )
+            derived = lint_run.derive_expected_next(text, run_dir)
+            self.assertEqual(derived, "smoke")
+            buf = __import__("io").StringIO()
+            with __import__("contextlib").redirect_stdout(buf):
+                rc = lint_run.print_next_hint(run_dir, derive=True)
+            out = buf.getvalue()
+            self.assertEqual(rc, 1)
+            self.assertIn("handoff: do-not-launch", out)
+            self.assertNotIn("handoff-for.py", out)
+            self.assertTrue(
+                "unsafe card vs derived" in out
+                or "Build-writes-Smoke alone" in out
+                or "Smoke unpaid" in out
+            )
+
+    def test_m1_smoke_fail_next_fix_tests_allows(self):
+        """M1: smoke-fail + Next=fix-tests → allow (derive fix-tests; JUMP_AHEAD ok)."""
+        text = _base(
+            mode="full",
+            review="full",
+            next_step="fix-tests",
+            stage_id="smoke",  # prior failure stage; Fix not completed yet
+            last_verify="verify-pass",
+            hitl_gate_b="blocking",
+            gate_b_approved="yes",
+            notes="- 04a skipped — no planned test cases\n- Fix ask",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            _seed_full_pre_design(run_dir)
+            _write_03a_clean(run_dir)
+            (run_dir / "06-test-log.md").write_text(
+                "**Result:** smoke-fail\n"
+                "**Smoke result:** smoke-fail\n",
+                encoding="utf-8",
+            )
+            derived = lint_run.derive_expected_next(text, run_dir)
+            self.assertEqual(derived, "fix-tests")
+            # JUMP_AHEAD still allows fix-tests when derived were still smoke
+            unsafe = lint_run._unsafe_card_derive_mismatch(
+                "fix-tests", "smoke", text, run_dir
+            )
+            self.assertIsNone(unsafe)
+            issues = lint_run_md(
+                text,
+                before_design_review=False,
+                before_build=False,
+                before_code_review=False,
+                run_dir=run_dir,
+            )
+            self.assertFalse(
+                any("Smoke unpaid" in e for e in _errors(issues))
+            )
+            self.assertFalse(
+                any("Build-writes-Smoke alone" in e for e in _errors(issues))
+            )
+            buf = __import__("io").StringIO()
+            with __import__("contextlib").redirect_stdout(buf):
+                rc = lint_run.print_next_hint(run_dir, derive=True)
+            out = buf.getvalue()
+            # Card matches derived fix-tests — no unsafe jump-ahead
+            self.assertNotIn("unsafe card vs derived", out)
+            if rc == 1:
+                self.assertNotIn("Smoke unpaid", out)
+                self.assertNotIn("Build-writes-Smoke alone", out)
+
+    def test_m1_result_failure_next_fix_tests_allows(self):
+        """M1: top-level Result failure + Next=fix-tests → allow (JUMP_AHEAD)."""
+        text = _base(
+            mode="full",
+            review="full",
+            next_step="fix-tests",
+            stage_id="smoke",  # prior smoke-fail; Fix not completed yet
+            last_verify="verify-pass",
+            hitl_gate_b="blocking",
+            gate_b_approved="yes",
+            notes="- 04a skipped — no planned test cases",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            _seed_full_pre_design(run_dir)
+            _write_03a_clean(run_dir)
+            (run_dir / "06-test-log.md").write_text(
+                "**Result:** failure\n"
+                "**Smoke result:** smoke-fail\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(
+                lint_run.derive_expected_next(text, run_dir), "fix-tests"
+            )
+            unsafe = lint_run._unsafe_card_derive_mismatch(
+                "fix-tests", "smoke", text, run_dir
+            )
+            self.assertIsNone(unsafe)
+
+    def test_m1_derive_smoke_fail_returns_fix_tests(self):
+        """M1: Smoke Result smoke-fail → derive fix-tests (not smoke)."""
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="fix-tests",
+            stage_id="smoke",  # still unpaid Fix; Last stage ≠ fix-tests
+            last_verify="verify-pass",
+            hitl_gate_b="auto",
+            gate_b_approved="none",
+            notes="- Fix ask",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "03-design.md").write_text("# d\n", encoding="utf-8")
+            (run_dir / "04-tasks.md").write_text("# t\n", encoding="utf-8")
+            (run_dir / "03a-design-review-log.md").write_text(
+                "**Result:** clean\n", encoding="utf-8"
+            )
+            (run_dir / "06-test-log.md").write_text(
+                "**Smoke result:** smoke-fail\n", encoding="utf-8"
+            )
+            self.assertEqual(
+                lint_run.derive_expected_next(text, run_dir), "fix-tests"
+            )
+
+    def test_m1_derive_test_failure_returns_fix_tests(self):
+        """M1: test-lite Result failure → derive fix-tests (not re-test)."""
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="fix-tests",
+            stage_id="test-lite",  # failure without Fix verify-pass yet
+            last_verify="verify-pass",
+            hitl_gate_b="auto",
+            gate_b_approved="none",
+            notes="- Fix ask",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "03-design.md").write_text("# d\n", encoding="utf-8")
+            (run_dir / "04-tasks.md").write_text("# t\n", encoding="utf-8")
+            (run_dir / "03a-design-review-log.md").write_text(
+                "**Result:** clean\n", encoding="utf-8"
+            )
+            (run_dir / "05-review-log.md").write_text(
+                "**Result:** clean\n", encoding="utf-8"
+            )
+            (run_dir / "06-test-log.md").write_text(
+                "**Smoke result:** smoke-pass\n"
+                "**Result:** failure\n"
+                "**Test path last run:** lite\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(
+                lint_run.derive_expected_next(text, run_dir), "fix-tests"
+            )
+
+    def test_m1_after_fix_verify_pass_smoke_fail_derives_smoke(self):
+        """M1: smoke-fail → fix-tests → after verify-pass → derive smoke (re-smoke)."""
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="smoke",
+            stage_id="fix-tests",
+            last_verify="verify-pass",
+            hitl_gate_b="auto",
+            gate_b_approved="none",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "03-design.md").write_text("# d\n", encoding="utf-8")
+            (run_dir / "04-tasks.md").write_text("# t\n", encoding="utf-8")
+            (run_dir / "03a-design-review-log.md").write_text(
+                "**Result:** clean\n", encoding="utf-8"
+            )
+            (run_dir / "06-test-log.md").write_text(
+                "**Smoke result:** smoke-fail\n", encoding="utf-8"
+            )
+            self.assertEqual(
+                lint_run.derive_expected_next(text, run_dir), "smoke"
+            )
+
+    def test_m1_after_fix_verify_pass_test_failure_derives_test_lite(self):
+        """M1: test failure → fix-tests → after verify-pass → derive test-lite."""
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="test-lite",
+            stage_id="fix-tests",
+            last_verify="verify-pass",
+            hitl_gate_b="auto",
+            gate_b_approved="none",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "03-design.md").write_text("# d\n", encoding="utf-8")
+            (run_dir / "04-tasks.md").write_text("# t\n", encoding="utf-8")
+            (run_dir / "03a-design-review-log.md").write_text(
+                "**Result:** clean\n", encoding="utf-8"
+            )
+            (run_dir / "05-review-log.md").write_text(
+                "**Result:** clean\n", encoding="utf-8"
+            )
+            (run_dir / "06-test-log.md").write_text(
+                "**Smoke result:** smoke-pass\n"
+                "**Result:** failure\n"
+                "**Test path last run:** lite\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(
+                lint_run.derive_expected_next(text, run_dir), "test-lite"
+            )
+
+    def test_m1_after_fix_verify_pass_test_failure_derives_test_full(self):
+        """M1: test failure → fix-tests → after verify-pass → derive test-full."""
+        text = _base(
+            mode="full",
+            review="full",
+            next_step="test-full",
+            stage_id="fix-tests",
+            last_verify="verify-pass",
+            hitl_gate_b="blocking",
+            gate_b_approved="yes",
+            notes=(
+                "- 04a skipped — no planned test cases\n"
+                "- Smoke: smoke-pass (re-run)"
+            ),
+            run_log=_independent_smoke_run_log("quality"),
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            _seed_full_pre_design(run_dir)
+            _write_03a_clean(run_dir)
+            (run_dir / "05-review-log.md").write_text(
+                "## Adversarial test review\n\n"
+                "**Result:** clean\n\n"
+                "## Quality review\n\n"
+                "**Result:** clean\n",
+                encoding="utf-8",
+            )
+            (run_dir / "06-test-log.md").write_text(
+                "**Result:** failure\n"
+                "**Test path last run:** full\n"
+                "**Smoke result:** smoke-pass\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(
+                lint_run.derive_expected_next(text, run_dir), "test-full"
+            )
+
+    def test_m1_unpaid_smoke_still_derives_smoke(self):
+        """M1: missing 06 unpaid Smoke → derive smoke (blocks fix-tests)."""
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="code-review-phase",
+            last_verify="verify-pass",
+            hitl_gate_b="auto",
+            gate_b_approved="none",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "03-design.md").write_text("# d\n", encoding="utf-8")
+            (run_dir / "04-tasks.md").write_text("# t\n", encoding="utf-8")
+            (run_dir / "03a-design-review-log.md").write_text(
+                "**Result:** clean\n", encoding="utf-8"
+            )
+            # no 06
+            self.assertEqual(
+                lint_run.derive_expected_next(text, run_dir), "smoke"
+            )
+            unsafe = lint_run._unsafe_card_derive_mismatch(
+                "fix-tests", "smoke", text, run_dir
+            )
+            self.assertIsNotNone(unsafe)
+            self.assertIn("Smoke unpaid", unsafe)
+
+    def test_m1_skip_review_smoke_fail_derives_fix_tests(self):
+        """M1: skip-review + smoke-fail → derive fix-tests (not build)."""
+        text = _base(
+            mode="simple",
+            review="skip-review",
+            next_step="fix-tests",
+            stage_id="smoke",  # Fix not completed yet
+            last_verify="verify-pass",
+            hitl_gate_b="auto",
+            gate_b_approved="none",
+            has_api="no",
+            has_db="no",
+            notes="- Fix ask",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            (run_dir / "03-design.md").write_text("# d\n", encoding="utf-8")
+            (run_dir / "04-tasks.md").write_text("# t\n", encoding="utf-8")
+            (run_dir / "03a-design-review-log.md").write_text(
+                "**Result:** clean\n", encoding="utf-8"
+            )
+            (run_dir / "06-test-log.md").write_text(
+                "**Smoke result:** smoke-fail\n", encoding="utf-8"
+            )
+            self.assertEqual(
+                lint_run.derive_expected_next(text, run_dir), "fix-tests"
+            )
+            # JUMP_AHEAD: fix-tests allowed even if derived were still build
+            unsafe = lint_run._unsafe_card_derive_mismatch(
+                "fix-tests", "build", text, run_dir
+            )
+            self.assertIsNone(unsafe)
+            buf = __import__("io").StringIO()
+            with __import__("contextlib").redirect_stdout(buf):
+                rc = lint_run.print_next_hint(run_dir, derive=True)
+            out = buf.getvalue()
+            self.assertNotIn("unsafe card vs derived", out)
+            if rc == 1:
+                self.assertNotIn("pre-Build / pre-verify jump-ahead", out)
+
+    def test_m1_skip_review_unpaid_smoke_still_derives_build(self):
+        """M1: skip-review + missing 06 unpaid → derive build (blocks fix-tests)."""
+        text = _base(
+            mode="simple",
+            review="skip-review",
+            next_step="fix-tests",
+            stage_id="fix-tests",
+            last_verify="verify-pass",
+            hitl_gate_b="auto",
+            gate_b_approved="none",
+            has_api="no",
+            has_db="no",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            (run_dir / "03-design.md").write_text("# d\n", encoding="utf-8")
+            (run_dir / "04-tasks.md").write_text("# t\n", encoding="utf-8")
+            (run_dir / "03a-design-review-log.md").write_text(
+                "**Result:** clean\n", encoding="utf-8"
+            )
+            # no 06
+            self.assertEqual(
+                lint_run.derive_expected_next(text, run_dir), "build"
+            )
+            unsafe = lint_run._unsafe_card_derive_mismatch(
+                "fix-tests", "build", text, run_dir
+            )
+            self.assertIsNotNone(unsafe)
+            self.assertIn("pre-Build", unsafe)
+            buf = __import__("io").StringIO()
+            with __import__("contextlib").redirect_stdout(buf):
+                rc = lint_run.print_next_hint(run_dir, derive=True)
+            out = buf.getvalue()
+            self.assertEqual(rc, 1)
+            self.assertIn("handoff: do-not-launch", out)
+            self.assertTrue(
+                "unsafe card vs derived" in out
+                or "Smoke unpaid" in out
+                or "derived next: build" in out
+            )
+
+    def test_m2_conflicting_smoke_tokens_derives_fix_tests(self):
+        """M2: Smoke-section pass+fail → fail-closed; derive fix-tests."""
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="code-review-phase",
+            stage_id="code-review-phase",
+            last_verify="verify-pass",
+            hitl_gate_b="auto",
+            gate_b_approved="none",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            (run_dir / "03-design.md").write_text("# d\n", encoding="utf-8")
+            (run_dir / "04-tasks.md").write_text("# t\n", encoding="utf-8")
+            (run_dir / "03a-design-review-log.md").write_text(
+                "**Result:** clean\n", encoding="utf-8"
+            )
+            # Conflicting Smoke-section tokens (legacy top Result + Smoke result)
+            (run_dir / "06-test-log.md").write_text(
+                "**Result:** smoke-pass\n"
+                "**Smoke result:** smoke-fail\n",
+                encoding="utf-8",
+            )
+            self.assertTrue(lint_run._smoke_fail_or_failure(run_dir))
+            self.assertFalse(lint_run._smoke_pass(run_dir))
+            self.assertEqual(
+                lint_run.derive_expected_next(text, run_dir), "fix-tests"
+            )
+            # Conflicting: Smoke result pass + Result under ## Smoke = failure
+            (run_dir / "06-test-log.md").write_text(
+                "## Smoke\n\n"
+                "**Result:** failure\n"
+                "**Smoke result:** smoke-pass\n",
+                encoding="utf-8",
+            )
+            self.assertTrue(lint_run._smoke_fail_or_failure(run_dir))
+            self.assertFalse(lint_run._smoke_pass(run_dir))
+            self.assertEqual(
+                lint_run.derive_expected_next(text, run_dir), "fix-tests"
+            )
+            # Top-level test Result failure is NOT a smoke-fail token
+            (run_dir / "06-test-log.md").write_text(
+                "**Result:** failure\n"
+                "**Smoke result:** smoke-pass\n",
+                encoding="utf-8",
+            )
+            self.assertFalse(lint_run._smoke_fail_or_failure(run_dir))
+            self.assertTrue(lint_run._smoke_pass(run_dir))
+
+    def test_e1_smoke_section_ignores_legacy_top_level_smoke_pass(self):
+        """E1: ## Smoke present → no legacy top-level smoke-pass; prefer Smoke result.
+
+        Top-level overwrite to failure must not flip unpaid when Smoke result
+        is smoke-pass; bare ## Smoke without Smoke result is unpaid.
+        """
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            # Legacy top-level only + ## Smoke → unpaid (require Smoke result)
+            (run_dir / "06-test-log.md").write_text(
+                "## Smoke\n\n"
+                "commands…\n\n"
+                "**Result:** smoke-pass\n",  # top-level after section? under Smoke
+                encoding="utf-8",
+            )
+            # Result under ## Smoke still counts as evidence (not legacy top-level)
+            self.assertTrue(lint_run._smoke_pass(run_dir))
+            # ## Smoke + top-level smoke-pass outside section, no Smoke result
+            (run_dir / "06-test-log.md").write_text(
+                "**Result:** smoke-pass\n\n"
+                "## Smoke\n\n"
+                "commands only\n",
+                encoding="utf-8",
+            )
+            self.assertFalse(lint_run._smoke_pass(run_dir))
+            # Smoke result paid; top-level overwritten by test failure → still pass
+            (run_dir / "06-test-log.md").write_text(
+                "**Result:** failure\n\n"
+                "## Smoke\n\n"
+                "**Smoke result:** smoke-pass\n",
+                encoding="utf-8",
+            )
+            self.assertTrue(lint_run._smoke_pass(run_dir))
+            self.assertFalse(lint_run._smoke_fail_or_failure(run_dir))
+            # No ## Smoke: legacy top-level still accepted
+            (run_dir / "06-test-log.md").write_text(
+                "**Result:** smoke-pass\n", encoding="utf-8"
+            )
+            self.assertTrue(lint_run._smoke_pass(run_dir))
+
+    def test_h1_fix_tests_verify_fail_derives_same_stage(self):
+        """H1: Last stage=fix-tests + verify-fail → derive fix-tests (not build)."""
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="fix-tests",
+            stage_id="fix-tests",
+            last_verify="verify-fail",
+            hitl_gate_b="auto",
+            gate_b_approved="none",
+            notes="- 04a skipped — no planned test cases",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            (run_dir / "03-design.md").write_text("# d\n", encoding="utf-8")
+            (run_dir / "04-tasks.md").write_text("# t\n", encoding="utf-8")
+            (run_dir / "03a-design-review-log.md").write_text(
+                "**Result:** clean\n", encoding="utf-8"
+            )
+            (run_dir / "06-test-log.md").write_text(
+                "**Smoke result:** smoke-pass\n"
+                "**Result:** failure\n"
+                "**Test path last run:** lite\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(
+                lint_run.derive_expected_next(text, run_dir), "fix-tests"
+            )
+            unsafe = lint_run._unsafe_card_derive_mismatch(
+                "fix-tests", "fix-tests", text, run_dir
+            )
+            self.assertIsNone(unsafe)
+            buf = __import__("io").StringIO()
+            with __import__("contextlib").redirect_stdout(buf):
+                rc = lint_run.print_next_hint(run_dir, derive=True)
+            out = buf.getvalue()
+            self.assertNotIn("unsafe card vs derived", out)
+            self.assertNotIn("handoff: do-not-launch", out)
+            self.assertEqual(rc, 0)
+
+    def test_h1_fix_review_verify_fail_derives_same_stage(self):
+        """H1: Last stage=fix-review + verify-fail → derive fix-review (not build)."""
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="fix-review",
+            stage_id="fix-review",
+            last_verify="verify-fail",
+            hitl_gate_b="auto",
+            gate_b_approved="none",
+            notes="- 04a skipped — no planned test cases",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            (run_dir / "03-design.md").write_text("# d\n", encoding="utf-8")
+            (run_dir / "04-tasks.md").write_text("# t\n", encoding="utf-8")
+            (run_dir / "03a-design-review-log.md").write_text(
+                "**Result:** clean\n", encoding="utf-8"
+            )
+            (run_dir / "05-review-log.md").write_text(
+                "**Result:** needs fix\n", encoding="utf-8"
+            )
+            self.assertEqual(
+                lint_run.derive_expected_next(text, run_dir), "fix-review"
+            )
+            unsafe = lint_run._unsafe_card_derive_mismatch(
+                "fix-review", "fix-review", text, run_dir
+            )
+            self.assertIsNone(unsafe)
+            buf = __import__("io").StringIO()
+            with __import__("contextlib").redirect_stdout(buf):
+                rc = lint_run.print_next_hint(run_dir, derive=True)
+            out = buf.getvalue()
+            self.assertNotIn("unsafe card vs derived", out)
+            self.assertNotIn("handoff: do-not-launch", out)
+            self.assertEqual(rc, 0)
+
+    def test_h1_test_lite_verify_fail_derives_fix_tests(self):
+        """H1: Last stage=test-lite + verify-fail → derive fix-tests (not build)."""
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="fix-tests",
+            stage_id="test-lite",
+            last_verify="verify-fail",
+            hitl_gate_b="auto",
+            gate_b_approved="none",
+            notes="- 04a skipped — no planned test cases",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            (run_dir / "03-design.md").write_text("# d\n", encoding="utf-8")
+            (run_dir / "04-tasks.md").write_text("# t\n", encoding="utf-8")
+            (run_dir / "03a-design-review-log.md").write_text(
+                "**Result:** clean\n", encoding="utf-8"
+            )
+            (run_dir / "06-test-log.md").write_text(
+                "**Smoke result:** smoke-pass\n"
+                "**Result:** failure\n"
+                "**Test path last run:** lite\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(
+                lint_run.derive_expected_next(text, run_dir), "fix-tests"
+            )
+
+    def test_h1_test_full_verify_fail_derives_fix_tests(self):
+        """H1: Last stage=test-full + verify-fail → derive fix-tests (not build)."""
+        text = _base(
+            mode="full",
+            review="full",
+            next_step="fix-tests",
+            stage_id="test-full",
+            last_verify="verify-fail",
+            hitl_gate_b="blocking",
+            gate_b_approved="yes",
+            notes="- 04a skipped — no planned test cases",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            _seed_full_pre_design(run_dir)
+            _write_03a_clean(run_dir)
+            self.assertEqual(
+                lint_run.derive_expected_next(text, run_dir), "fix-tests"
+            )
+
+    def test_h1_smoke_verify_fail_derives_fix_tests(self):
+        """H1: Last stage=smoke + verify-fail → derive fix-tests (not build)."""
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="fix-tests",
+            stage_id="smoke",
+            last_verify="verify-fail",
+            hitl_gate_b="auto",
+            gate_b_approved="none",
+            notes="- 04a skipped — no planned test cases",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            (run_dir / "03-design.md").write_text("# d\n", encoding="utf-8")
+            (run_dir / "04-tasks.md").write_text("# t\n", encoding="utf-8")
+            (run_dir / "03a-design-review-log.md").write_text(
+                "**Result:** clean\n", encoding="utf-8"
+            )
+            self.assertEqual(
+                lint_run.derive_expected_next(text, run_dir), "fix-tests"
+            )
+
+    def test_h1_adversarial_verify_fail_derives_fix_review(self):
+        """H1: Last stage=adversarial + verify-fail → derive fix-review (not build)."""
+        text = _base(
+            mode="full",
+            review="full",
+            next_step="fix-review",
+            stage_id="adversarial",
+            last_verify="verify-fail",
+            hitl_gate_b="blocking",
+            gate_b_approved="yes",
+            notes="- 04a skipped — no planned test cases",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            _seed_full_pre_design(run_dir)
+            _write_03a_clean(run_dir)
+            self.assertEqual(
+                lint_run.derive_expected_next(text, run_dir), "fix-review"
+            )
+
+    def test_h1_quality_verify_fail_derives_fix_review(self):
+        """H1: Last stage=quality + verify-fail → derive fix-review (not build)."""
+        text = _base(
+            mode="full",
+            review="full",
+            next_step="fix-review",
+            stage_id="quality",
+            last_verify="verify-fail",
+            hitl_gate_b="blocking",
+            gate_b_approved="yes",
+            notes="- 04a skipped — no planned test cases",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            _seed_full_pre_design(run_dir)
+            _write_03a_clean(run_dir)
+            self.assertEqual(
+                lint_run.derive_expected_next(text, run_dir), "fix-review"
+            )
+
+    def test_h1_code_review_phase_verify_fail_derives_fix_review(self):
+        """H1: Last stage=code-review-phase + verify-fail → derive fix-review."""
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="fix-review",
+            stage_id="code-review-phase",
+            last_verify="verify-fail",
+            hitl_gate_b="auto",
+            gate_b_approved="none",
+            notes="- 04a skipped — no planned test cases",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            (run_dir / "03-design.md").write_text("# d\n", encoding="utf-8")
+            (run_dir / "04-tasks.md").write_text("# t\n", encoding="utf-8")
+            (run_dir / "03a-design-review-log.md").write_text(
+                "**Result:** clean\n", encoding="utf-8"
+            )
+            self.assertEqual(
+                lint_run.derive_expected_next(text, run_dir), "fix-review"
+            )
+
+    def test_m1_after_fix_verify_pass_next_fix_tests_vs_smoke_do_not_launch(self):
+        """M1: after Fix unlock + smoke-fail, Next=fix-tests → do-not-launch."""
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="fix-tests",
+            stage_id="fix-tests",
+            last_verify="verify-pass",
+            hitl_gate_b="auto",
+            gate_b_approved="none",
+            notes="- clarity-check ok — fix-tests",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            (run_dir / "03-design.md").write_text("# d\n", encoding="utf-8")
+            (run_dir / "04-tasks.md").write_text("# t\n", encoding="utf-8")
+            (run_dir / "03a-design-review-log.md").write_text(
+                "**Result:** clean\n", encoding="utf-8"
+            )
+            (run_dir / "06-test-log.md").write_text(
+                "**Smoke result:** smoke-fail\n", encoding="utf-8"
+            )
+            self.assertEqual(
+                lint_run.derive_expected_next(text, run_dir), "smoke"
+            )
+            unsafe = lint_run._unsafe_card_derive_mismatch(
+                "fix-tests", "smoke", text, run_dir
+            )
+            self.assertIsNotNone(unsafe)
+            buf = __import__("io").StringIO()
+            with __import__("contextlib").redirect_stdout(buf):
+                rc = lint_run.print_next_hint(run_dir, derive=True)
+            out = buf.getvalue()
+            self.assertEqual(rc, 1)
+            self.assertIn("handoff: do-not-launch", out)
+            self.assertIn("unsafe card vs derived", out)
+
+    def test_m1_after_fix_verify_pass_next_smoke_ok(self):
+        """M1: after Fix unlock + smoke-fail, Next=smoke → ok."""
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="smoke",
+            stage_id="fix-tests",
+            last_verify="verify-pass",
+            hitl_gate_b="auto",
+            gate_b_approved="none",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            (run_dir / "03-design.md").write_text("# d\n", encoding="utf-8")
+            (run_dir / "04-tasks.md").write_text("# t\n", encoding="utf-8")
+            (run_dir / "03a-design-review-log.md").write_text(
+                "**Result:** clean\n", encoding="utf-8"
+            )
+            (run_dir / "06-test-log.md").write_text(
+                "**Smoke result:** smoke-fail\n", encoding="utf-8"
+            )
+            self.assertEqual(
+                lint_run.derive_expected_next(text, run_dir), "smoke"
+            )
+            unsafe = lint_run._unsafe_card_derive_mismatch(
+                "smoke", "smoke", text, run_dir
+            )
+            self.assertIsNone(unsafe)
+            buf = __import__("io").StringIO()
+            with __import__("contextlib").redirect_stdout(buf):
+                rc = lint_run.print_next_hint(run_dir, derive=True)
+            out = buf.getvalue()
+            self.assertNotIn("unsafe card vs derived", out)
+            self.assertNotIn("handoff: do-not-launch", out)
+            self.assertEqual(rc, 0)
+
+    def test_m1_after_fix_verify_pass_next_fix_tests_vs_test_lite_do_not_launch(
+        self,
+    ):
+        """M1: after Fix unlock + test failure, Next=fix-tests → do-not-launch."""
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="fix-tests",
+            stage_id="fix-tests",
+            last_verify="verify-pass",
+            hitl_gate_b="auto",
+            gate_b_approved="none",
+            notes="- clarity-check ok — fix-tests",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            (run_dir / "03-design.md").write_text("# d\n", encoding="utf-8")
+            (run_dir / "04-tasks.md").write_text("# t\n", encoding="utf-8")
+            (run_dir / "03a-design-review-log.md").write_text(
+                "**Result:** clean\n", encoding="utf-8"
+            )
+            (run_dir / "05-review-log.md").write_text(
+                "**Result:** clean\n", encoding="utf-8"
+            )
+            (run_dir / "06-test-log.md").write_text(
+                "**Smoke result:** smoke-pass\n"
+                "**Result:** failure\n"
+                "**Test path last run:** lite\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(
+                lint_run.derive_expected_next(text, run_dir), "test-lite"
+            )
+            unsafe = lint_run._unsafe_card_derive_mismatch(
+                "fix-tests", "test-lite", text, run_dir
+            )
+            self.assertIsNotNone(unsafe)
+            self.assertIn("after Fix unlock", unsafe)
+            buf = __import__("io").StringIO()
+            with __import__("contextlib").redirect_stdout(buf):
+                rc = lint_run.print_next_hint(run_dir, derive=True)
+            out = buf.getvalue()
+            self.assertEqual(rc, 1)
+            self.assertIn("handoff: do-not-launch", out)
+            self.assertIn("unsafe card vs derived", out)
+
+    def test_m1_after_fix_verify_pass_next_test_lite_ok(self):
+        """M1: after Fix unlock + test failure, Next=test-lite → ok."""
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="test-lite",
+            stage_id="fix-tests",
+            last_verify="verify-pass",
+            hitl_gate_b="auto",
+            gate_b_approved="none",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            (run_dir / "03-design.md").write_text("# d\n", encoding="utf-8")
+            (run_dir / "04-tasks.md").write_text("# t\n", encoding="utf-8")
+            (run_dir / "03a-design-review-log.md").write_text(
+                "**Result:** clean\n", encoding="utf-8"
+            )
+            (run_dir / "05-review-log.md").write_text(
+                "**Result:** clean\n", encoding="utf-8"
+            )
+            (run_dir / "06-test-log.md").write_text(
+                "**Smoke result:** smoke-pass\n"
+                "**Result:** failure\n"
+                "**Test path last run:** lite\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(
+                lint_run.derive_expected_next(text, run_dir), "test-lite"
+            )
+            unsafe = lint_run._unsafe_card_derive_mismatch(
+                "test-lite", "test-lite", text, run_dir
+            )
+            self.assertIsNone(unsafe)
+            buf = __import__("io").StringIO()
+            with __import__("contextlib").redirect_stdout(buf):
+                rc = lint_run.print_next_hint(run_dir, derive=True)
+            out = buf.getvalue()
+            self.assertNotIn("unsafe card vs derived", out)
+            self.assertNotIn("handoff: do-not-launch", out)
+            self.assertEqual(rc, 0)
+
+    def test_m1_after_fix_verify_pass_next_fix_tests_vs_test_full_do_not_launch(
+        self,
+    ):
+        """M1: after Fix unlock + test failure, Next=fix-tests vs test-full → unsafe."""
+        text = _base(
+            mode="full",
+            review="full",
+            next_step="fix-tests",
+            stage_id="fix-tests",
+            last_verify="verify-pass",
+            hitl_gate_b="blocking",
+            gate_b_approved="yes",
+            notes=(
+                "- 04a skipped — no planned test cases\n"
+                "- Smoke: smoke-pass (re-run)\n"
+                "- clarity-check ok — fix-tests"
+            ),
+            run_log=_independent_smoke_run_log("quality"),
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            _seed_full_pre_design(run_dir)
+            _write_03a_clean(run_dir)
+            (run_dir / "05-review-log.md").write_text(
+                "## Adversarial test review\n\n"
+                "**Result:** clean\n\n"
+                "## Quality review\n\n"
+                "**Result:** clean\n",
+                encoding="utf-8",
+            )
+            (run_dir / "06-test-log.md").write_text(
+                "**Result:** failure\n"
+                "**Test path last run:** full\n"
+                "**Smoke result:** smoke-pass\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(
+                lint_run.derive_expected_next(text, run_dir), "test-full"
+            )
+            unsafe = lint_run._unsafe_card_derive_mismatch(
+                "fix-tests", "test-full", text, run_dir
+            )
+            self.assertIsNotNone(unsafe)
+            buf = __import__("io").StringIO()
+            with __import__("contextlib").redirect_stdout(buf):
+                rc = lint_run.print_next_hint(run_dir, derive=True)
+            out = buf.getvalue()
+            self.assertEqual(rc, 1)
+            self.assertIn("handoff: do-not-launch", out)
+
+    def test_e1_result_under_smoke_does_not_mask_test_failure(self):
+        """E1: Result smoke-pass under ## Smoke + top-level failure → fix-tests."""
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="fix-tests",
+            stage_id="test-lite",
+            last_verify="verify-pass",
+            hitl_gate_b="auto",
+            gate_b_approved="none",
+            notes="- Fix ask",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "03-design.md").write_text("# d\n", encoding="utf-8")
+            (run_dir / "04-tasks.md").write_text("# t\n", encoding="utf-8")
+            (run_dir / "03a-design-review-log.md").write_text(
+                "**Result:** clean\n", encoding="utf-8"
+            )
+            (run_dir / "05-review-log.md").write_text(
+                "**Result:** clean\n", encoding="utf-8"
+            )
+            # Smoke Result first would mask naive file-wide parse
+            (run_dir / "06-test-log.md").write_text(
+                "## Smoke\n\n"
+                "**Result:** smoke-pass\n"
+                "**Smoke result:** smoke-pass\n\n"
+                "## Test\n\n"
+                "**Result:** failure\n"
+                "**Test path last run:** lite\n",
+                encoding="utf-8",
+            )
+            self.assertTrue(lint_run._smoke_pass(run_dir))
+            self.assertFalse(lint_run._smoke_fail_or_failure(run_dir))
+            self.assertTrue(lint_run._test_log_failure(run_dir))
+            self.assertEqual(
+                lint_run.derive_expected_next(text, run_dir), "fix-tests"
+            )
+            # Trailing failure still inside Smoke (no following ##) also counts
+            (run_dir / "06-test-log.md").write_text(
+                "## Smoke\n\n"
+                "**Result:** smoke-pass\n"
+                "**Smoke result:** smoke-pass\n\n"
+                "**Result:** failure\n"
+                "**Test path last run:** lite\n",
+                encoding="utf-8",
+            )
+            self.assertTrue(lint_run._test_log_failure(run_dir))
+            self.assertEqual(
+                lint_run.derive_expected_next(text, run_dir), "fix-tests"
+            )
+            # After Fix unlock (Smoke pass + test failure outside) → re-test
+            (run_dir / "06-test-log.md").write_text(
+                "## Smoke\n\n"
+                "**Smoke result:** smoke-pass\n\n"
+                "## Test\n\n"
+                "**Result:** failure\n"
+                "**Test path last run:** lite\n",
+                encoding="utf-8",
+            )
+            text_after = _base(
+                mode="simple",
+                review="lite",
+                next_step="test-lite",
+                stage_id="fix-tests",
+                last_verify="verify-pass",
+                hitl_gate_b="auto",
+                gate_b_approved="none",
+            )
+            self.assertEqual(
+                lint_run.derive_expected_next(text_after, run_dir), "test-lite"
+            )
+
+    def test_m1_smoke_pass_plus_test_failure_next_test_full(self):
+        """M1: smoke-pass + Result failure + Next=test-full → not Smoke unpaid.
+
+        Derive fix-tests; after clearing to success, path advances past Smoke.
+        """
+        text = _base(
+            mode="full",
+            review="full",
+            next_step="test-full",
+            stage_id="test-full",
+            last_verify="verify-pass",
+            hitl_gate_b="blocking",
+            gate_b_approved="yes",
+            notes=(
+                "- 04a skipped — no planned test cases\n"
+                "- Smoke: smoke-pass (re-run)"
+            ),
+            run_log=_independent_smoke_run_log("quality"),
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            _seed_full_pre_design(run_dir)
+            _write_03a_clean(run_dir)
+            (run_dir / "05-review-log.md").write_text(
+                "## Adversarial test review\n\n"
+                "**Result:** clean\n\n"
+                "## Quality review\n\n"
+                "**Result:** clean\n",
+                encoding="utf-8",
+            )
+            (run_dir / "06-test-log.md").write_text(
+                "**Result:** failure\n"
+                "**Test path last run:** full\n"
+                "**Smoke result:** smoke-pass\n",
+                encoding="utf-8",
+            )
+            self.assertFalse(lint_run._smoke_fail_or_failure(run_dir))
+            self.assertTrue(lint_run._smoke_pass(run_dir))
+            self.assertEqual(
+                lint_run.derive_expected_next(text, run_dir), "fix-tests"
+            )
+            issues = lint_run_md(
+                text,
+                before_design_review=False,
+                before_build=False,
+                before_code_review=False,
+                run_dir=run_dir,
+            )
+            self.assertFalse(
+                any("Smoke unpaid" in e for e in _errors(issues))
+            )
+            # After Fix clears to success — derive gate-c (not smoke / not Fix)
+            (run_dir / "06-test-log.md").write_text(
+                "**Result:** success\n"
+                "**Test path last run:** full\n"
+                "**Smoke result:** smoke-pass\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(
+                lint_run.derive_expected_next(text, run_dir), "gate-c"
+            )
+            issues2 = lint_run_md(
+                text,
+                before_design_review=False,
+                before_build=False,
+                before_code_review=False,
+                run_dir=run_dir,
+            )
+            self.assertFalse(
+                any("Smoke unpaid" in e for e in _errors(issues2))
+            )
+
+    def test_e2_gate_c_while_derived_test_lite_do_not_launch(self):
+        """E2: Next=gate-c while derived=test-lite → do-not-launch."""
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="gate-c",
+            stage_id="gate-c",
+            last_verify="verify-pass",
+            hitl_gate_b="auto",
+            gate_b_approved="none",
+            notes="- 04a skipped — no planned test cases",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            (run_dir / "03-design.md").write_text("# d\n", encoding="utf-8")
+            (run_dir / "04-tasks.md").write_text("# t\n", encoding="utf-8")
+            (run_dir / "03a-design-review-log.md").write_text(
+                "**Result:** clean\n", encoding="utf-8"
+            )
+            (run_dir / "05-review-log.md").write_text(
+                "**Result:** clean\n", encoding="utf-8"
+            )
+            (run_dir / "06-test-log.md").write_text(
+                "**Smoke result:** smoke-pass\n", encoding="utf-8"
+            )
+            derived = lint_run.derive_expected_next(text, run_dir)
+            self.assertEqual(derived, "test-lite")
+            unsafe = lint_run._unsafe_card_derive_mismatch(
+                "gate-c", derived, text, run_dir
+            )
+            self.assertIsNotNone(unsafe)
+            self.assertIn("test bar unpaid", unsafe)
+            buf = __import__("io").StringIO()
+            with __import__("contextlib").redirect_stdout(buf):
+                rc = lint_run.print_next_hint(run_dir, derive=True)
+            out = buf.getvalue()
+            self.assertEqual(rc, 1)
+            self.assertIn("handoff: do-not-launch", out)
+            self.assertIn("unsafe card vs derived", out)
+
+    def test_e2_gate_c_while_derived_test_full_do_not_launch(self):
+        """E2: Next=gate-c while derived=test-full → do-not-launch."""
+        text = _base(
+            mode="full",
+            review="full",
+            next_step="gate-c",
+            stage_id="gate-c",
+            last_verify="verify-pass",
+            hitl_gate_b="blocking",
+            gate_b_approved="yes",
+            notes=(
+                "- 04a skipped — no planned test cases\n"
+                "- Smoke: smoke-pass (re-run)"
+            ),
+            run_log=_independent_smoke_run_log("quality"),
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            _seed_full_pre_design(run_dir)
+            _write_03a_clean(run_dir)
+            (run_dir / "05-review-log.md").write_text(
+                "## Adversarial test review\n\n"
+                "**Result:** clean\n\n"
+                "## Quality\n\n"
+                "**Result:** clean\n",
+                encoding="utf-8",
+            )
+            (run_dir / "06-test-log.md").write_text(
+                "**Smoke result:** smoke-pass\n", encoding="utf-8"
+            )
+            derived = lint_run.derive_expected_next(text, run_dir)
+            self.assertEqual(derived, "test-full")
+            unsafe = lint_run._unsafe_card_derive_mismatch(
+                "gate-c", derived, text, run_dir
+            )
+            self.assertIsNotNone(unsafe)
+            self.assertIn("test bar unpaid", unsafe)
+            buf = __import__("io").StringIO()
+            with __import__("contextlib").redirect_stdout(buf):
+                rc = lint_run.print_next_hint(run_dir, derive=True)
+            out = buf.getvalue()
+            self.assertEqual(rc, 1)
+            self.assertIn("handoff: do-not-launch", out)
+            self.assertIn("unsafe card vs derived", out)
+
+    def test_e1_gate_c_while_derived_smoke_do_not_launch(self):
+        """E1: Next=gate-c while derived=smoke → do-not-launch (smoke first)."""
+        text = _base(
+            mode="full",
+            review="full",
+            next_step="gate-c",
+            stage_id="gate-c",
+            last_verify="verify-pass",
+            hitl_gate_b="blocking",
+            gate_b_approved="yes",
+            notes="- 04a skipped — no planned test cases",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            _seed_full_pre_design(run_dir)
+            _write_03a_clean(run_dir)
+            (run_dir / "06-test-log.md").write_text(
+                "**Smoke result:** smoke-pass\n", encoding="utf-8"
+            )
+            derived = lint_run.derive_expected_next(text, run_dir)
+            self.assertEqual(derived, "smoke")
+            buf = __import__("io").StringIO()
+            with __import__("contextlib").redirect_stdout(buf):
+                rc = lint_run.print_next_hint(run_dir, derive=True)
+            out = buf.getvalue()
+            self.assertEqual(rc, 1)
+            self.assertIn("handoff: do-not-launch", out)
+            self.assertNotIn("handoff-for.py", out)
+            self.assertTrue(
+                "unsafe card vs derived" in out
+                or "Build-writes-Smoke alone" in out
+                or "Smoke unpaid" in out
+            )
+            self.assertIn("smoke", out.lower())
+
+
+class TestAsyncNotifyRequested(unittest.TestCase):
+    """E4: async-notify requires Notes request line."""
+
+    def test_async_without_request_errors(self):
+        text = _base(
+            hitl_gate_b="async-notify",
+            next_step="build",
+            stage_id="build",
+            notes="- ok",
+            auto_provenance=False,
+            clarity_ok=True,
+        )
+        # Strip auto-injected request if any by rebuilding without helper inject
+        # _base injects when auto_provenance True; with False still injects E4?
+        # With auto_provenance=False the E4 inject is inside auto_provenance block —
+        # so no request line → error.
+        issues = lint_run_md(
+            text, before_design_review=False, before_build=False, run_dir=None
+        )
+        self.assertTrue(
+            any("async-notify requested" in e for e in _errors(issues))
+        )
+
+    def test_async_with_request_ok_when_low_risk(self):
+        notes, run_log = _async_armed_notes_and_log()
+        notes = (
+            '- async-notify requested — user: '
+            '"please open a veto window before build"\n'
+            + notes
+        )
+        text = _base(
+            hitl_gate_b="async-notify",
+            next_step="build",
+            stage_id="build",
+            notes=notes,
+            run_log=run_log,
+            auto_provenance=False,
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            _write_async_gap_sidecar(run_dir)
+            issues = lint_run_md(
+                text,
+                before_design_review=False,
+                before_build=True,
+                run_dir=run_dir,
+            )
+            self.assertFalse(
+                any("async-notify requested" in e for e in _errors(issues))
+            )
 
 
 if __name__ == "__main__":

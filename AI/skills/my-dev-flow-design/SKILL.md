@@ -40,7 +40,7 @@ Design-only subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). No production c
 - **Design options:** Mode **full** → two options + tradeoffs; Mode **simple** → one recommended + ≤3-line rejected alternative. Decision shape: handoffs.md.
 - **Required in `03-design.md`:** keep headings (System design, Sequence, Contracts, Design patterns, UI, OWASP) — expand when Has API/DB/UI or Mode full ([artifacts/03-design.md](../my-dev-flow/artifacts/03-design.md)).
 - **Has UI:** set in Ideation → `00-run.md`. When yes, lock layout/IA in `03` + acceptance in `04`; match chrome + Gate A 80/20 when `01a` exists.
-- **Has API / Has DB:** set `yes`/`no` in Analyze or Design. This skill does **not** write `03a-*`.
+- **Has API / Has DB / Has auth/PII/schema:** set `yes`/`no` in Analyze or Design. Auth/PII/schema yes → Mode simple Gate B **blocking** ([hitl-gate-b.md](../my-dev-flow/hitl-gate-b.md)). This skill does **not** write `03a-*`.
 - **Gate A** (full): day-to-day + 80/20 → `01a`; auto when Result **ok**.
 - **Grill** after Analyze: grill.md. Do not start Design on `needs-round`. HITL Grill ≠ Gate B.
 - **Update from review:** `03a` Fix ask, **or** Notes `design-backloop` / Decision N Option 1 (no prior Fix ask); stay aligned with Gate A idea.
