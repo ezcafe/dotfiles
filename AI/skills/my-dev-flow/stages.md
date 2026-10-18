@@ -59,7 +59,7 @@ flowchart LR
   end
 ```
 
-*Footnote:* skip-review legality: [lenses.md](lenses.md). Mode **full** has no skip-review edge.
+*Footnote:* skip-review → Gate C is **fail-closed** (Build-writes-Smoke alone is not enough) — [hitl.md](hitl.md) Gate C test bar. Legality: [lenses.md](lenses.md). Mode **full** has no skip-review edge.
 
 ### Mode × Review profile → post-Build path
 
@@ -70,7 +70,7 @@ flowchart LR
 | **full** | **full** | Build-writes-Smoke skip → Adv → Quality → lenses → `test-full` → Gate C → merge → `done` |
 | **full** | **lite** | Build-writes-Smoke skip → `code-review-phase` → lenses per plan → `test-lite` → Gate C → merge → `done` |
 | **simple** | **lite** | Build-writes-Smoke skip → `code-review-phase` → lenses per plan → `test-lite` → Gate C → merge → `done` |
-| **simple** | **skip-review** | Legal path → Gate C → merge → `done` ([lenses.md](lenses.md) · [hitl.md](hitl.md)); else drop |
+| **simple** | **skip-review** | Legal path → Gate C → merge → `done` **only** when Gate C fail-closed bar met ([hitl.md](hitl.md)); else drop ([lenses.md](lenses.md)) |
 
 **Forbidden combos (lint error):** Mode **simple** + Review profile **full** (want Adv→Quality→`test-full` → use Mode **full**, or keep simple with **lite** / **skip-review**). Mode **full** + **skip-review**: [lenses.md](lenses.md). Hard stops: [failure-playbook.md](failure-playbook.md). Design wrong after Build → [Design-backloop](#design-backloop-after-build).
 
@@ -130,6 +130,15 @@ Ambiguous → Decision N. API/DB rule: [lenses.md](lenses.md).
 
 ---
 
+## Load budget
+
+| When | Open (max) | Do not |
+|------|------------|--------|
+| **Step 0** | This Step 0 section + [artifacts/00-run.md](artifacts/00-run.md) + [models.md](models.md) tier table + lint once | Whole SKILL.md · whole handoffs.md · all artifacts |
+| **Each stage** | Card + `lint-run.py --next --derive` + **one** companion section + `handoff-for.py` output + `stages/<id>.md` | Re-read orchestrator SKILL · full handoffs table · unrelated stage prompts |
+
+Soft caps: [size-caps.md](size-caps.md) · [invariants.md](invariants.md) Task-count / main-thread.
+
 ## Step 0 — Classify + resolve models + create run
 
 0. **Skills sync (hard stop when `AI/skills/my-dev-flow` exists):** run `./AI/skills/sync-to-cursor.sh --check` (or full sync). Drift → **stop**; do not classify until SoT ↔ `~/.cursor/skills` matches ([skills-path.md](skills-path.md)).
@@ -140,7 +149,7 @@ Ambiguous → Decision N. API/DB rule: [lenses.md](lenses.md).
    2. **API/DB?** new/changed public API or persistence → full (unless [tiny tweak](lenses.md)); no → lean simple.
    3. **Invent *what*?** yes → myplan Decision N or Mode full Ideation; no → proceed with Mode from (1)+(2) + cheap path.
 4. Create slug; write `00-run.md` from [artifacts/00-run.md](artifacts/00-run.md): Status `running`, Mode, profile, Complexity (one-line), Has UI/API/DB when known, Lens plan **none**, **Pending parallel: none**, Gate B veto **none**, models ([models.md](models.md)), card, HITL Gate B ([hitl.md](hitl.md) Default Gate B — full → **blocking**; simple low-risk → prefer **auto**; **async-notify** only when user asks for a veto window / async digest), HITL Grill (full → async-notify; simple → auto), HITL Gate C **blocking**.
-5. **Lint (required):** `scripts/lint-run.py .my-docs/workflow/<slug>/` (again `--before-design-review` / `--before-build` / `--before-code-review` / `--before-merge`). Optional: `--check-stage-ids` after editing handoffs/parent-next/stages; `--check-results` for Result tokens + size soft warns.
+5. **Lint (required):** `scripts/lint-run.py .my-docs/workflow/<slug>/` (again `--before-design-review` / `--before-build` / `--before-code-review` / `--before-merge`). **Before each Task:** `--next --derive` ([parent-next.md](parent-next.md)). Optional: `--check-stage-ids` after editing handoffs/parent-next/stages; `--check-results` for Result tokens + size soft warns.
 6. Chat one line: Mode + profile + why.
 
 ### Mode selection
@@ -176,11 +185,11 @@ Scope grows (API/DB yes, auth/PII, multi-surface, blast radius): **Decision N** 
 1. Read `00-run.md`: Status, Last stage, card, Gates, profile, Mode, Gate B veto, Pending parallel.
 2. Do not re-classify unless asked or scope changed.
 3. Do not redo completed gates unless artifacts changed.
-4. Next = first incomplete Full/Simple step, or card Next step / Stage id ([LEGACY.md](LEGACY.md) for Status-as-stage). Card is override; optional `lint-run.py <run-dir> --next --derive` diffs card vs derived next ([parent-next.md](parent-next.md); optional `tdd-review` until 04a / Notes skip — [lenses.md](lenses.md)).
-5. One subflow `SKILL.md`; prompt = **required** `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>` + **`stages/<stage-id>.md`** ([parent-next.md](parent-next.md) · [skills-path.md](skills-path.md); handoffs.md = edit SoT / debug only).
+4. Next = first incomplete Full/Simple step, or card Next step / Stage id ([LEGACY.md](LEGACY.md) for Status-as-stage). **Required:** `lint-run.py <run-dir> --next --derive`. Unsafe card vs derived → error + `do-not-launch` unless Notes `card-override — <reason>` **and** `provenance — card-override — user: "…"` (+ optional Decision N) ([parent-next.md](parent-next.md); optional `tdd-review` until 04a / Notes skip — [lenses.md](lenses.md)).
+5. One subflow `SKILL.md`; prompt = **required** `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>` (includes Description) + **`stages/<stage-id>.md`** ([parent-next.md](parent-next.md) · [skills-path.md](skills-path.md); handoffs.md = edit SoT / debug only).
 6. `stopped` → new Decision; `done` → new slug or explicit re-open.
-7. Gate B veto `pending` → do not Build. Blocking without **Gate B approved** → do not Build ([hitl.md](hitl.md)).
-8. async-notify gap: Notes veto window / paused + Next `build` + veto `none` → this resume **is** next parent turn — set **Build armed**, then launch ([hitl.md](hitl.md)).
+7. Gate B veto `pending` → do not Build. Blocking without **Gate B approved** + provenance → do not Build ([hitl.md](hitl.md)).
+8. async-notify gap: Notes veto window / paused + Next `build` + veto `none` → this resume **is** next parent turn — append **Build armed** Run log line (new timestamp), then launch ([hitl.md](hitl.md)).
 
 ---
 
@@ -247,9 +256,9 @@ Gate B veto after Build is separate ([hitl.md](hitl.md) re-open Gate B).
 
 ## Orchestrator rules (short)
 
-- Honor Full/Simple order above; one subflow at a time.
-- Before each Task: [invariants.md](invariants.md); **required** `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>`.
+- Honor Full/Simple order above; one subflow at a time. Honor [Load budget](#load-budget).
+- Before each Task: [invariants.md](invariants.md); `lint-run.py --next --derive`; **required** `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>`.
 - Design-review update → re-review. Smoke/test fail → Fix (verify-pass) → re-run.
 - No advance on verify-fail; max 3 → Decision N. Design invalid → Design-backloop.
-- Card Next step = stage id (+ description from `handoff-for.py` / [handoffs.md](handoffs.md) SoT).
+- Card Next step = stage id (+ Description from `handoff-for.py` output). Unsafe card vs derive → `card-override — <reason>` or fix card.
 - Mode full Task count ≥20 → Decision N ([invariants.md](invariants.md)).

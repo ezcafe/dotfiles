@@ -15,7 +15,8 @@ Veto / Gate C: [hitl.md](hitl.md). Skip-review ban: [lenses.md](lenses.md).
 | **test↔fix** after 3 rounds | Pause; Decision N | Raise cap · waive green tests → Gate C · Stop |
 | **Design-backloop** (design invalid after Build) | Pause; Decision N | Amend → Notes `design-backloop`, **Gate B approved: none**, clear Build armed / veto-window; if prior `05`/`06` Results exist → Notes `- review-stale` / `- test-stale` (or clear Results) ([verify-and-fix.md](verify-and-fix.md) Stale); Next `design-update` (Decision N is entry — no prior `03a` Fix ask); Fix-only · Stop ([stages.md](stages.md)) |
 | **Gate B veto** before Build (`pending`) | Do **not** Build | Settle veto or re-open Gate B ([hitl.md](hitl.md)) |
-| **Veto window open** without **Build armed** | Do **not** Build | Arm Build on this turn / resume, or settle veto ([hitl.md](hitl.md)) |
+| **Veto window open** without **Build armed** / incomplete async gap | Do **not** Build | Run `--next` → copy `async-gap-pending`; arm with later HH:MM; or settle veto ([hitl.md](hitl.md)) |
+| **Missing provenance** (Gate B/C approved, waivers, docs-only, smoke-pass-rerun, card-override) | Do **not** Build / Merge / unlock unsafe Next | Copy verbatim user quote ≥12 chars into `provenance — <kind> — user: "…"` ([hitl.md](hitl.md)) |
 | **Gate B veto after Build** | Pause; Decision N | Discard · Keep + re-open → **Gate B approved: none**, clear armed/window, Next `gate-b` · Stop ([hitl.md](hitl.md)) |
 | **Usage limit** on Task | Wait 5s → same model → `inherit` → main-thread that stage only | Log only; do not ask unless inherit fails and main-thread also blocked |
 | **User reject / stop / abort** | Status `stopped` (not `done`) | Freeze stage + reason; require new Decision to resume |

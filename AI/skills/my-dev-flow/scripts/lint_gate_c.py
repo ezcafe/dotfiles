@@ -30,6 +30,7 @@ from lint_common import (
     VALID_REVIEW_PROFILE,
     _card_next_stage_id,
     _first_token,
+    _has_provenance,
     _looks_like_template,
     _notes_blob,
     _parse_result_token,
@@ -55,7 +56,7 @@ def _parse_gate_c_approved(text: str) -> tuple[str | None, set[str]]:
 def _check_gate_c_approved(
     text: str, issues: list[Issue], *, before_merge: bool
 ) -> None:
-    """Require durable Gate C approved when Next=merge or --before-merge."""
+    """Require durable Gate C approved + provenance when Next=merge / --before-merge."""
     enforce = before_merge or _card_next_stage_id(text) == "merge"
     if not enforce:
         return
@@ -90,6 +91,38 @@ def _check_gate_c_approved(
                 "error",
                 f"Gate C approved has unknown tokens {sorted(unknown)} — "
                 f"use subset of {sorted(VALID_GATE_C_ACTIONS)}",
+            )
+        )
+        return
+    if not _has_provenance(text, "gate-c-approved"):
+        issues.append(
+            Issue(
+                "error",
+                "Gate C approved without provenance — Notes/Run log must have "
+                '`provenance — gate-c-approved — user: "<quote>"` (hitl.md)',
+            )
+        )
+
+
+def _check_waiver_provenance(text: str, issues: list[Issue]) -> None:
+    """Reject inventable waiver tokens without provenance (hitl.md · R1)."""
+    notes = _notes_blob(text)
+    if GATE_C_TEST_OVERRIDE_RE.search(notes) and not _has_provenance(
+        text, "gate-c-test-override"
+    ):
+        issues.append(
+            Issue(
+                "error",
+                "Notes gate-c-test-override without provenance — require "
+                '`provenance — gate-c-test-override — user: "<quote>"` (hitl.md)',
+            )
+        )
+    if SMOKE_WAIVE_RE.search(notes) and not _has_provenance(text, "smoke-waive"):
+        issues.append(
+            Issue(
+                "error",
+                "Notes smoke-waive without provenance — require "
+                '`provenance — smoke-waive — user: "<quote>"` (hitl.md)',
             )
         )
 def _check_status_done_requires_merge(
@@ -276,24 +309,28 @@ def _check_stale_before_merge(
             )
         )
 def _independent_smoke_done(text: str) -> bool:
-    """True when Notes/Smoke field show independent re-run or explicit waive."""
+    """True when smoke-waive or smoke-pass-rerun **with** provenance (S5).
+
+    Free-text Notes ``smoke-pass (re-run)`` alone is inventable — rejected.
+    """
     notes = _notes_blob(text)
-    if SMOKE_WAIVE_RE.search(notes):
+    if SMOKE_WAIVE_RE.search(notes) and _has_provenance(text, "smoke-waive"):
         return True
-    if SMOKE_RERUN_DONE_RE.search(notes):
-        return True
-    if SMOKE_RERUN_DONE_RE.search(text):
+    if (
+        SMOKE_RERUN_DONE_RE.search(notes) or SMOKE_RERUN_DONE_RE.search(text)
+    ) and _has_provenance(text, "smoke-pass-rerun"):
         return True
     return False
 def _docs_only_marked(text: str) -> bool:
-    """True when Complexity or Notes mark ``docs-only`` (hitl.md · verify-and-fix.md)."""
+    """True when docs-only is marked **and** provenance is present (S5)."""
     notes = _notes_blob(text)
-    if DOCS_ONLY_RE.search(notes):
-        return True
-    cm = COMPLEXITY_RE.search(text)
-    if cm and DOCS_ONLY_RE.search(cm.group(1)):
-        return True
-    return False
+    marked = bool(DOCS_ONLY_RE.search(notes))
+    if not marked:
+        cm = COMPLEXITY_RE.search(text)
+        marked = bool(cm and DOCS_ONLY_RE.search(cm.group(1)))
+    if not marked:
+        return False
+    return _has_provenance(text, "docs-only")
 def _check_skip_review_build_only_smoke(
     text: str,
     issues: list[Issue],
@@ -303,14 +340,18 @@ def _check_skip_review_build_only_smoke(
 ) -> None:
     """Fail-closed when skip-review merge relies only on Build-writes-Smoke.
 
-    Escape: Notes smoke-waive / smoke-pass (re-run) / gate-c-test-override.
-    ``docs-only`` in Complexity/Notes → warn/allow (hitl.md · verify-and-fix.md).
+    Escape: Notes smoke-waive / smoke-pass (re-run) / gate-c-test-override /
+    docs-only — each **with** matching provenance (hitl.md · S5). Bare Notes
+    tokens alone are inventable and rejected.
     """
     enforce = before_merge or _card_next_stage_id(text) == "merge"
     if not enforce:
         return
     notes = _notes_blob(text)
-    if GATE_C_TEST_OVERRIDE_RE.search(notes):
+    # Override waives only with provenance (bare token is inventable — R1)
+    if GATE_C_TEST_OVERRIDE_RE.search(notes) and _has_provenance(
+        text, "gate-c-test-override"
+    ):
         return
     rp_m = REQUIRED_FIELD_PATTERNS["Review profile"].search(text)
     if not rp_m:
@@ -326,8 +367,35 @@ def _check_skip_review_build_only_smoke(
         issues.append(
             Issue(
                 "warn",
-                "skip-review merge: only Build-writes-Smoke with docs-only — "
-                "warn/allow path (verify-and-fix.md · hitl.md)",
+                "skip-review merge: only Build-writes-Smoke with docs-only + "
+                "provenance — warn/allow path (verify-and-fix.md · hitl.md)",
+            )
+        )
+        return
+    # Bare docs-only / smoke-pass (re-run) without provenance → error
+    cm = COMPLEXITY_RE.search(text)
+    bare_docs = bool(DOCS_ONLY_RE.search(notes)) or bool(
+        cm and DOCS_ONLY_RE.search(cm.group(1))
+    )
+    if bare_docs and not _has_provenance(text, "docs-only"):
+        issues.append(
+            Issue(
+                "error",
+                "skip-review merge: Notes/Complexity `docs-only` without "
+                'provenance — require `provenance — docs-only — user: "…"` '
+                "(hitl.md)",
+            )
+        )
+        return
+    if (
+        SMOKE_RERUN_DONE_RE.search(notes) or SMOKE_RERUN_DONE_RE.search(text)
+    ) and not _has_provenance(text, "smoke-pass-rerun"):
+        issues.append(
+            Issue(
+                "error",
+                "skip-review merge: Notes `smoke-pass (re-run)` without "
+                "provenance — require "
+                '`provenance — smoke-pass-rerun — user: "…"` (hitl.md)',
             )
         )
         return
@@ -335,8 +403,8 @@ def _check_skip_review_build_only_smoke(
         Issue(
             "error",
             "skip-review merge: only Build-writes-Smoke — require Notes "
-            "`smoke-waive` / `smoke-pass (re-run)` / `gate-c-test-override` "
-            "or Complexity/Notes `docs-only` before Gate C "
+            "`smoke-waive` / `smoke-pass (re-run)` / `gate-c-test-override` / "
+            "`docs-only` **each with provenance** before Gate C "
             "(verify-and-fix.md · hitl.md)",
         )
     )
@@ -356,7 +424,9 @@ def _check_gate_c_test_bar(
         return
 
     notes = _notes_blob(text)
-    if GATE_C_TEST_OVERRIDE_RE.search(notes):
+    if GATE_C_TEST_OVERRIDE_RE.search(notes) and _has_provenance(
+        text, "gate-c-test-override"
+    ):
         return
 
     rp_m = REQUIRED_FIELD_PATTERNS["Review profile"].search(text)
@@ -368,6 +438,10 @@ def _check_gate_c_test_bar(
 
     mode_m = REQUIRED_FIELD_PATTERNS["Mode"].search(text)
     mode = _first_token(mode_m.group(1)) if mode_m else None
+    override_hint = (
+        "or Notes gate-c-test-override + provenance "
+        '(`provenance — gate-c-test-override — user: "…"`)'
+    )
 
     if review == "full":
         if not _test_log_success(run_dir, expect_mode="full"):
@@ -375,8 +449,7 @@ def _check_gate_c_test_bar(
                 Issue(
                     "error",
                     "Gate C test bar (full): need 06-test-log.md Result success "
-                    "and Mode last run full (hitl.md) — or Notes "
-                    "gate-c-test-override",
+                    f"and Mode last run full (hitl.md) — {override_hint}",
                 )
             )
         return
@@ -387,8 +460,7 @@ def _check_gate_c_test_bar(
                 Issue(
                     "error",
                     "Gate C test bar (lite): need 06-test-log.md Result success "
-                    "and Mode last run lite (hitl.md) — or Notes "
-                    "gate-c-test-override",
+                    f"and Mode last run lite (hitl.md) — {override_hint}",
                 )
             )
         return
@@ -423,7 +495,7 @@ def _check_gate_c_test_bar(
                 Issue(
                     "error",
                     "Gate C test bar (skip-review): need Last Verify verify-pass "
-                    "(hitl.md) — or Notes gate-c-test-override",
+                    f"(hitl.md) — {override_hint}",
                 )
             )
         if not _smoke_pass(run_dir):
@@ -431,6 +503,6 @@ def _check_gate_c_test_bar(
                 Issue(
                     "error",
                     "Gate C test bar (skip-review): need 06-test-log Smoke "
-                    "result smoke-pass (hitl.md) — or Notes gate-c-test-override",
+                    f"result smoke-pass (hitl.md) — {override_hint}",
                 )
             )

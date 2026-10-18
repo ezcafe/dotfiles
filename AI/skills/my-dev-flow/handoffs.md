@@ -5,7 +5,8 @@ Stage-scoped handoffs, Decision options shape, progress paths, and Task `descrip
 Artifact size caps: [size-caps.md](size-caps.md). Tiny-tweak / never invent empty `03a-api` / `03a-db`: [lenses.md](lenses.md) (do not treat this file as second SoT for that rule).  
 Templates: [artifacts/INDEX.md](artifacts/INDEX.md). Severity: [severity.md](severity.md). Paths: [skills-path.md](skills-path.md). Verify/Fix: [verify-and-fix.md](verify-and-fix.md). Parent checklist: [invariants.md](invariants.md). HITL / veto: [hitl.md](hitl.md). Pipeline order: [stages.md](stages.md).
 
-**Required for Task launch:** `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>` → prints base block template + that stage’s R/W row (resolve `{my-dev-flow}` per [skills-path.md](skills-path.md); optional `--skill-root` / `--slug`).  
+**Required for Task launch:** `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>` → prints base block + that stage’s R/W row + **Description** from the Task description map below (resolve `{my-dev-flow}` per [skills-path.md](skills-path.md); optional `--skill-root` / `--slug`). Paste script output into the Orchestrator card **Task description**.  
+`handoff-for.py --check-descriptions` → exit 1 if any R/W stage id lacks a description row.  
 **This file (handoffs.md):** edit SoT / debug only — do **not** load the whole file for every launch.
 
 ## Decision options (required for every choice list)
@@ -143,18 +144,21 @@ Orchestrator card uses **stage ids**. Alias column is for chat only.
 ```markdown
 - **HH:MM** · done · analyze · usage-limit retry — waited 5s
 - **HH:MM** · done · Gate B — async-notify · Gate B veto: none
-- **HH:MM** · paused · gate-b · Build armed · parent turn gap observed
+- **14:00** · paused · gate-b · async-notify posted — veto window open
+- **14:05** · paused · gate-b · Build armed
 - **HH:MM** · done · build · Result verify-pass · Smoke section written · Smoke Task skipped
 - **HH:MM** · paused · Gate C — blocking — Approve commit + push + PR + merge?
 - **HH:MM** · stopped · Gate B veto pending — frozen before Build
 - **HH:MM** · done · merge · Mode was right because clear bug fix stayed simple
 ```
 
+Async Gate B also needs Notes `async-gap-pending — 14:00` (from `--next` on the digest turn) before the later **Build armed** line — [examples/async-gate-b-build-armed.md](examples/async-gate-b-build-armed.md). Do **not** invent `parent turn gap observed`.
+
 ---
 
 ## Task `description` map (by stage id)
 
-Use as Task `description` / Orchestrator card **Task description**.
+**Machine SoT** for `handoff-for.py` (and Orchestrator card **Task description**). Every R/W stage id **must** have a row here.
 
 | Stage id | description |
 |----------|-------------|

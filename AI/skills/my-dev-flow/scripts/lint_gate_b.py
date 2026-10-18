@@ -6,6 +6,8 @@ from __future__ import annotations
 
 import re
 
+from pathlib import Path
+
 from lint_common import (
     BUILD_ARMED_RE,
     CARD_NEXT_RE,
@@ -16,17 +18,22 @@ from lint_common import (
     HAS_DB_LINE_RE,
     HITL_GATE_B_RE,
     Issue,
-    PARENT_TURN_GAP_RE,
     REQUIRED_FIELD_PATTERNS,
-    VALID_GATE_B_VETO,
     VALID_HITL_TIER,
     VETO_WINDOW_RE,
+    _async_arm_timestamps,
+    _async_digest_timestamps,
+    _async_gap_pending_tokens,
     _card_next_stage_id,
     _first_token,
+    _has_provenance,
+    _hhmm_to_minutes,
     _looks_like_template,
     _notes_blob,
     _parsed_yes_no,
+    _read_async_gap_sidecar,
     _run_log_blob,
+    _run_log_timestamped_entries,
 )
 
 def _parse_gate_b_approved(text: str) -> str | None:
@@ -55,30 +62,38 @@ def _gate_b_approved_ok(text: str) -> bool:
 def _check_gate_b_approved(
     text: str, issues: list[Issue], *, before_build: bool
 ) -> None:
-    """When HITL Gate B is blocking, require Gate B approved before Build."""
+    """When HITL Gate B is blocking, require Gate B approved + provenance."""
     enforce = before_build or _card_next_stage_id(text) == "build"
     if not enforce:
         return
     tier = _parse_hitl_gate_b(text)
     if tier != "blocking":
         return
-    if _gate_b_approved_ok(text):
-        return
-    raw = _parse_gate_b_approved(text)
-    if raw is None:
-        issues.append(
-            Issue(
-                "error",
-                "Gate B approved missing — set yes (or named pick) after "
-                "blocking Gate B yes (hitl.md)",
+    if not _gate_b_approved_ok(text):
+        raw = _parse_gate_b_approved(text)
+        if raw is None:
+            issues.append(
+                Issue(
+                    "error",
+                    "Gate B approved missing — set yes (or named pick) after "
+                    "blocking Gate B yes (hitl.md)",
+                )
             )
-        )
-    else:
+        else:
+            issues.append(
+                Issue(
+                    "error",
+                    "Gate B approved is none — require yes (or named pick) before "
+                    "Build when HITL Gate B is blocking (hitl.md)",
+                )
+            )
+        return
+    if not _has_provenance(text, "gate-b-approved"):
         issues.append(
             Issue(
                 "error",
-                "Gate B approved is none — require yes (or named pick) before "
-                "Build when HITL Gate B is blocking (hitl.md)",
+                "Gate B approved without provenance — Notes/Run log must have "
+                '`provenance — gate-b-approved — user: "<quote>"` (hitl.md)',
             )
         )
 def _check_design_backloop_gate_b(
@@ -167,8 +182,67 @@ def _check_hitl_gate_b_mode(
                     "use blocking (hitl.md Default Gate B narrow async)",
                 )
             )
-def _check_async_gate_b_gap(text: str, issues: list[Issue], *, before_build: bool) -> None:
-    """async-notify Gate B veto window / Build armed / parent turn gap."""
+def _async_turn_gap_ok(text: str, run_dir: Path | None = None) -> bool:
+    """True when async arm evidence meets turn-boundary bar (hitl.md · S2).
+
+    Requires: (1) arm HH:MM strictly later than a digest HH:MM,
+    (2) Notes ``async-gap-pending — <digest-ts>`` matching that digest,
+    (3) when ``run_dir`` is set, sidecar ``.lint-async-gap`` from a prior
+    ``--next`` do-not-launch matching the same digest.
+
+    Inventing Notes ``parent turn gap observed`` alone is **not** enough.
+    Residual: without chat integration, a determined agent can still forge
+    sidecar + token + later HH:MM in one edit.
+    """
+    digest_times = _async_digest_timestamps(text)
+    arm_times = _async_arm_timestamps(text)
+    if not digest_times or not arm_times:
+        return False
+    pending = _async_gap_pending_tokens(text)
+    if not pending:
+        return False
+    # Digest ts must appear in both Run log digest lines and pending token
+    matched_digests = digest_times & pending
+    if not matched_digests:
+        return False
+    if run_dir is not None:
+        side = _read_async_gap_sidecar(run_dir)
+        if side is None or side not in matched_digests:
+            return False
+        matched_digests = {side}
+    # At least one arm minute strictly later than a matched digest
+    for d_ts in matched_digests:
+        d_min = _hhmm_to_minutes(d_ts)
+        if d_min is None:
+            continue
+        for a_ts in arm_times:
+            a_min = _hhmm_to_minutes(a_ts)
+            if a_min is not None and a_min > d_min:
+                return True
+    return False
+
+
+def _async_gap_pending_digest_ts(text: str) -> str | None:
+    """Best digest timestamp to emit as ``async-gap-pending — HH:MM``."""
+    digests = _async_digest_timestamps(text)
+    if not digests:
+        return None
+    # Prefer earliest digest (first post)
+    return min(digests, key=lambda t: _hhmm_to_minutes(t) or 0)
+
+
+def _check_async_gate_b_gap(
+    text: str,
+    issues: list[Issue],
+    *,
+    before_build: bool,
+    run_dir: Path | None = None,
+) -> None:
+    """async-notify Gate B veto window / Build armed / machine-checkable turn gap.
+
+    Enforced on ``--before-build`` **or** card Next=`build` (parity with Gate B
+    approved — S1).
+    """
     status_m = REQUIRED_FIELD_PATTERNS["Status"].search(text)
     status = _first_token(status_m.group(1)) if status_m else ""
     notes = _notes_blob(text)
@@ -176,9 +250,11 @@ def _check_async_gate_b_gap(text: str, issues: list[Issue], *, before_build: boo
     notes_and_log = notes + "\n" + run_log
     veto_window = bool(VETO_WINDOW_RE.search(notes))
     build_armed = bool(BUILD_ARMED_RE.search(notes_and_log))
+    hitl_async = _parse_hitl_gate_b(text) == "async-notify"
     next_m = CARD_NEXT_RE.search(text)
     next_step = (next_m.group(1).strip().lower() if next_m else "")
     next_is_build = next_step.startswith("build") or "build" in next_step.split()
+    enforce = before_build or next_is_build
 
     # Error: Status=running AND Notes still say veto window open (Build launched without clearing)
     if status == "running" and veto_window:
@@ -190,7 +266,7 @@ def _check_async_gate_b_gap(text: str, issues: list[Issue], *, before_build: boo
             )
         )
 
-    if not before_build:
+    if not enforce:
         return
 
     # Cannot Build while veto window open without Build armed
@@ -204,28 +280,49 @@ def _check_async_gate_b_gap(text: str, issues: list[Issue], *, before_build: boo
             )
         )
 
-    # paused + Next step build + veto window open → prefer gap evidence
-    if status == "paused" and (veto_window or next_is_build) and VETO_WINDOW_RE.search(
-        notes_and_log
+    # Fail-closed turn gap: arm later than digest + pending token (+ sidecar)
+    needs_gap = (veto_window or hitl_async) and (
+        build_armed or next_is_build or status == "paused"
+    )
+    if needs_gap and build_armed and not _async_turn_gap_ok(text, run_dir):
+        detail = (
+            "need arm HH:MM strictly later than digest, Notes "
+            "`async-gap-pending — <digest-ts>` matching Run log digest"
+        )
+        if run_dir is not None and _read_async_gap_sidecar(run_dir) is None:
+            detail += (
+                ", and `.lint-async-gap` sidecar from a prior `--next` "
+                "do-not-launch"
+            )
+        elif run_dir is not None:
+            detail += " (sidecar digest mismatch or missing pending token)"
+        issues.append(
+            Issue(
+                "error",
+                f"async-notify Gate B: {detail} — inventing "
+                "`parent turn gap observed` or same-turn dual HH:MM is not "
+                "enough (hitl.md)",
+            )
+        )
+    elif needs_gap and veto_window and not build_armed:
+        pass  # already errored above on missing Build armed
+    elif (
+        status == "paused"
+        and veto_window
+        and next_is_build
+        and not _async_turn_gap_ok(text, run_dir)
+        and not build_armed
     ):
-        gap_ok = bool(PARENT_TURN_GAP_RE.search(notes_and_log))
-        veto_m = REQUIRED_FIELD_PATTERNS["Gate B veto"].search(text)
-        veto_ok = False
-        if veto_m and not _looks_like_template(veto_m.group(1)):
-            veto_ok = _first_token(veto_m.group(1)) in VALID_GATE_B_VETO
-        if not gap_ok and not veto_ok:
+        # Waiting for arm turn — require digest log entry at least once posted
+        entries = _run_log_timestamped_entries(text)
+        has_digest = any(
+            VETO_WINDOW_RE.search(n) or "async-notify" in n.lower() for _, n in entries
+        )
+        if not has_digest:
             issues.append(
                 Issue(
                     "error",
                     "async-notify Gate B: Status paused + veto window open — "
-                    "add Run log/Notes parent turn gap observed, or set Gate B veto",
-                )
-            )
-        elif not gap_ok:
-            issues.append(
-                Issue(
-                    "warn",
-                    "async-notify Gate B: prefer Run log line noting parent turn gap "
-                    "before Build (hitl.md)",
+                    "add timestamped Run log entry for digest post (hitl.md)",
                 )
             )

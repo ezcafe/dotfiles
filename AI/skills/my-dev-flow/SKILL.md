@@ -23,9 +23,11 @@ design-heavy, never ship first draft, generation ≠ verification.
 
 ## Start (Step 0)
 
-Follow **[stages.md](stages.md) Step 0** (classify, seed `00-run.md`, models, lint, chat one line). Do not restate Step 0 bullets here.
+Follow **[stages.md](stages.md) Step 0** (classify, seed `00-run.md`, models, lint, chat one line). Do not restate Step 0 bullets here. Honor [Load budget](stages.md#load-budget).
 
 **Skills sync:** Step 0 hard stop when `AI/skills/my-dev-flow` exists — `./AI/skills/sync-to-cursor.sh --check` (or sync) before classify; after SoT edits, sync then re-check ([skills-path.md](skills-path.md)).
+
+**Before every Task:** `python3 {my-dev-flow}/scripts/lint-run.py <run-dir> --next --derive` then `handoff-for.py <stage-id>` ([parent-next.md](parent-next.md)). Unsafe card vs derived → fix card or Notes `card-override — <reason>` + provenance `card-override` (`do-not-launch` exits **1**).
 
 ## When to run
 
@@ -50,8 +52,8 @@ Follow **[stages.md](stages.md) Step 0** (classify, seed `00-run.md`, models, li
 | Need | Read |
 |------|------|
 | Runtime order / Mode / resume / abort | [stages.md](stages.md) |
-| Card Stage id / Next → which 1–2 files | [parent-next.md](parent-next.md) · `lint-run.py --next` |
-| Gate B/C · veto · **Gate B approved** · async gap · **Build armed** · Gate C bar | [hitl.md](hitl.md) |
+| Card Stage id / Next → which 1–2 files | [parent-next.md](parent-next.md) · `lint-run.py --next --derive` (required habit) |
+| Gate B/C · veto · **Gate B approved** · provenance · async gap · **Build armed** · Gate C bar | [hitl.md](hitl.md) |
 | Models + usage-limit | [models.md](models.md) |
 | Has API/DB · tiny-tweak · Lens plan · skip-review ban | [lenses.md](lenses.md) |
 | Parent checklist · Task-count budget · max-round Decisions | [invariants.md](invariants.md) |
@@ -61,7 +63,8 @@ Follow **[stages.md](stages.md) Step 0** (classify, seed `00-run.md`, models, li
 | Build / Fix | card + handoff `build`/`fix-*` + [verify-and-fix.md](verify-and-fix.md) |
 | New artifact body | one file under [artifacts/](artifacts/INDEX.md) |
 | Grill | [grill.md](grill.md) (once when entering Grill) |
-| Lint `00-run.md` | [scripts/lint-run.py](scripts/lint-run.py) · [scripts/README.md](scripts/README.md) (`--next`, `--before-build`, `--before-code-review`, `--before-merge`, `--dry-run-seed`) |
+| Lint `00-run.md` | [scripts/lint-run.py](scripts/lint-run.py) · [scripts/README.md](scripts/README.md) (`--next --derive`, `--before-build`, `--before-code-review`, `--before-merge`, `--dry-run-seed`) |
+| Load budget (Step 0 / per-stage) | [stages.md](stages.md#load-budget) |
 | Phase entry | that subflow `SKILL.md` once |
 | Golden paths | [examples/INDEX.md](examples/INDEX.md) |
 | Anti-patterns | [examples/anti-patterns.md](examples/anti-patterns.md) |

@@ -36,8 +36,9 @@ Build Task **first action:** read `00-run.md` **Gate B veto**, **Gate B approved
 | `Gate B veto: pending` | Stop; first return line `Result: blocked — Gate B veto`; do not change code |
 | HITL Gate B is **blocking** and **Gate B approved** is `none`/missing | Stop; first return line `Result: blocked — Gate B approved`; do not change code |
 | Notes say veto window open **and** **Build armed** missing | Stop; first return line `Result: blocked — Build armed missing`; do not change code |
+| Notes veto window + **Build armed** but async gap incomplete (arm not later than digest / missing `async-gap-pending` / no `.lint-async-gap`) | Stop; first return line `Result: blocked — async gap incomplete`; do not change code |
 | Notes match `design-backloop` | Stop; first return line `Result: blocked — design-backloop`; do not change code |
-| `Gate B veto: none` and (blocking → approved settled; auto may leave approved `none`) and (no open veto window, or **Build armed** present) and no `design-backloop` | Continue Build |
+| `Gate B veto: none` and (blocking → approved settled; auto may leave approved `none`) and (no open veto window, or **Build armed** + complete async gap) and no `design-backloop` | Continue Build |
 
 Parent must not launch Build while veto is `pending`, while blocking Gate B lacks **Gate B approved**, while veto window is open without **Build armed**, or while Notes say `design-backloop`. Lint: `scripts/lint-run.py <run-dir> --before-build`.
 

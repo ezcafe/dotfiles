@@ -6,9 +6,9 @@ Usage:
   python3 {my-dev-flow}/scripts/handoff-for.py build --slug 20261013-fix-login
   python3 handoff-for.py build --skill-root /abs/path/to/my-dev-flow
 
-Parses the Stage id → read / write markdown table in handoffs.md
-(sibling of this script's parent package). Prefer this over loading
-the whole handoffs table into context.
+Parses the Stage id → read / write markdown table **and** the Task
+``description`` map in handoffs.md (sibling of this script's parent
+package). Prefer this over loading the whole handoffs table into context.
 
 Resolve ``{my-dev-flow}`` per skills-path.md before launch. Optional
 ``--skill-root`` writes absolute skill paths into the base block.
@@ -71,6 +71,60 @@ def _parse_stage_table(text: str) -> dict[str, tuple[str, str]]:
     return rows
 
 
+def _parse_description_table(text: str) -> dict[str, str]:
+    """Return stage_id -> description from the Task description map table."""
+    marker = "## Task `description` map"
+    start = text.find(marker)
+    if start < 0:
+        start = text.find("| Stage id | description |")
+    if start < 0:
+        return {}
+    # Prefer the header row inside that section
+    header = text.find("| Stage id | description |", start)
+    if header < 0:
+        return {}
+    rows: dict[str, str] = {}
+    for line in text[header:].splitlines():
+        if not line.startswith("|"):
+            if rows:
+                break
+            continue
+        if re.match(r"\|[-:\s|]+\|", line):
+            continue
+        if line.startswith("| Stage id |"):
+            continue
+        protected = line.replace("\\|", "\0")
+        parts = [
+            p.strip().replace("\0", "|")
+            for p in protected.strip().strip("|").split("|")
+        ]
+        if len(parts) < 2:
+            continue
+        stage_cell, desc_cell = parts[0], parts[1]
+        # Skip classify / parenthetical rows without a backtick stage id
+        m = re.search(r"`([^`]+)`", stage_cell)
+        if not m:
+            continue
+        stage_id = m.group(1).strip()
+        # Description may be wrapped in backticks
+        desc = desc_cell.strip()
+        dm = re.search(r"`([^`]+)`", desc)
+        if dm:
+            desc = dm.group(1).strip()
+        else:
+            desc = desc.strip("`*_ ")
+        if stage_id and desc:
+            rows[stage_id] = desc
+    return rows
+
+
+def _missing_description_ids(
+    rw_rows: dict[str, tuple[str, str]], desc_rows: dict[str, str]
+) -> list[str]:
+    """Stage ids in R/W table that lack a description row."""
+    return sorted(set(rw_rows) - set(desc_rows))
+
+
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("stage_id", help="Stage id from handoffs.md (e.g. build, design-phase)")
@@ -93,6 +147,11 @@ def main() -> int:
             "Resolved absolute my-dev-flow skill root (skills-path.md). "
             "When set, base block uses absolute paths to size-caps / skills-path / severity"
         ),
+    )
+    p.add_argument(
+        "--check-descriptions",
+        action="store_true",
+        help="Exit 1 if any R/W stage id lacks a Task description row",
     )
     args = p.parse_args()
 
@@ -121,6 +180,19 @@ def main() -> int:
 
     text = handoffs_path.read_text(encoding="utf-8")
     rows = _parse_stage_table(text)
+    desc_rows = _parse_description_table(text)
+
+    if args.check_descriptions:
+        missing = _missing_description_ids(rows, desc_rows)
+        if missing:
+            print(
+                f"error: stage ids missing Task description rows: {missing}",
+                file=sys.stderr,
+            )
+            return 1
+        print(f"ok: {len(rows)} stage ids have description rows")
+        return 0
+
     stage = args.stage_id.strip().strip("`")
     if stage not in rows:
         known = ", ".join(sorted(rows))
@@ -128,7 +200,16 @@ def main() -> int:
         print(f"known: {known}", file=sys.stderr)
         return 1
 
+    missing = _missing_description_ids(rows, desc_rows)
+    if stage in missing or stage not in desc_rows:
+        print(
+            f"error: stage id {stage!r} has no Task description row in handoffs.md",
+            file=sys.stderr,
+        )
+        return 1
+
     read_cell, write_cell = rows[stage]
+    description = desc_rows[stage]
     print(
         BASE_BLOCK.format(
             slug=args.slug,
@@ -141,8 +222,14 @@ def main() -> int:
     )
     print()
     print(f"### Stage row: `{stage}`")
+    print(f"Description: {description}")
     print(f"Read: {read_cell}")
     print(f"Write: {write_cell}")
+    if missing:
+        print(
+            f"warn: other stage ids missing descriptions: {missing}",
+            file=sys.stderr,
+        )
     return 0
 
 

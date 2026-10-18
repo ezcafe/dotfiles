@@ -26,7 +26,7 @@ Build subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). First output is a **d
 |-------|------|
 | Runtime order | [`../my-dev-flow/stages.md`](../my-dev-flow/stages.md) |
 | Verify / Smoke after Build (Build-writes-Smoke) / Fix | [`../my-dev-flow/verify-and-fix.md`](../my-dev-flow/verify-and-fix.md) |
-| Gate B veto / Build armed | [`../my-dev-flow/hitl.md`](../my-dev-flow/hitl.md) |
+| Gate B veto / Build armed / provenance / async gap | [`../my-dev-flow/hitl.md`](../my-dev-flow/hitl.md) |
 | skip-review legality | [`../my-dev-flow/lenses.md`](../my-dev-flow/lenses.md) |
 | Design-backloop / max rounds | [`../my-dev-flow/invariants.md`](../my-dev-flow/invariants.md) |
 | Result tokens | [`../my-dev-flow/results.md`](../my-dev-flow/results.md) |
@@ -55,7 +55,7 @@ Build subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). First output is a **d
 | Mode | Need |
 |------|------|
 | **TDD review** | `03`+`04` with planned tests; Gate B not required yet |
-| **Build** | Gate B checked; veto `none`; when HITL Gate B is **blocking**, **Gate B approved** `yes` (or named pick) — [hitl.md](../my-dev-flow/hitl.md); **Build armed** if async window open (**auto** may leave Gate B approved `none`); Verify commands; prefer `04a` or Notes skip |
+| **Build** | Gate B checked; veto `none`; when HITL Gate B is **blocking**, **Gate B approved** `yes` (or named pick) **+ provenance** — [hitl.md](../my-dev-flow/hitl.md); **Build armed** + turn-boundary gap if async window open (**auto** may leave Gate B approved `none`); Verify commands; prefer `04a` or Notes skip |
 | **Fix-from-tests** | `06` smoke-fail/failure + Fix ask; Verify commands |
 
 If not ready → **stop**.

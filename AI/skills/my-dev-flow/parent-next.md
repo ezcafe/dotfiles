@@ -2,11 +2,11 @@
 
 Given `00-run.md` Orchestrator card **Stage id** / **Next step**, open **1–2 files** + handoff. Do **not** re-read orchestrator [SKILL.md](SKILL.md).
 
-**Also:** `python3 {my-dev-flow}/scripts/lint-run.py <run-dir> --next` prints the card Next hint from a live run (resolve `{my-dev-flow}` per [skills-path.md](skills-path.md)). Optional `--next --derive` also computes expected next from Mode/profile + artifacts and warns when it differs from the card (card remains the launch override). After design **clean**, derive returns `tdd-review` until `04a` exists or Notes `04a skipped` ([lenses.md](lenses.md)); `--next` / `--before-build` require `03a` Result **clean** before Build.
+**Also (required habit):** before every Task, run `python3 {my-dev-flow}/scripts/lint-run.py <run-dir> --next --derive` (resolve `{my-dev-flow}` per [skills-path.md](skills-path.md)). Derive computes expected next from Mode/profile + artifacts. **Unsafe** card vs derived mismatches → **error** + `do-not-launch` (exit **1**) unless Notes `card-override — <reason>` **and** `provenance — card-override — user: "…"` (+ optional Decision N): card `merge` while derived is earlier; card `build` while design not clean / derived pre-Build; card `code-review-phase` / `adversarial` / `quality` / `test-*` / `fix-*` / `smoke` / `gate-c` while derived is still pre-Build or `build`; **post-Build** card `test-*` / `fix-tests` / `gate-c` / `merge` while derived is still in review (`adversarial` / `quality` / `code-review-phase` / `lens-*` / `merge-findings` / `fix-review`) — skip-review profile exempt; card `quality` while derived `adversarial`; card `smoke` / `fix-tests` while derived is review-entry unless Notes `smoke re-run` / Fix ask; card `lens-*` / `merge-findings` while derived is still `adversarial` / `quality` / `code-review-phase` / `fix-review` (pre-lens) — allowed when derived is that lens (Lens plan unpaid path) or card-override + provenance. Soft mismatches (peer/parallel / minor reorder) stay warn. After design **clean**, derive returns `tdd-review` until `04a` exists or Notes `04a skipped` ([lenses.md](lenses.md)); `--next` / `--before-build` require `03a` Result **clean** before Build.
 
 **Gate A fail-closed (Mode full):** `--next` emits `handoff: do-not-launch` when card Next is past Gate A (`skim`, `analyze`, …) while `01a` Result ≠ `ok` — same rule as `--derive` ([stages.md](stages.md) · [results.md](results.md)).
 
-**Handoff command (canonical):** `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>` (optional `--slug`, `--skill-root`).
+**Handoff command (canonical):** `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>` (optional `--slug`, `--skill-root`) — prints base block + R/W row + **Description** from the Task description map. Paste that output into the Orchestrator card **Task description**.
 
 **Before launch (clarity-check — required at design/code boundaries per [invariants.md](invariants.md) checklist; not a Task / no handoffs id):**
 
@@ -14,11 +14,18 @@ Given `00-run.md` Orchestrator card **Stage id** / **Next step**, open **1–2 f
 |----------|------|
 | Before Analyze / Grill / Design (Mode **full** standalone stages) | [../my-dev-flow-design/stages/clarity-check.md](../my-dev-flow-design/stages/clarity-check.md) — full-mode gates |
 | Before `design-phase` (Mode **simple** only) | Same file — **design-phase entry** section only (`01-idea` + Mode simple; do **not** require `02-analysis` / `02b` yet) |
-| Before TDD review / Build / Fix | [../my-dev-flow-code/stages/clarity-check.md](../my-dev-flow-code/stages/clarity-check.md) |
+| Before TDD review / Build / Fix / Merge | [../my-dev-flow-code/stages/clarity-check.md](../my-dev-flow-code/stages/clarity-check.md) |
 
 If clarity-check fails → ask the user; do **not** launch the Task.
 
-**Log token (once per run):** after the first passing clarity-check in this run, add to Notes or Run log: `clarity-check ok — <boundary>` where `<boundary>` names that check (e.g. `design-phase`, `analyze`, `build`). **One** such token unlocks **all** later design/code boundaries in the same run — lint checks **presence-any** (does **not** require `<boundary>` to match the current Next). Still fail-closed: Lint **errors** / `--next` → `do-not-launch` when **no** token exists before those Next targets / `--before-build` ([invariants.md](invariants.md)). Prefer opening the matching clarity-check file at each boundary above; do not invent a second token just to rename the boundary.
+**Log token:** after a passing clarity-check, add to Notes or Run log: `clarity-check ok — <boundary>` where `<boundary>` is the stage id (e.g. `design-phase`, `build`, `fix-review`, `merge`).
+
+| Next class | Lint rule |
+|------------|-----------|
+| **Soft** (`design-phase`, `analyze`, `grill`, `design`, `tdd-review`) | **Presence-any:** one `clarity-check ok — <any>` token in the run unlocks later soft boundaries |
+| **Hard / high-risk** (`build`, `fix-review`, `fix-tests`, `merge`) | **Boundary-matched:** must have `clarity-check ok — <exact Next>` (e.g. Next `build` needs `clarity-check ok — build`) |
+
+Fail-closed: Lint **errors** / `--next` → `do-not-launch` when the rule above is not met ([invariants.md](invariants.md)).
 
 | Stage id / Next | Open (1–2) | Handoff |
 |-----------------|------------|---------|

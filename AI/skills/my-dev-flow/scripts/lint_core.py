@@ -18,23 +18,32 @@ from lint_common import (
     CALIBRATION_PROFILE_OK_RE,
     CARD_NEXT_RE,
     CARD_STAGE_RE,
-    CLARITY_CHECK_OK_RE,
+    CLARITY_CHECK_HIGH_RISK,
     CLARITY_CHECK_STAGES,
     CODE_REVIEW_ENTRY_STAGES,
     DESIGN_BACKLOOP_RE,
+    FIX_ASK_RE,
     FOLD_API_DB_RE,
     HAS_API_LINE_RE,
     HAS_DB_LINE_RE,
+    IN_REVIEW_DERIVED,
     Issue,
+    JUMP_AHEAD_FROM_PRE_BUILD,
+    JUMP_AHEAD_FROM_REVIEW,
     LEGACY_STATUS_HINTS,
+    LENS_JUMP_AHEAD_CARDS,
     LENS_PLAN_RE,
     MAIN_THREAD_RE,
     PACKAGE,
     PARENT_NEXT_MD,
     PENDING_PARALLEL_RE,
     POST_GATE_A_STAGES,
+    PRE_BUILD_DERIVED,
+    PRE_LENS_DERIVED,
     REQUIRED_FIELD_PATTERNS,
+    REVIEW_ENTRY_DERIVED,
     REVIEW_STALE_RE,
+    SMOKE_RERUN_RE,
     SOFT_MAIN_THREAD_CAP,
     SOFT_TASK_CAP,
     TASK_COUNT_RE,
@@ -53,10 +62,13 @@ from lint_common import (
     VETO_WINDOW_RE,
     _artifact_exists,
     _card_next_stage_id,
+    _card_override_ok,
     _check_yes_no_flag,
+    _clarity_boundaries_logged,
     _exact_enum_token,
     _extract_stage_token,
     _first_token,
+    _has_provenance,
     _looks_like_template,
     _notes_blob,
     _parsed_yes_no,
@@ -64,6 +76,7 @@ from lint_common import (
     _parse_result_token,
     _read_artifact,
     _run_log_blob,
+    _write_async_gap_sidecar,
 )
 from lint_derive import (
     _design_review_result,
@@ -75,6 +88,8 @@ from lint_derive import (
     derive_expected_next,
 )
 from lint_gate_b import (
+    _async_gap_pending_digest_ts,
+    _async_turn_gap_ok,
     _check_async_gate_b_gap,
     _check_design_backloop_gate_b,
     _check_gate_b_approved,
@@ -88,6 +103,7 @@ from lint_gate_c import (
     _check_skip_review_build_only_smoke,
     _check_stale_before_merge,
     _check_status_done_requires_merge,
+    _check_waiver_provenance,
     _implied_review_stale,
     _implied_test_stale,
     _parse_gate_c_approved,
@@ -277,15 +293,109 @@ def _check_isolated_api_db_files(
                     "design-review (or Notes tiny-contract-tweak) — lenses.md",
                 )
             )
-def _clarity_check_logged(text: str) -> bool:
-    """True when Notes or Run log has ``clarity-check ok — <boundary>``.
+def _clarity_check_logged(text: str, *, stage_id: str = "") -> bool:
+    """True when clarity-check token satisfies soft or hard rule for stage.
 
-    Presence-any is intentional (once-per-run): any matching token unlocks
-    later design/code boundaries. Lint does **not** match ``<boundary>`` to
-    the current Next (parent-next.md Option A).
+    Soft (design/analyze/grill/tdd-review): presence-any once-per-run.
+    Hard (build / fix-* / merge): boundary must match Next (parent-next.md · R3).
     """
-    blob = _notes_blob(text) + "\n" + _run_log_blob(text)
-    return bool(CLARITY_CHECK_OK_RE.search(blob))
+    boundaries = _clarity_boundaries_logged(text)
+    if not boundaries:
+        return False
+    target = (stage_id or "").strip().lower()
+    if not target or target not in CLARITY_CHECK_HIGH_RISK:
+        return True  # soft: any token unlocks
+    return target in boundaries
+
+
+def _review_profile_token(text: str) -> str | None:
+    m = REQUIRED_FIELD_PATTERNS["Review profile"].search(text)
+    if not m:
+        return None
+    return _first_token(m.group(1))
+
+
+def _notes_allow_review_entry_sidepath(card: str, text: str) -> bool:
+    """True when Notes unlock smoke / fix-tests during review-entry (T2)."""
+    notes = _notes_blob(text)
+    if card == "smoke" and SMOKE_RERUN_RE.search(notes):
+        return True
+    if card == "fix-tests" and FIX_ASK_RE.search(notes):
+        return True
+    return False
+
+
+def _unsafe_card_derive_mismatch(
+    card: str, derived: str, text: str, run_dir: Path | None
+) -> str | None:
+    """Return reason when card vs derived mismatch is unsafe (R4/S3/T1/T2/U1), else None.
+
+    Soft warn only for peer/parallel or minor reorder. Jump-ahead to
+    review/test/fix/merge while derived is still pre-Build or pre-verify,
+    post-Build jump past unfinished review, or soft lens / merge-findings
+    before Adv/Quality / lite / Fix, is **unsafe** → do-not-launch unless
+    card-override + provenance (or skip-review for post-review jumps).
+    Legitimate lens cards when derived is that lens (Lens plan unpaid path)
+    match at ``card == derived`` and are not unsafe.
+    """
+    if not card or not derived or card == derived:
+        return None
+    if "||" in derived:
+        parts = derived.split("||")
+        if card in parts:
+            return None
+        return None  # parallel hint stays warn-only
+    if card == "merge" and derived not in ("merge", "gate-c"):
+        return f"card Next `merge` while derived `{derived}`"
+    if card == "build":
+        design = _design_review_result(run_dir)
+        if design != "clean":
+            return (
+                "card Next `build` while design not clean "
+                f"(03a Result is {design or 'missing'})"
+            )
+        if derived in PRE_BUILD_DERIVED or derived.startswith("design"):
+            return f"card Next `build` while derived `{derived}`"
+    # S3: review/test/fix/merge while still pre-Build or awaiting Build
+    if derived in PRE_BUILD_DERIVED or derived == "build":
+        if card in JUMP_AHEAD_FROM_PRE_BUILD:
+            return (
+                f"card Next `{card}` while derived `{derived}` "
+                "(pre-Build / pre-verify jump-ahead)"
+            )
+    # T2: Quality (and peers) before Adversarial
+    if card == "quality" and derived == "adversarial":
+        return (
+            "card Next `quality` while derived `adversarial` "
+            "(Adv before Quality)"
+        )
+    # T2: smoke / fix-tests while still at review entry
+    if derived in REVIEW_ENTRY_DERIVED and card in ("smoke", "fix-tests"):
+        if not _notes_allow_review_entry_sidepath(card, text):
+            return (
+                f"card Next `{card}` while derived `{derived}` "
+                "(review-entry; need Notes smoke re-run / Fix ask, "
+                "or card-override + provenance)"
+            )
+    # U1: lens-* / merge-findings while still Adv / Quality / lite / Fix
+    if derived in PRE_LENS_DERIVED and card in LENS_JUMP_AHEAD_CARDS:
+        return (
+            f"card Next `{card}` while derived `{derived}` "
+            "(lens / merge-findings before Adv/Quality / pre-lens)"
+        )
+    # T1: test / gate-c / merge while derived still in review pipeline
+    if derived in IN_REVIEW_DERIVED and card in JUMP_AHEAD_FROM_REVIEW:
+        if _review_profile_token(text) == "skip-review":
+            return None
+        # fix-tests at review-entry already handled above with Notes exception;
+        # Fix ask also unlocks fix-tests later in the review pipeline
+        if card == "fix-tests" and FIX_ASK_RE.search(_notes_blob(text)):
+            return None
+        return (
+            f"card Next `{card}` while derived `{derived}` "
+            "(post-Build review still unpaid)"
+        )
+    return None
 def _calibration_blob(run_dir: Path | None) -> str:
     """Read workflow ``_calibration.md`` (parent of slug) or run-dir copy."""
     if run_dir is None:
@@ -328,23 +438,37 @@ def _check_calibration_on_done(
 def _check_clarity_check_logged(
     text: str, issues: list[Issue], *, before_build: bool
 ) -> None:
-    """Error when clarity-check token missing before design/code boundaries.
+    """Error when clarity-check token missing / mismatched before boundaries.
 
-    Enforces invariants.md checklist + parent-next.md (do-not-launch).
+    Soft stages: presence-any. High-risk (build/fix-*/merge): boundary-matched.
     """
     next_id = _card_next_stage_id(text)
-    if not (before_build or next_id in CLARITY_CHECK_STAGES):
+    if before_build:
+        target = "build"
+    elif next_id in CLARITY_CHECK_STAGES:
+        target = next_id
+    else:
         return
-    if _clarity_check_logged(text):
+    if _clarity_check_logged(text, stage_id=target):
         return
-    label = next_id or "build"
-    issues.append(
-        Issue(
-            "error",
-            f"clarity-check ok — <boundary> missing from Notes/Run log "
-            f"before `{label}` — do not launch (parent-next.md · invariants.md)",
+    if target in CLARITY_CHECK_HIGH_RISK:
+        issues.append(
+            Issue(
+                "error",
+                f"clarity-check ok — {target} missing from Notes/Run log "
+                f"(boundary-matched required for high-risk Next) — do not launch "
+                "(parent-next.md · invariants.md)",
+            )
         )
-    )
+    else:
+        issues.append(
+            Issue(
+                "error",
+                f"clarity-check ok — <boundary> missing from Notes/Run log "
+                f"before `{target}` — do not launch "
+                "(parent-next.md · invariants.md)",
+            )
+        )
 def _check_design_review_clean_before_build(
     text: str,
     issues: list[Issue],
@@ -478,6 +602,7 @@ def lint_run_md(
     _check_gate_b_approved(text, issues, before_build=before_build)
     _check_design_backloop_gate_b(text, issues, before_build=before_build)
     _check_gate_c_approved(text, issues, before_merge=before_merge)
+    _check_waiver_provenance(text, issues)
     _check_stale_before_merge(
         text, issues, before_merge=before_merge, run_dir=run_dir
     )
@@ -534,7 +659,9 @@ def lint_run_md(
         run_dir=run_dir,
         mode_token=mode_token,
     )
-    _check_async_gate_b_gap(text, issues, before_build=before_build)
+    _check_async_gate_b_gap(
+        text, issues, before_build=before_build, run_dir=run_dir
+    )
     _check_task_count_budget(text, issues, mode_token)
     _check_main_thread_fallbacks(text, issues)
 
@@ -636,15 +763,39 @@ def print_next_hint(run_dir: Path, *, derive: bool = False) -> int:
             if stage_id and stage_id not in parts:
                 print(
                     f"warn: card Next `{stage_id}` differs from derived `{derived}` "
-                    "— card remains launch override; confirm or update card "
-                    "(parent-next.md · stages.md Resume)"
+                    "— confirm or update card (parent-next.md · stages.md Resume)"
                 )
         elif derived and stage_id and derived != stage_id:
-            print(
-                f"warn: card Next `{stage_id}` differs from derived `{derived}` "
-                "— card remains launch override; confirm or update card "
-                "(parent-next.md · stages.md Resume)"
+            unsafe = _unsafe_card_derive_mismatch(
+                stage_id, derived, text, run_dir
             )
+            if unsafe and not _card_override_ok(text):
+                print(
+                    f"error: unsafe card vs derived — {unsafe} — "
+                    "do-not-launch unless Notes `card-override — <reason>` "
+                    "+ `provenance — card-override — user: \"…\"` "
+                    "(+ optional Decision N) (stages.md · parent-next.md · R4/S7)"
+                )
+                print("companion: stages.md · parent-next.md")
+                print("handoff: do-not-launch")
+                print(
+                    "next action: set card Next to derived, or Notes "
+                    "`card-override — <reason>` + provenance card-override "
+                    "then re-run --next --derive"
+                )
+                return 1
+            if unsafe and _card_override_ok(text):
+                print(
+                    f"warn: card Next `{stage_id}` differs from derived "
+                    f"`{derived}` — Notes card-override + provenance present "
+                    "(R4/S7)"
+                )
+            else:
+                print(
+                    f"warn: card Next `{stage_id}` differs from derived "
+                    f"`{derived}` — confirm or update card "
+                    "(parent-next.md · stages.md Resume)"
+                )
 
     # Terminal lifecycle: do not launch further pipeline Tasks
     if status in ("done", "stopped"):
@@ -660,7 +811,7 @@ def print_next_hint(run_dir: Path, *, derive: bool = False) -> int:
                 "next action: run stopped — freeze stage; require Decision "
                 "to resume or new slug"
             )
-        return 0
+        return 1
 
     if not stage_id:
         print("hint: set Orchestrator card Next step / Stage id")
@@ -692,7 +843,7 @@ def print_next_hint(run_dir: Path, *, derive: bool = False) -> int:
                 "next action: set Next gate-a or ideation-update until "
                 "01a Result ok, then re-run --next"
             )
-            return 0
+            return 1
 
     # H2: unpaid Lens plan → do not launch test / gate-c / merge
     if stage_id in UNPAID_LENS_BLOCK_STAGES:
@@ -712,7 +863,7 @@ def print_next_hint(run_dir: Path, *, derive: bool = False) -> int:
                 else "merge-findings not clean (2+ lenses)"
             )
             print(
-                f"warn: Lens plan unpaid — {reason}; do not advance to "
+                f"error: Lens plan unpaid — {reason}; do not advance to "
                 f"`{stage_id}` (lenses.md)"
             )
             print("companion: lenses.md · parent-next.md")
@@ -723,7 +874,7 @@ def print_next_hint(run_dir: Path, *, derive: bool = False) -> int:
                 + ("then merge-findings; " if len(entries) >= 2 else "")
                 + "then re-run --next"
             )
-            return 0
+            return 1
         if (review_stale or implied_review) and stage_id in ("gate-c", "merge"):
             if review_stale:
                 print(
@@ -741,7 +892,7 @@ def print_next_hint(run_dir: Path, *, derive: bool = False) -> int:
             print(
                 "next action: clear review-stale after review clean; re-run --next"
             )
-            return 0
+            return 1
         if (test_stale or implied_test) and stage_id in ("gate-c", "merge"):
             if test_stale:
                 print(
@@ -759,7 +910,7 @@ def print_next_hint(run_dir: Path, *, derive: bool = False) -> int:
             print(
                 "next action: clear test-stale after test success; re-run --next"
             )
-            return 0
+            return 1
 
     # Design-backloop: redirect Build only — gate-b after re-review is settle path
     # (token stays until settle; do not redirect Next=gate-b → design-update)
@@ -774,21 +925,29 @@ def print_next_hint(run_dir: Path, *, derive: bool = False) -> int:
             "next action: set Next design-update (or gate-b after re-review); "
             "clear design-backloop only after fresh Gate B settle"
         )
-        return 0
+        return 1
 
-    # Clarity-check required at design/code boundaries (invariants.md · parent-next.md)
-    if stage_id in CLARITY_CHECK_STAGES and not _clarity_check_logged(text):
-        print(
-            f"error: clarity-check ok — <boundary> missing before `{stage_id}` "
-            "(parent-next.md · invariants.md)"
-        )
+    # Clarity-check: soft presence-any; hard boundary-matched for high-risk
+    if stage_id in CLARITY_CHECK_STAGES and not _clarity_check_logged(
+        text, stage_id=stage_id
+    ):
+        if stage_id in CLARITY_CHECK_HIGH_RISK:
+            print(
+                f"error: clarity-check ok — {stage_id} missing "
+                "(boundary-matched required) (parent-next.md · invariants.md)"
+            )
+        else:
+            print(
+                f"error: clarity-check ok — <boundary> missing before `{stage_id}` "
+                "(parent-next.md · invariants.md)"
+            )
         print("companion: parent-next.md · invariants.md")
         print("handoff: do-not-launch")
         print(
             "next action: run clarity-check; log `clarity-check ok — "
             f"{stage_id}` on Notes/Run log; then re-run --next"
         )
-        return 0
+        return 1
 
     # M2: design-review / design-verify-phase must be clean before Build
     if stage_id == "build":
@@ -811,28 +970,71 @@ def print_next_hint(run_dir: Path, *, derive: bool = False) -> int:
                 f"next action: finish {stage_name} to Result clean "
                 "(or design-update), then re-run --next"
             )
-            return 0
+            return 1
 
-    # Parent gates / blocked async gap: never emit Task handoff
-    if stage_id == "build" and veto_window and not build_armed:
-        print(
-            "blocked: veto window open — set Build armed on this turn "
-            "(hitl.md), then Build"
-        )
-        print("companion: hitl.md · parent-next.md")
-        print("handoff: do-not-launch")
-        print("next action: set Notes/Run log Build armed (parent turn gap), re-run --next")
-        return 0
+    # Parent gates / blocked async gap: never emit Task handoff (S1/S2)
     if stage_id == "build":
         hitl_tier = _parse_hitl_gate_b(text)
+        async_path = veto_window or hitl_tier == "async-notify"
+        if async_path and (veto_window or build_armed):
+            gap_ok = _async_turn_gap_ok(text, run_dir)
+            if veto_window and not build_armed:
+                digest_ts = _async_gap_pending_digest_ts(text)
+                if digest_ts:
+                    _write_async_gap_sidecar(run_dir, digest_ts)
+                    print(f"async-gap-pending — {digest_ts}")
+                print(
+                    "blocked: veto window open — copy async-gap-pending into "
+                    "Notes, end turn, then set Build armed with later HH:MM "
+                    "(hitl.md)"
+                )
+                print("companion: hitl.md · parent-next.md")
+                print("handoff: do-not-launch")
+                print(
+                    "next action: Notes `async-gap-pending — <digest-ts>` "
+                    "+ Run log Build armed (later HH:MM); re-run --next"
+                )
+                return 1
+            if build_armed and not gap_ok:
+                digest_ts = _async_gap_pending_digest_ts(text)
+                if digest_ts:
+                    _write_async_gap_sidecar(run_dir, digest_ts)
+                    print(f"async-gap-pending — {digest_ts}")
+                print(
+                    "blocked: async Gate B gap incomplete — need arm HH:MM "
+                    "strictly later than digest + Notes async-gap-pending "
+                    "matching digest (+ `.lint-async-gap` from prior --next) "
+                    "(hitl.md)"
+                )
+                print("companion: hitl.md · parent-next.md")
+                print("handoff: do-not-launch")
+                print(
+                    "next action: fix two-timestamp gap + pending token; "
+                    "re-run --next"
+                )
+                return 1
         if hitl_tier == "blocking" and not _gate_b_approved_ok(text):
             print("companion: hitl.md · parent-next.md (row for `build`)")
             print("handoff: do-not-launch")
             print(
                 "next action: blocking Gate B — set Gate B approved "
-                "yes (or named pick), then re-run --next"
+                "yes (or named pick) + provenance, then re-run --next"
             )
-            return 0
+            return 1
+        if hitl_tier == "blocking" and _gate_b_approved_ok(text) and not _has_provenance(
+            text, "gate-b-approved"
+        ):
+            print(
+                "error: Gate B approved without provenance "
+                '(need `provenance — gate-b-approved — user: "…"`) (hitl.md)'
+            )
+            print("companion: hitl.md · parent-next.md")
+            print("handoff: do-not-launch")
+            print(
+                "next action: add provenance quoting the user Gate B yes; "
+                "re-run --next"
+            )
+            return 1
     if stage_id in ("gate-b", "gate-c"):
         print(f"companion: hitl.md · parent-next.md (row for `{stage_id}`)")
         print("handoff: do-not-launch")
@@ -850,7 +1052,7 @@ def print_next_hint(run_dir: Path, *, derive: bool = False) -> int:
                 "next action: Gate C blocking ask; set Gate C approved "
                 "before merge — hitl.md"
             )
-        return 0
+        return 1
     if stage_id == "merge":
         _gc_raw, gc_actions = _parse_gate_c_approved(text)
         if _gc_raw is None or _gc_raw == "none" or not gc_actions:
@@ -858,10 +1060,24 @@ def print_next_hint(run_dir: Path, *, derive: bool = False) -> int:
             print("handoff: do-not-launch")
             print(
                 "next action: Gate C blocking ask; set Gate C approved "
-                "(non-empty commit|push|pr|merge subset), then re-run --next"
+                "(non-empty commit|push|pr|merge subset) + provenance, "
+                "then re-run --next"
             )
-            return 0
+            return 1
+        if not _has_provenance(text, "gate-c-approved"):
+            print(
+                "error: Gate C approved without provenance "
+                '(need `provenance — gate-c-approved — user: "…"`) (hitl.md)'
+            )
+            print("companion: hitl.md · parent-next.md")
+            print("handoff: do-not-launch")
+            print(
+                "next action: add provenance quoting the user Gate C yes; "
+                "re-run --next"
+            )
+            return 1
         bar_issues: list[Issue] = []
+        _check_waiver_provenance(text, bar_issues)
         _check_gate_c_test_bar(
             text, bar_issues, before_merge=True, run_dir=run_dir
         )
@@ -876,9 +1092,10 @@ def print_next_hint(run_dir: Path, *, derive: bool = False) -> int:
             print("handoff: do-not-launch")
             print(
                 "next action: meet Gate C test bar (or Notes gate-c-test-override / "
-                "smoke-waive / smoke-pass (re-run) / docs-only), then re-run --next"
+                "smoke-waive / smoke-pass-rerun / docs-only each with provenance), "
+                "then re-run --next"
             )
-            return 0
+            return 1
 
     print(f"companion: parent-next.md (row for `{stage_id}`)")
     print(

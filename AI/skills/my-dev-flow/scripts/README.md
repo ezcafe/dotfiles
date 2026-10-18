@@ -16,11 +16,11 @@ cd AI/skills/my-dev-flow/scripts && python3 test_lint_run.py
 
 | Flag | Role |
 |------|------|
-| `--next` | Print card Next hint + companion / handoff (or `do-not-launch`) |
-| `--next --derive` | Also derive expected next; warn when card differs |
-| `--before-build` | Gate B / veto / Build armed / Verify / design clean / clarity-check |
+| `--next` | Print card Next hint + companion / handoff (or `do-not-launch`). Exit **1** when printing `handoff: do-not-launch`; exit **0** when emitting a Task handoff; exit **2** on missing `00-run.md` |
+| `--next --derive` | **Required habit** before each Task: derive expected next; unsafe mismatch → error + `do-not-launch` (exit 1) unless Notes `card-override` + provenance `card-override` |
+| `--before-build` | Gate B / veto / Build armed / async turn-boundary gap / provenance / Verify / design clean / clarity-check |
 | `--before-code-review` | Lens plan api/db when Has API/DB yes |
-| `--before-merge` | Gate C approved + test bar + stale / skip-review smoke |
+| `--before-merge` | Gate C approved + provenance + test bar + stale / skip-review smoke |
 | `--before-design-review` | Has API/DB set; isolated 03a when Mode full |
 | `--check-stage-ids` | Registry drift vs handoffs / parent-next / stages |
 | `--dry-run-seed` | Seed `00-run.md` from template, lint, stop |
@@ -36,4 +36,7 @@ When `AI/skills/my-dev-flow` exists, Step 0 requires `./AI/skills/sync-to-cursor
 
 ```bash
 python3 scripts/handoff-for.py <stage-id> [--slug <slug>] [--skill-root <abs>]
+python3 scripts/handoff-for.py build --check-descriptions
 ```
+
+Prints base block + R/W row + **Description** from handoffs.md Task description map.

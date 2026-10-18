@@ -4,8 +4,11 @@ Enforces handoffs.md / parent-next.md / stages/*.md registry drift (skills-path.
 """
 from __future__ import annotations
 
+import importlib.util
 import re
+import sys
 from pathlib import Path
+from types import ModuleType
 
 from lint_common import (
     HANDOFFS_MD,
@@ -15,6 +18,22 @@ from lint_common import (
     SUBFLOW_DIRS,
     VALID_STAGE_IDS,
 )
+
+
+def _load_handoff_for() -> ModuleType:
+    """Load scripts/handoff-for.py (hyphenated filename — not a normal import)."""
+    path = PACKAGE / "scripts" / "handoff-for.py"
+    # Prefer already-loaded module (e.g. unit tests) when present and complete
+    existing = sys.modules.get("handoff_for")
+    if existing is not None and hasattr(existing, "_missing_description_ids"):
+        return existing
+    spec = importlib.util.spec_from_file_location("handoff_for", path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"cannot load handoff-for.py from {path}")
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["handoff_for"] = mod
+    spec.loader.exec_module(mod)
+    return mod
 
 def stage_ids_from_handoffs(text: str | None = None) -> frozenset[str]:
     """Parse stage ids from handoffs.md Stage id → read / write table."""
@@ -122,6 +141,29 @@ def check_stage_id_registry() -> list[Issue]:
                 "stages/*.md drift vs handoffs.md — "
                 f"only_in_files={sorted(from_files - expected_files)} "
                 f"only_in_handoffs={sorted(expected_files - from_files)}",
+            )
+        )
+
+    # R5: every R/W stage id needs a Task description row
+    try:
+        handoff_for = _load_handoff_for()
+        h_text = HANDOFFS_MD.read_text(encoding="utf-8")
+        rw = handoff_for._parse_stage_table(h_text)
+        desc = handoff_for._parse_description_table(h_text)
+        missing_desc = handoff_for._missing_description_ids(rw, desc)
+        if missing_desc:
+            issues.append(
+                Issue(
+                    "error",
+                    "handoffs.md R/W stage ids missing Task description rows: "
+                    f"{missing_desc}",
+                )
+            )
+    except Exception as exc:  # pragma: no cover — import/parse failure
+        issues.append(
+            Issue(
+                "warn",
+                f"could not check Task description map: {exc}",
             )
         )
 

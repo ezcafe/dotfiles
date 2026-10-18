@@ -50,7 +50,7 @@ Merge subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). Human owns top risks.
 
 - Check `06-test-log.md` / Build result against Gate C test bar for this Review profile. If below bar: **stop** and run the missing test mode or fix via `my-dev-flow-code`. Only continue if the user **explicitly overrides** (log in Notes).
 - Prefer all review lenses clean (`05-review-log.md`). If not clean: **warn** and only continue if the user explicitly overrides.
-- **Gate C yes** for the listed actions — durable **`Gate C approved`** on `00-run.md` (not `none`). Silence / “continue pipeline” / Gate B auto ≠ approval.
+- **Gate C yes** for the listed actions — durable **`Gate C approved`** on `00-run.md` (not `none`) **with** matching provenance (`provenance — gate-c-approved — user: "…"` — [`hitl.md`](../my-dev-flow/hitl.md) Provenance). Silence / “continue pipeline” / Gate B auto ≠ approval.
 
 Reject Gate C → stop.
 

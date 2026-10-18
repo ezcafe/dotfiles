@@ -26,6 +26,8 @@ from lint_stage_ids import (  # noqa: F401
     stage_ids_from_stages_files,
 )
 from lint_gate_b import (  # noqa: F401
+    _async_gap_pending_digest_ts,
+    _async_turn_gap_ok,
     _check_async_gate_b_gap,
     _check_design_backloop_gate_b,
     _check_gate_b_approved,
@@ -40,6 +42,7 @@ from lint_gate_c import (  # noqa: F401
     _check_skip_review_build_only_smoke,
     _check_stale_before_merge,
     _check_status_done_requires_merge,
+    _check_waiver_provenance,
     _docs_only_marked,
     _implied_review_stale,
     _implied_test_stale,

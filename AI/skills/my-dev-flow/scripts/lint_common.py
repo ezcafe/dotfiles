@@ -154,7 +154,9 @@ GATE_C_APPROVED_RE = re.compile(
 LENS_PLAN_RE = re.compile(r"^\*\*Lens plan:\*\*\s*(.+)$", re.M | re.I)
 SMOKE_RERUN_RE = re.compile(r"(?i)\bsmoke\s+re-?run\b")
 SMOKE_WAIVE_RE = re.compile(
-    r"(?i)\bsmoke\s*-?\s*waive\b|\bwaive\s+(?:independent\s+)?smoke\b"
+    r"(?im)(?:^|\n)\s*[-*]\s*`?smoke\s*-?\s*waive`?(?:\s*$|\s*[—#–-]|\s*\n)|"
+    r"(?im)(?:^|\n)\s*[-*]\s*`?waive\s+(?:independent\s+)?smoke`?"
+    r"(?:\s*$|\s*[—#–-]|\s*\n)"
 )
 SMOKE_RERUN_DONE_RE = re.compile(
     r"(?i)smoke-pass\s*\(\s*re-?run\s*\)|"
@@ -205,7 +207,8 @@ LAST_VERIFY_PASS_AT_RE = re.compile(
     r"^\*\*Last verify-pass at:\*\*\s*(.+)$", re.M | re.I
 )
 GATE_C_TEST_OVERRIDE_RE = re.compile(
-    r"(?i)\bgate-c-test-override\b|\bGate C test override\b"
+    r"(?im)(?:^|\n)\s*[-*]\s*`?(?:gate-c-test-override|Gate C test override)`?"
+    r"(?:\s*$|\s*[—#–-]|\s*\n)"
 )
 DOCS_ONLY_RE = re.compile(r"(?i)\bdocs-only\b")
 COMPLEXITY_RE = re.compile(r"^\*\*Complexity:\*\*\s*(.+)$", re.M | re.I)
@@ -254,7 +257,7 @@ UNPAID_LENS_BLOCK_STAGES = frozenset(
 GRILL_SKIP_RE = re.compile(r"(?i)\bgrill\s+skipped\b")
 TDD_04A_SKIP_RE = re.compile(r"(?i)\b04a\s+skipped\b")
 CLARITY_CHECK_OK_RE = re.compile(
-    r"(?i)clarity-check\s+ok\s*[—–-]\s*\S+"
+    r"(?i)clarity-check\s+ok\s*[—–-]\s*(\S+)"
 )
 CLARITY_CHECK_STAGES = frozenset(
     {
@@ -266,8 +269,161 @@ CLARITY_CHECK_STAGES = frozenset(
         "build",
         "fix-review",
         "fix-tests",
+        "merge",
     }
 )
+# High-risk Next: boundary-matched clarity-check required (parent-next.md · R3)
+CLARITY_CHECK_HIGH_RISK = frozenset(
+    {"build", "fix-review", "fix-tests", "merge"}
+)
+# Consent / waiver provenance (hitl.md · R1) — quote length ≥ N, not filler
+PROVENANCE_MIN_QUOTE_LEN = 12
+PROVENANCE_FILLER_QUOTES = frozenset(
+    {
+        "yes",
+        "ok",
+        "okay",
+        "yep",
+        "yup",
+        "sure",
+        "fine",
+        "lgtm",
+        "approved",
+        "approve",
+        "accepted",
+        "accept",
+        "merge",
+        "ship",
+        "go",
+        "proceed",
+        "ship it",
+        "looks good",
+        "good",
+        "done",
+        "confirmed",
+        "confirm",
+        "agree",
+        "agreed",
+    }
+)
+PROVENANCE_KINDS = frozenset(
+    {
+        "gate-b-approved",
+        "gate-c-approved",
+        "gate-c-test-override",
+        "smoke-waive",
+        "docs-only",
+        "smoke-pass-rerun",
+        "card-override",
+    }
+)
+PROVENANCE_RE = re.compile(
+    r"(?im)(?:^|\n)\s*[-*]?\s*`?provenance`?\s*[—–-]\s*"
+    r"(gate-b-approved|gate-c-approved|gate-c-test-override|smoke-waive|"
+    r"docs-only|smoke-pass-rerun|card-override)"
+    r"\s*[—–-]\s*user:\s*\"([^\"]+)\"",
+)
+CARD_OVERRIDE_RE = re.compile(
+    r"(?im)(?:^|\n)\s*[-*]?\s*`?card-override`?\s*[—–-]\s*\S+"
+)
+# Turn-boundary token from prior --next do-not-launch (hitl.md · S2)
+ASYNC_GAP_PENDING_RE = re.compile(
+    r"(?im)(?:^|\n)\s*[-*]?\s*`?async-gap-pending`?\s*[—–-]\s*"
+    r"(\d{1,2}:\d{2}(?::\d{2})?)"
+)
+ASYNC_GAP_SIDECAR = ".lint-async-gap"
+# Run log line: - **HH:MM** · status · stage · note
+RUN_LOG_ENTRY_RE = re.compile(
+    r"(?im)^\s*[-*]\s*\*\*(\d{1,2}:\d{2}(?::\d{2})?)\*\*\s*·\s*[^\n·]+·\s*[^\n·]+·\s*(.+)$"
+)
+# Stages that are "earlier" than Build (unsafe card=build when derived here)
+PRE_BUILD_DERIVED = frozenset(
+    {
+        "ideation",
+        "gate-a",
+        "ideation-update",
+        "skim",
+        "analyze",
+        "grill",
+        "design",
+        "design-phase",
+        "design-review",
+        "api-contract-review",
+        "db-design-review",
+        "design-verify-phase",
+        "design-update",
+        "tdd-review",
+        "gate-b",
+    }
+)
+# Jump-ahead while derived is still pre-Build / pre-verify → unsafe (S3)
+JUMP_AHEAD_FROM_PRE_BUILD = frozenset(
+    {
+        "smoke",
+        "adversarial",
+        "quality",
+        "code-review-phase",
+        "lens-security",
+        "lens-perf",
+        "lens-memory",
+        "lens-api",
+        "lens-db",
+        "merge-findings",
+        "fix-review",
+        "test-full",
+        "test-lite",
+        "fix-tests",
+        "gate-c",
+        "merge",
+    }
+)
+# Derived still in review pipeline (post-Build) — test/gate-c/merge jump is unsafe (T1)
+IN_REVIEW_DERIVED = frozenset(
+    {
+        "adversarial",
+        "quality",
+        "code-review-phase",
+        "lens-security",
+        "lens-perf",
+        "lens-memory",
+        "lens-api",
+        "lens-db",
+        "merge-findings",
+        "fix-review",
+    }
+)
+# Cards that skip remaining review work while derived ∈ IN_REVIEW_DERIVED
+JUMP_AHEAD_FROM_REVIEW = frozenset(
+    {
+        "test-full",
+        "test-lite",
+        "fix-tests",
+        "gate-c",
+        "merge",
+    }
+)
+# Pre-lens review (Adv / Quality / lite / Fix) — lens-* / merge-findings jump unsafe (U1)
+PRE_LENS_DERIVED = frozenset(
+    {
+        "adversarial",
+        "quality",
+        "code-review-phase",
+        "fix-review",
+    }
+)
+LENS_JUMP_AHEAD_CARDS = frozenset(
+    {
+        "lens-security",
+        "lens-perf",
+        "lens-memory",
+        "lens-api",
+        "lens-db",
+        "merge-findings",
+    }
+)
+# Review entry (Adv / lite combined) — smoke / fix-tests blocked unless Notes (T2)
+REVIEW_ENTRY_DERIVED = frozenset({"adversarial", "code-review-phase"})
+FIX_ASK_RE = re.compile(r"(?i)\bfix\s+ask\b")
 CALIBRATION_MODE_OK_RE = re.compile(r"(?i)\bMode\s+OK\?")
 CALIBRATION_PROFILE_OK_RE = re.compile(r"(?i)\bReview\s+profile\s+OK\?")
 CALIBRATION_FRICTION_RE = re.compile(
@@ -417,6 +573,121 @@ def _notes_blob(text: str) -> str:
 def _run_log_blob(text: str) -> str:
     m = RUN_LOG_SECTION_RE.search(text)
     return m.group(1) if m else ""
+def _normalize_provenance_quote(quote: str) -> str:
+    """Lowercase + collapse whitespace for filler checks."""
+    return re.sub(r"\s+", " ", (quote or "").strip().lower())
+
+
+def _provenance_quote_ok(quote: str) -> bool:
+    """True when quote meets length + non-filler bar (hitl.md · S4)."""
+    q = (quote or "").strip()
+    if len(q) < PROVENANCE_MIN_QUOTE_LEN:
+        return False
+    norm = _normalize_provenance_quote(q)
+    if not norm or norm in PROVENANCE_FILLER_QUOTES:
+        return False
+    return True
+
+
+def _provenance_kinds(text: str) -> set[str]:
+    """Return provenance kinds with quality user quotes in Notes or Run log."""
+    blob = _notes_blob(text) + "\n" + _run_log_blob(text)
+    found: set[str] = set()
+    for m in PROVENANCE_RE.finditer(blob):
+        kind = m.group(1).strip().lower()
+        quote = (m.group(2) or "").strip()
+        if kind in PROVENANCE_KINDS and _provenance_quote_ok(quote):
+            found.add(kind)
+    return found
+def _has_provenance(text: str, kind: str) -> bool:
+    return kind.lower() in _provenance_kinds(text)
+def _clarity_boundaries_logged(text: str) -> set[str]:
+    """Return boundary tokens from ``clarity-check ok — <boundary>`` lines."""
+    blob = _notes_blob(text) + "\n" + _run_log_blob(text)
+    return {
+        m.group(1).strip().strip("`*_").lower()
+        for m in CLARITY_CHECK_OK_RE.finditer(blob)
+        if m.group(1) and m.group(1).strip()
+    }
+def _card_override_logged(text: str) -> bool:
+    """True when Notes have ``card-override — <reason>`` (stages.md · R4)."""
+    return bool(CARD_OVERRIDE_RE.search(_notes_blob(text)))
+
+
+def _card_override_ok(text: str) -> bool:
+    """True when card-override Notes + provenance unlock unsafe derive (S7)."""
+    return _card_override_logged(text) and _has_provenance(text, "card-override")
+
+
+def _hhmm_to_minutes(ts: str) -> int | None:
+    """Parse HH:MM or HH:MM:SS to minutes-from-midnight; None if invalid."""
+    parts = (ts or "").strip().split(":")
+    if len(parts) not in (2, 3):
+        return None
+    try:
+        h, m = int(parts[0]), int(parts[1])
+    except ValueError:
+        return None
+    if not (0 <= h <= 23 and 0 <= m <= 59):
+        return None
+    return h * 60 + m
+
+
+def _async_digest_timestamps(text: str) -> set[str]:
+    """Run log timestamps for async-notify / veto-window digest lines."""
+    out: set[str] = set()
+    for ts, note in _run_log_timestamped_entries(text):
+        low = note.lower()
+        if VETO_WINDOW_RE.search(note) or "async-notify" in low:
+            out.add(ts)
+    return out
+
+
+def _async_arm_timestamps(text: str) -> set[str]:
+    """Run log timestamps for Build armed lines."""
+    return {
+        ts
+        for ts, note in _run_log_timestamped_entries(text)
+        if BUILD_ARMED_RE.search(note)
+    }
+
+
+def _async_gap_pending_tokens(text: str) -> set[str]:
+    """Timestamps from Notes/Run log ``async-gap-pending — HH:MM`` lines."""
+    blob = _notes_blob(text) + "\n" + _run_log_blob(text)
+    return {m.group(1).strip() for m in ASYNC_GAP_PENDING_RE.finditer(blob)}
+
+
+def _async_gap_sidecar_path(run_dir: Path | None) -> Path | None:
+    if run_dir is None:
+        return None
+    return run_dir / ASYNC_GAP_SIDECAR
+
+
+def _read_async_gap_sidecar(run_dir: Path | None) -> str | None:
+    path = _async_gap_sidecar_path(run_dir)
+    if path is None or not path.is_file():
+        return None
+    raw = path.read_text(encoding="utf-8").strip().splitlines()
+    return raw[0].strip() if raw else None
+
+
+def _write_async_gap_sidecar(run_dir: Path | None, digest_ts: str) -> None:
+    path = _async_gap_sidecar_path(run_dir)
+    if path is None or not digest_ts:
+        return
+    path.write_text(f"{digest_ts.strip()}\n", encoding="utf-8")
+
+
+def _run_log_timestamped_entries(text: str) -> list[tuple[str, str]]:
+    """Return [(HH:MM, note), ...] from Run log (machine-checkable turn sep)."""
+    blob = _run_log_blob(text)
+    if not blob:
+        return []
+    return [
+        (m.group(1).strip(), m.group(2).strip())
+        for m in RUN_LOG_ENTRY_RE.finditer(blob)
+    ]
 def _artifact_exists(run_dir: Path | None, name: str) -> bool:
     if run_dir is None:
         return False

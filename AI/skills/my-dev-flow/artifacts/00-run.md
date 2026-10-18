@@ -60,10 +60,10 @@ Fill **Required** at Step 0. Fill **Optional** when known.
 <!-- Exact one of: none | pending — hitl.md. Must be none before Build. -->
 
 **Gate B approved:** none
-<!-- none until Gate B settles. HITL Gate B blocking → yes (or named pick) before Build. auto → may stay none. async-notify → Build armed + gap (not this field) — hitl.md. -->
+<!-- none until Gate B settles. HITL Gate B blocking → yes (or named pick) + Notes provenance — gate-b-approved — user: "…" (≥12 chars, non-filler) before Build. auto → may stay none. async-notify → Build armed + turn-boundary gap (async-gap-pending + later HH:MM + .lint-async-gap) — hitl.md. -->
 
 **Gate C approved:** none
-<!-- Required default none. At Gate C / before merge: none until user yes; then comma-separated subset of commit,push,pr,merge naming what the user approved (hitl.md). -->
+<!-- Required default none. At Gate C / before merge: none until user yes; then comma-separated subset of commit,push,pr,merge + provenance — gate-c-approved — user: "…" (hitl.md). -->
 
 **Last stage:** stage id + short note (e.g. `build verify-pass`, `gate-b async-notify`) — resume from next incomplete stage id
 
@@ -120,7 +120,7 @@ Update after each step. Parent reads **this card + one** stages/hitl/models/lens
 | Phase | design |
 | Stage id | |
 | Next step | |
-| Task description | handoff-for.py <stage-id> output (required) |
+| Task description | full `handoff-for.py <stage-id>` output incl. Description (required) |
 | stages.md section | path + heading only (or hitl/models/lenses/invariants) |
 | Model tier | Fast |
 | Prereq Result | |
@@ -141,7 +141,9 @@ Update after each step. Parent reads **this card + one** stages/hitl/models/lens
 
 - Abort / scope-change: Status `stopped` + frozen stage + reason
 - async-notify Gate B tokens: write live lines only when posting / arming — see hitl.md (do not paste example tokens into Notes at seed time)
-- Gate C yes: set **Gate C approved:** commit,push,pr,merge (subset as named); optional Notes `Gate C yes — … (chat HH:MM)` — hitl.md
+- Consent / waivers: quality provenance required for approved fields, waive kinds, docs-only, smoke-pass-rerun, card-override — hitl.md (do not paste bare tokens at seed)
+- Gate C yes: set **Gate C approved:** commit,push,pr,merge (subset as named) + provenance — hitl.md
+- Card vs derive: unsafe mismatch → card-override Notes + provenance card-override, or fix Next — parent-next.md
 - Design backloop path: failure-playbook.md / invariants.md / stages.md
 - tiny-contract-tweak — Notes fold into Quality / code-review-phase (optional)
 - Status `done` only after Merge Result success **and** `merge` ∈ Gate C approved; subset without merge → stay paused; abort → `stopped`
@@ -149,7 +151,8 @@ Update after each step. Parent reads **this card + one** stages/hitl/models/lens
 
 ### Run log
 
-Newest at the bottom: `- **HH:MM** · running|done|paused|stopped · <stage-id> · note`
+Newest at the bottom: `- **HH:MM** · running|done|paused|stopped · <stage-id> · note`  
+async-notify: digest post → `--next` `async-gap-pending — HH:MM` → arm with **later** `HH:MM` + Build armed (hitl.md).
 
 -
 ```
