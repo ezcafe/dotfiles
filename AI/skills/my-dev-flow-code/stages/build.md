@@ -23,7 +23,8 @@ Read {my-dev-flow}/verify-and-fix.md (Gate B veto / Build armed + Verify gate + 
 FIRST: Read 00-run.md **Gate B veto**, **Gate B approved** (durable field — not design-doc approval), Notes provenance, and async gap tokens.
 - If veto pending → stop; return first line `Result: blocked — Gate B veto`; do not change code.
 - If HITL Gate B is blocking and **Gate B approved** is none/missing **or** provenance `gate-b-approved` is missing/weak → stop; return first line `Result: blocked — Gate B approved`; do not change code.
-- If Notes say veto window open AND (**Build armed** missing OR async gap incomplete) → stop; return first line `Result: blocked — Build armed missing`; do not change code.
+- If Notes say veto window open AND **Build armed** missing → stop; return first line `Result: blocked — Build armed missing`; do not change code.
+- If Notes veto window + **Build armed** but async gap incomplete → stop; return first line `Result: blocked — async gap incomplete`; do not change code.
 - If Notes match `design-backloop` → stop; return first line `Result: blocked — design-backloop`; do not change code.
 Then read Verify commands (required). Read 03-design.md and 04-tasks.md. Read 04a-tdd-test-review.md if present — implement Fix ask tests (Red) with matching tasks.
 When Has UI: follow Design UI locks in 03/04 and existing app chrome; if 01a-idea-ui-review.md is present, honor Gate A #1/#2 visibility.
@@ -38,7 +39,7 @@ Rules:
 - **Verify gate:** Use Verify commands from 00-run.md only (do not invent commands). Max 3 attempts. On pass: write 06-test-log.md Smoke section (build/unit rows + Smoke result smoke-pass). On fail after 3: Result verify-fail.
 - Do not merge or push. Do not `git commit` unless the user explicitly asked for a commit. Do not claim ready to ship.
 
-Return FIRST LINE exactly: Result: verify-pass | verify-fail | blocked — Gate B veto | blocked — Gate B approved | blocked — Build armed missing | blocked — design-backloop
+Return FIRST LINE exactly: Result: verify-pass | verify-fail | blocked — Gate B veto | blocked — Gate B approved | blocked — Build armed missing | blocked — async gap incomplete | blocked — design-backloop
 Then: what shipped; commands + pass/fail; Smoke section path; remaining risks; if UI, HTML match (yes/no + intentional delta).
 ```
 

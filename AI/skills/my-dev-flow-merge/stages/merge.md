@@ -4,7 +4,7 @@
 
 **subagent_type:** `generalPurpose`  
 **model:** resolved Fast  
-**Task description:** `Push PR and merge`
+**Task description:** `Execute Gate C actions`
 
 **Done when:** Approved actions ran (or correctly skipped); PR URL / merge result returned (or stop reason). Parent sets Status **`done`** after merge success when merge was approved.
 

@@ -1,6 +1,6 @@
 # Golden path — mid-run reclassify simple → full
 
-Short recovery. Parent follows [stages.md](../stages.md) Mid-run reclassify + [invariants.md](../invariants.md). Drop skip-review when contracts appear ([lenses.md](../lenses.md)).
+Short recovery. Parent follows [step-0.md](../step-0.md) Mid-run reclassify + [invariants.md](../invariants.md). Drop skip-review when contracts appear ([lenses.md](../lenses.md)).
 
 ## Ask started as
 

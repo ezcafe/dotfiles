@@ -21,7 +21,7 @@ Parent reads the first ~40 lines; do not bury the token.
 | Domain | Tokens | Parent advances when | Do not advance when |
 |--------|--------|----------------------|---------------------|
 | **Verify** (Build / Fix) | `verify-pass` \| `verify-fail` | `verify-pass` | `verify-fail` (retry ≤3 or Decision N) |
-| **Blocked** (pre-code stop) | `blocked — <reason>` | — (settle reason) | Always stay; e.g. Gate B veto, Gate B approved, Build armed missing, design-backloop |
+| **Blocked** (pre-code stop) | `blocked — <reason>` | — (settle reason) | Always stay; e.g. Gate B veto, Gate B approved, Build armed missing, async gap incomplete, design-backloop |
 | **Design review** (`03a*`) | `clean` \| `needs update` \| `skipped` | overall `clean` (API/DB `clean`\|`skipped`) | `needs update` → Update → re-review |
 | **Gate A** (`01a`) | `ok` \| `needs update` \| `escalate` | `ok` (auto-check Gate A) | `needs update` → ideation-update ↔ gate-a until ok or round=3 (pause human only at max 3); `escalate` → hold (`--derive` / `--next` stay fail-closed — not skim). Resume only after **Decision N** + **explicit user yes**: re-run Gate A, or set Result `ok` + Notes — never invent Result `ok` ([invariants.md](invariants.md) · [failure-playbook.md](failure-playbook.md)) |
 | **Grill** (`02b`) | `frontier-empty` \| `needs-round` \| `skipped` | `frontier-empty` or `skipped` | `needs-round` |

@@ -23,7 +23,7 @@ Do **not** hardcode `~/.cursor/skills/...` in prompts when `AI/skills/<skill-nam
 3. After SoT edits: run `./AI/skills/sync-to-cursor.sh` so `~/.cursor/skills` matches; re-`--check` if unsure.
 4. Do **not** treat Cursor discovery as SoT until sync ran / `--check` is clean.
 
-Also noted in [SKILL.md](SKILL.md) Start, [stages.md](stages.md) Step 0, [invariants.md](invariants.md) checklist item 10, and [examples/anti-patterns.md](examples/anti-patterns.md).
+Also noted in [SKILL.md](SKILL.md) Start, [step-0.md](step-0.md), [invariants.md](invariants.md) checklist item 10, and [examples/anti-patterns.md](examples/anti-patterns.md).
 
 **Stage-id drift check (optional after editing handoffs / parent-next / stages):**  
 `python3 scripts/lint-run.py . --check-stage-ids` (fails on registry drift).

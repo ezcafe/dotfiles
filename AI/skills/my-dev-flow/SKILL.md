@@ -16,14 +16,14 @@ description: >-
 
 End-to-end **orchestrator only**. Stage prompts live in subflows.  
 **Runtime order (SoT):** [stages.md](stages.md) Happy path.  
-**Companions:** [hitl.md](hitl.md) · [models.md](models.md) · [lenses.md](lenses.md) · [invariants.md](invariants.md) · [failure-playbook.md](failure-playbook.md) · [grill.md](grill.md) · [verify-and-fix.md](verify-and-fix.md) · [parent-next.md](parent-next.md) · [size-caps.md](size-caps.md) · [results.md](results.md).
+**Companions:** [hitl.md](hitl.md) · [models.md](models.md) · [lenses.md](lenses.md) · [invariants.md](invariants.md) · [failure-playbook.md](failure-playbook.md) · [grill.md](grill.md) · [verify-and-fix.md](verify-and-fix.md) · [parent-next.md](parent-next.md) · [size-caps.md](size-caps.md) · [results.md](results.md) · [step-0.md](step-0.md) · [resume-abort.md](resume-abort.md) · [design-backloop.md](design-backloop.md) · [orchestrator-rules.md](orchestrator-rules.md).
 
 Practices: [AI-assisted engineering](https://newsletter.eng-leadership.com/p/how-to-do-ai-assisted-engineering) —
 design-heavy, never ship first draft, generation ≠ verification.
 
 ## Start (Step 0)
 
-Follow **[stages.md](stages.md) Step 0** (classify, seed `00-run.md`, models, lint, chat one line). Do not restate Step 0 bullets here. Honor [Load budget](stages.md#load-budget).
+Follow **[step-0.md](step-0.md)** (classify, seed `00-run.md`, models, lint, chat one line). Do not restate Step 0 bullets here. Honor [Load budget](step-0.md#load-budget).
 
 **Skills sync:** Step 0 hard stop when `AI/skills/my-dev-flow` exists — `./AI/skills/sync-to-cursor.sh --check` (or sync) before classify; after SoT edits, sync then re-check ([skills-path.md](skills-path.md)).
 
@@ -43,15 +43,19 @@ Follow **[stages.md](stages.md) Step 0** (classify, seed `00-run.md`, models, li
 2. **No secrets** in commits; never force-push.
 3. **Design before code.** Design-review **or** design-verify-phase Result **clean** (by Mode) before Build (and before optional 04a).
 4. **Build / Fix Verify gate** — do not advance on verify-fail. ([verify-and-fix.md](verify-and-fix.md))
-5. **Do not invent approval** — stop / veto / async Gate B gap / **Build armed** / Status / skip-review ban: [stages.md](stages.md) · [hitl.md](hitl.md) · [lenses.md](lenses.md).
+5. **Do not invent approval** — stop / veto / async Gate B gap / **Build armed** / Status / skip-review ban: [stages.md](stages.md) · [resume-abort.md](resume-abort.md) · [hitl.md](hitl.md) · [lenses.md](lenses.md).
 
-**Companion links (not duplicated here):** Smoke after Build (Build-writes-Smoke) · legal skip-review → [lenses.md](lenses.md) · [verify-and-fix.md](verify-and-fix.md) · [hitl.md](hitl.md). Fresh Task → **required** `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>` ([handoffs.md](handoffs.md) = edit SoT / debug only · [skills-path.md](skills-path.md)). Usage limit → [models.md](models.md). Design-backloop / max-round → [failure-playbook.md](failure-playbook.md) · [invariants.md](invariants.md). No UI concept step → [LEGACY.md](LEGACY.md). Parent checklist → [invariants.md](invariants.md). Skills SoT + sync → [skills-path.md](skills-path.md).
+**Companion links (not duplicated here):** Smoke after Build (Build-writes-Smoke) · legal skip-review → [lenses.md](lenses.md) · [verify-and-fix.md](verify-and-fix.md) · [hitl.md](hitl.md). Fresh Task → **required** `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>` ([handoffs.md](handoffs.md) = edit SoT / debug only · [skills-path.md](skills-path.md)). Usage limit → [models.md](models.md). Design-backloop / max-round → [design-backloop.md](design-backloop.md) · [failure-playbook.md](failure-playbook.md) · [invariants.md](invariants.md). No UI concept step → [LEGACY.md](LEGACY.md). Parent checklist → [invariants.md](invariants.md). Skills SoT + sync → [skills-path.md](skills-path.md).
 
 ## Routing (package + parent load)
 
 | Need | Read |
 |------|------|
-| Runtime order / Mode / resume / abort | [stages.md](stages.md) |
+| Runtime order / Happy path / Mode × profile | [stages.md](stages.md) |
+| Step 0 / Mode / profile / mid-run reclassify | [step-0.md](step-0.md) |
+| Resume / abort / scope-change | [resume-abort.md](resume-abort.md) |
+| Design-backloop after Build | [design-backloop.md](design-backloop.md) |
+| Orchestrator rules (short) | [orchestrator-rules.md](orchestrator-rules.md) |
 | Card Stage id / Next → which 1–2 files | [parent-next.md](parent-next.md) · `lint-run.py --next --derive` (required habit) |
 | Gate B/C · veto · **Gate B approved** · provenance · async gap · **Build armed** · Gate C bar | [hitl.md](hitl.md) |
 | Models + usage-limit | [models.md](models.md) |
@@ -64,7 +68,7 @@ Follow **[stages.md](stages.md) Step 0** (classify, seed `00-run.md`, models, li
 | New artifact body | one file under [artifacts/](artifacts/INDEX.md) |
 | Grill | [grill.md](grill.md) (once when entering Grill) |
 | Lint `00-run.md` | [scripts/lint-run.py](scripts/lint-run.py) · [scripts/README.md](scripts/README.md) (`--next --derive`, `--before-build`, `--before-code-review`, `--before-merge`, `--dry-run-seed`) |
-| Load budget (Step 0 / per-stage) | [stages.md](stages.md#load-budget) |
+| Load budget (Step 0 / per-stage) | [step-0.md](step-0.md#load-budget) |
 | Phase entry | that subflow `SKILL.md` once |
 | Golden paths | [examples/INDEX.md](examples/INDEX.md) |
 | Anti-patterns | [examples/anti-patterns.md](examples/anti-patterns.md) |

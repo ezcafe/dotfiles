@@ -1,7 +1,7 @@
 # Failure playbook (parent)
 
 **This file is SoT for:** what the parent chats on hard stops and max-rounds.  
-Decision shapes: [invariants.md](invariants.md). Pipeline: [stages.md](stages.md).  
+Decision shapes: [invariants.md](invariants.md). Pipeline: [stages.md](stages.md). Design-backloop: [design-backloop.md](design-backloop.md).  
 Veto / Gate C: [hitl.md](hitl.md). Skip-review ban: [lenses.md](lenses.md).
 
 ## Quick map
@@ -13,7 +13,7 @@ Veto / Gate C: [hitl.md](hitl.md). Skip-review ban: [lenses.md](lenses.md).
 | **design-review / design-verify** after 3 Update rounds | Pause; Decision N | Raise cap · ship Enhancements-only if clean · Stop/reclassify |
 | **review Fix** after 3 rounds | Pause; Decision N | Raise cap · defer Enhancements if clean · Stop / design-backloop |
 | **test↔fix** after 3 rounds | Pause; Decision N | Raise cap · waive green tests → Gate C · Stop |
-| **Design-backloop** (design invalid after Build) | Pause; Decision N | Amend → Notes `design-backloop`, **Gate B approved: none**, clear Build armed / veto-window; if prior `05`/`06` Results exist → Notes `- review-stale` / `- test-stale` (or clear Results) ([verify-and-fix.md](verify-and-fix.md) Stale); Next `design-update` (Decision N is entry — no prior `03a` Fix ask); Fix-only · Stop ([stages.md](stages.md)) |
+| **Design-backloop** (design invalid after Build) | Pause; Decision N | Amend → Notes `design-backloop`, **Gate B approved: none**, clear Build armed / veto-window; if prior `05`/`06` Results exist → Notes `- review-stale` / `- test-stale` (or clear Results) ([verify-and-fix.md](verify-and-fix.md) Stale); Next `design-update` (Decision N is entry — no prior `03a` Fix ask); Fix-only · Stop ([design-backloop.md](design-backloop.md)) |
 | **Gate B veto** before Build (`pending`) | Do **not** Build | Settle veto or re-open Gate B ([hitl.md](hitl.md)) |
 | **Veto window open** without **Build armed** / incomplete async gap | Do **not** Build | Run `--next` → copy `async-gap-pending`; arm with later HH:MM; or settle veto ([hitl.md](hitl.md)) |
 | **Missing provenance** (Gate B/C approved, waivers, docs-only, smoke-pass-rerun, card-override) | Do **not** Build / Merge / unlock unsafe Next | Copy verbatim user quote ≥12 chars into `provenance — <kind> — user: "…"` ([hitl.md](hitl.md)) |
@@ -31,7 +31,7 @@ Veto / Gate C: [hitl.md](hitl.md). Skip-review ban: [lenses.md](lenses.md).
 | **Gate C decline / silence** | Stay paused or `stopped` | No commit/push/PR/merge |
 | **Merge success without `merge` in Gate C approved** | Stay `paused` | Leave Next for remaining actions — do not set `done` ([results.md](results.md)) |
 | **async-notify Gate B on Mode full** | Do not — use **blocking** | [hitl.md](hitl.md) Default Gate B (narrow async) |
-| **Blocking Gate B without Gate B approved** | Do **not** Build | Set **Gate B approved** `yes` (or named pick) — [hitl.md](hitl.md) |
+| **Blocking Gate B without Gate B approved** | Do **not** Build | Set **Gate B approved** `yes` (or named pick) **+** provenance `gate-b-approved` — [hitl.md](hitl.md) |
 
 ## Anti-loop rules
 

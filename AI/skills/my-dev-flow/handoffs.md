@@ -34,7 +34,7 @@ Do not list bare names without these fields.
 | When | Options (fixed) | Where |
 |------|-----------------|-------|
 | Gate A escalate | Re-run Gate A · override Result ok + Notes after explicit yes · Stop | [invariants.md](invariants.md) · [results.md](results.md) |
-| Design invalid after Build / Fix | Amend design → re-review → Gate B · Fix-only · Stop | [stages.md](stages.md) Design-backloop / [invariants.md](invariants.md) |
+| Design invalid after Build / Fix | Amend design → re-review → Gate B · Fix-only · Stop | [design-backloop.md](design-backloop.md) / [invariants.md](invariants.md) |
 | async-notify Gate B veto after Build | Discard draft · Keep draft + re-open Gate B · Stop | [hitl.md](hitl.md) |
 | verify-fail / review / test max rounds | Narrow or raise cap · Proceed if clean / waive · Stop | [invariants.md](invariants.md) |
 
@@ -192,4 +192,4 @@ Async Gate B also needs Notes `async-gap-pending — 14:00` (from `--next` on th
 | `test-full` | `Full test suite` (coverage + e2e gaps + run — one Task) |
 | `test-lite` | `Run build and tests` |
 | `fix-tests` | `Fix from test log` |
-| `merge` | `Push PR and merge` |
+| `merge` | `Execute Gate C actions` |

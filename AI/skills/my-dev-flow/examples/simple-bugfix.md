@@ -26,14 +26,14 @@ Minimal walkthrough. Parent follows [stages.md](../stages.md) Happy path (simple
 | 6 | Smoke Task | **skipped** (Build-writes-Smoke — [verify-and-fix.md](../verify-and-fix.md)) |
 | 7 | `code-review-phase` | Lite combined → Result **clean** |
 | 8 | `test-lite` | Result **success** |
-| 9 | Gate C | blocking — user names commit / push / PR / merge |
+| 9 | Gate C | blocking — user names commit / push / PR / merge; set `Gate C approved: commit,push,pr,merge` **+** Notes `- provenance — gate-c-approved — user: "commit push PR and merge"` ([hitl.md](../hitl.md) Provenance) |
 | 10 | `merge` | Only approved actions; Status **`done`** only when Result **success** **and** `merge` ∈ Gate C approved (PR-only / commit-only → stay **paused**) + calibration Notes (≤3) + append same ≤3 lines to `_calibration.md` ([stages.md](../stages.md) Done criteria) |
 
 ## Legal skip-review variant
 
 If Mode **simple**, Review profile **skip-review**, and Has API=no **and** Has DB=no: after Build verify-pass + Smoke section → Gate C (no `code-review-phase` / `test-lite`). Mode full never uses this path. If either flag flips to yes → drop skip-review ([lenses.md](../lenses.md)).
 
-**Before Gate C (required):** record Notes `smoke-waive` / `smoke-pass (re-run)` / `gate-c-test-override`, or Complexity/Notes `docs-only` (tiny-tweak / copy path). Else lint `--before-merge` **errors** on Build-writes-Smoke alone. Recovery order: [verify-and-fix.md](../verify-and-fix.md) (Smoke after Build) · [hitl.md](../hitl.md) Gate C bar.
+**Before Gate C (required):** one escape **with provenance** — e.g. Notes `smoke-waive` **+** `- provenance — smoke-waive — user: "waive independent smoke for this copy tweak"` (or `smoke-pass-rerun` / `gate-c-test-override` / `docs-only` with matching kinds). Bare tokens alone are rejected. Else lint `--before-merge` **errors** on Build-writes-Smoke alone. SoT: [hitl.md](../hitl.md) Gate C test bar / Provenance · recovery [verify-and-fix.md](../verify-and-fix.md).
 
 ## Parent habits
 

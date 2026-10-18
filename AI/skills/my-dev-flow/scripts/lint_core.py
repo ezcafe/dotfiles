@@ -763,7 +763,7 @@ def print_next_hint(run_dir: Path, *, derive: bool = False) -> int:
             if stage_id and stage_id not in parts:
                 print(
                     f"warn: card Next `{stage_id}` differs from derived `{derived}` "
-                    "— confirm or update card (parent-next.md · stages.md Resume)"
+                    "— confirm or update card (parent-next.md · resume-abort.md)"
                 )
         elif derived and stage_id and derived != stage_id:
             unsafe = _unsafe_card_derive_mismatch(
@@ -794,7 +794,7 @@ def print_next_hint(run_dir: Path, *, derive: bool = False) -> int:
                 print(
                     f"warn: card Next `{stage_id}` differs from derived "
                     f"`{derived}` — confirm or update card "
-                    "(parent-next.md · stages.md Resume)"
+                    "(parent-next.md · resume-abort.md)"
                 )
 
     # Terminal lifecycle: do not launch further pipeline Tasks

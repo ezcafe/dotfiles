@@ -29,7 +29,7 @@ Fail-closed: Lint **errors** / `--next` → `do-not-launch` when the rule above 
 
 | Stage id / Next | Open (1–2) | Handoff |
 |-----------------|------------|---------|
-| (Step 0 / classify) | [stages.md](stages.md) Step 0 · [artifacts/00-run.md](artifacts/00-run.md) | — seed + `lint-run.py` |
+| (Step 0 / classify) | [step-0.md](step-0.md) · [artifacts/00-run.md](artifacts/00-run.md) | — seed + `lint-run.py` |
 | `ideation` | [../my-dev-flow-design/stages/ideation.md](../my-dev-flow-design/stages/ideation.md) · design [SKILL.md](../my-dev-flow-design/SKILL.md) once | `python3 {my-dev-flow}/scripts/handoff-for.py ideation` |
 | `gate-a` | [../my-dev-flow-design/stages/gate-a.md](../my-dev-flow-design/stages/gate-a.md) | `python3 {my-dev-flow}/scripts/handoff-for.py gate-a` |
 | `ideation-update` | [../my-dev-flow-design/stages/ideation-update.md](../my-dev-flow-design/stages/ideation-update.md) | `python3 {my-dev-flow}/scripts/handoff-for.py ideation-update` |
@@ -44,10 +44,10 @@ Fail-closed: Lint **errors** / `--next` → `do-not-launch` when the rule above 
 | `design-review` | [../my-dev-flow-design-review/stages/design-review.md](../my-dev-flow-design-review/stages/design-review.md) | `python3 {my-dev-flow}/scripts/handoff-for.py design-review` |
 | `design-verify-phase` | [../my-dev-flow-design-review/stages/design-verify-phase.md](../my-dev-flow-design-review/stages/design-verify-phase.md) | `python3 {my-dev-flow}/scripts/handoff-for.py design-verify-phase` |
 | `tdd-review` | [../my-dev-flow-code/stages/tdd-review.md](../my-dev-flow-code/stages/tdd-review.md) · [verify-and-fix.md](verify-and-fix.md) | `python3 {my-dev-flow}/scripts/handoff-for.py tdd-review` |
-| `gate-b` | [hitl.md](hitl.md) · card Next | digest only — set **Gate B approved** when blocking; no handoff Task |
+| `gate-b` | [hitl.md](hitl.md) · card Next | digest only — set **Gate B approved** when blocking **+ provenance**; no handoff Task |
 | `build` (armed / approved) | [../my-dev-flow-code/stages/build.md](../my-dev-flow-code/stages/build.md) · [verify-and-fix.md](verify-and-fix.md) · [hitl.md](hitl.md) if async gap | `python3 {my-dev-flow}/scripts/handoff-for.py build` |
 | `build` (async gap, not armed) | [hitl.md](hitl.md) — set **Build armed** on this resume turn; do not launch yet if veto pending | — |
-| `build` (blocking, Gate B approved none) | [hitl.md](hitl.md) — set **Gate B approved** yes / named pick; do not launch | — |
+| `build` (blocking, Gate B approved none) | [hitl.md](hitl.md) — set **Gate B approved** yes / named pick **+ provenance**; do not launch | — |
 | `smoke` | [../my-dev-flow-test/stages/smoke.md](../my-dev-flow-test/stages/smoke.md) | `python3 {my-dev-flow}/scripts/handoff-for.py smoke` |
 | `code-review-phase` | [../my-dev-flow-review/stages/code-review-phase.md](../my-dev-flow-review/stages/code-review-phase.md) · Lens plan ([lenses.md](lenses.md)) | `python3 {my-dev-flow}/scripts/handoff-for.py code-review-phase` |
 | `adversarial` | [../my-dev-flow-review/stages/adversarial.md](../my-dev-flow-review/stages/adversarial.md) · Lens plan ([lenses.md](lenses.md)) | `python3 {my-dev-flow}/scripts/handoff-for.py adversarial` |
@@ -60,6 +60,6 @@ Fail-closed: Lint **errors** / `--next` → `do-not-launch` when the rule above 
 | `fix-tests` | [../my-dev-flow-code/stages/fix-tests.md](../my-dev-flow-code/stages/fix-tests.md) · [verify-and-fix.md](verify-and-fix.md) | `python3 {my-dev-flow}/scripts/handoff-for.py fix-tests` |
 | `gate-c` | [hitl.md](hitl.md) Gate C bar | blocking ask — no merge yet |
 | `merge` (Gate C approved set) | [../my-dev-flow-merge/stages/merge.md](../my-dev-flow-merge/stages/merge.md) · [hitl.md](hitl.md) | `python3 {my-dev-flow}/scripts/handoff-for.py merge` |
-| `merge` (approved missing or none) | [hitl.md](hitl.md) Gate C — ask + set **Gate C approved**; do not launch | — |
+| `merge` (approved missing or none) | [hitl.md](hitl.md) Gate C — ask + set **Gate C approved** **+ provenance**; do not launch | — |
 
-**Resume:** [stages.md](stages.md) Resume · async Build arm: [hitl.md](hitl.md).
+**Resume:** [resume-abort.md](resume-abort.md) · async Build arm: [hitl.md](hitl.md).

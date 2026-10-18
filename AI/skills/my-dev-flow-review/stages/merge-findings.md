@@ -38,7 +38,7 @@ Rules for merging:
 3. Drop or demote to Nit/FYI: vague nits, speculative micro-opts without evidence, duplicates
 4. Rank remaining Fix ask: Critical → Major (Enhancements → Deferred; do not put in Fix ask)
 5. Result = **clean** only if no open **Critical** or **Major** remain after merge (Enhancements do **not** block clean — copy to Deferred per `{my-dev-flow}/severity.md`)
-6. Result = **needs fix** if any Critical/Major remain — write numbered Fix ask (what to change, which files, which lens ids). If Fix needs design/contract change → parent Design-backloop (stages.md), not silent design rewrite.
+6. Result = **needs fix** if any Critical/Major remain — write numbered Fix ask (what to change, which files, which lens ids). If Fix needs design/contract change → parent Design-backloop ([design-backloop.md](../../my-dev-flow/design-backloop.md)), not silent design rewrite.
 
 Write/update 05-review-log.md section “Merged lenses” using the template shape:
 - Round number

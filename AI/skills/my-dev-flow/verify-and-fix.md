@@ -73,7 +73,7 @@ When Build **verify-pass** rewrites a draft that already had review/test Results
 | `- review-stale` | Prior `05-review-log` clean (and lenses) is invalid | Re-enter review path; block gate-c/merge until cleared |
 | `- test-stale` | Prior `06` success / Mode last run is invalid | Re-enter test-full/test-lite; block gate-c/merge until cleared |
 
-Clear each token only after a fresh clean/success. Same bullet style as `design-backloop` / `tiny-contract-tweak` ([stages.md](stages.md) Design-backloop · [build.md](../my-dev-flow-code/stages/build.md)).
+Clear each token only after a fresh clean/success. Same bullet style as `design-backloop` / `tiny-contract-tweak` ([design-backloop.md](design-backloop.md) · [build.md](../my-dev-flow-code/stages/build.md)).
 
 **Clock (fail-closed):** On verify-pass, set durable `**Last verify-pass at:**` ISO-8601 on `00-run.md` (Build After). Lint treats `05` clean / `06` success as **unpaid** when the artifact file mtime is older than that timestamp and Notes lack the matching stale token — same `--before-merge` **error** / `--next` `do-not-launch` / `--derive` re-entry as explicit Notes. Fresh re-review / re-test (file mtime ≥ clock) clears the unpaid state; then clear Notes tokens. Missing clock → Notes tokens only (no auto-detect). Not waived by `gate-c-test-override`.
 
@@ -89,7 +89,7 @@ Parent then:
 |-----------|--------|
 | Smoke section complete + smoke-pass + commands match Verify commands | **Skip Smoke Task** — treat as smoke-pass; continue (review or Gate C) |
 | Smoke incomplete, mismatch, or Notes `smoke re-run` | Launch Smoke Task (independent re-run) — see **skip-review ordered recovery** below |
-| Review profile **skip-review** (legality: [lenses.md](lenses.md)) | Gate C test bar = Build verify-pass (+ Smoke section). Before Gate C: Notes `smoke-waive` / `smoke-pass (re-run)` / `gate-c-test-override`, **or** Complexity/Notes `docs-only` (warn/allow). Else Lint `--before-merge` **errors** when only Build-writes-Smoke (fail-closed) |
+| Review profile **skip-review** (legality: [lenses.md](lenses.md)) | Gate C test bar + escape **with provenance** — [hitl.md](hitl.md) Gate C test bar / Provenance. Bare waiver tokens alone are rejected. `docs-only` warn/allow applies **only after** matching provenance is present. Else Lint `--before-merge` **errors** when only Build-writes-Smoke (fail-closed) |
 
 ### Skip-review + Smoke ordered recovery (SoT)
 
@@ -99,7 +99,7 @@ When Review profile is **skip-review** and Smoke is incomplete / mismatched / ne
 2. **Or** Notes `smoke re-run` → allow **one** Smoke Task under skip-review (exception; clear the Notes token after smoke-pass). Prefer this independent re-run once before Gate C when Build-writes-Smoke feels thin.
 3. **Or** drop skip-review → **lite** → `code-review-phase` → `test-lite` → Gate C.
 
-Do **not** launch `smoke` under skip-review without Notes `smoke re-run` (lint warn). Explicit Notes `smoke-waive` / `smoke-pass (re-run)` / `gate-c-test-override`, or Complexity/Notes `docs-only`, may skip the independent-Smoke requirement. After an independent re-run, record `smoke-pass (re-run)` (Notes or Smoke field) and clear the `smoke re-run` token. Lint `--before-merge` **errors** when skip-review has only Build-writes-Smoke without those tokens (`docs-only` → warn/allow). Independent verification for merge remains: **full** / **lite** test after review (or smoke-pass alone for Mode simple legal skip-review when waived).
+Do **not** launch `smoke` under skip-review without Notes `smoke re-run` (lint warn). Escapes that skip independent Smoke must match [hitl.md](hitl.md) Gate C test bar / Provenance (same kinds + `provenance — <kind> — user: "…"`). After an independent re-run, record `smoke-pass (re-run)` **plus** provenance `smoke-pass-rerun`, then clear the `smoke re-run` token. Lint `--before-merge` **errors** when skip-review has only Build-writes-Smoke without those escapes; `docs-only` warn/allow applies **only after** provenance is present. Independent verification for merge remains: **full** / **lite** test after review (or smoke-pass alone for Mode simple legal skip-review when waived).
 
 ## Fix rules (TDD)
 
@@ -109,7 +109,7 @@ Do **not** launch `smoke` under skip-review without Notes `smoke re-run` (lint w
 - Append Round notes on the log being updated (`06-test-log.md` or `05-review-log.md`).
 - No merge/push/commit unless user explicitly asked.
 - Max **3** Fix↔re-verify cycles per mode (smoke / full / review lens), then pause.
-- If Fix **cannot** stay aligned with design (contracts / IA / acceptance must change) → stop Fix; parent runs **Design-backloop** Decision N in [stages.md](stages.md) / [invariants.md](invariants.md). Do **not** silently rewrite `03-design` / `04-tasks` inside Fix.
+- If Fix **cannot** stay aligned with design (contracts / IA / acceptance must change) → stop Fix; parent runs **Design-backloop** Decision N in [design-backloop.md](design-backloop.md) / [invariants.md](invariants.md). Do **not** silently rewrite `03-design` / `04-tasks` inside Fix.
 
 ## Orchestrator card fields (persist)
 

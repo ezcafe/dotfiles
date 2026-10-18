@@ -1,6 +1,6 @@
 # Golden path — drop skip-review when Has API flips yes
 
-Short recovery. SoT: [lenses.md](../lenses.md) · [hitl.md](../hitl.md) Gate C bar · [stages.md](../stages.md) Mid-run reclassify.
+Short recovery. SoT: [lenses.md](../lenses.md) · [hitl.md](../hitl.md) Gate C bar · [step-0.md](../step-0.md) Mid-run reclassify.
 
 ## Start
 

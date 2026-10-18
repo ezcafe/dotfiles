@@ -2,7 +2,7 @@
 
 Canonical human-in-the-loop rules for [`my-dev-flow`](SKILL.md).  
 **This file is SoT for:** Gate B veto, **Gate B approved**, async-notify one-turn gap, **Build armed**, Gate C test bar, **Gate C approved** actions.  
-Pipeline order: [stages.md](stages.md). Decision shapes: [handoffs.md](handoffs.md) + [invariants.md](invariants.md). Grill domain: [grill.md](grill.md).
+Pipeline order: [stages.md](stages.md). Resume/abort: [resume-abort.md](resume-abort.md). Decision shapes: [handoffs.md](handoffs.md) + [invariants.md](invariants.md). Grill domain: [grill.md](grill.md).
 
 ## Tiers
 
@@ -77,11 +77,11 @@ When Gate B uses **async-notify** (only when Default Gate B allows it):
 5. **Build Task must re-read `00-run.md` first.** If `Gate B veto` is `pending` → stop with Result note `blocked — Gate B veto`; do not write code. If Notes still say veto window open **and** **Build armed** is missing → stop; parent must arm first.
 6. After Build **starts** with veto still `none` and **Build armed** present: set Status `running`; **clear** Notes “veto window open”, **Build armed**, and `async-gap-pending` (Build in flight). Lint errors if Status=`running` while Notes still say veto window open, or if `--before-build` / Next=`build` sees veto window without **Build armed** / incomplete gap.
 
-**Lint:** `scripts/lint-run.py <run-dir> --before-build` **and** default lint when card Next=`build` enforce veto `none` + veto-window / **Build armed** / Status consistency + **async turn-boundary gap** (arm later than digest + pending token + sidecar) + **Gate B approved** + provenance when HITL Gate B is **blocking**. `--next` with Next=`build` on the async path runs the **same** gap check and emits `do-not-launch` (exit **1**) until the gap is complete — including when **Build armed** is present but timestamps/token/sidecar fail. Notes `design-backloop` → **error** only on `--before-build` or Next=`build` (blocks Build even when Gate B soft / approved `none`); default lint with Next in recovery (`design-update` / re-review / `gate-b` / …) → **warn** recovery in progress — [stages.md](stages.md). Mode **full** + HITL Gate B ∈ {`auto`,`async-notify`} → lint error. Mode **simple** + Has API/DB = yes + HITL Gate B ∈ {`auto`,`async-notify`} → lint error (default and `--before-build`; hitl.md Default Gate B requires **blocking**). `--next` emits `handoff: do-not-launch` (exit **1**) for Build until blocking **Gate B approved** + provenance is set (or until **Build armed** + turn-boundary gap when async-notify); with Notes `design-backloop` and Next `build` → redirect to `design-update` (Next `gate-b` + token → normal Gate B digest / settle; clear token on settle).
+**Lint:** `scripts/lint-run.py <run-dir> --before-build` **and** default lint when card Next=`build` enforce veto `none` + veto-window / **Build armed** / Status consistency + **async turn-boundary gap** (arm later than digest + pending token + sidecar) + **Gate B approved** + provenance when HITL Gate B is **blocking**. `--next` with Next=`build` on the async path runs the **same** gap check and emits `do-not-launch` (exit **1**) until the gap is complete — including when **Build armed** is present but timestamps/token/sidecar fail. Notes `design-backloop` → **error** only on `--before-build` or Next=`build` (blocks Build even when Gate B soft / approved `none`); default lint with Next in recovery (`design-update` / re-review / `gate-b` / …) → **warn** recovery in progress — [design-backloop.md](design-backloop.md). Mode **full** + HITL Gate B ∈ {`auto`,`async-notify`} → lint error. Mode **simple** + Has API/DB = yes + HITL Gate B ∈ {`auto`,`async-notify`} → lint error (default and `--before-build`; hitl.md Default Gate B requires **blocking**). `--next` emits `handoff: do-not-launch` (exit **1**) for Build until blocking **Gate B approved** + provenance is set (or until **Build armed** + turn-boundary gap when async-notify); with Notes `design-backloop` and Next `build` → redirect to `design-update` (Next `gate-b` + token → normal Gate B digest / settle; clear token on settle).
 
 **Residual risk:** wall-clock HH:MM and a Notes token cannot prove a real chat turn boundary without IDE/chat integration. A determined agent can still invent sidecar + pending line + later HH:MM in one edit. The bar raises the cost (must run `--next` once on digest-only state) but does not eliminate forgeability.
 
-**Durable resume:** If Notes say veto window open / Last stage is Gate B async-notify / Status `paused` with Next step `build`, and `Gate B veto` is `none`, a later **resume** counts as the next parent turn — run `--next` if sidecar missing, copy `async-gap-pending`, append **Build armed** Run log line (later timestamp), then launch Build after veto re-read. Do not require same-session memory. See [stages.md](stages.md) Resume.
+**Durable resume:** If Notes say veto window open / Last stage is Gate B async-notify / Status `paused` with Next step `build`, and `Gate B veto` is `none`, a later **resume** counts as the next parent turn — run `--next` if sidecar missing, copy `async-gap-pending`, append **Build armed** Run log line (later timestamp), then launch Build after veto re-read. Do not require same-session memory. See [resume-abort.md](resume-abort.md).
 
 ## Gate B approved (durable)
 
@@ -122,7 +122,7 @@ Do not silently continue to review. Pause with **Decision N** ([handoffs.md](han
 | 2 | Keep draft; re-open Gate B (amend design/tasks only) |
 | 3 | Stop (Status `stopped`) |
 
-**On re-open Gate B (Option 1 or 2):** set **`Gate B approved: none`**; clear Notes **Build armed** and veto-window tokens; card Next = `gate-b`; require a **fresh** Gate B digest + yes (or named pick) before Build. Do not reuse the prior approved token. Design-backloop Option 1 uses the same approved/armed reset but Next = `design-update` first ([stages.md](stages.md)).
+**On re-open Gate B (Option 1 or 2):** set **`Gate B approved: none`**; clear Notes **Build armed** and veto-window tokens; card Next = `gate-b`; require a **fresh** Gate B digest + yes (or named pick) before Build. Do not reuse the prior approved token. Design-backloop Option 1 uses the same approved/armed reset but Next = `design-update` first ([design-backloop.md](design-backloop.md)).
 
 ## HITL Grill (independent of Gate B)
 
