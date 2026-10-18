@@ -245,16 +245,26 @@ def _check_pending_parallel(
                 )
             )
 
-    if one_only and (pending in (None, "api|db", "api", "db") or pending == "none"):
+    if one_only:
         missing = "03a-db-design-review.md" if api_done else "03a-api-contract-review.md"
         present = "03a-api-contract-review.md" if api_done else "03a-db-design-review.md"
-        issues.append(
-            Issue(
-                "error",
-                f"{present} exists without {missing} while Pending parallel is "
-                f"{pending or 'missing'} — keep api|db and finish the other, or Notes skip",
+        if pending == "api|db":
+            # Valid in-flight resume-serialize (stages.md / lenses.md / derive H3)
+            issues.append(
+                Issue(
+                    "warn",
+                    f"{present} exists without {missing} — Pending parallel api|db "
+                    "(resume serialize); finish the other, then set none",
+                )
             )
-        )
+        elif pending in (None, "none", "api", "db"):
+            issues.append(
+                Issue(
+                    "error",
+                    f"{present} exists without {missing} while Pending parallel is "
+                    f"{pending or 'missing'} — keep api|db and finish the other, or Notes skip",
+                )
+            )
 def _check_isolated_api_db_files(
     text: str,
     issues: list[Issue],
@@ -296,8 +306,9 @@ def _check_isolated_api_db_files(
 def _clarity_check_logged(text: str, *, stage_id: str = "") -> bool:
     """True when clarity-check token satisfies soft or hard rule for stage.
 
-    Soft (design/analyze/grill/tdd-review): presence-any once-per-run.
-    Hard (build / fix-* / merge): boundary must match Next (parent-next.md · R3).
+    Soft (design/analyze/grill/design-phase): presence-any once-per-run.
+    Hard (tdd-review / build / fix-* / merge): boundary must match Next
+    (parent-next.md · R3).
     """
     boundaries = _clarity_boundaries_logged(text)
     if not boundaries:
@@ -440,7 +451,8 @@ def _check_clarity_check_logged(
 ) -> None:
     """Error when clarity-check token missing / mismatched before boundaries.
 
-    Soft stages: presence-any. High-risk (build/fix-*/merge): boundary-matched.
+    Soft stages: presence-any. High-risk (tdd-review/build/fix-*/merge):
+    boundary-matched.
     """
     next_id = _card_next_stage_id(text)
     if before_build:
@@ -498,7 +510,7 @@ def _check_design_review_clean_before_build(
         )
     )
 def _check_task_count_budget(text: str, issues: list[Issue], mode_token: str | None) -> None:
-    """M2: soft warn when Mode full Task count >= 20 and Status running."""
+    """M2: soft warn when Mode full Task count >= SOFT_TASK_CAP and Status running."""
     if mode_token != "full":
         return
     status_m = REQUIRED_FIELD_PATTERNS["Status"].search(text)

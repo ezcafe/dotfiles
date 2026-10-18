@@ -8,4 +8,4 @@ Happy path: [stages.md](stages.md). Load budget: [step-0.md](step-0.md#load-budg
 - Design-review update → re-review. Smoke/test fail → Fix (verify-pass) → re-run.
 - No advance on verify-fail; max 3 → Decision N. Design invalid → [design-backloop.md](design-backloop.md).
 - Card Next step = stage id (+ Description from `handoff-for.py` output). Unsafe card vs derive → Notes `card-override — <reason>` **+** `provenance — card-override — user: "…"` ([hitl.md](hitl.md)), or fix card.
-- Mode full Task count ≥20 → Decision N ([invariants.md](invariants.md)).
+- Mode full Task count ≥25 → Decision N ([invariants.md](invariants.md)).

@@ -26,7 +26,8 @@ Veto / Gate C: [hitl.md](hitl.md). Skip-review ban: [lenses.md](lenses.md).
 | **Has API/DB flips yes under skip-review** | Drop skip-review → **lite** (or reclassify) | One-liner: set Has API/DB **yes**, Review profile **lite**, re-lint — [examples/drop-skip-review-api-flip.md](examples/drop-skip-review-api-flip.md) |
 | **Smoke gap under skip-review** | Ordered recovery | Prefer re-Build → or Notes `smoke re-run` once → or drop skip-review → lite ([verify-and-fix.md](verify-and-fix.md)) |
 | **review-stale / test-stale** (Notes) | Do **not** merge | Re-enter review / test-full|test-lite; clear token only after fresh clean/success — lint `--before-merge` errors; `--next` do-not-launch ([verify-and-fix.md](verify-and-fix.md)) |
-| **Task count ≥ 20** (Mode full, running) | Decision N (soft budget) | Continue · Reclassify/slim · Stop ([invariants.md](invariants.md)) |
+| **Task count ≥ 25** (Mode full, running) | Decision N (soft budget) | Continue · Reclassify/slim · Stop ([invariants.md](invariants.md)) |
+| **Missing clarity-check token** (soft or hard) | Do **not** launch; `--next` → `do-not-launch` | Soft Next → any `clarity-check ok — …` once (presence-any); hard Next → exact `clarity-check ok — <Next>`. Open the boundary file ([parent-next.md](parent-next.md)); re-run `--next` |
 | **main-thread fallbacks ≥ 3** (running) | Decision N (soft pause) | Continue · Reclassify/model path · Stop ([invariants.md](invariants.md)) |
 | **Gate C decline / silence** | Stay paused or `stopped` | No commit/push/PR/merge |
 | **Merge success without `merge` in Gate C approved** | Stay `paused` | Leave Next for remaining actions — do not set `done` ([results.md](results.md)) |

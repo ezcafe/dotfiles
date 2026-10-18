@@ -34,13 +34,13 @@ Build Task **first action:** read `00-run.md` **Gate B veto**, **Gate B approved
 | Condition | Action |
 |-----------|--------|
 | `Gate B veto: pending` | Stop; first return line `Result: blocked — Gate B veto`; do not change code |
-| HITL Gate B is **blocking** and **Gate B approved** is `none`/missing | Stop; first return line `Result: blocked — Gate B approved`; do not change code |
+| HITL Gate B is **blocking** and (**Gate B approved** is `none`/missing **or** provenance `gate-b-approved` missing/weak) | Stop; first return line `Result: blocked — Gate B approved`; do not change code |
 | Notes say veto window open **and** **Build armed** missing | Stop; first return line `Result: blocked — Build armed missing`; do not change code |
 | Notes veto window + **Build armed** but async gap incomplete (arm not later than digest / missing `async-gap-pending` / no `.lint-async-gap`) | Stop; first return line `Result: blocked — async gap incomplete`; do not change code |
 | Notes match `design-backloop` | Stop; first return line `Result: blocked — design-backloop`; do not change code |
-| `Gate B veto: none` and (blocking → approved settled; auto may leave approved `none`) and (no open veto window, or **Build armed** + complete async gap) and no `design-backloop` | Continue Build |
+| `Gate B veto: none` and (blocking → approved settled **+ quality provenance**; auto may leave approved `none`) and (no open veto window, or **Build armed** + complete async gap) and no `design-backloop` | Continue Build |
 
-Parent must not launch Build while veto is `pending`, while blocking Gate B lacks **Gate B approved**, while veto window is open without **Build armed**, or while Notes say `design-backloop`. Lint: `scripts/lint-run.py <run-dir> --before-build`.
+Parent must not launch Build while veto is `pending`, while blocking Gate B lacks **Gate B approved** **+ quality provenance**, while veto window is open without **Build armed**, or while Notes say `design-backloop`. Lint: `scripts/lint-run.py <run-dir> --before-build`.
 
 ## Verify gate (blocking)
 
@@ -99,7 +99,7 @@ When Review profile is **skip-review** and Smoke is incomplete / mismatched / ne
 2. **Or** Notes `smoke re-run` → allow **one** Smoke Task under skip-review (exception; clear the Notes token after smoke-pass). Prefer this independent re-run once before Gate C when Build-writes-Smoke feels thin.
 3. **Or** drop skip-review → **lite** → `code-review-phase` → `test-lite` → Gate C.
 
-Do **not** launch `smoke` under skip-review without Notes `smoke re-run` (lint warn). Escapes that skip independent Smoke must match [hitl.md](hitl.md) Gate C test bar / Provenance (same kinds + `provenance — <kind> — user: "…"`). After an independent re-run, record `smoke-pass (re-run)` **plus** provenance `smoke-pass-rerun`, then clear the `smoke re-run` token. Lint `--before-merge` **errors** when skip-review has only Build-writes-Smoke without those escapes; `docs-only` warn/allow applies **only after** provenance is present. Independent verification for merge remains: **full** / **lite** test after review (or smoke-pass alone for Mode simple legal skip-review when waived).
+Do **not** launch `smoke` under skip-review without Notes `smoke re-run` (lint warn). Do **not** launch `test-full` / `test-lite` under legal skip-review — those follow review paths after drop. Escapes that skip independent Smoke must match [hitl.md](hitl.md) Gate C test bar / Provenance (same kinds + `provenance — <kind> — user: "…"`). After an independent re-run, record `smoke-pass (re-run)` **plus** provenance `smoke-pass-rerun`, then clear the `smoke re-run` token. Lint `--before-merge` **errors** when skip-review has only Build-writes-Smoke without those escapes; `docs-only` warn/allow applies **only after** provenance is present. Independent verification for merge remains: **full** / **lite** test after review (or Gate C escape + provenance for Mode simple legal skip-review).
 
 ## Fix rules (TDD)
 

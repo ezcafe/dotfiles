@@ -22,7 +22,7 @@ Design-only subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). No production c
 |-------|------|
 | Runtime order / Mode | [`../my-dev-flow/stages.md`](../my-dev-flow/stages.md) |
 | Stage prompts | [stages.md](stages.md) index → load **`stages/<stage-id>.md` only** |
-| Handoffs | **Required** `scripts/handoff-for.py <stage-id>` · [`handoffs.md`](../my-dev-flow/handoffs.md) = edit SoT / debug only |
+| Handoffs | **Required** `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>` ([`skills-path.md`](../my-dev-flow/skills-path.md)) · [`handoffs.md`](../my-dev-flow/handoffs.md) = edit SoT / debug only |
 | Grill / HITL | [`../my-dev-flow/grill.md`](../my-dev-flow/grill.md) · [`../my-dev-flow/hitl.md`](../my-dev-flow/hitl.md) |
 | Has API/DB / tiny-tweak | [`../my-dev-flow/lenses.md`](../my-dev-flow/lenses.md) |
 | Max rounds / backloop | [`../my-dev-flow/invariants.md`](../my-dev-flow/invariants.md) |
@@ -73,7 +73,7 @@ Update: Update from 03a or design-backloop → (parent) re-review
 - Detect: `03a` needs update **or** Notes `design-backloop` → Update; Mode simple → **design-phase** only; else Full.
 - Full: separate Tasks; Gate A before Analyze; Grill before Design.
 - Simple: one `design-phase` Task; Grill inside bundle when frontier open / Has API/DB.
-- Fresh Task + `stages/<id>.md` + paste `scripts/handoff-for.py <stage-id>` output (do not load whole handoffs.md for launch).
+- Fresh Task + `stages/<id>.md` + paste `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>` output (resolve per [`skills-path.md`](../my-dev-flow/skills-path.md); do not load whole handoffs.md for launch).
 - After Design: parent runs design-review / design-verify-phase before Gate B — do not Gate B from this skill.
 - Design-backloop / veto / skip-review: parent SoT links above.
 
@@ -90,5 +90,6 @@ Update: Update from 03a or design-backloop → (parent) re-review
 ## Start checklist
 
 1. Confirm Full / Simple / Update + files; resolve models.
-2. Run stage prompts per Mode.
-3. Hand off to design-review / design-verify-phase (parent).
+2. Open [stages/clarity-check.md](stages/clarity-check.md); after pass log `clarity-check ok — <boundary>` (soft presence-any; [parent-next.md](../my-dev-flow/parent-next.md)); then launch.
+3. Run stage prompts per Mode.
+4. Hand off to design-review / design-verify-phase (parent).

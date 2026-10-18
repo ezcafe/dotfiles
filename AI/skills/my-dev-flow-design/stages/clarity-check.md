@@ -31,4 +31,8 @@ Before Grill / Design, also confirm:
 
 Before Design, confirm Grill is **frontier-empty** or **skipped** (see `02b-grill.md` / Notes). Do not start Design on `needs-round`.
 
+**Checklist note:** soft clarity lint is a **floor** (once-per-run presence-any — [parent-next.md](../../my-dev-flow/parent-next.md)). A soft token already in Notes does **not** skip opening this file — still confirm Problem map / What-Why-How (and Grill frontier) before Design. Soft clarity also does **not** skip must-hold stage gates (open Grill still blocks Design via derive/lint).
+
 If no → ask the user; do not launch the next stage.
+
+After pass, log `clarity-check ok — <boundary>` (e.g. `design-phase`, `analyze`, `grill`, `design`). Soft presence-any once-per-run: one token unlocks later soft lint boundaries; it does **not** unlock high-risk code stages (`tdd-review` / `build` / `fix-*` / `merge`).

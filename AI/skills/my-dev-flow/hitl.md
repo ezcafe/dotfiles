@@ -58,6 +58,8 @@ Inventable tokens without a user quote are **rejected**. Before lint accepts **G
 
 Bare approved fields, waiver tokens, or card-override **without** matching quality provenance → lint **error** / `--next` → `do-not-launch` (exit **1**). Do **not** invent quotes.
 
+**Residual risk:** lint raises the cost of forged quotes (length ≥12, filler ban, kind match). It does **not** prove the quote was uttered in chat.
+
 ## async-notify + Gate B veto + Build armed (required)
 
 When Gate B uses **async-notify** (only when Default Gate B allows it):

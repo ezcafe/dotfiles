@@ -12,7 +12,7 @@ Severity: `{my-dev-flow}/severity.md`.
 
 | Mode | Order |
 |------|-------|
-| **full** | When both Has API+DB (not tiny): `api-contract-review` ∥ `db-design-review` (same turn) → `design-review` |
+| **full** | Has API **and** Has DB (not tiny): both `03a-*` missing → `api-contract-review` ∥ `db-design-review` (**same-turn** parallel); one `03a-*` exists → launch **missing only** (resume serialize) → `design-review` |
 | **full** | API or DB only → that isolated stage → `design-review` |
 | **simple** | `design-verify-phase` only |
 

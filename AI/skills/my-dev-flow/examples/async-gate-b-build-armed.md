@@ -36,5 +36,5 @@ Mode **simple**, Has API=no, Has DB=no, no auth/PII/schema, design-verify clean 
 
 ## Parent habits
 
-- Resume with Notes veto window open + Next `build` + veto `none` **is** the next parent turn — append **Build armed** with a new timestamp, then Build ([hitl.md](../hitl.md) Durable resume)
+- Resume with Notes veto window open + Next `build` + veto `none` **is** the next parent turn — run `--next` if sidecar missing, copy `async-gap-pending`, append **Build armed** with a **later** HH:MM, then Build ([hitl.md](../hitl.md) Durable resume)
 - Anti-patterns: [anti-patterns.md](anti-patterns.md) (same-turn Build · inventable gap · missing Build armed)

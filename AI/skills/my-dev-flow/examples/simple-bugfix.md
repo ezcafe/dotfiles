@@ -31,7 +31,7 @@ Minimal walkthrough. Parent follows [stages.md](../stages.md) Happy path (simple
 
 ## Legal skip-review variant
 
-If Mode **simple**, Review profile **skip-review**, and Has API=no **and** Has DB=no: after Build verify-pass + Smoke section → Gate C (no `code-review-phase` / `test-lite`). Mode full never uses this path. If either flag flips to yes → drop skip-review ([lenses.md](../lenses.md)).
+If Mode **simple**, Review profile **skip-review**, and Has API=no **and** Has DB=no: after Build verify-pass + Smoke section → Gate C **only with** a fail-closed escape **+ provenance** (no `code-review-phase` / `test-lite`). Mode full never uses this path. If either flag flips to yes → drop skip-review ([lenses.md](../lenses.md)).
 
 **Before Gate C (required):** one escape **with provenance** — e.g. Notes `smoke-waive` **+** `- provenance — smoke-waive — user: "waive independent smoke for this copy tweak"` (or `smoke-pass-rerun` / `gate-c-test-override` / `docs-only` with matching kinds). Bare tokens alone are rejected. Else lint `--before-merge` **errors** on Build-writes-Smoke alone. SoT: [hitl.md](../hitl.md) Gate C test bar / Provenance · recovery [verify-and-fix.md](../verify-and-fix.md).
 

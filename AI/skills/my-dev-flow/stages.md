@@ -59,7 +59,7 @@ flowchart LR
     S2 --> S3[Gate B→Build]
     S3 --> S4{Review profile}
     S4 -->|lite| S5[code-review-phase→test-lite→Gate C]
-    S4 -->|skip-review| S6[Gate C]
+    S4 -->|skip-review| S6[Gate C escape+provenance]
   end
 ```
 
@@ -85,7 +85,7 @@ flowchart LR
 3. Gate A — day-to-day + 80/20 → `01a` (auto when ok; ideation-update ↔ gate-a until ok or round=3; pause for human only at max 3 or escalate)
 4. Light skim → `02-skim.md` — **fail-closed:** do not launch skim+ while `01a` ≠ `ok` (`lint-run.py --next` / `--derive` → `do-not-launch`; [parent-next.md](parent-next.md))
 5. Analyze → Grill (or skip) → Design (two options); refine Has API/DB
-6. Design ↔ review until clean — Has API **and** Has DB: **must** parallel API ∥ DB (unless tiny tweak), then general; max 3; **Pending parallel** ([artifacts/00-run.md](artifacts/00-run.md))
+6. Design ↔ review until clean — Has API **and** Has DB (not tiny tweak): both `03a-*` missing → **same-turn** parallel API ∥ DB; one `03a-*` exists → launch **missing only** (resume serialize) — [lenses.md](lenses.md) · derive H3; then general; max 3; **Pending parallel** ([artifacts/00-run.md](artifacts/00-run.md))
 7. 4a — TDD only if planned tests
 8. Gate B — HITL + digest ([hitl.md](hitl.md)). Mode **full** → **blocking** only (never async-notify). On settle: **blocking** → set **Gate B approved** `yes` (or named pick) + veto `none` **+ quality provenance** ([hitl.md](hitl.md)) before Build. Async-notify path: Simple step 4 / [hitl.md](hitl.md).
 9. Build (veto `none` + **Gate B approved** when blocking + **Build armed** if async → Verify → `verify-pass` + Smoke section; max 3) — Result tokens: [results.md](results.md)
@@ -107,7 +107,7 @@ Skip Ideation / Gate A / skim. Prefer phase bundles.
 3. `design-verify-phase` until clean; max 3
 4. 4a if planned → Gate B → Build (veto `none` + **Gate B approved** when blocking + **Build armed** if async + verify-pass + Smoke). Gate B tier per [hitl.md](hitl.md): Mode simple low-risk → prefer **auto**; **async-notify** only when user asks for a veto window / async digest (narrow rule); else **blocking**. On settle: **blocking** → set **Gate B approved** **+ quality provenance** ([hitl.md](hitl.md)) before Build; **auto** may leave it `none`; **async-notify** → gap + **Build armed**.
 5. After smoke-pass (Smoke Task usually skipped):
-   - **(a) Legal skip-review** — per [lenses.md](lenses.md) → Gate C → merge → **`done`** when `merge` ∈ Gate C approved **+ quality provenance** ([hitl.md](hitl.md))
+   - **(a) Legal skip-review** — per [lenses.md](lenses.md) → Gate C **only when** Gate C test bar escape **+ provenance** met ([hitl.md](hitl.md)); Build-writes-Smoke alone is not enough → merge → **`done`** when `merge` ∈ Gate C approved **+ quality provenance**
    - **(b)** drop skip-review ([lenses.md](lenses.md)) → `code-review-phase` → `test-lite` → Gate C → **`done`** when `merge` ∈ Gate C approved **+ quality provenance** ([hitl.md](hitl.md))
    - **Else (lite)** — `code-review-phase` → `test-lite` → Gate C → **`done`** when `merge` ∈ Gate C approved **+ quality provenance** ([hitl.md](hitl.md))
 6. After Merge Result **success** **and** `merge` ∈ Gate C approved **+ quality provenance** ([hitl.md](hitl.md)) → Status **`done`** + **calibration** Notes + append `_calibration.md` (PR-only → stay `paused`)
@@ -139,14 +139,14 @@ Ambiguous → Decision N. API/DB rule: [lenses.md](lenses.md).
 | Rule | Mode **simple** | Mode **full** |
 |------|-----------------|---------------|
 | Design | One `design-phase` | Analyze → Grill → Design |
-| Verify | One `design-verify-phase` | API ∥ DB parallel when both (except [tiny tweak](lenses.md)) → general |
+| Verify | One `design-verify-phase` | API ∥ DB: both `03a-*` missing → parallel; one exists → missing only (resume serialize) — [lenses.md](lenses.md); except [tiny tweak](lenses.md) → general |
 | Code review + Test | **By Review profile** (below) — not by Mode | **By Review profile** (below) — Mode full + lite still uses lite path |
 | Lens plan | **none** | **none** then signals |
 | Model | Prefer **Fast** ([models.md](models.md)) | Medium when available |
 
 **Review profile → post-Build:** use the SoT table [Mode × Review profile → post-Build path](#mode--review-profile--post-build-path) (do not restate here).
 
-API ∥ DB both yes (not tiny): **same-turn** parallel isolated Tasks. Simple folds into `design-verify-phase`.
+API ∥ DB both yes (not tiny): both `03a-*` missing → **same-turn** parallel isolated Tasks; one exists → launch missing only (resume serialize) — [lenses.md](lenses.md). Simple folds into `design-verify-phase`.
 
 ---
 

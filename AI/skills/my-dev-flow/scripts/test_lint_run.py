@@ -91,7 +91,7 @@ def _base(
     if gate_b_approved is None:
         # Blocking Gate B needs durable yes before Build; keep fixtures green
         gate_b_approved = "yes" if hitl_gate_b == "blocking" else "none"
-    # Soft: presence-any; hard (build/fix-*/merge): boundary-matched
+    # Soft: presence-any; hard (tdd-review/build/fix-*/merge): boundary-matched
     if clarity_ok and not re.search(r"(?i)clarity-check\s+ok", notes):
         boundary = (
             next_step
@@ -323,25 +323,65 @@ class TestLintRun(unittest.TestCase):
             any("Pending parallel missing" in e for e in _errors(issues))
         )
 
-    def test_pending_parallel_api_db_until_both_done(self):
+    def test_pending_parallel_one_present_api_db_warn_only(self):
+        """T1: default lint — one 03a-* + api|db = valid resume serialize (warn, not error)."""
         text = _base(
             mode="full",
             review="full",
             has_api="yes",
             has_db="yes",
             pending_parallel="api|db",
+            stage_id="api-contract-review",
+            next_step="db-design-review",
         )
         with tempfile.TemporaryDirectory() as td:
             run_dir = Path(td)
             (run_dir / "03a-api-contract-review.md").write_text("ok", encoding="utf-8")
             issues = lint_run_md(
                 text,
-                before_design_review=True,
+                before_design_review=False,
+                before_build=False,
+                run_dir=run_dir,
+            )
+            self.assertFalse(
+                any("without" in e for e in _errors(issues)),
+                msg=_errors(issues),
+            )
+            self.assertFalse(
+                any("Pending parallel" in e for e in _errors(issues)),
+                msg=_errors(issues),
+            )
+            self.assertTrue(
+                any(
+                    "resume serialize" in w and "finish the other" in w
+                    for w in _warns(issues)
+                ),
+                msg=_warns(issues),
+            )
+
+    def test_pending_parallel_one_present_none_errors(self):
+        """T1: one 03a-* + Pending parallel none → error (must keep api|db)."""
+        text = _base(
+            mode="full",
+            review="full",
+            has_api="yes",
+            has_db="yes",
+            pending_parallel="none",
+            stage_id="api-contract-review",
+            next_step="db-design-review",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "03a-api-contract-review.md").write_text("ok", encoding="utf-8")
+            issues = lint_run_md(
+                text,
+                before_design_review=False,
                 before_build=False,
                 run_dir=run_dir,
             )
             self.assertTrue(
-                any("without" in e and "03a-db" in e for e in _errors(issues))
+                any("without" in e and "03a-db" in e for e in _errors(issues)),
+                msg=_errors(issues),
             )
 
     def test_pending_parallel_none_when_both_needed_errors(self):
@@ -600,7 +640,7 @@ class TestLintRun(unittest.TestCase):
         )
 
     def test_task_count_soft_cap_warn(self):
-        text = _base(mode="full", review="full", task_count="20", status="running")
+        text = _base(mode="full", review="full", task_count="25", status="running")
         issues = lint_run_md(
             text, before_design_review=False, before_build=False
         )
@@ -3495,6 +3535,42 @@ class TestM1M2E1E2Findings(unittest.TestCase):
                 "boundary-matched" in e or "clarity-check ok — build" in e
                 for e in _errors(issues)
             )
+        )
+
+    def test_clarity_check_soft_token_does_not_unlock_tdd_review(self):
+        """S2: soft design-phase token does not satisfy high-risk tdd-review."""
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="tdd-review",
+            stage_id="tdd-review",
+            notes="- clarity-check ok — design-phase",
+            clarity_ok=False,
+        )
+        issues = lint_run_md(
+            text, before_design_review=False, before_build=False
+        )
+        self.assertTrue(
+            any(
+                "boundary-matched" in e or "clarity-check ok — tdd-review" in e
+                for e in _errors(issues)
+            )
+        )
+
+    def test_clarity_check_boundary_matched_tdd_review_ok(self):
+        """S2: clarity-check ok — tdd-review unlocks Next tdd-review."""
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="tdd-review",
+            stage_id="tdd-review",
+            notes="- clarity-check ok — tdd-review",
+        )
+        issues = lint_run_md(
+            text, before_design_review=False, before_build=False
+        )
+        self.assertFalse(
+            any("clarity-check ok" in e and "missing" in e for e in _errors(issues))
         )
 
     def test_clarity_check_boundary_matched_build_ok(self):

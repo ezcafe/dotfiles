@@ -274,7 +274,7 @@ CLARITY_CHECK_STAGES = frozenset(
 )
 # High-risk Next: boundary-matched clarity-check required (parent-next.md · R3)
 CLARITY_CHECK_HIGH_RISK = frozenset(
-    {"build", "fix-review", "fix-tests", "merge"}
+    {"tdd-review", "build", "fix-review", "fix-tests", "merge"}
 )
 # Consent / waiver provenance (hitl.md · R1) — quote length ≥ N, not filler
 PROVENANCE_MIN_QUOTE_LEN = 12
@@ -439,7 +439,7 @@ MODE_LAST_RUN_RE = re.compile(
     r"(?im)^\*\*Mode last run:\*\*\s*(.+)$"
 )
 LAST_STAGE_RE = re.compile(r"^\*\*Last stage:\*\*\s*(.+)$", re.M | re.I)
-SOFT_TASK_CAP = 20
+SOFT_TASK_CAP = 25
 DESIGN_BACKLOOP_RECOVERY_STAGES = frozenset(
     {
         "design-update",

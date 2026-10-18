@@ -30,7 +30,7 @@ Build subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). First output is a **d
 | skip-review legality | [`../my-dev-flow/lenses.md`](../my-dev-flow/lenses.md) |
 | Design-backloop / max rounds | [`../my-dev-flow/invariants.md`](../my-dev-flow/invariants.md) |
 | Result tokens | [`../my-dev-flow/results.md`](../my-dev-flow/results.md) |
-| Handoffs / models | **Required** `scripts/handoff-for.py <stage-id>` · [`handoffs.md`](../my-dev-flow/handoffs.md) = edit SoT / debug only · [`models.md`](../my-dev-flow/models.md) |
+| Handoffs / models | **Required** `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>` ([`skills-path.md`](../my-dev-flow/skills-path.md)) · [`handoffs.md`](../my-dev-flow/handoffs.md) = edit SoT / debug only · [`models.md`](../my-dev-flow/models.md) |
 
 ## When to run
 
@@ -44,7 +44,7 @@ Build subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). First output is a **d
 - **Fix-from-tests:** repair from `06` Fix ask only; verify-pass before re-test.
 - **Design-backloop** if `03`/`04` must change — never silently rewrite (invariants.md).
 - TDD when tasks include tests. Has UI → match Design UI + chrome.
-- Paste `scripts/handoff-for.py <stage-id>` output per Task; plain words.
+- Paste `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>` output per Task (resolve per [`skills-path.md`](../my-dev-flow/skills-path.md)); plain words.
 
 ## Models
 
@@ -55,7 +55,7 @@ Build subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). First output is a **d
 | Mode | Need |
 |------|------|
 | **TDD review** | `03`+`04` with planned tests; Gate B not required yet |
-| **Build** | Gate B checked; veto `none`; when HITL Gate B is **blocking**, **Gate B approved** `yes` (or named pick) **+ provenance** — [hitl.md](../my-dev-flow/hitl.md); **Build armed** + turn-boundary gap if async window open (**auto** may leave Gate B approved `none`); Verify commands; prefer `04a` or Notes skip |
+| **Build** | Gate B settled per [hitl.md](../my-dev-flow/hitl.md); veto `none`; when HITL Gate B is **blocking**, **Gate B approved** `yes` (or named pick) **+ provenance**; **Build armed** + turn-boundary gap if async window open (**auto** may leave Gate B approved `none`); Verify commands; prefer `04a` or Notes skip |
 | **Fix-from-tests** | `06` smoke-fail/failure + Fix ask; Verify commands |
 
 If not ready → **stop**.
@@ -77,5 +77,6 @@ Fix-from-tests    → Fix → Verify → verify-pass → re-test
 ## Start checklist
 
 1. Confirm mode + files + Verify commands.
-2. Resolve models.
-3. Run `stages/<id>.md` for TDD / Build / Fix.
+2. Open [stages/clarity-check.md](stages/clarity-check.md); log matching `clarity-check ok — tdd-review|build|fix-*` before launch ([parent-next.md](../my-dev-flow/parent-next.md)).
+3. Resolve models.
+4. Run `stages/<id>.md` for TDD / Build / Fix.

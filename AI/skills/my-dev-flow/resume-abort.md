@@ -12,7 +12,7 @@ Happy path: [stages.md](stages.md). Design invalid after Build: [design-backloop
 5. One subflow `SKILL.md`; prompt = **required** `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>` (includes Description) + **`stages/<stage-id>.md`** ([parent-next.md](parent-next.md) · [skills-path.md](skills-path.md); handoffs.md = edit SoT / debug only).
 6. `stopped` → new Decision; `done` → new slug or explicit re-open.
 7. Gate B veto `pending` → do not Build. Blocking without **Gate B approved** + provenance → do not Build ([hitl.md](hitl.md)).
-8. async-notify gap: Notes veto window / paused + Next `build` + veto `none` → this resume **is** next parent turn — append **Build armed** Run log line (new timestamp), then launch ([hitl.md](hitl.md)).
+8. async-notify gap: Notes veto window / paused + Next `build` + veto `none` → this resume **is** next parent turn — run `--next` if `.lint-async-gap` sidecar missing, copy `async-gap-pending`, append **Build armed** Run log line (**later** HH:MM), then launch after veto re-read ([hitl.md](hitl.md) Durable resume). Do **not** short-circuit to append **Build armed** then launch alone.
 
 ## Abort / scope-change
 

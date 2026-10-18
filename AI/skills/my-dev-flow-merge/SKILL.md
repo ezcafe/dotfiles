@@ -20,7 +20,7 @@ Merge subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). Human owns top risks.
 |---------|------|
 | Pipeline order / Status `done` | [`../my-dev-flow/stages.md`](../my-dev-flow/stages.md) |
 | Gate C (always blocking) + test bar + **Gate C approved** + Provenance | [`../my-dev-flow/hitl.md`](../my-dev-flow/hitl.md) |
-| Stage handoffs | **Required** `scripts/handoff-for.py <stage-id>` · [`handoffs.md`](../my-dev-flow/handoffs.md) = edit SoT / debug only |
+| Stage handoffs | **Required** `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>` ([`skills-path.md`](../my-dev-flow/skills-path.md)) · [`handoffs.md`](../my-dev-flow/handoffs.md) = edit SoT / debug only |
 | Models (Merge = Fast) | [`../my-dev-flow/models.md`](../my-dev-flow/models.md) |
 | Parent checklist | [`../my-dev-flow/invariants.md`](../my-dev-flow/invariants.md) |
 | PR body template | [`../my-dev-flow/artifacts/pr-body.md`](../my-dev-flow/artifacts/pr-body.md) |
@@ -74,6 +74,7 @@ GATE C (blocking user yes — parent may ask) → Merge Task (only approved: com
 ## Start checklist
 
 1. Confirm Gate C test bar ([`hitl.md`](../my-dev-flow/hitl.md)) — or Notes waiver kind **+** matching `provenance — <kind> — user: "…"`; summarize top risks; ensure **Gate C approved** + provenance `gate-c-approved` set (ask if needed).
-2. Run `lint-run.py --before-merge` (required; fail-closed on missing provenance / bar).
-3. Resolve Fast model.
-4. Run merge stage only for actions in **Gate C approved**; re-check field + provenance + chat. Hard rules: [`stages/merge.md`](stages/merge.md).
+2. Open code [clarity-check.md](../my-dev-flow-code/stages/clarity-check.md) **Merge** section; log `clarity-check ok — merge` before launch ([parent-next.md](../my-dev-flow/parent-next.md)).
+3. Run `lint-run.py --before-merge` (required; fail-closed on missing provenance / bar).
+4. Resolve Fast model.
+5. Run merge stage only for actions in **Gate C approved**; re-check field + provenance + chat. Hard rules: [`stages/merge.md`](stages/merge.md).

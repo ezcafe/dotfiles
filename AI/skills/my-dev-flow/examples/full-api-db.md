@@ -28,7 +28,7 @@ Anti-patterns: [anti-patterns.md](anti-patterns.md). API/DB rules: [lenses.md](.
 | 4 | `analyze` | `02-analysis.md`; frontier may list contract/authz choices |
 | 5 | `grill` | `02b-grill.md` frontier-empty (or skip only if frontier empty) |
 | 6 | `design` | Two options in `03-design.md` + `04-tasks.md`; Verify commands; Has API/DB **yes** |
-| 7 | `api-contract-review` ∥ `db-design-review` | **Same parent turn** (parallel); Pending parallel `api|db` → `none` when both done; both clean or Fix ask |
+| 7 | `api-contract-review` ∥ `db-design-review` | Both `03a-*` missing → **same parent turn** (parallel); one `03a-*` exists → launch **missing only** (resume serialize — do not re-parallel); Pending parallel `api|db` → `none` when both done; both clean or Fix ask ([lenses.md](../lenses.md)) |
 | 8 | `design-review` | General clean (after isolated clean); Deferred Enhancements OK |
 | 9 | (04a) | Only if `04-tasks` lists concrete tests; else skip Notes |
 | 10 | Gate B | **blocking** required as default (Mode **full** — never async-notify default; [hitl.md](../hitl.md) Default Gate B narrow async); on approve set `Gate B approved: yes` (or named pick) + `Gate B veto: none` **+** Notes `- provenance — gate-b-approved — user: "yes go build"` ([hitl.md](../hitl.md) Provenance) |

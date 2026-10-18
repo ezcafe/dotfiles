@@ -22,8 +22,8 @@ If clarity-check fails → ask the user; do **not** launch the Task.
 
 | Next class | Lint rule |
 |------------|-----------|
-| **Soft** (`design-phase`, `analyze`, `grill`, `design`, `tdd-review`) | **Presence-any:** one `clarity-check ok — <any>` token in the run unlocks later soft boundaries |
-| **Hard / high-risk** (`build`, `fix-review`, `fix-tests`, `merge`) | **Boundary-matched:** must have `clarity-check ok — <exact Next>` (e.g. Next `build` needs `clarity-check ok — build`) |
+| **Soft** (`design-phase`, `analyze`, `grill`, `design`) | **Presence-any (once-per-run by design):** one `clarity-check ok — <any>` token unlocks later soft boundaries (lint floor only). Parent must still **open** the clarity file and run its content checks (e.g. before Design: Problem map / What-Why-How) even when a soft token already exists. Soft clarity does **not** replace must-hold stage gates in derive/lint (e.g. open Grill still blocks Design). Soft design tokens do **not** unlock `tdd-review` / Build / Fix / Merge. |
+| **Hard / high-risk** (`tdd-review`, `build`, `fix-review`, `fix-tests`, `merge`) | **Boundary-matched:** must have `clarity-check ok — <exact Next>` (e.g. Next `tdd-review` needs `clarity-check ok — tdd-review`; Next `build` needs `clarity-check ok — build`) |
 
 Fail-closed: Lint **errors** / `--next` → `do-not-launch` when the rule above is not met ([invariants.md](invariants.md)).
 

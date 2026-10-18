@@ -2,7 +2,7 @@
 
 **Stage id:** `smoke`
 
-**When:** Smoke **re-run** only — Build did not leave smoke-pass, commands mismatch Verify commands, or Notes `smoke re-run`. Default after Build verify-pass: **parent skips this Task** (Build-writes-Smoke — see `{my-dev-flow}/verify-and-fix.md`). Under **skip-review**, prefer re-Build first; Notes `smoke re-run` allows one Smoke Task; else drop skip-review → lite.
+**When:** Smoke **re-run** only — Build did not leave smoke-pass, commands mismatch Verify commands, or Notes `smoke re-run`. Default after Build verify-pass: **parent skips this Task** (Build-writes-Smoke — see `{my-dev-flow}/verify-and-fix.md`). Under **skip-review**: do **not** launch `test-full` / `test-lite`; allow this Task **only** with Notes `smoke re-run` (prefer re-Build first per ordered recovery); else Gate C when escape + provenance met ([hitl.md](../../my-dev-flow/hitl.md)) or drop skip-review → lite.
 
 **subagent_type:** `generalPurpose`  
 **model:** resolved Fast  
@@ -34,4 +34,4 @@ Return FIRST LINE exactly: Result: smoke-pass | smoke-fail
 Then short summary + path to 06-test-log.md ({my-dev-flow}/results.md).
 ```
 
-**After:** Parent: smoke-pass → `my-dev-flow-review` (or Gate C if legal skip-review — [lenses.md](../../my-dev-flow/lenses.md)). smoke-fail → Fix-from-tests → verify-pass → re-smoke. Do not open Gate C/merge from this skill.
+**After:** Parent: smoke-pass → `my-dev-flow-review` (or Gate C if legal skip-review **and** escape + provenance — [lenses.md](../../my-dev-flow/lenses.md) · [hitl.md](../../my-dev-flow/hitl.md)). smoke-fail → Fix-from-tests → verify-pass → re-smoke. Do not open Gate C/merge from this skill.

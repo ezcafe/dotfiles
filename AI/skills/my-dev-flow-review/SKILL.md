@@ -24,7 +24,7 @@ Review + Fix subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). Generation ≠
 | Lens plan / api/db / tiny-tweak | [`../my-dev-flow/lenses.md`](../my-dev-flow/lenses.md) |
 | Verify gate on Fix | [`../my-dev-flow/verify-and-fix.md`](../my-dev-flow/verify-and-fix.md) |
 | Max rounds / Decision N | [`../my-dev-flow/invariants.md`](../my-dev-flow/invariants.md) |
-| Stage handoffs | **Required** `scripts/handoff-for.py <stage-id>` · [`handoffs.md`](../my-dev-flow/handoffs.md) = edit SoT / debug only |
+| Stage handoffs | **Required** `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>` ([`skills-path.md`](../my-dev-flow/skills-path.md)) · [`handoffs.md`](../my-dev-flow/handoffs.md) = edit SoT / debug only |
 | Models | [`../my-dev-flow/models.md`](../my-dev-flow/models.md) |
 
 ## When to run
@@ -39,7 +39,7 @@ Review + Fix subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). Generation ≠
 - **Lenses / tiny-tweak / api·db:** [`lenses.md`](../my-dev-flow/lenses.md). Merge findings only if **2+** lenses.
 - **Fix:** verify-pass before re-review; max 3 → Decision N ([`verify-and-fix.md`](../my-dev-flow/verify-and-fix.md) · [`invariants.md`](../my-dev-flow/invariants.md)).
 - **UI lock (Has UI):** Quality fails **Major** on Design UI / Gate A #1/#2 / chrome drift.
-- Result tokens: [`results.md`](../my-dev-flow/results.md). Paste `scripts/handoff-for.py <stage-id>` output per Task; plain words.
+- Result tokens: [`results.md`](../my-dev-flow/results.md). Paste `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>` output per Task (resolve per [`skills-path.md`](../my-dev-flow/skills-path.md)); plain words.
 
 ## Models
 
@@ -100,4 +100,5 @@ Parent runtime order: [`../my-dev-flow/stages.md`](../my-dev-flow/stages.md) Hap
 
 1. Confirm draft + Smoke; init `05-review-log.md`; read Review profile + Lens plan.
 2. Resolve models (Fast-on-simple; Medium|Fast on full).
-3. Review profile lite → code-review-phase; Review profile full → Adv → Quality → lenses → Fix until clean ([stages.md](stages.md) · parent Happy path).
+3. Before `fix-review`: open code [clarity-check.md](../my-dev-flow-code/stages/clarity-check.md); log `clarity-check ok — fix-review`.
+4. Review profile lite → code-review-phase; Review profile full → Adv → Quality → lenses → Fix until clean ([stages.md](stages.md) · parent Happy path).
