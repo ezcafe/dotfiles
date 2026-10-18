@@ -3,16 +3,16 @@ name: my-dev-flow
 description: >-
   Orchestrates the AI-assisted delivery pipeline (design → review → build →
   test → merge). Classifies simple vs full. Gate C always blocking; Mode full
-  Gate B blocking; Mode simple Gate B soft (auto|async-notify when allowed);
-  Grill soft by default. Use when the user says run my-dev-flow, start
-  my-dev-flow, run my-plan-flow / my-workflow (legacy), simple mode,
-  ideate → build → merge, grill / stress-test this plan, or wants the
-  end-to-end delivery pipeline.
+  Gate B blocking; Mode simple Gate B soft (prefer auto; async-notify
+  when user asks for a veto window); Grill soft by default. Use when the
+  user says run my-dev-flow, start my-dev-flow, run my-plan-flow /
+  my-workflow (legacy), simple mode, ideate → build → merge, grill /
+  stress-test this plan, or wants the end-to-end delivery pipeline.
 ---
 
 # my-dev-flow
 
-**TL;DR:** (1) Classify Mode simple vs full. (2) Seed `.my-docs/workflow/<slug>/` from artifacts. (3) Run **Full/Simple pipeline order** in [stages.md](stages.md). (4) Gate C always **blocking**. Mode **full** Gate B **blocking**. Mode **simple** Gate B soft (auto|async-notify when allowed). Grill soft by default. Soft HITL → Grill + Mode simple Gate B only — [hitl.md](hitl.md).
+**TL;DR:** (1) Classify Mode simple vs full. (2) Seed `.my-docs/workflow/<slug>/` from artifacts. (3) Run **Full/Simple pipeline order** in [stages.md](stages.md). (4) Gate C always **blocking**. Mode **full** Gate B **blocking**. Mode **simple** Gate B soft (prefer **auto**; **async-notify** when user asks for a veto window). Grill soft by default. Soft HITL → Grill + Mode simple Gate B only — [hitl.md](hitl.md).
 
 End-to-end **orchestrator only**. Stage prompts live in subflows.  
 **Runtime order (SoT):** [stages.md](stages.md) Happy path.  
@@ -39,7 +39,7 @@ Follow **[stages.md](stages.md) Step 0** (classify, seed `00-run.md`, models, li
 
 1. **Gate C always blocking.** Never commit, push, open a PR, or merge without an explicit user yes that names each action. ([hitl.md](hitl.md))
 2. **No secrets** in commits; never force-push.
-3. **Design before code.** Design-review clean before Build (and before optional 04a).
+3. **Design before code.** Design-review **or** design-verify-phase Result **clean** (by Mode) before Build (and before optional 04a).
 4. **Build / Fix Verify gate** — do not advance on verify-fail. ([verify-and-fix.md](verify-and-fix.md))
 5. **Do not invent approval** — stop / veto / async Gate B gap / **Build armed** / Status / skip-review ban: [stages.md](stages.md) · [hitl.md](hitl.md) · [lenses.md](lenses.md).
 
@@ -61,7 +61,7 @@ Follow **[stages.md](stages.md) Step 0** (classify, seed `00-run.md`, models, li
 | Build / Fix | card + handoff `build`/`fix-*` + [verify-and-fix.md](verify-and-fix.md) |
 | New artifact body | one file under [artifacts/](artifacts/INDEX.md) |
 | Grill | [grill.md](grill.md) (once when entering Grill) |
-| Lint `00-run.md` | [scripts/lint-run.py](scripts/lint-run.py) (`--next`, `--before-build`, `--before-code-review`, `--dry-run-seed`) |
+| Lint `00-run.md` | [scripts/lint-run.py](scripts/lint-run.py) · [scripts/README.md](scripts/README.md) (`--next`, `--before-build`, `--before-code-review`, `--before-merge`, `--dry-run-seed`) |
 | Phase entry | that subflow `SKILL.md` once |
 | Golden paths | [examples/INDEX.md](examples/INDEX.md) |
 | Anti-patterns | [examples/anti-patterns.md](examples/anti-patterns.md) |

@@ -21,17 +21,19 @@ Minimal walkthrough. Parent follows [stages.md](../stages.md) Happy path (simple
 | 1 | `design-phase` | Writes `02-analysis.md`, skip grill Notes, `03-design.md` (one option), `04-tasks.md`; sets Verify commands + Has API/DB **no** |
 | 2 | `design-verify-phase` | `03a-design-review-log.md` Result **clean** (no empty `03a-api` / `03a-db`) |
 | 3 | (04a) | Notes `04a skipped — no planned test cases` (unless tasks list tests) |
-| 4 | Gate B | Prefer **auto** (or **async-notify** only if [hitl.md](../hitl.md) narrow rule allows — Mode simple + no API/DB/auth/PII/schema); `Gate B veto: none`. If async: one turn gap + **Build armed** then `build` |
+| 4 | Gate B | Prefer **auto**; **async-notify** only when user asks for a veto window ([hitl.md](../hitl.md) narrow rule); `Gate B veto: none`. If async: one turn gap + **Build armed** then `build` |
 | 5 | `build` | Re-read veto = none → TDD → verify-pass → write Smoke section smoke-pass |
 | 6 | Smoke Task | **skipped** (Build-writes-Smoke — [verify-and-fix.md](../verify-and-fix.md)) |
 | 7 | `code-review-phase` | Lite combined → Result **clean** |
 | 8 | `test-lite` | Result **success** |
 | 9 | Gate C | blocking — user names commit / push / PR / merge |
-| 10 | `merge` | Only approved actions; Status **`done`** only when Result **success** **and** `merge` ∈ Gate C approved (PR-only / commit-only → stay **paused**) + calibration Notes (≤3) |
+| 10 | `merge` | Only approved actions; Status **`done`** only when Result **success** **and** `merge` ∈ Gate C approved (PR-only / commit-only → stay **paused**) + calibration Notes (≤3) + append same ≤3 lines to `_calibration.md` ([stages.md](../stages.md) Done criteria) |
 
 ## Legal skip-review variant
 
 If Mode **simple**, Review profile **skip-review**, and Has API=no **and** Has DB=no: after Build verify-pass + Smoke section → Gate C (no `code-review-phase` / `test-lite`). Mode full never uses this path. If either flag flips to yes → drop skip-review ([lenses.md](../lenses.md)).
+
+**Before Gate C (required):** record Notes `smoke-waive` / `smoke-pass (re-run)` / `gate-c-test-override`, or Complexity/Notes `docs-only` (tiny-tweak / copy path). Else lint `--before-merge` **errors** on Build-writes-Smoke alone. Recovery order: [verify-and-fix.md](../verify-and-fix.md) (Smoke after Build) · [hitl.md](../hitl.md) Gate C bar.
 
 ## Parent habits
 

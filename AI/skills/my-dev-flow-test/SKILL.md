@@ -68,7 +68,7 @@ Parent routes next steps (review / Gate C / Fix / merge) — see Happy path in [
 
 - Detect smoke vs full vs lite from parent ask / **Review profile**.
 - Prefer **skip Smoke Task** when Build already wrote smoke-pass (Build-writes-Smoke).
-- Legal skip-review ([lenses.md](../my-dev-flow/lenses.md)) → do not launch test Tasks; parent goes Gate C on verify-pass.
+- Legal skip-review ([lenses.md](../my-dev-flow/lenses.md)) → do not launch test Tasks; parent goes Gate C on verify-pass — but Gate C bar still needs smoke waive tokens (`smoke-waive` / `smoke-pass (re-run)` / `gate-c-test-override` / `docs-only`) per [hitl.md](../my-dev-flow/hitl.md) · [verify-and-fix.md](../my-dev-flow/verify-and-fix.md).
 - Fresh Task per stage; prompt from `stages/<stage-id>.md` only (index: [stages.md](stages.md)).
 - On failure / smoke-fail → Fix-from-tests (code); re-run same mode only after verify-pass.
 - Do not merge, push, or open Gate C.

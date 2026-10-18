@@ -17,10 +17,10 @@ Pipeline order: [stages.md](stages.md). Decision shapes: [handoffs.md](handoffs.
 | Mode / scope | Prefer |
 |--------------|--------|
 | Mode **full** | Always **blocking**. Never use async-notify or auto as default. |
-| Mode **simple** + Has API=no + Has DB=no + no auth/PII/schema in scope + design-review clean + (04a ok\|skipped) | **auto** or **async-notify** |
+| Mode **simple** + Has API=no + Has DB=no + no auth/PII/schema in scope + design-review **or** design-verify-phase Result **clean** (by Mode) + (04a ok\|skipped) | **auto** (default) |
 | Mode **simple** + any of: Has API=yes, Has DB=yes, auth/PII/schema in scope, open Critical/Major | **blocking** |
 
-**async-notify allowed only** for Mode **simple** when Has API=no **and** Has DB=no **and** no auth/PII/schema in scope. Else use **blocking** (or **auto** when the simple low-risk row above holds).
+**When to choose async:** Mode **simple** low-risk row above **and** the user asks for a veto window / async digest — otherwise prefer **auto**. **async-notify allowed only** for Mode **simple** when Has API=no **and** Has DB=no **and** no auth/PII/schema in scope. Else use **blocking** (or **auto** when the simple low-risk row holds).
 
 **Soft HITL** applies only to **HITL Grill** and Mode **simple** Gate B (when allowed). Mode **full** Gate B and Gate C are never soft.
 
@@ -109,13 +109,13 @@ Do **not** copy Gate B tier into Grill unless `00-run.md` explicitly sets them e
 
 | Review profile | Required |
 |----------------|----------|
-| **skip-review** | Legal only per [lenses.md](lenses.md). Then: Build **verify-pass** + Smoke section smoke-pass (no full/lite required). Prefer one independent Smoke Task re-run (or Notes `smoke-waive`) before Gate C — fast path still OK. Lint `--before-merge` **warns** when only Build-writes-Smoke. Smoke recovery: [verify-and-fix.md](verify-and-fix.md) |
+| **skip-review** | Legal only per [lenses.md](lenses.md). Then: Build **verify-pass** + Smoke section smoke-pass (no full/lite required). Before Gate C: Notes `smoke-waive` / `smoke-pass (re-run)` / `gate-c-test-override`, **or** Complexity/Notes `docs-only` (warn/allow). Else Lint `--before-merge` **errors** when only Build-writes-Smoke (fail-closed). Smoke recovery: [verify-and-fix.md](verify-and-fix.md) |
 | **lite** | `06-test-log.md` Result **success** **and** **Mode last run:** `lite` (missing Mode last run → fail closed) |
 | **full** | `06-test-log.md` Result **success** **and** **Mode last run:** `full` (missing Mode last run → fail closed) |
 
 Explicit user override may waive green tests; log in Notes with token `gate-c-test-override` (or `Gate C test override`). Does **not** waive Notes `review-stale` / `test-stale` (or unpaid clean/success vs `Last verify-pass at` — [verify-and-fix.md](verify-and-fix.md) Stale).
 
-**Lint:** `scripts/lint-run.py <run-dir> --before-merge` (also when `--next` and card Next=`merge`) enforces this bar from `00-run.md` + `06-test-log.md` unless Notes override is present; **errors** on `review-stale` / `test-stale` and on unpaid `05`/`06` vs `Last verify-pass at`; skip-review Build-only smoke → **warn**; also runs `--check-results` (warn-only).
+**Lint:** `scripts/lint-run.py <run-dir> --before-merge` (also when `--next` and card Next=`merge`) enforces this bar from `00-run.md` + `06-test-log.md` unless Notes override is present; **errors** on `review-stale` / `test-stale` and on unpaid `05`/`06` vs `Last verify-pass at`; skip-review Build-only smoke → **error** unless `smoke-waive` / `smoke-pass (re-run)` / `gate-c-test-override` / `docs-only`; also runs `--check-results` (warn-only).
 
 After Merge Result **success** **and** `merge` ∈ **Gate C approved** → set Status **`done`**. Subset without `merge` (e.g. PR only) → stay `paused`; leave Next for remaining actions. Abort/reject → `stopped`, not `done` ([results.md](results.md) · [stages.md](stages.md) Done criteria).
 

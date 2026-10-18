@@ -4,7 +4,7 @@ Short walkthrough of the one-turn gap. SoT: [hitl.md](../hitl.md) async-notify +
 
 ## When
 
-Mode **simple**, Has API=no, Has DB=no, no auth/PII/schema, design-verify clean — Default Gate B allows **async-notify** ([hitl.md](../hitl.md)).
+Mode **simple**, Has API=no, Has DB=no, no auth/PII/schema, design-verify clean — Default Gate B prefers **auto**; this example uses **async-notify** when the user wants a veto window ([hitl.md](../hitl.md)).
 
 ## Ask
 

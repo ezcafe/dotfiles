@@ -33,7 +33,7 @@ Minimal walkthrough. Parent follows [stages.md](../stages.md) Happy path (full) 
 | 13 | lenses | Per Lens plan (often none) |
 | 14 | `test-lite` | Result **success** (not `test-full`) |
 | 15 | Gate C | blocking — user names commit / push / PR / merge |
-| 16 | `merge` | Only approved actions; Status **`done`** only when Result **success** **and** `merge` ∈ Gate C approved (PR-only / commit-only → stay **paused**) + calibration Notes (≤3) |
+| 16 | `merge` | Only approved actions; Status **`done`** only when Result **success** **and** `merge` ∈ Gate C approved (PR-only / commit-only → stay **paused**) + calibration Notes (≤3) + append same ≤3 lines to `_calibration.md` ([stages.md](../stages.md) Done criteria) |
 
 ## Do not
 

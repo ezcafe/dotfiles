@@ -101,7 +101,7 @@ Skip Ideation / Gate A / skim. Prefer phase bundles.
 1. Step 0 — Mode simple; Review profile **lite** or **skip-review** only (**never** profile **full** — lint error; want full review → Mode **full**); Lens plan **none**; Gate B veto **none**; Status `running`; bootstrap `01-idea` if needed; **lint**
 2. `design-phase` — Analyze + Grill (or skip) + Design; set Verify commands + Has API/DB
 3. `design-verify-phase` until clean; max 3
-4. 4a if planned → Gate B → Build (veto `none` + **Gate B approved** when blocking + **Build armed** if async + verify-pass + Smoke). Gate B tier per [hitl.md](hitl.md): Mode simple → auto|async-notify when narrow rule allows; else **blocking**. On settle: **blocking** → set **Gate B approved** before Build; **auto** may leave it `none`; **async-notify** → gap + **Build armed**.
+4. 4a if planned → Gate B → Build (veto `none` + **Gate B approved** when blocking + **Build armed** if async + verify-pass + Smoke). Gate B tier per [hitl.md](hitl.md): Mode simple low-risk → prefer **auto**; **async-notify** only when user asks for a veto window / async digest (narrow rule); else **blocking**. On settle: **blocking** → set **Gate B approved** before Build; **auto** may leave it `none`; **async-notify** → gap + **Build armed**.
 5. After smoke-pass (Smoke Task usually skipped):
    - **(a) Legal skip-review** — per [lenses.md](lenses.md) → Gate C → merge → **`done`** when `merge` ∈ Gate C approved ([hitl.md](hitl.md))
    - **(b)** drop skip-review ([lenses.md](lenses.md)) → `code-review-phase` → `test-lite` → Gate C → **`done`** when `merge` ∈ Gate C approved
@@ -139,7 +139,7 @@ Ambiguous → Decision N. API/DB rule: [lenses.md](lenses.md).
    1. **Outcome clear?** yes → lean simple; no → lean full (or myplan if inventing *what*).
    2. **API/DB?** new/changed public API or persistence → full (unless [tiny tweak](lenses.md)); no → lean simple.
    3. **Invent *what*?** yes → myplan Decision N or Mode full Ideation; no → proceed with Mode from (1)+(2) + cheap path.
-4. Create slug; write `00-run.md` from [artifacts/00-run.md](artifacts/00-run.md): Status `running`, Mode, profile, Complexity (one-line), Has UI/API/DB when known, Lens plan **none**, **Pending parallel: none**, Gate B veto **none**, models ([models.md](models.md)), card, HITL Gate B ([hitl.md](hitl.md) Default Gate B — full → **blocking**; simple low-risk → auto|async-notify), HITL Grill (full → async-notify; simple → auto), HITL Gate C **blocking**.
+4. Create slug; write `00-run.md` from [artifacts/00-run.md](artifacts/00-run.md): Status `running`, Mode, profile, Complexity (one-line), Has UI/API/DB when known, Lens plan **none**, **Pending parallel: none**, Gate B veto **none**, models ([models.md](models.md)), card, HITL Gate B ([hitl.md](hitl.md) Default Gate B — full → **blocking**; simple low-risk → prefer **auto**; **async-notify** only when user asks for a veto window / async digest), HITL Grill (full → async-notify; simple → auto), HITL Gate C **blocking**.
 5. **Lint (required):** `scripts/lint-run.py .my-docs/workflow/<slug>/` (again `--before-design-review` / `--before-build` / `--before-code-review` / `--before-merge`). Optional: `--check-stage-ids` after editing handoffs/parent-next/stages; `--check-results` for Result tokens + size soft warns.
 6. Chat one line: Mode + profile + why.
 

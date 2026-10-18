@@ -13,7 +13,7 @@ Anti-patterns: [anti-patterns.md](anti-patterns.md). API/DB rules: [lenses.md](.
 - Slug e.g. `20261013-care-log-attachments`
 - Has API / Has DB → set **yes** once Design has contracts (force yes\|no before design-review)
 - **Pending parallel:** `api|db` until both `03a-api` and `03a-db` exist, then `none`
-- HITL Gate B prefer **blocking** (Has API/DB + authz); HITL Grill **async-notify**; Gate C **blocking**
+- HITL Gate B **blocking** (required for Mode full); HITL Grill **async-notify**; Gate C **blocking**
 - `Gate B veto: none`
 - **Never** skip-review when Has API or Has DB = yes
 - **Lint (required):** `scripts/lint-run.py …` then `--before-design-review` / `--before-build`
@@ -39,7 +39,7 @@ Anti-patterns: [anti-patterns.md](anti-patterns.md). API/DB rules: [lenses.md](.
 | 15 | `lens-api` ∥ `lens-db` (∥ `lens-security` if planned) | Parallel when 2+ → `merge-findings` |
 | 16 | `test-full` | One Task; Result **success** |
 | 17 | Gate C | blocking — user names commit / push / PR / merge |
-| 18 | `merge` | Only approved actions; Status **`done`** only when Result **success** **and** `merge` ∈ Gate C approved (PR-only / commit-only → stay **paused**) + calibration Notes (≤3) |
+| 18 | `merge` | Only approved actions; Status **`done`** only when Result **success** **and** `merge` ∈ Gate C approved (PR-only / commit-only → stay **paused**) + calibration Notes (≤3) + append same ≤3 lines to `_calibration.md` ([stages.md](../stages.md) Done criteria) |
 
 ## Tiny-tweak variant (not this ask)
 

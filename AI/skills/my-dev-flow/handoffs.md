@@ -53,12 +53,13 @@ Workflow slug: <slug>
 Stage: <stage-id>
 00-run.md: .my-docs/workflow/<slug>/00-run.md
 Read only the artifacts listed for this stage (do not open others unless a listed file links to them).
-Write only: <write list for stage>
+Write only: <parsed write cell for this stage>
 Use simple plain words. Fresh context — do not assume prior chat or other agents' memory.
 Honor artifact size caps in my-dev-flow/size-caps.md.
 Resolve skill paths per my-dev-flow/skills-path.md ({my-dev-flow}, {myplan}, etc.).
 Severity exit per my-dev-flow/severity.md (Critical/Major block clean; defer Enhancement).
 ```
+`handoff-for.py` substitutes the stage Write cell into the base block (no unfilled placeholder).
 
 ### Stage id → read / write
 
@@ -78,7 +79,7 @@ Severity exit per my-dev-flow/severity.md (Critical/Major block clean; defer Enh
 | `db-design-review` | `00-run.md`, `02-analysis.md`, `03-design.md` (Database contracts + example queries), `04-tasks.md`, `02-skim.md` (if present), repo `AGENTS.md` / `db/schema` / migration patterns when present — stage N/A when Has DB = no or Notes `tiny-contract-tweak` | `03a-db-design-review.md` only (do not invent if skipped) |
 | `design-update` | `00-run.md`, `03a-design-review-log.md` (if present), `03a-api-contract-review.md` (if present — not Notes `tiny-contract-tweak` / skipped), `03a-db-design-review.md` (if present — not Notes `tiny-contract-tweak` / skipped), `01-idea.md`, `02-skim.md` (if present), `02-analysis.md`, `02b-grill.md` (if present), `03-design.md`, `04-tasks.md` | `03-design.md`, `04-tasks.md`, `00-run.md` Notes (backloop rounds), plus `03a*` round notes when present (no empty `03a-api` / `03a-db`) |
 | `tdd-review` | `00-run.md`, `03-design.md`, `04-tasks.md`, `03a-design-review-log.md` (if present) — **only when planned tests exist** | `04a-tdd-test-review.md` |
-| `build` | `00-run.md` (Verify commands + **Gate B veto** must be `none`; when HITL Gate B is **blocking** → **Gate B approved** `yes`/named pick; if Notes veto window open → **Build armed** required — [hitl.md](hitl.md) · [verify-and-fix.md](verify-and-fix.md)), `03-design.md`, `04-tasks.md`, `04a-tdd-test-review.md` (if present), when **Has UI**: Design UI specs in `03-design` / acceptance in `04-tasks` (+ `01a-idea-ui-review.md` if present for Gate A #1/#2), `06-test-log.md` (create/update Smoke) | code + Smoke section; first line Result **verify-pass** \| **verify-fail**; if veto `pending`, (blocking without **Gate B approved**), (veto window open without **Build armed**), or Notes `design-backloop` → stop without coding (`blocked — …`); parent skips Smoke Task on verify-pass |
+| `build` | `00-run.md`, `03-design.md`, `04-tasks.md`, `04a-tdd-test-review.md` (if present), when **Has UI**: Design UI specs in `03-design` / acceptance in `04-tasks` (+ `01a-idea-ui-review.md` if present), `06-test-log.md` (create/update Smoke) — honor [hitl.md](hitl.md) · [verify-and-fix.md](verify-and-fix.md) | code + Smoke section; first line Result **verify-pass** \| **verify-fail**; stop without coding when blocked (`blocked — …`) — honor [hitl.md](hitl.md) · [verify-and-fix.md](verify-and-fix.md); parent skips Smoke Task on verify-pass |
 | `smoke` | `00-run.md`, `06-test-log.md` | `06-test-log.md` (Smoke section) — only when Smoke re-run needed |
 | `adversarial` | `00-run.md`, `04-tasks.md`, `05-review-log.md` + draft code/tests | `05-review-log.md` (Adversarial section) |
 | `quality` | `00-run.md`, `01-idea.md`, `01a-idea-ui-review.md` (if present), `03-design.md`, `04-tasks.md`, `05-review-log.md` + draft code | `05-review-log.md` (Quality section) |
@@ -89,11 +90,11 @@ Severity exit per my-dev-flow/severity.md (Critical/Major block clean; defer Enh
 | `lens-perf` | `00-run.md`, `03-design.md`, `04-tasks.md` + draft code | `05-lens-performance.md` only |
 | `lens-memory` | `00-run.md`, `03-design.md`, `04-tasks.md` + draft code | `05-lens-memory.md` only |
 | `merge-findings` | `00-run.md`, active `05-lens-*.md` for this round, `05-review-log.md` | `05-review-log.md` (Merged lenses section) |
-| `fix-review` | `00-run.md` (Verify commands), `05-review-log.md` (Fix ask), `03-design.md`, `04-tasks.md` | code + fix notes; first line Result **verify-pass** \| **verify-fail** |
+| `fix-review` | `00-run.md`, `05-review-log.md` (Fix ask), `03-design.md`, `04-tasks.md` — honor [verify-and-fix.md](verify-and-fix.md) | code + fix notes; first line Result **verify-pass** \| **verify-fail** |
 | `test-full` | `00-run.md` (Verify commands), `03-design.md`, `04-tasks.md`, `06-test-log.md` — **one Task:** coverage + add missing e2e + run suite | `06-test-log.md` (Coverage + Runs + Result; **Mode last run:** `full`) |
 | `test-lite` | `00-run.md` (Verify commands), `04-tasks.md`, `06-test-log.md` | `06-test-log.md` (targeted e2e; unit if needed; **Mode last run:** `lite`) |
-| `fix-tests` | `00-run.md` (Verify commands), `06-test-log.md` (Fix ask), `03-design.md`, `04-tasks.md` | code; first line Result **verify-pass** \| **verify-fail** |
-| `merge` | `00-run.md` (**Gate C approved** — abort if missing/`none`), `06-test-log.md`, `05-review-log.md` (if present), skim `03-design.md` (optional for PR risk summary); template `{my-dev-flow}/artifacts/pr-body.md` | PR body from template + merge; **refuse** commit of `.env` / `.env.*` / `*.pem` / `credentials.json` / `*secret*` ([merge.md](../my-dev-flow-merge/stages/merge.md)) |
+| `fix-tests` | `00-run.md`, `06-test-log.md` (Fix ask), `03-design.md`, `04-tasks.md` — honor [verify-and-fix.md](verify-and-fix.md) | code; first line Result **verify-pass** \| **verify-fail** |
+| `merge` | `00-run.md`, `06-test-log.md`, `05-review-log.md` (if present), skim `03-design.md` (optional for PR risk summary); template `{my-dev-flow}/artifacts/pr-body.md` — honor [hitl.md](hitl.md) Gate C | PR body from template + merge; **refuse** commit of `.env` / `.env.*` / `*.pem` / `credentials.json` / `*secret*` ([merge.md](../my-dev-flow-merge/stages/merge.md)) |
 
 **Prompt tip:** After the base block, paste only the concrete paths for that stage (expand `<slug>`). Example for `design-review`:
 

@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import importlib.util
 import os
+import re
 import sys
 import tempfile
 import time
@@ -54,12 +55,22 @@ def _base(
     gate_b_approved: str | None = None,
     gate_c_approved: str = "none",
     lens_plan: str = "none",
+    clarity_ok: bool = True,
 ) -> str:
     if hitl_gate_b is None:
         hitl_gate_b = "blocking" if mode == "full" else "auto"
     if gate_b_approved is None:
         # Blocking Gate B needs durable yes before Build; keep fixtures green
         gate_b_approved = "yes" if hitl_gate_b == "blocking" else "none"
+    # R2: once-per-run presence-any (not boundary-matched); keep fixtures green
+    # unless testing absence. Lint only checks that some token exists.
+    if clarity_ok and not re.search(r"(?i)clarity-check\s+ok", notes):
+        boundary = (
+            next_step
+            if next_step in lint_run.CLARITY_CHECK_STAGES
+            else "build"
+        )
+        notes = f"{notes}\n- clarity-check ok — {boundary}"
     pp = (
         f"**Pending parallel:** {pending_parallel}\n"
         if pending_parallel is not None
@@ -429,6 +440,7 @@ class TestHandoffFor(unittest.TestCase):
             block = handoff_for.BASE_BLOCK.format(
                 slug="s",
                 stage_id="build",
+                write_list="code + Smoke section",
                 size_caps_path=str(skill_root / "size-caps.md"),
                 skills_path_path=str(skill_root / "skills-path.md"),
                 severity_path=str(skill_root / "severity.md"),
@@ -1502,8 +1514,8 @@ class TestGateCTestBar(unittest.TestCase):
             any("Gate C test bar" in e for e in _errors(issues))
         )
 
-    def test_skip_review_build_only_smoke_warns(self):
-        """E5: skip-review + Build-writes-Smoke only → warn on --before-merge."""
+    def test_skip_review_build_only_smoke_errors(self):
+        """E5/R7: skip-review + Build-writes-Smoke only → error on --before-merge."""
         text = _base(
             review="skip-review",
             has_api="no",
@@ -1529,11 +1541,43 @@ class TestGateCTestBar(unittest.TestCase):
             )
             self.assertFalse(any("Gate C test bar" in e for e in _errors(issues)))
             self.assertTrue(
-                any("Build-writes-Smoke" in w for w in _warns(issues))
+                any("Build-writes-Smoke" in e for e in _errors(issues))
             )
 
-    def test_skip_review_smoke_waive_no_warn(self):
-        """E5: Notes smoke-waive suppresses Build-only smoke warn."""
+    def test_skip_review_docs_only_smoke_warns(self):
+        """R7: docs-only → warn/allow for Build-only smoke."""
+        text = _base(
+            review="skip-review",
+            has_api="no",
+            has_db="no",
+            next_step="merge",
+            stage_id="gate-c",
+            gate_c_approved="merge",
+            last_verify="verify-pass",
+            notes="- docs-only — copy tweak",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "06-test-log.md").write_text(
+                "# Test log\n\n**Smoke result:** smoke-pass\n",
+                encoding="utf-8",
+            )
+            issues = lint_run_md(
+                text,
+                before_design_review=False,
+                before_build=False,
+                before_merge=True,
+                run_dir=run_dir,
+            )
+            self.assertFalse(
+                any("Build-writes-Smoke" in e for e in _errors(issues))
+            )
+            self.assertTrue(
+                any("docs-only" in w for w in _warns(issues))
+            )
+
+    def test_skip_review_smoke_waive_no_error(self):
+        """E5: Notes smoke-waive clears fail-closed Build-only smoke error."""
         text = _base(
             review="skip-review",
             has_api="no",
@@ -1558,11 +1602,12 @@ class TestGateCTestBar(unittest.TestCase):
                 run_dir=run_dir,
             )
             self.assertFalse(
-                any("Build-writes-Smoke" in w for w in _warns(issues))
+                any("Build-writes-Smoke" in e for e in _errors(issues)),
+                "smoke-waive must clear fail-closed Build-writes-Smoke error",
             )
 
-    def test_skip_review_smoke_rerun_done_no_warn(self):
-        """E5: smoke-pass (re-run) evidence suppresses warn."""
+    def test_skip_review_smoke_rerun_done_no_error(self):
+        """E5: smoke-pass (re-run) evidence clears fail-closed Build-only smoke error."""
         text = _base(
             review="skip-review",
             has_api="no",
@@ -1587,7 +1632,8 @@ class TestGateCTestBar(unittest.TestCase):
                 run_dir=run_dir,
             )
             self.assertFalse(
-                any("Build-writes-Smoke" in w for w in _warns(issues))
+                any("Build-writes-Smoke" in e for e in _errors(issues)),
+                "smoke-pass (re-run) must clear fail-closed Build-writes-Smoke error",
             )
 
     def test_next_merge_blocks_on_bar(self):
@@ -1610,7 +1656,8 @@ class TestGateCTestBar(unittest.TestCase):
             out = buf.getvalue()
             self.assertEqual(rc, 0)
             self.assertIn("handoff: do-not-launch", out)
-            self.assertIn("Gate C test bar", out)
+            self.assertIn("error: Gate C test bar", out)
+            self.assertNotIn("warn: Gate C test bar", out)
 
 
 class TestDeriveAndCheckResults(unittest.TestCase):
@@ -2055,12 +2102,29 @@ class TestDeriveAndCheckResults(unittest.TestCase):
         self.assertIn("04-tasks.md", write_cell)
         self.assertIn("00-run.md", write_cell)
 
-    def test_handoff_build_includes_design_backloop(self):
+    def test_handoff_build_honors_hitl_verify(self):
+        rows = handoff_for._parse_stage_table(
+            handoff_for.HANDOFFS.read_text(encoding="utf-8")
+        )
+        read_cell, write_cell = rows["build"]
+        self.assertIn("hitl.md", read_cell)
+        self.assertIn("verify-and-fix.md", write_cell)
+
+    def test_handoff_base_substitutes_write_list(self):
         rows = handoff_for._parse_stage_table(
             handoff_for.HANDOFFS.read_text(encoding="utf-8")
         )
         _read, write_cell = rows["build"]
-        self.assertIn("design-backloop", write_cell)
+        block = handoff_for.BASE_BLOCK.format(
+            slug="s",
+            stage_id="build",
+            write_list=write_cell,
+            size_caps_path="size-caps.md",
+            skills_path_path="skills-path.md",
+            severity_path="severity.md",
+        )
+        self.assertIn(write_cell, block)
+        self.assertNotIn("<write list for stage>", block)
 
     def test_handoff_base_points_at_size_caps(self):
         self.assertIn("{size_caps_path}", handoff_for.BASE_BLOCK)
@@ -3007,7 +3071,7 @@ class TestM1M2E1E2Findings(unittest.TestCase):
             out = buf.getvalue()
             self.assertEqual(rc, 0)
             self.assertIn("handoff: do-not-launch", out)
-            self.assertIn("design-review Result must be clean", out)
+            self.assertIn("error: design-review Result must be clean", out)
 
     def test_status_done_warns_without_calibration(self):
         """E1: Status=done without calibration evidence → warn."""
@@ -3041,24 +3105,25 @@ class TestM1M2E1E2Findings(unittest.TestCase):
             any("calibration evidence" in w for w in _warns(issues))
         )
 
-    def test_clarity_check_warn_before_design_phase(self):
-        """E2: Next design-phase without clarity-check token → soft-warn."""
+    def test_clarity_check_error_before_design_phase(self):
+        """R2: Next design-phase without clarity-check token → error."""
         text = _base(
             mode="simple",
             review="lite",
             next_step="design-phase",
             stage_id="design-phase",
             notes="- ok",
+            clarity_ok=False,
         )
         issues = lint_run_md(
             text, before_design_review=False, before_build=False
         )
         self.assertTrue(
-            any("clarity-check ok" in w for w in _warns(issues))
+            any("clarity-check ok" in e for e in _errors(issues))
         )
 
-    def test_clarity_check_ok_logged_no_warn(self):
-        """E2: clarity-check ok — <boundary> in Notes clears warn."""
+    def test_clarity_check_ok_logged_no_error(self):
+        """R2: once-per-run presence-any — any clarity-check ok token clears error."""
         text = _base(
             mode="simple",
             review="lite",
@@ -3070,8 +3135,29 @@ class TestM1M2E1E2Findings(unittest.TestCase):
             text, before_design_review=False, before_build=False
         )
         self.assertFalse(
-            any("clarity-check ok" in w and "missing" in w for w in _warns(issues))
+            any("clarity-check ok" in e and "missing" in e for e in _errors(issues))
         )
+
+    def test_clarity_check_next_do_not_launch(self):
+        """R2: --next emits error + do-not-launch when clarity-check missing."""
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="design-phase",
+            stage_id="design-phase",
+            notes="- ok",
+            clarity_ok=False,
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            buf = __import__("io").StringIO()
+            with __import__("contextlib").redirect_stdout(buf):
+                rc = lint_run.print_next_hint(run_dir)
+            out = buf.getvalue()
+            self.assertEqual(rc, 0)
+            self.assertIn("handoff: do-not-launch", out)
+            self.assertIn("error: clarity-check", out)
 
 
 if __name__ == "__main__":

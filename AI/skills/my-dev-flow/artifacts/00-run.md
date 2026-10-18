@@ -106,7 +106,7 @@ Fill **Required** at Step 0. Fill **Optional** when known.
 - **HITL Gate B:** auto
 - **HITL Grill:** auto
 - **HITL Gate C:** blocking
-<!-- Gate C always blocking. Gate B: Mode full → blocking (never auto/async-notify); Mode simple → auto|async-notify only when Has API/DB=no + no auth/PII/schema (hitl.md Default Gate B narrow async). HITL Grill independent of Gate B. Soft HITL = Grill + simple Gate B only. -->
+<!-- Gate C always blocking. Gate B: Mode full → blocking (never auto/async-notify); Mode simple low-risk → prefer auto; async-notify only when user asks for a veto window / async digest (Has API/DB=no + no auth/PII/schema — hitl.md Default Gate B). HITL Grill independent of Gate B. Soft HITL = Grill + simple Gate B only. -->
 - **04a:** skipped — reason:
 - **Smoke:** pending
 <!-- pending | smoke-pass (from Build) | smoke-pass (re-run) | smoke-fail | skipped-verify-bar (skip-review) -->
@@ -134,7 +134,7 @@ Update after each step. Parent reads **this card + one** stages/hitl/models/lens
 ### Gates
 
 - [ ] Gate A — Day-to-day + 80/20 (auto when `01a` Result ok)
-- [ ] Gate B — Design + tasks (+ tests if planned) — HITL: Mode full → blocking; Mode simple → auto | async-notify | blocking per hitl.md
+- [ ] Gate B — Design + tasks (+ tests if planned) — HITL: Mode full → blocking; Mode simple low-risk → prefer auto (async-notify only when user asks for veto window / async digest); else blocking — hitl.md
 - [ ] Gate C — Commit / push / PR / merge — **always blocking** (record **Gate C approved** on yes)
 
 ### Notes

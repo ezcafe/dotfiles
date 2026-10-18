@@ -18,7 +18,7 @@ Given `00-run.md` Orchestrator card **Stage id** / **Next step**, open **1–2 f
 
 If clarity-check fails → ask the user; do **not** launch the Task.
 
-**Log token (once):** after a passing clarity-check, add to Notes or Run log: `clarity-check ok — <boundary>` where `<boundary>` is e.g. `design-phase`, `analyze`, `build`. Lint soft-warns when the token is missing before those Next targets / `--before-build`.
+**Log token (once per run):** after the first passing clarity-check in this run, add to Notes or Run log: `clarity-check ok — <boundary>` where `<boundary>` names that check (e.g. `design-phase`, `analyze`, `build`). **One** such token unlocks **all** later design/code boundaries in the same run — lint checks **presence-any** (does **not** require `<boundary>` to match the current Next). Still fail-closed: Lint **errors** / `--next` → `do-not-launch` when **no** token exists before those Next targets / `--before-build` ([invariants.md](invariants.md)). Prefer opening the matching clarity-check file at each boundary above; do not invent a second token just to rename the boundary.
 
 | Stage id / Next | Open (1–2) | Handoff |
 |-----------------|------------|---------|

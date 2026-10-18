@@ -29,7 +29,7 @@ Workflow slug: {slug}
 Stage: {stage_id}
 00-run.md: .my-docs/workflow/{slug}/00-run.md
 Read only the artifacts listed for this stage (do not open others unless a listed file links to them).
-Write only: <write list for stage>
+Write only: {write_list}
 Use simple plain words. Fresh context — do not assume prior chat or other agents' memory.
 Honor artifact size caps in {size_caps_path}.
 Resolve skill paths per {skills_path_path} ({{my-dev-flow}}, {{myplan}}, etc.).
@@ -133,6 +133,7 @@ def main() -> int:
         BASE_BLOCK.format(
             slug=args.slug,
             stage_id=stage,
+            write_list=write_cell,
             size_caps_path=size_caps_ref,
             skills_path_path=skills_path_ref,
             severity_path=severity_ref,

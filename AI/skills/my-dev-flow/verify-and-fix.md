@@ -88,7 +88,7 @@ Parent then:
 |-----------|--------|
 | Smoke section complete + smoke-pass + commands match Verify commands | **Skip Smoke Task** — treat as smoke-pass; continue (review or Gate C) |
 | Smoke incomplete, mismatch, or Notes `smoke re-run` | Launch Smoke Task (independent re-run) — see **skip-review ordered recovery** below |
-| Review profile **skip-review** (legality: [lenses.md](lenses.md)) | Gate C test bar = Build verify-pass (+ Smoke section). Fast path: no Smoke Task required by default. Prefer one independent Smoke re-run (Notes `smoke re-run`) or explicit Notes `smoke-waive` / `gate-c-test-override` before Gate C. Lint `--before-merge`: **warn** when only Build-writes-Smoke (no re-run evidence / waive) |
+| Review profile **skip-review** (legality: [lenses.md](lenses.md)) | Gate C test bar = Build verify-pass (+ Smoke section). Before Gate C: Notes `smoke-waive` / `smoke-pass (re-run)` / `gate-c-test-override`, **or** Complexity/Notes `docs-only` (warn/allow). Else Lint `--before-merge` **errors** when only Build-writes-Smoke (fail-closed) |
 
 ### Skip-review + Smoke ordered recovery (SoT)
 
@@ -98,7 +98,7 @@ When Review profile is **skip-review** and Smoke is incomplete / mismatched / ne
 2. **Or** Notes `smoke re-run` → allow **one** Smoke Task under skip-review (exception; clear the Notes token after smoke-pass). Prefer this independent re-run once before Gate C when Build-writes-Smoke feels thin.
 3. **Or** drop skip-review → **lite** → `code-review-phase` → `test-lite` → Gate C.
 
-Do **not** launch `smoke` under skip-review without Notes `smoke re-run` (lint warn). Explicit Notes `smoke-waive` (or `gate-c-test-override`) may skip the independent-Smoke preference — not a hard lint block. After an independent re-run, record `smoke-pass (re-run)` (Notes or Smoke field) and clear the `smoke re-run` token. Lint `--before-merge` **warns** when skip-review has only Build-writes-Smoke. Independent verification for merge remains: **full** / **lite** test after review (or smoke-pass alone for Mode simple legal skip-review).
+Do **not** launch `smoke` under skip-review without Notes `smoke re-run` (lint warn). Explicit Notes `smoke-waive` / `smoke-pass (re-run)` / `gate-c-test-override`, or Complexity/Notes `docs-only`, may skip the independent-Smoke requirement. After an independent re-run, record `smoke-pass (re-run)` (Notes or Smoke field) and clear the `smoke re-run` token. Lint `--before-merge` **errors** when skip-review has only Build-writes-Smoke without those tokens (`docs-only` → warn/allow). Independent verification for merge remains: **full** / **lite** test after review (or smoke-pass alone for Mode simple legal skip-review when waived).
 
 ## Fix rules (TDD)
 

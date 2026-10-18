@@ -13,6 +13,7 @@ Quick “wrong move → right move” for [`my-dev-flow`](../SKILL.md).
 | Treat Gate B **auto** / **async-notify** as commit approval | Gate C always blocking; name each git action ([hitl.md](../hitl.md)) |
 | Launch Merge when **Gate C approved** is missing / `none` | Ask Gate C; set durable field; `--next` / lint block until non-empty ([hitl.md](../hitl.md)) |
 | Use Gate B **async-notify** as default on Mode **full** | Mode full → **blocking** only; async-notify only Mode **simple** + Has API/DB=no + no auth/PII/schema ([hitl.md](../hitl.md) Default Gate B narrow async) |
+| Mode **simple** low-risk: default Gate B to **async-notify** without user asking for a veto window / async digest | Prefer **auto**; use **async-notify** only when the user asks for that veto window ([hitl.md](../hitl.md) Default Gate B) |
 | Launch Build in the **same parent turn** as async-notify Gate B digest | One turn gap ([hitl.md](../hitl.md)); Build re-reads `Gate B veto`; resume counts as next turn |
 | Skip sync-to-cursor after editing `AI/skills/` | Run `./AI/skills/sync-to-cursor.sh` (optional `--check` for my-dev-flow* drift — [skills-path.md](../skills-path.md)) |
 | Load whole [handoffs.md](../handoffs.md) for every Task launch | **Required** `scripts/handoff-for.py <stage-id>` ([handoffs.md](../handoffs.md) = edit SoT / debug only) |
@@ -32,7 +33,7 @@ Quick “wrong move → right move” for [`my-dev-flow`](../SKILL.md).
 | Invent unit/e2e runners when Verify commands say N/A | Honor N/A; do not invent a test stack |
 | Copy Gate B HITL tier into Grill | HITL Grill is independent ([grill.md](../grill.md) · [hitl.md](../hitl.md)) |
 | Mode **simple** `design-phase` skips Grill HITL when frontier open or Has API/DB | Still honor HITL Grill ([grill.md](../grill.md) · [hitl.md](../hitl.md)); bundle ≠ skip Grill |
-| Rush Gate C under **skip-review** with only Build-writes-Smoke and no independent check | Prefer one Notes `smoke re-run` (or Notes `smoke-waive` / `gate-c-test-override`) before Gate C; lint `--before-merge` warns; fast path still legal ([verify-and-fix.md](../verify-and-fix.md) · [hitl.md](../hitl.md)) |
+| Rush Gate C under **skip-review** with only Build-writes-Smoke and no independent check | Before Gate C: Notes `smoke-waive` / `smoke-pass (re-run)` / `gate-c-test-override`, or Complexity/Notes `docs-only`; else lint `--before-merge` **errors** (fail-closed). Recovery order: [verify-and-fix.md](../verify-and-fix.md) · [hitl.md](../hitl.md) |
 | Invent Gate A Result `ok` on resume (no Decision N + explicit user yes) | Hold; Decision N → re-run Gate A, or set `ok` + Notes **only after explicit user yes** — never invent ([results.md](../results.md) · [failure-playbook.md](../failure-playbook.md)) |
 | Omit Notes `review-stale` / `test-stale` after rebuild or design-backloop when prior `05`/`06` Results exist | Add both tokens (or clear Results); lint fail-closed when `Last verify-pass at` shows unpaid clean/success ([verify-and-fix.md](../verify-and-fix.md) Stale) |
-| Skip required clarity-check at design/code boundaries | Open the boundary file; if it fails → ask the user; do not launch. Log `clarity-check ok — <boundary>` on Notes/Run log ([parent-next.md](../parent-next.md) · [invariants.md](../invariants.md)) |
+| Skip required clarity-check at design/code boundaries | Open the boundary file; if it fails → ask the user; do not launch. Log `clarity-check ok — <boundary>` **once per run** (presence-any; not boundary-matched) ([parent-next.md](../parent-next.md) · [invariants.md](../invariants.md)) |
