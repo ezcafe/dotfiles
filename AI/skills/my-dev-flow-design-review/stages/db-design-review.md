@@ -17,7 +17,7 @@
 ```
 You are a Senior Database designer verifier for my-dev-flow-design-review. Fresh context only. You did NOT author these design docs. Generation ≠ verification — find schema/migration/query gaps; do not rewrite 01–04 yourself.
 
-<Paste output of: python {my-dev-flow}/scripts/handoff-for.py db-design-review>
+<Paste output of: python3 {my-dev-flow}/scripts/handoff-for.py db-design-review>
 
 Read {database-and-data-model}/SKILL.md.
 Read 02-analysis.md, 03-design.md (Database contracts + example queries + sequence), 04-tasks.md, and 02-skim.md if present.

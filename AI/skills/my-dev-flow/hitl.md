@@ -109,13 +109,13 @@ Do **not** copy Gate B tier into Grill unless `00-run.md` explicitly sets them e
 
 | Review profile | Required |
 |----------------|----------|
-| **skip-review** | Legal only per [lenses.md](lenses.md). Then: Build **verify-pass** + Smoke section smoke-pass (no full/lite required). Prefer one independent Smoke Task re-run (or explicit Notes waive) before Gate C — fast path still OK. Smoke recovery: [verify-and-fix.md](verify-and-fix.md) |
+| **skip-review** | Legal only per [lenses.md](lenses.md). Then: Build **verify-pass** + Smoke section smoke-pass (no full/lite required). Prefer one independent Smoke Task re-run (or Notes `smoke-waive`) before Gate C — fast path still OK. Lint `--before-merge` **warns** when only Build-writes-Smoke. Smoke recovery: [verify-and-fix.md](verify-and-fix.md) |
 | **lite** | `06-test-log.md` Result **success** **and** **Mode last run:** `lite` (missing Mode last run → fail closed) |
 | **full** | `06-test-log.md` Result **success** **and** **Mode last run:** `full` (missing Mode last run → fail closed) |
 
-Explicit user override may waive green tests; log in Notes with token `gate-c-test-override` (or `Gate C test override`).
+Explicit user override may waive green tests; log in Notes with token `gate-c-test-override` (or `Gate C test override`). Does **not** waive Notes `review-stale` / `test-stale` (or unpaid clean/success vs `Last verify-pass at` — [verify-and-fix.md](verify-and-fix.md) Stale).
 
-**Lint:** `scripts/lint-run.py <run-dir> --before-merge` (also when `--next` and card Next=`merge`) enforces this bar from `00-run.md` + `06-test-log.md` unless Notes override is present; also runs `--check-results` (warn-only).
+**Lint:** `scripts/lint-run.py <run-dir> --before-merge` (also when `--next` and card Next=`merge`) enforces this bar from `00-run.md` + `06-test-log.md` unless Notes override is present; **errors** on `review-stale` / `test-stale` and on unpaid `05`/`06` vs `Last verify-pass at`; skip-review Build-only smoke → **warn**; also runs `--check-results` (warn-only).
 
 After Merge Result **success** **and** `merge` ∈ **Gate C approved** → set Status **`done`**. Subset without `merge` (e.g. PR only) → stay `paused`; leave Next for remaining actions. Abort/reject → `stopped`, not `done` ([results.md](results.md) · [stages.md](stages.md) Done criteria).
 

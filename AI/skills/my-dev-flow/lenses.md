@@ -73,3 +73,5 @@ API lens → `05-lens-api.md`. DB lens → `05-lens-db.md`.
 ## TDD test-case review (Step 4a)
 
 Run `04a` **only if** `04-tasks.md` lists concrete tests to create. Else Notes `04a skipped — no planned test cases`; do not invent `04a`.
+
+**Derive:** after design-review / design-verify-phase **clean**, `--next --derive` returns `tdd-review` until `04a-tdd-test-review.md` exists **or** Notes have `04a skipped`; then `gate-b` / `build`.

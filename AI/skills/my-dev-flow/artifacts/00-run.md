@@ -17,6 +17,7 @@ Fill **Required** at Step 0. Fill **Optional** when known.
 | Pending parallel | `none` \| `api` \| `db` \| `api\|db` |
 | Has UI / API / DB | `yes` \| `no` |
 | Last Verify | `pending` \| `verify-pass` \| `verify-fail` |
+| Last verify-pass at | `none` \| ISO-8601 (set on verify-pass — [verify-and-fix.md](../verify-and-fix.md) Stale) |
 | Gate C approved | `none` \| comma-separated subset of `commit`,`push`,`pr`,`merge` |
 
 ```markdown
@@ -50,6 +51,8 @@ Fill **Required** at Step 0. Fill **Optional** when known.
 - **e2e:** `<command>` | N/A — <reason>
 
 **Last Verify:** pending
+**Last verify-pass at:** none
+<!-- ISO-8601 when Last Verify becomes verify-pass (Build After). Lint compares 05/06 mtimes for unpaid clean/success — verify-and-fix.md Stale. none until first verify-pass. -->
 **Verify attempts:** 0
 <!-- Reset per Build/Fix stage entry; max 3 -->
 
@@ -58,6 +61,9 @@ Fill **Required** at Step 0. Fill **Optional** when known.
 
 **Gate B approved:** none
 <!-- none until Gate B settles. HITL Gate B blocking → yes (or named pick) before Build. auto → may stay none. async-notify → Build armed + gap (not this field) — hitl.md. -->
+
+**Gate C approved:** none
+<!-- Required default none. At Gate C / before merge: none until user yes; then comma-separated subset of commit,push,pr,merge naming what the user approved (hitl.md). -->
 
 **Last stage:** stage id + short note (e.g. `build verify-pass`, `gate-b async-notify`) — resume from next incomplete stage id
 
@@ -101,8 +107,6 @@ Fill **Required** at Step 0. Fill **Optional** when known.
 - **HITL Grill:** auto
 - **HITL Gate C:** blocking
 <!-- Gate C always blocking. Gate B: Mode full → blocking (never auto/async-notify); Mode simple → auto|async-notify only when Has API/DB=no + no auth/PII/schema (hitl.md Default Gate B narrow async). HITL Grill independent of Gate B. Soft HITL = Grill + simple Gate B only. -->
-- **Gate C approved:** none
-<!-- Required when at Gate C / before merge: none until user yes; then comma-separated subset of commit,push,pr,merge naming what the user approved (hitl.md). -->
 - **04a:** skipped — reason:
 - **Smoke:** pending
 <!-- pending | smoke-pass (from Build) | smoke-pass (re-run) | smoke-fail | skipped-verify-bar (skip-review) -->

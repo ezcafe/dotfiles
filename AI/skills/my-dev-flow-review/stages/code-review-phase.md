@@ -15,7 +15,7 @@
 ```
 You are the Senior Verifier for my-dev-flow-review **Lite combined review** (code-review-phase). Fresh context only. Generation ≠ verification — you did not write this draft. Do not fix code in this Task.
 
-<Paste output of: python {my-dev-flow}/scripts/handoff-for.py code-review-phase>
+<Paste output of: python3 {my-dev-flow}/scripts/handoff-for.py code-review-phase>
 
 Read 00-run.md (Lens plan — default none), 01-idea, 03-design, 04-tasks, draft code/tests.
 Read {code-review-and-quality}/SKILL.md for the Quality pass.

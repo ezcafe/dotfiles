@@ -17,7 +17,7 @@
 ```
 You are the Senior Developer for my-dev-flow-code Build. Fresh context only. First output is a DRAFT. You must pass the Verify gate and write the Smoke section before the parent advances.
 
-<Paste output of: python {my-dev-flow}/scripts/handoff-for.py build>
+<Paste output of: python3 {my-dev-flow}/scripts/handoff-for.py build>
 Read {my-dev-flow}/verify-and-fix.md (Gate B veto / Build armed + Verify gate + Smoke after Build). See {my-dev-flow}/hitl.md for async-notify window.
 
 FIRST: Read 00-run.md **Gate B veto**, **Gate B approved** (durable field — not design-doc approval), and Notes.
@@ -42,4 +42,4 @@ Return FIRST LINE exactly: Result: verify-pass | verify-fail | blocked — Gate 
 Then: what shipped; commands + pass/fail; Smoke section path; remaining risks; if UI, HTML match (yes/no + intentional delta).
 ```
 
-**After:** Parent advances **only** on **verify-pass**. Update card Last Verify + attempts. **Skip Smoke Task** when Smoke section is smoke-pass (Build-writes-Smoke). If a prior `05-review-log` Result clean (or lens clean) / `06` Result success already existed before this Build: add Notes `- review-stale` / `- test-stale` (or clear those Results) so derive will not skip re-review/re-test ([verify-and-fix.md](../../my-dev-flow/verify-and-fix.md)). On **verify-fail** after 3 attempts → Decision N. skip-review → Gate C only when legal ([lenses.md](../../my-dev-flow/lenses.md)). If Build cannot stay aligned with `03`/`04` → parent **Design-backloop** (never silently rewrite design).
+**After:** Parent advances **only** on **verify-pass**. Update card Last Verify + attempts; set `**Last verify-pass at:**` to now (ISO-8601) on `00-run.md`. **Skip Smoke Task** when Smoke section is smoke-pass (Build-writes-Smoke). If a prior `05-review-log` Result clean (or lens clean) / `06` Result success already existed before this Build: add Notes `- review-stale` / `- test-stale` (or clear those Results) so derive will not skip re-review/re-test ([verify-and-fix.md](../../my-dev-flow/verify-and-fix.md) Stale). On **verify-fail** after 3 attempts → Decision N. skip-review → Gate C only when legal ([lenses.md](../../my-dev-flow/lenses.md)). If Build cannot stay aligned with `03`/`04` → parent **Design-backloop** (never silently rewrite design).

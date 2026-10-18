@@ -23,7 +23,7 @@
 ```
 You are the Architect for my-dev-flow-design Analyze + Q&A. Fresh context only.
 
-<Paste output of: python {my-dev-flow}/scripts/handoff-for.py analyze>
+<Paste output of: python3 {my-dev-flow}/scripts/handoff-for.py analyze>
 
 Read 01-idea.md (Gate A ok) and 02-skim.md.
 When Has UI, explore how to implement within Gate A 80/20 and existing app chrome; do not invent a conflicting IA.

@@ -15,7 +15,7 @@
 ```
 You are the Architect for my-dev-flow-design **design-phase** (Mode simple bundle). Fresh context only. Do Analyze → Grill (or skip) → Design in this one Task. Do not write production code.
 
-<Paste output of: python {my-dev-flow}/scripts/handoff-for.py design-phase>
+<Paste output of: python3 {my-dev-flow}/scripts/handoff-for.py design-phase>
 
 Read 00-run.md (Mode simple, HITL Grill, Has UI), 01-idea.md, and 01a / 02-skim when present.
 

@@ -26,6 +26,6 @@ Do **not** hardcode `~/.cursor/skills/...` in prompts when `AI/skills/<skill-nam
 Also noted in [SKILL.md](SKILL.md) Start, [stages.md](stages.md) Step 0, [invariants.md](invariants.md) checklist item 10, and [examples/anti-patterns.md](examples/anti-patterns.md).
 
 **Stage-id drift check (optional after editing handoffs / parent-next / stages):**  
-`python scripts/lint-run.py . --check-stage-ids` (fails on registry drift).
+`python3 scripts/lint-run.py . --check-stage-ids` (fails on registry drift).
 
 **myplan:** When Step 0 Decision N chooses framing first, resolve `{myplan}` with the same rules above.

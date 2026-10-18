@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """Unit tests for lint-run.py — run from this directory:
 
-  python -m pytest test_lint_run.py -q
+  python3 -m pytest test_lint_run.py -q
   # or
-  python -m unittest test_lint_run.py
+  python3 -m unittest test_lint_run.py
 """
 
 from __future__ import annotations
 
 import importlib.util
+import os
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -42,6 +44,7 @@ def _base(
     has_db: str = "no",
     pending_parallel: str | None = "none",
     last_verify: str = "pending",
+    last_verify_pass_at: str | None = None,
     notes: str = "- ok",
     task_count: str = "1",
     next_step: str = "design-phase",
@@ -90,11 +93,14 @@ def _base(
 **Lens plan:** {lens_plan}
 
 {verify_block}**Last Verify:** {last_verify}
+**Last verify-pass at:** {last_verify_pass_at if last_verify_pass_at is not None else "none"}
 **Verify attempts:** 0
 
 **Gate B veto:** {veto}
 
 **Gate B approved:** {gate_b_approved}
+
+**Gate C approved:** {gate_c_approved}
 
 {pp}**Last stage:** {stage_id}
 
@@ -113,7 +119,6 @@ def _base(
 - **HITL Gate B:** {hitl_gate_b}
 - **HITL Grill:** auto
 - **HITL Gate C:** blocking
-- **Gate C approved:** {gate_c_approved}
 
 ### Orchestrator card (parent — avoid re-ingest)
 
@@ -145,13 +150,26 @@ def _warns(issues) -> list[str]:
     return [i.message for i in issues if i.severity == "warn"]
 
 
+def _write_03a_clean(run_dir: Path) -> None:
+    (run_dir / "03a-design-review-log.md").write_text(
+        "**Result:** clean\n", encoding="utf-8"
+    )
+
+
 class TestLintRun(unittest.TestCase):
     def test_legal_skip_review(self):
         text = _base(review="skip-review", has_api="no", has_db="no")
-        issues = lint_run_md(
-            text, before_design_review=False, before_build=True, check_skip_review=True
-        )
-        self.assertEqual(_errors(issues), [])
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            _write_03a_clean(run_dir)
+            issues = lint_run_md(
+                text,
+                before_design_review=False,
+                before_build=True,
+                check_skip_review=True,
+                run_dir=run_dir,
+            )
+            self.assertEqual(_errors(issues), [])
 
     def test_illegal_skip_review_plus_api(self):
         text = _base(review="skip-review", has_api="yes", has_db="no")
@@ -734,6 +752,7 @@ class TestGateBApprovedAndSkipReviewDefault(unittest.TestCase):
             (run_dir / "01a-idea-ui-review.md").write_text(
                 "**Result:** ok\n", encoding="utf-8"
             )
+            _write_03a_clean(run_dir)
             from io import StringIO
             import contextlib
 
@@ -1075,6 +1094,7 @@ class TestNextAndDryRun(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             run_dir = Path(td)
             (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            _write_03a_clean(run_dir)
             from io import StringIO
             import contextlib
 
@@ -1399,6 +1419,176 @@ class TestGateCTestBar(unittest.TestCase):
         self.assertFalse(
             any("Gate C test bar" in e for e in _errors(issues))
         )
+
+    def test_before_merge_errors_on_review_stale(self):
+        """H1: review-stale blocks --before-merge even when 06 success present."""
+        text = _base(
+            review="lite",
+            next_step="merge",
+            stage_id="gate-c",
+            gate_c_approved="commit,push,pr,merge",
+            last_verify="verify-pass",
+            notes="- review-stale — rebuild invalidated prior review",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "06-test-log.md").write_text(
+                "# Test log\n\n**Result:** success\n**Mode last run:** lite\n"
+                "**Smoke result:** smoke-pass\n",
+                encoding="utf-8",
+            )
+            issues = lint_run_md(
+                text,
+                before_design_review=False,
+                before_build=False,
+                before_merge=True,
+                run_dir=run_dir,
+            )
+            self.assertTrue(
+                any("review-stale" in e for e in _errors(issues))
+            )
+            self.assertFalse(
+                any("Gate C test bar" in e for e in _errors(issues))
+            )
+
+    def test_before_merge_errors_on_test_stale(self):
+        """H1: test-stale blocks --before-merge even when 06 success present."""
+        text = _base(
+            review="lite",
+            next_step="merge",
+            stage_id="gate-c",
+            gate_c_approved="commit,push,pr,merge",
+            last_verify="verify-pass",
+            notes="- test-stale — rebuild invalidated prior test",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "06-test-log.md").write_text(
+                "# Test log\n\n**Result:** success\n**Mode last run:** lite\n"
+                "**Smoke result:** smoke-pass\n",
+                encoding="utf-8",
+            )
+            issues = lint_run_md(
+                text,
+                before_design_review=False,
+                before_build=False,
+                before_merge=True,
+                run_dir=run_dir,
+            )
+            self.assertTrue(
+                any("test-stale" in e for e in _errors(issues))
+            )
+
+    def test_stale_not_waived_by_gate_c_override(self):
+        """H1: gate-c-test-override does not clear review-stale/test-stale."""
+        text = _base(
+            review="lite",
+            next_step="merge",
+            stage_id="gate-c",
+            gate_c_approved="merge",
+            notes=(
+                "- gate-c-test-override — user waived\n"
+                "- review-stale — still invalid"
+            ),
+        )
+        issues = lint_run_md(
+            text,
+            before_design_review=False,
+            before_build=False,
+            before_merge=True,
+        )
+        self.assertTrue(any("review-stale" in e for e in _errors(issues)))
+        self.assertFalse(
+            any("Gate C test bar" in e for e in _errors(issues))
+        )
+
+    def test_skip_review_build_only_smoke_warns(self):
+        """E5: skip-review + Build-writes-Smoke only → warn on --before-merge."""
+        text = _base(
+            review="skip-review",
+            has_api="no",
+            has_db="no",
+            next_step="merge",
+            stage_id="gate-c",
+            gate_c_approved="merge",
+            last_verify="verify-pass",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "06-test-log.md").write_text(
+                "# Test log\n\n**Result:** smoke-pass\n"
+                "**Smoke result:** smoke-pass\n",
+                encoding="utf-8",
+            )
+            issues = lint_run_md(
+                text,
+                before_design_review=False,
+                before_build=False,
+                before_merge=True,
+                run_dir=run_dir,
+            )
+            self.assertFalse(any("Gate C test bar" in e for e in _errors(issues)))
+            self.assertTrue(
+                any("Build-writes-Smoke" in w for w in _warns(issues))
+            )
+
+    def test_skip_review_smoke_waive_no_warn(self):
+        """E5: Notes smoke-waive suppresses Build-only smoke warn."""
+        text = _base(
+            review="skip-review",
+            has_api="no",
+            has_db="no",
+            next_step="merge",
+            stage_id="gate-c",
+            gate_c_approved="merge",
+            last_verify="verify-pass",
+            notes="- smoke-waive — user accepts Build-writes-Smoke",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "06-test-log.md").write_text(
+                "# Test log\n\n**Smoke result:** smoke-pass\n",
+                encoding="utf-8",
+            )
+            issues = lint_run_md(
+                text,
+                before_design_review=False,
+                before_build=False,
+                before_merge=True,
+                run_dir=run_dir,
+            )
+            self.assertFalse(
+                any("Build-writes-Smoke" in w for w in _warns(issues))
+            )
+
+    def test_skip_review_smoke_rerun_done_no_warn(self):
+        """E5: smoke-pass (re-run) evidence suppresses warn."""
+        text = _base(
+            review="skip-review",
+            has_api="no",
+            has_db="no",
+            next_step="merge",
+            stage_id="gate-c",
+            gate_c_approved="merge",
+            last_verify="verify-pass",
+            notes="- Smoke: smoke-pass (re-run)",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "06-test-log.md").write_text(
+                "# Test log\n\n**Smoke result:** smoke-pass\n",
+                encoding="utf-8",
+            )
+            issues = lint_run_md(
+                text,
+                before_design_review=False,
+                before_build=False,
+                before_merge=True,
+                run_dir=run_dir,
+            )
+            self.assertFalse(
+                any("Build-writes-Smoke" in w for w in _warns(issues))
+            )
 
     def test_next_merge_blocks_on_bar(self):
         text = _base(
@@ -2367,6 +2557,521 @@ class TestH1H7Findings(unittest.TestCase):
                 "**Result:** clean\n", encoding="utf-8"
             )
             self.assertTrue(lint_run._review_clean(run_dir, "lite"))
+
+
+class TestE2UnpaidVsVerifyClock(unittest.TestCase):
+    """E2: unpaid 05/06 vs Last verify-pass at without Notes stale tokens."""
+
+    @staticmethod
+    def _clock_iso(offset_sec: float = 0.0) -> str:
+        import datetime as dt
+
+        return dt.datetime.fromtimestamp(
+            time.time() + offset_sec, tz=dt.timezone.utc
+        ).isoformat()
+
+    def _seed_paid_lite(self, run_dir: Path) -> None:
+        (run_dir / "03-design.md").write_text("# d\n", encoding="utf-8")
+        (run_dir / "04-tasks.md").write_text("# t\n", encoding="utf-8")
+        (run_dir / "03a-design-review-log.md").write_text(
+            "**Result:** clean\n", encoding="utf-8"
+        )
+        (run_dir / "05-review-log.md").write_text(
+            "**Result:** clean\n", encoding="utf-8"
+        )
+        (run_dir / "06-test-log.md").write_text(
+            "**Smoke result:** smoke-pass\n"
+            "**Result:** success\n"
+            "**Mode last run:** lite\n",
+            encoding="utf-8",
+        )
+
+    def test_before_merge_errors_when_review_older_than_clock(self):
+        # Clock = now; 05 older → unpaid review
+        clock = self._clock_iso(0)
+        text = _base(
+            review="lite",
+            next_step="merge",
+            stage_id="gate-c",
+            gate_c_approved="commit,push,pr,merge",
+            last_verify="verify-pass",
+            last_verify_pass_at=clock,
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            self._seed_paid_lite(run_dir)
+            old = time.time() - 3600
+            os.utime(run_dir / "05-review-log.md", (old, old))
+            os.utime(run_dir / "06-test-log.md", (time.time(), time.time()))
+            issues = lint_run_md(
+                text,
+                before_design_review=False,
+                before_build=False,
+                before_merge=True,
+                run_dir=run_dir,
+            )
+            errs = _errors(issues)
+            self.assertTrue(
+                any("Last verify-pass at" in e and "05-review-log" in e for e in errs)
+            )
+
+    def test_before_merge_errors_when_test_older_than_clock(self):
+        clock = self._clock_iso(0)
+        text = _base(
+            review="lite",
+            next_step="merge",
+            stage_id="gate-c",
+            gate_c_approved="merge",
+            last_verify="verify-pass",
+            last_verify_pass_at=clock,
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            self._seed_paid_lite(run_dir)
+            # Fresh review after rebuild; stale test file
+            os.utime(run_dir / "05-review-log.md", (time.time(), time.time()))
+            old = time.time() - 3600
+            os.utime(run_dir / "06-test-log.md", (old, old))
+            issues = lint_run_md(
+                text,
+                before_design_review=False,
+                before_build=False,
+                before_merge=True,
+                run_dir=run_dir,
+            )
+            errs = _errors(issues)
+            self.assertTrue(
+                any("Last verify-pass at" in e and "06-test-log" in e for e in errs)
+            )
+            self.assertFalse(
+                any("05-review-log" in e for e in errs)
+            )
+
+    def test_before_merge_ok_when_artifacts_newer_than_clock(self):
+        # Clock in the past; fresh 05/06 after re-review/re-test
+        clock = self._clock_iso(-3600)
+        text = _base(
+            review="lite",
+            next_step="merge",
+            stage_id="gate-c",
+            gate_c_approved="merge",
+            last_verify="verify-pass",
+            last_verify_pass_at=clock,
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            self._seed_paid_lite(run_dir)
+            fresh = time.time()
+            os.utime(run_dir / "05-review-log.md", (fresh, fresh))
+            os.utime(run_dir / "06-test-log.md", (fresh, fresh))
+            issues = lint_run_md(
+                text,
+                before_design_review=False,
+                before_build=False,
+                before_merge=True,
+                run_dir=run_dir,
+            )
+            errs = _errors(issues)
+            self.assertFalse(any("Last verify-pass at" in e for e in errs))
+            self.assertFalse(any("review-stale" in e for e in errs))
+            self.assertFalse(any("test-stale" in e for e in errs))
+
+    def test_no_clock_skips_auto_detect(self):
+        """Missing Last verify-pass at → Notes-only (no implied error)."""
+        text = _base(
+            review="lite",
+            next_step="merge",
+            stage_id="gate-c",
+            gate_c_approved="merge",
+            last_verify="verify-pass",
+            last_verify_pass_at="none",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            self._seed_paid_lite(run_dir)
+            old = time.time() - 7200
+            os.utime(run_dir / "05-review-log.md", (old, old))
+            os.utime(run_dir / "06-test-log.md", (old, old))
+            issues = lint_run_md(
+                text,
+                before_design_review=False,
+                before_build=False,
+                before_merge=True,
+                run_dir=run_dir,
+            )
+            self.assertFalse(
+                any("Last verify-pass at" in e for e in _errors(issues))
+            )
+
+    def test_notes_stale_still_errors_without_double_implied(self):
+        clock = self._clock_iso(0)
+        text = _base(
+            review="lite",
+            next_step="merge",
+            stage_id="gate-c",
+            gate_c_approved="merge",
+            last_verify="verify-pass",
+            last_verify_pass_at=clock,
+            notes="- review-stale — rebuild",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            self._seed_paid_lite(run_dir)
+            old = time.time() - 3600
+            os.utime(run_dir / "05-review-log.md", (old, old))
+            issues = lint_run_md(
+                text,
+                before_design_review=False,
+                before_build=False,
+                before_merge=True,
+                run_dir=run_dir,
+            )
+            errs = _errors(issues)
+            review_msgs = [e for e in errs if "review-stale" in e or "05-review-log" in e]
+            self.assertEqual(len(review_msgs), 1)
+            self.assertTrue(any("Notes review-stale" in e for e in review_msgs))
+
+    def test_derive_reenters_review_when_implied_stale(self):
+        clock = self._clock_iso(0)
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="gate-c",
+            last_verify="verify-pass",
+            last_verify_pass_at=clock,
+            hitl_gate_b="auto",
+            gate_b_approved="none",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            self._seed_paid_lite(run_dir)
+            old = time.time() - 3600
+            os.utime(run_dir / "05-review-log.md", (old, old))
+            os.utime(run_dir / "06-test-log.md", (time.time(), time.time()))
+            derived = lint_run.derive_expected_next(text, run_dir)
+            self.assertEqual(derived, "code-review-phase")
+
+    def test_derive_reenters_test_when_implied_stale(self):
+        clock = self._clock_iso(0)
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="gate-c",
+            last_verify="verify-pass",
+            last_verify_pass_at=clock,
+            hitl_gate_b="auto",
+            gate_b_approved="none",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            self._seed_paid_lite(run_dir)
+            os.utime(run_dir / "05-review-log.md", (time.time(), time.time()))
+            old = time.time() - 3600
+            os.utime(run_dir / "06-test-log.md", (old, old))
+            derived = lint_run.derive_expected_next(text, run_dir)
+            self.assertEqual(derived, "test-lite")
+
+    def test_next_do_not_launch_merge_on_implied_review_stale(self):
+        clock = self._clock_iso(0)
+        text = _base(
+            review="lite",
+            next_step="merge",
+            stage_id="merge",
+            gate_c_approved="merge",
+            last_verify="verify-pass",
+            last_verify_pass_at=clock,
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            self._seed_paid_lite(run_dir)
+            old = time.time() - 3600
+            os.utime(run_dir / "05-review-log.md", (old, old))
+            import io
+            from contextlib import redirect_stdout
+
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                rc = lint_run.print_next_hint(run_dir, derive=False)
+            out = buf.getvalue()
+            self.assertEqual(rc, 0)
+            self.assertIn("handoff: do-not-launch", out)
+            self.assertIn("Last verify-pass at", out)
+
+    def test_skip_review_ignores_implied_review_stale(self):
+        clock = self._clock_iso(0)
+        text = _base(
+            review="skip-review",
+            has_api="no",
+            has_db="no",
+            next_step="merge",
+            stage_id="gate-c",
+            gate_c_approved="merge",
+            last_verify="verify-pass",
+            last_verify_pass_at=clock,
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "05-review-log.md").write_text(
+                "**Result:** clean\n", encoding="utf-8"
+            )
+            (run_dir / "06-test-log.md").write_text(
+                "**Smoke result:** smoke-pass\n"
+                "**Result:** smoke-pass\n",
+                encoding="utf-8",
+            )
+            old = time.time() - 3600
+            os.utime(run_dir / "05-review-log.md", (old, old))
+            issues = lint_run_md(
+                text,
+                before_design_review=False,
+                before_build=False,
+                before_merge=True,
+                run_dir=run_dir,
+            )
+            self.assertFalse(
+                any("05-review-log" in e for e in _errors(issues))
+            )
+
+
+class TestM1M2E1E2Findings(unittest.TestCase):
+    """Fresh-review M1/M2/E1/E2: 04a derive, 03a before Build, calibration, clarity."""
+
+    def test_derive_tdd_review_after_design_clean_no_04a(self):
+        """M1: design clean + no 04a / skip Notes → tdd-review (not gate-b/build)."""
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="gate-b",
+            hitl_gate_b="auto",
+            gate_b_approved="none",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "03-design.md").write_text("# d\n", encoding="utf-8")
+            (run_dir / "04-tasks.md").write_text("# t\n", encoding="utf-8")
+            _write_03a_clean(run_dir)
+            derived = lint_run.derive_expected_next(text, run_dir)
+            self.assertEqual(derived, "tdd-review")
+
+    def test_derive_gate_b_when_04a_skipped_notes(self):
+        """M1: Notes 04a skipped → gate-b/build (auto → build)."""
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="gate-b",
+            notes="- 04a skipped — no planned test cases",
+            hitl_gate_b="auto",
+            gate_b_approved="none",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "03-design.md").write_text("# d\n", encoding="utf-8")
+            (run_dir / "04-tasks.md").write_text("# t\n", encoding="utf-8")
+            _write_03a_clean(run_dir)
+            derived = lint_run.derive_expected_next(text, run_dir)
+            self.assertEqual(derived, "build")
+
+    def test_derive_gate_b_when_04a_artifact_exists(self):
+        """M1: 04a-tdd-test-review.md present → past optional 04a."""
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="gate-b",
+            hitl_gate_b="blocking",
+            gate_b_approved="none",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "03-design.md").write_text("# d\n", encoding="utf-8")
+            (run_dir / "04-tasks.md").write_text("# t\n", encoding="utf-8")
+            _write_03a_clean(run_dir)
+            (run_dir / "04a-tdd-test-review.md").write_text(
+                "**Result:** clean\n", encoding="utf-8"
+            )
+            derived = lint_run.derive_expected_next(text, run_dir)
+            self.assertEqual(derived, "gate-b")
+
+    def test_derive_full_tdd_review_after_design_clean(self):
+        """M1: Mode full design clean without 04a → tdd-review."""
+        text = _base(
+            mode="full",
+            review="full",
+            next_step="gate-b",
+            hitl_gate_b="blocking",
+            gate_b_approved="none",
+            has_api="no",
+            has_db="no",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            for name in (
+                "01-idea.md",
+                "01a-idea-ui-review.md",
+                "02-skim.md",
+                "02-analysis.md",
+                "02b-grill.md",
+                "03-design.md",
+                "04-tasks.md",
+            ):
+                body = (
+                    "**Result:** ok\n"
+                    if name == "01a-idea-ui-review.md"
+                    else (
+                        "**Result:** frontier-empty\n"
+                        if name == "02b-grill.md"
+                        else (
+                            "**Result:** done\n"
+                            if name == "02-skim.md"
+                            else "# x\n"
+                        )
+                    )
+                )
+                (run_dir / name).write_text(body, encoding="utf-8")
+            _write_03a_clean(run_dir)
+            derived = lint_run.derive_expected_next(text, run_dir)
+            self.assertEqual(derived, "tdd-review")
+
+    def test_before_build_requires_03a_clean(self):
+        """M2: --before-build errors when 03a Result ≠ clean."""
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="build",
+            stage_id="gate-b",
+            hitl_gate_b="auto",
+            notes="- 04a skipped — no planned test cases",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            issues = lint_run_md(
+                text,
+                before_design_review=False,
+                before_build=True,
+                run_dir=run_dir,
+            )
+            self.assertTrue(
+                any(
+                    "design-verify-phase Result must be clean" in e
+                    for e in _errors(issues)
+                )
+            )
+
+    def test_before_build_ok_when_03a_clean(self):
+        """M2: --before-build passes design gate when 03a clean."""
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="build",
+            stage_id="gate-b",
+            hitl_gate_b="auto",
+            notes="- 04a skipped — no planned test cases\n"
+            "- clarity-check ok — build",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            _write_03a_clean(run_dir)
+            issues = lint_run_md(
+                text,
+                before_design_review=False,
+                before_build=True,
+                run_dir=run_dir,
+            )
+            self.assertFalse(
+                any("Result must be clean before Build" in e for e in _errors(issues))
+            )
+
+    def test_next_build_do_not_launch_without_03a_clean(self):
+        """M2: --next on build → do-not-launch when 03a not clean."""
+        text = _base(
+            mode="full",
+            review="full",
+            next_step="build",
+            stage_id="gate-b",
+            status="paused",
+            hitl_gate_b="blocking",
+            gate_b_approved="yes",
+        )
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td)
+            (run_dir / "00-run.md").write_text(text, encoding="utf-8")
+            (run_dir / "01a-idea-ui-review.md").write_text(
+                "**Result:** ok\n", encoding="utf-8"
+            )
+            from io import StringIO
+            import contextlib
+
+            buf = StringIO()
+            with contextlib.redirect_stdout(buf):
+                rc = lint_run.print_next_hint(run_dir)
+            out = buf.getvalue()
+            self.assertEqual(rc, 0)
+            self.assertIn("handoff: do-not-launch", out)
+            self.assertIn("design-review Result must be clean", out)
+
+    def test_status_done_warns_without_calibration(self):
+        """E1: Status=done without calibration evidence → warn."""
+        text = _base(
+            status="done",
+            gate_c_approved="merge",
+            notes="- finished",
+        )
+        issues = lint_run_md(
+            text, before_design_review=False, before_build=False
+        )
+        self.assertTrue(
+            any("calibration evidence" in w for w in _warns(issues))
+        )
+
+    def test_status_done_ok_with_calibration_notes(self):
+        """E1: Mode OK? / profile OK? / friction Notes clear calibration warn."""
+        text = _base(
+            status="done",
+            gate_c_approved="merge",
+            notes=(
+                "- Mode OK? yes — simple fit\n"
+                "- Review profile OK? yes — lite enough\n"
+                "- Biggest friction stage? `build` — verify flaky"
+            ),
+        )
+        issues = lint_run_md(
+            text, before_design_review=False, before_build=False
+        )
+        self.assertFalse(
+            any("calibration evidence" in w for w in _warns(issues))
+        )
+
+    def test_clarity_check_warn_before_design_phase(self):
+        """E2: Next design-phase without clarity-check token → soft-warn."""
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="design-phase",
+            stage_id="design-phase",
+            notes="- ok",
+        )
+        issues = lint_run_md(
+            text, before_design_review=False, before_build=False
+        )
+        self.assertTrue(
+            any("clarity-check ok" in w for w in _warns(issues))
+        )
+
+    def test_clarity_check_ok_logged_no_warn(self):
+        """E2: clarity-check ok — <boundary> in Notes clears warn."""
+        text = _base(
+            mode="simple",
+            review="lite",
+            next_step="design-phase",
+            stage_id="design-phase",
+            notes="- clarity-check ok — design-phase",
+        )
+        issues = lint_run_md(
+            text, before_design_review=False, before_build=False
+        )
+        self.assertFalse(
+            any("clarity-check ok" in w and "missing" in w for w in _warns(issues))
+        )
 
 
 if __name__ == "__main__":

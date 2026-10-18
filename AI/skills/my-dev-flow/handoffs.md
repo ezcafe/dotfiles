@@ -5,7 +5,7 @@ Stage-scoped handoffs, Decision options shape, progress paths, and Task `descrip
 Artifact size caps: [size-caps.md](size-caps.md). Tiny-tweak / never invent empty `03a-api` / `03a-db`: [lenses.md](lenses.md) (do not treat this file as second SoT for that rule).  
 Templates: [artifacts/INDEX.md](artifacts/INDEX.md). Severity: [severity.md](severity.md). Paths: [skills-path.md](skills-path.md). Verify/Fix: [verify-and-fix.md](verify-and-fix.md). Parent checklist: [invariants.md](invariants.md). HITL / veto: [hitl.md](hitl.md). Pipeline order: [stages.md](stages.md).
 
-**Required for Task launch:** `python {my-dev-flow}/scripts/handoff-for.py <stage-id>` → prints base block template + that stage’s R/W row (resolve `{my-dev-flow}` per [skills-path.md](skills-path.md); optional `--skill-root` / `--slug`).  
+**Required for Task launch:** `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>` → prints base block template + that stage’s R/W row (resolve `{my-dev-flow}` per [skills-path.md](skills-path.md); optional `--skill-root` / `--slug`).  
 **This file (handoffs.md):** edit SoT / debug only — do **not** load the whole file for every launch.
 
 ## Decision options (required for every choice list)
@@ -32,6 +32,7 @@ Do not list bare names without these fields.
 
 | When | Options (fixed) | Where |
 |------|-----------------|-------|
+| Gate A escalate | Re-run Gate A · override Result ok + Notes after explicit yes · Stop | [invariants.md](invariants.md) · [results.md](results.md) |
 | Design invalid after Build / Fix | Amend design → re-review → Gate B · Fix-only · Stop | [stages.md](stages.md) Design-backloop / [invariants.md](invariants.md) |
 | async-notify Gate B veto after Build | Discard draft · Keep draft + re-open Gate B · Stop | [hitl.md](hitl.md) |
 | verify-fail / review / test max rounds | Narrow or raise cap · Proceed if clean / waive · Stop | [invariants.md](invariants.md) |
@@ -44,7 +45,7 @@ Do **not** paste the full artifact catalog into every Task. Use the **base block
 
 ### Base block (every Task)
 
-Printed by `python {my-dev-flow}/scripts/handoff-for.py <stage-id>`. With `--skill-root <abs>`, paths below become absolute under that root.
+Printed by `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>`. With `--skill-root <abs>`, paths below become absolute under that root.
 
 ```
 Repo root: <absolute path>
@@ -92,7 +93,7 @@ Severity exit per my-dev-flow/severity.md (Critical/Major block clean; defer Enh
 | `test-full` | `00-run.md` (Verify commands), `03-design.md`, `04-tasks.md`, `06-test-log.md` — **one Task:** coverage + add missing e2e + run suite | `06-test-log.md` (Coverage + Runs + Result; **Mode last run:** `full`) |
 | `test-lite` | `00-run.md` (Verify commands), `04-tasks.md`, `06-test-log.md` | `06-test-log.md` (targeted e2e; unit if needed; **Mode last run:** `lite`) |
 | `fix-tests` | `00-run.md` (Verify commands), `06-test-log.md` (Fix ask), `03-design.md`, `04-tasks.md` | code; first line Result **verify-pass** \| **verify-fail** |
-| `merge` | `00-run.md` (**Gate C approved** — abort if missing/`none`), `06-test-log.md`, `05-review-log.md` (if present), skim `03-design.md` (optional for PR risk summary); template `{my-dev-flow}/artifacts/pr-body.md` | PR body from template + merge (no secret files) |
+| `merge` | `00-run.md` (**Gate C approved** — abort if missing/`none`), `06-test-log.md`, `05-review-log.md` (if present), skim `03-design.md` (optional for PR risk summary); template `{my-dev-flow}/artifacts/pr-body.md` | PR body from template + merge; **refuse** commit of `.env` / `.env.*` / `*.pem` / `credentials.json` / `*secret*` ([merge.md](../my-dev-flow-merge/stages/merge.md)) |
 
 **Prompt tip:** After the base block, paste only the concrete paths for that stage (expand `<slug>`). Example for `design-review`:
 

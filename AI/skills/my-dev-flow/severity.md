@@ -22,4 +22,4 @@ Enhancements and nits do **not** block clean. List them in the findings table an
 
 ## Fix ask
 
-Fix ask bullets include **Critical** and **Major** only (≤ cap in [handoffs.md](handoffs.md)). Optional: one line “Deferred Enhancements: …” in Notes.
+Fix ask bullets include **Critical** and **Major** only (≤ cap in [size-caps.md](size-caps.md)). Optional: one line “Deferred Enhancements: …” in Notes.

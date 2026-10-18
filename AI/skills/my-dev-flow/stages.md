@@ -28,7 +28,7 @@ Do **not** store stage names in Status.
 2. `Review profile OK?` yes|no — one-line why
 3. `Biggest friction stage?` `<stage-id>` — one-line why
 
-Optional seed: [artifacts/_calibration.md](artifacts/_calibration.md).
+Template seed optional: [artifacts/_calibration.md](artifacts/_calibration.md). Append after `done` is required; lint **warns** when Status=`done` lacks Notes lines or a `_calibration.md` block.
 
 ---
 
@@ -176,8 +176,8 @@ Scope grows (API/DB yes, auth/PII, multi-surface, blast radius): **Decision N** 
 1. Read `00-run.md`: Status, Last stage, card, Gates, profile, Mode, Gate B veto, Pending parallel.
 2. Do not re-classify unless asked or scope changed.
 3. Do not redo completed gates unless artifacts changed.
-4. Next = first incomplete Full/Simple step, or card Next step / Stage id ([LEGACY.md](LEGACY.md) for Status-as-stage). Card is override; optional `lint-run.py <run-dir> --next --derive` diffs card vs derived next ([parent-next.md](parent-next.md)).
-5. One subflow `SKILL.md`; prompt = **required** `python {my-dev-flow}/scripts/handoff-for.py <stage-id>` + **`stages/<stage-id>.md`** ([parent-next.md](parent-next.md) · [skills-path.md](skills-path.md); handoffs.md = edit SoT / debug only).
+4. Next = first incomplete Full/Simple step, or card Next step / Stage id ([LEGACY.md](LEGACY.md) for Status-as-stage). Card is override; optional `lint-run.py <run-dir> --next --derive` diffs card vs derived next ([parent-next.md](parent-next.md); optional `tdd-review` until 04a / Notes skip — [lenses.md](lenses.md)).
+5. One subflow `SKILL.md`; prompt = **required** `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>` + **`stages/<stage-id>.md`** ([parent-next.md](parent-next.md) · [skills-path.md](skills-path.md); handoffs.md = edit SoT / debug only).
 6. `stopped` → new Decision; `done` → new slug or explicit re-open.
 7. Gate B veto `pending` → do not Build. Blocking without **Gate B approved** → do not Build ([hitl.md](hitl.md)).
 8. async-notify gap: Notes veto window / paused + Next `build` + veto `none` → this resume **is** next parent turn — set **Build armed**, then launch ([hitl.md](hitl.md)).
@@ -220,7 +220,7 @@ API ∥ DB both yes (not tiny): **same-turn** parallel isolated Tasks. Simple fo
 
 1. Log Notes bullet `- design-backloop`; prior Gate B **invalid**.
 2. Set **`Gate B approved: none`**; clear Notes **Build armed** and veto-window tokens.
-3. If prior `05-review-log` / `06-test-log` Results exist: add Notes `- review-stale` and `- test-stale` (or clear those Results) so derive will not treat old clean/success as paid before Gate C ([verify-and-fix.md](verify-and-fix.md)).
+3. If prior `05-review-log` / `06-test-log` Results exist: add Notes `- review-stale` and `- test-stale` (or clear those Results) so derive / `--before-merge` will not treat old clean/success as paid before Gate C ([verify-and-fix.md](verify-and-fix.md)).
 4. Card Next = `design-update` (not `build`). Decision N Option 1 is the entry — design-update accepts Notes `design-backloop` without a prior `03a` Fix ask ([design-update.md](../my-dev-flow-design/stages/design-update.md)).
 5. Resume design-update → design-review / design-verify-phase → **Gate B** (Next=`gate-b` while token still present) → Fix/Build.
 6. After fresh Gate B settle, clear Notes `- design-backloop` by HITL tier (same parent turn as settle):
@@ -248,7 +248,7 @@ Gate B veto after Build is separate ([hitl.md](hitl.md) re-open Gate B).
 ## Orchestrator rules (short)
 
 - Honor Full/Simple order above; one subflow at a time.
-- Before each Task: [invariants.md](invariants.md); **required** `python {my-dev-flow}/scripts/handoff-for.py <stage-id>`.
+- Before each Task: [invariants.md](invariants.md); **required** `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>`.
 - Design-review update → re-review. Smoke/test fail → Fix (verify-pass) → re-run.
 - No advance on verify-fail; max 3 → Decision N. Design invalid → Design-backloop.
 - Card Next step = stage id (+ description from `handoff-for.py` / [handoffs.md](handoffs.md) SoT).

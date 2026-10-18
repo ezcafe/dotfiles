@@ -23,7 +23,7 @@ worth reviewing (smoke) and matches requirements before merge (full/lite).
 | Verify commands + Smoke after Build (Build-writes-Smoke) | [`../my-dev-flow/verify-and-fix.md`](../my-dev-flow/verify-and-fix.md) |
 | Gate C test bar | [`../my-dev-flow/hitl.md`](../my-dev-flow/hitl.md) |
 | skip-review legality | [`../my-dev-flow/lenses.md`](../my-dev-flow/lenses.md) |
-| Stage handoffs | **Required** `python {my-dev-flow}/scripts/handoff-for.py <stage-id>` · [handoffs.md](../my-dev-flow/handoffs.md) = edit SoT / debug only |
+| Stage handoffs | **Required** `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>` · [handoffs.md](../my-dev-flow/handoffs.md) = edit SoT / debug only |
 | Models (all test = Fast) | [`../my-dev-flow/models.md`](../my-dev-flow/models.md) |
 | Max rounds / Decision N | [`../my-dev-flow/invariants.md`](../my-dev-flow/invariants.md) |
 | Test log template | [`../my-dev-flow/artifacts/06-test-log.md`](../my-dev-flow/artifacts/06-test-log.md) |

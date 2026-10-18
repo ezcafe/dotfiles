@@ -8,11 +8,12 @@ Veto / Gate C: [hitl.md](hitl.md). Skip-review ban: [lenses.md](lenses.md).
 
 | Situation | Parent action | Chat |
 |-----------|---------------|------|
+| **Gate A escalate** (`01a` Result escalate) | Pause; Decision N | Re-run Gate A · human override Result `ok` + Notes **only after explicit user yes** · Stop — never invent `ok` ([results.md](results.md) · [invariants.md](invariants.md)) |
 | **verify-fail** after 3 attempts | Pause; Decision N (verify-fail shape) | Options: narrow/waive · different Verify commands · Stop |
 | **design-review / design-verify** after 3 Update rounds | Pause; Decision N | Raise cap · ship Enhancements-only if clean · Stop/reclassify |
 | **review Fix** after 3 rounds | Pause; Decision N | Raise cap · defer Enhancements if clean · Stop / design-backloop |
 | **test↔fix** after 3 rounds | Pause; Decision N | Raise cap · waive green tests → Gate C · Stop |
-| **Design-backloop** (design invalid after Build) | Pause; Decision N | Amend → Notes `design-backloop`, **Gate B approved: none**, clear Build armed / veto-window, Next `design-update` (Decision N is entry — no prior `03a` Fix ask); Fix-only · Stop ([stages.md](stages.md)) |
+| **Design-backloop** (design invalid after Build) | Pause; Decision N | Amend → Notes `design-backloop`, **Gate B approved: none**, clear Build armed / veto-window; if prior `05`/`06` Results exist → Notes `- review-stale` / `- test-stale` (or clear Results) ([verify-and-fix.md](verify-and-fix.md) Stale); Next `design-update` (Decision N is entry — no prior `03a` Fix ask); Fix-only · Stop ([stages.md](stages.md)) |
 | **Gate B veto** before Build (`pending`) | Do **not** Build | Settle veto or re-open Gate B ([hitl.md](hitl.md)) |
 | **Veto window open** without **Build armed** | Do **not** Build | Arm Build on this turn / resume, or settle veto ([hitl.md](hitl.md)) |
 | **Gate B veto after Build** | Pause; Decision N | Discard · Keep + re-open → **Gate B approved: none**, clear armed/window, Next `gate-b` · Stop ([hitl.md](hitl.md)) |
@@ -23,6 +24,7 @@ Veto / Gate C: [hitl.md](hitl.md). Skip-review ban: [lenses.md](lenses.md).
 | **Mid-run scope growth** (API/DB/auth) | Decision N (reclassify) | Stay simple · Upgrade full · New slug/stop — **never** keep `skip-review` if contracts appear |
 | **Has API/DB flips yes under skip-review** | Drop skip-review → **lite** (or reclassify) | One-liner: set Has API/DB **yes**, Review profile **lite**, re-lint — [examples/drop-skip-review-api-flip.md](examples/drop-skip-review-api-flip.md) |
 | **Smoke gap under skip-review** | Ordered recovery | Prefer re-Build → or Notes `smoke re-run` once → or drop skip-review → lite ([verify-and-fix.md](verify-and-fix.md)) |
+| **review-stale / test-stale** (Notes) | Do **not** merge | Re-enter review / test-full|test-lite; clear token only after fresh clean/success — lint `--before-merge` errors; `--next` do-not-launch ([verify-and-fix.md](verify-and-fix.md)) |
 | **Task count ≥ 20** (Mode full, running) | Decision N (soft budget) | Continue · Reclassify/slim · Stop ([invariants.md](invariants.md)) |
 | **main-thread fallbacks ≥ 3** (running) | Decision N (soft pause) | Continue · Reclassify/model path · Stop ([invariants.md](invariants.md)) |
 | **Gate C decline / silence** | Stay paused or `stopped` | No commit/push/PR/merge |

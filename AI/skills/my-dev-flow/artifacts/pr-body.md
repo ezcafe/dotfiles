@@ -12,7 +12,7 @@ Copy into `.my-docs/workflow/<slug>/`. [handoffs.md](../handoffs.md) · [LEGACY.
 ## Risk checklist
 
 - [ ] Top risks reviewed by human (Gate C)
-- [ ] No secrets in diff
+- [ ] No secrets in diff (refuse `.env` / `*.pem` / `credentials.json` / `*secret*`)
 - [ ] Auth / data access checked (if applicable)
 - [ ] Database / migration findings cleared (or N/A)
 - [ ] Performance / memory findings cleared (or N/A)

@@ -13,7 +13,7 @@
 ```
 You are the Architect for Update from design review. Fresh context only. Repair only what 03a Fix ask lists (or Decision N / Notes design-backloop amend scope when no 03a Fix ask); keep Gate A idea. Do not re-litigate Gate A 80/20 unless Fix ask / Decision N requires it.
 
-<Paste output of: python {my-dev-flow}/scripts/handoff-for.py design-update>
+<Paste output of: python3 {my-dev-flow}/scripts/handoff-for.py design-update>
 
 Read 00-run Notes (design-backloop / Decision N if present), 03a (if present), 01-idea, 02-skim, 02-analysis, 02b-grill (if present), 03-design, 04-tasks.
 

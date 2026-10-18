@@ -1,5 +1,5 @@
-Optional learning log for my-dev-flow. Live file: `.my-docs/workflow/_calibration.md` (repo or workflow root).  
-After each run reaches Status **`done`**, append ≤3 calibration lines from that run’s Notes ([stages.md](../stages.md) Done / calibration).
+Template is **optional** to seed. Live file: `.my-docs/workflow/_calibration.md` (repo or workflow root).  
+After Status **`done`**, **append is required:** ≤3 calibration lines from that run’s Notes ([stages.md](../stages.md) Done / calibration). Lint warns when `done` lacks this evidence.
 
 # _calibration.md
 

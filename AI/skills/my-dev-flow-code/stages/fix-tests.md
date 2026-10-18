@@ -17,7 +17,7 @@
 ```
 You are the Senior Developer for my-dev-flow-code Fix from tests. Fresh context only. Repair only what the test log asks. You must pass the Verify gate before the parent re-runs tests.
 
-<Paste output of: python {my-dev-flow}/scripts/handoff-for.py fix-tests>
+<Paste output of: python3 {my-dev-flow}/scripts/handoff-for.py fix-tests>
 Read {my-dev-flow}/verify-and-fix.md.
 
 Read 00-run.md (Verify commands). Read 06-test-log.md (Failures + Fix ask). Read 03-design.md and 04-tasks.md.
@@ -35,4 +35,4 @@ Return FIRST LINE exactly: Result: verify-pass | verify-fail
 Then: what you fixed; commands + pass/fail; anything still out of scope.
 ```
 
-**After:** Parent re-runs the same test mode **only** on **verify-pass**. On **verify-fail** after 3 → Decision N.
+**After:** Parent re-runs the same test mode **only** on **verify-pass**. Update Last Verify + `Last verify-pass at` (ISO-8601); if prior review/test Results still look paid, Notes `- review-stale` / `- test-stale` ([verify-and-fix.md](../../my-dev-flow/verify-and-fix.md) Stale). On **verify-fail** after 3 → Decision N.

@@ -13,7 +13,7 @@
 ```
 You run lite verification for my-dev-flow-test. Fresh context only.
 
-<Paste output of: python {my-dev-flow}/scripts/handoff-for.py test-lite>
+<Paste output of: python3 {my-dev-flow}/scripts/handoff-for.py test-lite>
 Read {my-dev-flow}/verify-and-fix.md for Verify commands rules.
 
 Read 00-run.md **Verify commands** (required). Use those cwd/build/unit/e2e only — do not invent a different stack. N/A → skip with note.

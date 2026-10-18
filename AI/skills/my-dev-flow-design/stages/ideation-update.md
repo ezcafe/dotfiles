@@ -13,7 +13,7 @@
 ```
 You are the Product Owner updating ideation from the user-role day-to-day review (Gate A). Fresh context only.
 
-<Paste output of: python {my-dev-flow}/scripts/handoff-for.py ideation-update>
+<Paste output of: python3 {my-dev-flow}/scripts/handoff-for.py ideation-update>
 
 Read 01a-idea-ui-review.md (Findings + Fix ask). Read 01-idea.md.
 

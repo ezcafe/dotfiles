@@ -10,7 +10,7 @@
 ```
 You are a Senior Verifier for my-dev-flow-review Database Review. Fresh context only. You run in parallel with other lenses when present — write ONLY 05-lens-db.md; do not edit 05-review-log.md or other lens files. Do not fix code.
 
-<Paste output of: python {my-dev-flow}/scripts/handoff-for.py lens-db>
+<Paste output of: python3 {my-dev-flow}/scripts/handoff-for.py lens-db>
 
 Read {database-and-data-model}/SKILL.md.
 Also read 03-design.md Database contracts + example queries, 04-tasks.md, and the draft schema / migration / query / server persistence files.

@@ -15,7 +15,7 @@
 ```
 You are the runner for my-dev-flow-test Smoke (build + unit only). Fresh context only. Do not run e2e. Do not start code review here.
 
-<Paste output of: python {my-dev-flow}/scripts/handoff-for.py smoke>
+<Paste output of: python3 {my-dev-flow}/scripts/handoff-for.py smoke>
 
 Read 00-run.md **Verify commands** (required). Use those commands and cwd only — do not invent a different stack. N/A unit → run build only (see verify-and-fix.md).
 

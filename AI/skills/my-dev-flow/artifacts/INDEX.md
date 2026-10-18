@@ -1,6 +1,6 @@
 # Artifact templates (index)
 
-Read **one** template per stage. Size caps: [handoffs.md](../handoffs.md). Severity / Deferred: [severity.md](../severity.md).
+Read **one** template per stage. Size caps: [size-caps.md](../size-caps.md). Severity / Deferred: [severity.md](../severity.md).
 
 | Workflow artifact | Template |
 |-------------------|----------|
@@ -24,4 +24,4 @@ Read **one** template per stage. Size caps: [handoffs.md](../handoffs.md). Sever
 | `05-lens-memory.md` | [05-lens.md](05-lens.md) (copy; set lens = memory) |
 | `06-test-log.md` | [06-test-log.md](06-test-log.md) |
 | `pr-body.md` | [pr-body.md](pr-body.md) |
-| `_calibration.md` (optional learning log) | [_calibration.md](_calibration.md) — append after `done` |
+| `_calibration.md` | [_calibration.md](_calibration.md) — template optional; **append required** after Status `done` ([stages.md](../stages.md) calibration) |

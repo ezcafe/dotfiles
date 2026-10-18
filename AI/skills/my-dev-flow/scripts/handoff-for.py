@@ -2,9 +2,9 @@
 """Print base handoff block + one stage row from handoffs.md.
 
 Usage:
-  python {my-dev-flow}/scripts/handoff-for.py <stage-id>
-  python {my-dev-flow}/scripts/handoff-for.py build --slug 20261013-fix-login
-  python handoff-for.py build --skill-root /abs/path/to/my-dev-flow
+  python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>
+  python3 {my-dev-flow}/scripts/handoff-for.py build --slug 20261013-fix-login
+  python3 handoff-for.py build --skill-root /abs/path/to/my-dev-flow
 
 Parses the Stage id → read / write markdown table in handoffs.md
 (sibling of this script's parent package). Prefer this over loading

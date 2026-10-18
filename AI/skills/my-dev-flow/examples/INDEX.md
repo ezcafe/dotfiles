@@ -3,6 +3,7 @@
 | Example | When |
 |---------|------|
 | [simple-bugfix.md](simple-bugfix.md) | Mode simple + lite happy path |
+| [async-gate-b-build-armed.md](async-gate-b-build-armed.md) | Mode simple Gate B async-notify → one-turn gap → Build armed → Build |
 | [full-lite-review.md](full-lite-review.md) | Mode full + Review profile lite |
 | [full-api-db.md](full-api-db.md) | Mode full + API∥DB |
 | [reclassify-simple-to-full.md](reclassify-simple-to-full.md) | Mid-run scope growth |
