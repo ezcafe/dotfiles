@@ -11,6 +11,14 @@ description: >-
 
 **Orchestrator SoT:** `../my-dev-flow-v3/` (derive, gates, lenses). Load only the current stage file below.
 
+## Solo FIRST
+
+1. Min card: Mode, profile, Has flags, settle gen on `00-run.md`.  
+2. Unpaid bans: **ideation unpaid** before Gate A / skim / Analyze / Design / `design-phase` (FIRST `blocked — ideation unpaid`); skim FIRST also **unpaid Gate A** → `blocked — Gate A unpaid` ([stages/skim.md](stages/skim.md)); **Grill open** before Design / `design-update` (both Modes — Mode simple mid-open ≡ Grill open ∧ ¬carve — [../my-dev-flow-v3/grill.md](../my-dev-flow-v3/grill.md)); Notes `design-stale` bans Prefer `design-update` + `design-verify-phase` + Isolated / `design-review` (full unsafe-jump set — [../my-dev-flow-v3/derive-next.md](../my-dev-flow-v3/derive-next.md)); design-update unpaid before Isolated / design-review / design-verify (only when Grill closed).  
+3. Parent-only ([../my-dev-flow-v3/hitl.md](../my-dev-flow-v3/hitl.md)): never write consent / waiver Notes / settle gen / provenance, **lifecycle Notes** (`design-stale` / `design-backloop` / `review-stale` / `test-stale` / `waiting — <reason>`), or **card Has** — Stages return `candidate …` / `proposed Has` only.  
+4. Derive Next: [../my-dev-flow-v3/derive-next.md](../my-dev-flow-v3/derive-next.md) · Prefer SoT [../my-dev-flow-v3/derive-next-pre.md](../my-dev-flow-v3/derive-next-pre.md) · stage index [stages.md](stages.md).  
+5. Solo entry: [../my-dev-flow-v3/solo-entry.md](../my-dev-flow-v3/solo-entry.md).
+
 ## Stages
 
 | Id | File |
@@ -27,7 +35,7 @@ description: >-
 ## Principles
 
 1. Brainstorm hard-gate before Design ([../my-dev-flow-v3/brainstorm.md](../my-dev-flow-v3/brainstorm.md)).  
-2. Grill until frontier-empty ([../my-dev-flow-v3/grill.md](../my-dev-flow-v3/grill.md)).  
+2. **Grill closed** before Design (Mode full / mid-open — Notes `grill-skip` **or** Result `frontier-empty` only). Mode simple cold-start carve may Prefer `design-phase` while Grill unpaid — [../my-dev-flow-v3/grill.md](../my-dev-flow-v3/grill.md).  
 3. Two design options + recommendation.  
-4. Has flip After: [../my-dev-flow-v3/lenses.md](../my-dev-flow-v3/lenses.md).  
-5. Never write consent fields.
+4. After design stages: return `proposed Has: …` / Has flip / candidate tiny / `candidate grill-skip` / `candidate ideation-confirmed` **signal** only — parent writes card Has + Notes via Always §4 ([../my-dev-flow-v3/lenses.md](../my-dev-flow-v3/lenses.md) · [../my-dev-flow-v3/hitl.md](../my-dev-flow-v3/hitl.md) · [../my-dev-flow-v3/preflight.md](../my-dev-flow-v3/preflight.md)).  
+5. Never write consent / waiver Notes / card Has / settle gen / provenance.

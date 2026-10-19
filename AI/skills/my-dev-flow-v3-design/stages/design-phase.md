@@ -1,7 +1,13 @@
 # Design-phase (Mode simple)
 
-Bundle Analyze + Grill + Design into `02`/`02b`/`03`/`04`.
+## FIRST
 
-**Done when:** design artifacts present **and** Grill closed / Notes grill-skip.
+1. **ideation unpaid** → `Result: blocked — ideation unpaid` (paid = Notes `ideation-confirmed` + provenance **or** Notes `ideation-skip` / preferred `ideation skipped — <reason>` + provenance — [../../my-dev-flow-v3/brainstorm.md](../../my-dev-flow-v3/brainstorm.md) · [../../my-dev-flow-v3/derive-next.md](../../my-dev-flow-v3/derive-next.md)).  
+2. **Grill open ∧ ¬ cold-start carve (mid-open)** → `Result: blocked — Grill open (mid-open)` — fail-closed for full **Grill open** (incl. invent Result `skipped`, any Result ≠ `frontier-empty` without Notes `grill-skip`) when ¬carve; do **not** re-enter. Carve (allow proceed): none of {`02-analysis`, `03`, `04`} on disk **and** (**Grill unpaid** ∨ **Grill closed** / Notes `grill-skip`) — SoT [../../my-dev-flow-v3/grill.md](../../my-dev-flow-v3/grill.md) cold-start carve · [../../my-dev-flow-v3/derive-next.md](../../my-dev-flow-v3/derive-next.md) unsafe jumps · align [design.md](design.md) / [../../my-dev-flow-v3-design-review/stages/design-verify-phase.md](../../my-dev-flow-v3-design-review/stages/design-verify-phase.md).  
+3. Else proceed.
 
-**After:** if Grill open + artifacts → Next=`grill` (do not Prefer re-design-phase). Has flip checklist. Cold start only: Prefer design-phase while Grill unpaid and no artifacts.
+Bundle Analyze + Grill + Design into `02`/`02b`/`03`/`04`. Stamp `03` Result **`done`** only when Grill closed (Notes `grill-skip` **or** `02b` Result `frontier-empty`); while Grill open keep `03` Result **`pending`** / unset — do **not** stamp `done` from Design body alone ([../../my-dev-flow-v3/handoffs.md](../../my-dev-flow-v3/handoffs.md) · [../../my-dev-flow-v3/results.md](../../my-dev-flow-v3/results.md)).
+
+**Done when:** design artifacts present (`02-analysis` + `03` + `04`) **and** Grill closed — Notes `grill-skip` **or** `02b` Result `frontier-empty` only (**not** template `pending` alone; Notes `grill-skip` closes even if `02b` is `pending`/`needs-round`; Result `skipped` does **not** close). Align [../../my-dev-flow-v3/handoffs.md](../../my-dev-flow-v3/handoffs.md).
+
+**After:** if **Grill open** ∧ ¬ cold-start carve → signal Prefer `grill` / mid-open (do not Prefer re-design-phase; keep `03` Result `pending`/unset) — **card Next is parent-written** only ([../../my-dev-flow-v3/preflight.md](../../my-dev-flow-v3/preflight.md) Always §2); stage signals only. Return `proposed Has: …` / `Has flip detected` / `candidate tiny-contract-tweak` / `candidate grill-skip` to parent — parent writes card Has + Notes ([../../my-dev-flow-v3/lenses.md](../../my-dev-flow-v3/lenses.md) · [../../my-dev-flow-v3/hitl.md](../../my-dev-flow-v3/hitl.md) · [../../my-dev-flow-v3/preflight.md](../../my-dev-flow-v3/preflight.md) Always §4). Cold start carve — [../../my-dev-flow-v3/grill.md](../../my-dev-flow-v3/grill.md).

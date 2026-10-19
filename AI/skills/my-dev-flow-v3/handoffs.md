@@ -1,29 +1,29 @@
 # Handoffs R/W
 
-**Base ban (every Task):** never write Gate B/C approved, Build armed, settle gen, provenance, waiver Notes (`smoke-waive`, `smoke-pass (re-run)`, `smoke re-run`, `docs-only`, `gate-c-test-override`, `has-flip`), Status, Round.
+**Base ban (every Task):** never write parent-only fields — see [hitl.md](hitl.md) Parent-only (Gate B/C approved, Build armed, settle gen bumps, provenance, waiver/consent Notes incl. `has-flip` / `tiny-contract-tweak` / `ideation-skip` / `ideation-confirmed` / `grill-skip` / `04a skipped` / `smoke-pass` (alias `smoke-pass (re-run)`) / …, lifecycle Notes `design-stale` / `design-backloop` / `review-stale` / `test-stale` / `waiting — <reason>`, card Has flags, Status, Round, profile drop, **Last Verify** / **Last verify-pass at** / **Last verify settle-gen**). Stage After returns signals only (`proposed Has`, `candidate ideation-skip`, `candidate ideation-confirmed`, `candidate grill-skip`, `candidate 04a skipped`, `candidate design-stale`, `candidate design-backloop`, `candidate review-stale`, `candidate test-stale`, `candidate waiting — <reason>`, `candidate clear design-stale`, `candidate clear review-stale`, `candidate clear test-stale`, `candidate clear waiting`, …).
 
-Compose **one row** after you know Next — do not re-read this whole file every turn.
+**Row-only:** compose / read **one row** for Expected Next — do not re-read this whole file every turn ([step-0.md](step-0.md) Load budget).
 
 | Stage id | Read | Write | After (parent) |
 |----------|------|-------|----------------|
-| brainstorm / ideation | idea draft | `01-idea.md` | Shared understanding confirmed → Gate A or design-phase |
+| brainstorm / ideation | idea draft | `01-idea.md` | Prefer while **ideation unpaid**; Done when Notes `ideation-confirmed` + provenance **or** Notes `ideation-skip` (parent-only — return `candidate ideation-confirmed` / `candidate ideation-skip` only). Then Mode full Gate A→skim; Mode simple Prefer `design-phase` (cold start carve — [grill.md](grill.md) · [brainstorm.md](brainstorm.md) · [hitl.md](hitl.md)) |
 | gate-a | idea | `01a-gate-a.md` | |
 | skim | idea + 01a | `02-skim.md` | |
-| analyze | idea + skim | `02-analysis.md` | |
-| grill | analysis | `02b-grill.md` | Next stays `grill` until frontier-empty |
-| design | analysis + grill | `03-design.md` (+ options) | Clear `design-stale` only after Mode-full design + 03 rewrite; Has flip checklist ([lenses.md](lenses.md)) |
-| design-phase | idea | 02+03+04 (+ grill) | Grill closed; Has flip checklist |
-| design-update | prior 03 + findings | 03 (+ tasks) | Mode full: Prefer unpaid Isolated then design-review. Mode simple: design-verify-phase only. Has flip checklist |
-| design-verify-phase / design-review | 03 (+ contracts) | `03a-*.md` | |
-| api-contract-review / db-design-review | 03 | matching `03a-*` | Prefer unpaid sibling; then design-review when both paid |
-| tdd-review | `04` / `04a` | `04a` | |
-| build | Design clean + Gate B settled | code + `06` Smoke section + Build-verify | Stamp verify fields; mark stale if rebuild |
+| analyze | idea + skim | `02-analysis.md` Result `done` | **Analyze paid** = file + Result `done` |
+| grill | analysis | `02b-grill.md` | Next stays `grill` until Grill closed (Notes `grill-skip` **or** `frontier-empty` only — not `pending`/`skipped` alone). Return `candidate grill-skip` only — parent writes Notes + provenance ([grill.md](grill.md) · [hitl.md](hitl.md)) |
+| design | analysis + grill | `03-design.md` Result `done` (+ options) | Parent clears `design-stale` only after Mode-full design + 03 rewrite (stage returns `candidate clear design-stale`); return `proposed Has: …` / `Has flip detected` / `candidate tiny-contract-tweak` to parent ([lenses.md](lenses.md) — parent writes card Has + Notes via Always §4) |
+| design-phase | idea | 02+03+04 (+ grill) | **Done when** Grill closed → stamp `03` Result `done` (while Grill open keep `03` `pending`/unset). Mid-open = **Grill open** ∧ ¬ cold-start carve → signal Prefer `grill` (ban re-`design-phase`; full open incl. Result `skipped`) — **card Next parent-written** only. Return `proposed Has` / flip / candidate tiny / `candidate grill-skip` to parent (cold start carve — [grill.md](grill.md)) |
+| design-update | prior 03 + findings | 03 (+ tasks) | Blocked while Notes `design-stale` **or** **Grill open** (Prefer `grill` first). Same turn: Run-log `design-update — settle-gen:<N>` (pays **backloop rewrite**) **and** set **ALL** `03a*` → **`pending`** (not only `needs update` — same as backloop invalidate). Then Mode full Prefer unpaid Isolated → design-review; Mode simple Prefer design-verify-phase only. Blocked Isolated/review while **backloop rewrite unpaid** / any `03a*` still **needs update**. Return `proposed Has` / flip / candidate tiny to parent |
+| design-verify-phase / design-review | 03 (+ contracts) | `03a-*.md` | Launch only when Design present **and** ¬ design-update unpaid **and** ¬ Notes `design-stale` **and** ¬ **Grill open** (Mode simple: Prefer `design-phase` while ¬ Design present — never Prefer `design-verify-phase` cold). Mode simple `design-verify-phase`: Has API/DB ∈ {yes, unknown} (not tiny) → write matching Isolated `03a-api`/`03a-db` + Results; Has=no/tiny → Notes-skip only |
+| api-contract-review / db-design-review | 03 | matching `03a-*` | Launch only when Design present **and** ¬ design-update unpaid **and** ¬ Notes `design-stale` **and** ¬ **Grill open** **and** matching Has ∈ {yes, unknown} (not tiny); Prefer unpaid sibling; then design-review when both paid |
+| tdd-review | `04` / `04a` | `04a` | Prefer **only** when **04a unpaid / dirty** (planned tests present ∧ ¬Notes skip ∧ missing/`pending`/`needs more tests`). Waiver = Notes `04a skipped` (**parent-only** named yes + provenance — return `candidate 04a skipped` only). **04a ok** (¬ unpaid, incl. ¬ planned tests) before `gate-b` / `build` |
+| build | Design clean + Gate B settled | code + `06` Smoke section + Build-verify | Stage returns `Result: verify-pass` only; **parent stamps** Last Verify / Last verify-pass at / Last verify settle-gen ([verify.md](verify.md)). Return `candidate review-stale` / `candidate test-stale` only on rebuild — parent sets Notes |
 | smoke | 06 | Smoke source Smoke-Task | Parent Notes companion |
 | adversarial / quality / code-review-phase | draft + 05 | `05-review-log.md` sections | |
-| lens-* | draft + plan | `05-lens-*.md` | |
-| merge-findings | lenses | Merged section | |
-| fix-review / fix-tests | findings | code + verify | Stamp verify fields |
-| test-full / test-lite | 06 | 06 Result + path | Clear test-stale when Lite/full clear met; Prefer merge\|gate-c only when Tests success |
+| lens-* | draft + plan | `05-lens-*.md` only (not `05-review-log`) | Wait siblings (plan 2+). Any planned lens **`needs fix`** → Prefer `fix-review` Mode `merged-lenses` (plan 2+) / `plan-1-lens` (plan 1). Prefer `merge-findings` only when planned lenses **clean** + Merged unpaid (plan 2+). Plan 1: parent copies Result into Merged |
+| merge-findings | lenses | Merged section | Prefer only when planned lenses **clean** + Merged unpaid |
+| fix-review / fix-tests | findings | code + verify | Stage returns `Result: verify-pass` only; **parent stamps** verify fields ([verify.md](verify.md)). `fix-tests`: return `candidate clear review-stale` only — never stage-clear lifecycle Notes |
+| test-full / test-lite | 06 | 06 Result + path | Parent clears test-stale when Lite/full clear met; Prefer merge\|gate-c only when Tests success **and** **Lenses clean** |
 | merge | Gate C approved | git/PR | done only if merge ∈ approved + success |
 
 Description map: `lens-api` `lens-db` `lens-security` `lens-perf` `lens-memory` expand from `lens-*`.

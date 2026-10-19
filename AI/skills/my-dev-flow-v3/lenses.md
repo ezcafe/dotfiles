@@ -2,33 +2,71 @@
 
 ## Has flags
 
-`Has UI` · `Has API` · `Has DB` · `Has auth/PII/schema` — each `yes` \| `no`.
+`Has UI` · `Has API` · `Has DB` · `Has auth/PII/schema` — each `yes` \| `no` \| `unknown`.
 
-**Tiny:** isolated review may `skipped` when change is docs-only / comment-only against that surface.
+**`unknown` ≠ `no` (fail-closed) — split SoT:**
 
-## Has flip (no → yes)
+| Concern | Predicate | Auth SoT |
+|---------|-----------|----------|
+| **Gate B auto** (Mode simple) | API=no ∧ DB=no ∧ auth/PII/schema=no (explicit `no` only) | [gate-b.md](gate-b.md) — **Has UI not in Gate B auto predicate** |
+| **skip-review** legality | Has UI=no ∧ Has API=no ∧ Has DB=no ∧ Has auth/PII/schema=no | this file § skip-review |
 
-Same turn:
+When API **or** DB **or** auth/PII/schema is `unknown` (or **yes**): Gate B **blocking**. Has UI=`unknown` \| `yes` fail-closes **skip-review only** — does **not** alone force Gate B blocking / deny Gate B auto. Treat API/DB `unknown` like unpaid Isolated / required surface until resolved to `yes`\|`no` (same Prefer duties as Has=yes for that surface — **Design clean** / **Isolated unpaid** use `Has ∈ {yes, unknown}`).
+
+**Who writes card Has (parent-only):** Parent alone writes Has on `00-run.md`. Design / design-phase / design-update **After** returns `proposed Has: UI=… API=… DB=… auth/PII/schema=…` (and `Has flip detected` when a flip applies). Parent applies via [preflight.md](preflight.md) Always §4 — Tasks **never** write card Has ([hitl.md](hitl.md)).
+
+**`unknown` → `no` (resolve, not flip):** Parent writes card Has=`no` for that flag. **Do not** bump Gate B settle gen (no `has-flip` — flip is only toward **yes**). Same turn: re-derive Isolated unpaid / Design clean (that surface → N/A `skipped` without file) and skip-review legality (all UI/API/DB/auth explicit `no` may unlock skip-review) and Gate B tier (API=DB=auth explicit `no` may unlock Gate B auto when Mode simple — [gate-b.md](gate-b.md); Has UI not required for auto).
+
+## Tiny / Notes `tiny-contract-tweak`
+
+**All** must hold before the Note pays a skip:
+
+- One field / column / validator / docs-only contract note  
+- No new auth, PII, or cross-service boundary  
+- Blast radius one package  
+
+**Who writes:** **Parent-only** ([hitl.md](hitl.md)). Design / design-phase / design-update **After** returns `candidate tiny-contract-tweak` to parent — Tasks must **not** invent the Note to dodge unpaid Isolated.
+
+**Notes form:** `tiny-contract-tweak — <one-line reason>`.
+
+**What it skips:**
+
+| Surface | Effect |
+|---------|--------|
+| Isolated `03a-api` / `03a-db` | Treat as **`skipped`** — Notes-skip only; **never** invent empty files ([results.md](results.md)) |
+| Mode simple `design-verify-phase` | Fold light API/DB checks into overall log; do not write Isolated files |
+| Lens plan | Do **not** force `api` / `db` on Lens plan; may stay `none` for those surfaces |
+
+**Design clean / Verify clean:** Has ∈ {yes, unknown} + Notes `tiny-contract-tweak` → Isolated N/A (`skipped`). Overall `03a` still must be **`clean`**. Has ∈ {yes, unknown} **without** the Note → Isolated file required (`clean`). Has=no → that surface N/A (`skipped` without file).
+
+**Informal “Tiny”** elsewhere means the same criteria; prefer the Notes token when skipping Isolated or forced lenses.
+
+## Has flip (`no` → `yes` **or** `unknown` → `yes`)
+
+Same turn (**parent-only** — stage After returns `proposed Has: …` and/or `Has flip detected`; parent writes card Has + Notes / settle / profile drop via Always §4):
 
 1. If profile skip-review → drop to **lite** (mandatory; not Decision N Prefer-paid Else).  
-2. Gate B → **blocking**.  
-3. Bump **Gate B settle gen**; clear approved / armed / auto.  
+2. Gate B → **blocking** when API **or** DB **or** auth/PII/schema → **yes** (or Mode simple auto predicate fails — any of those flags **yes**/**`unknown`**); **UI alone** does **not** deny Gate B auto / force blocking (still drops skip-review per §1 — [gate-b.md](gate-b.md) SoT).  
+3. Bump **Gate B settle gen**; clear approved / armed / auto — for **any** flip (incl. UI-only).  
 4. Notes `has-flip — <flags> — gen:<N>`.  
-5. If API/DB newly yes: invalidate overall `03a` clean **or** Prefer re-run until Design clean (Isolated unpaid even if files exist).  
+5. If API/DB newly **yes** (not tiny) **or** UI newly **yes** **or** auth/PII/schema newly **yes**: parent **must** set overall `03a` → `pending` same turn as Always §4 (prior `clean` does not pay). Then Prefer re-verify: Mode **full:** Prefer unpaid Isolated when required (API/DB newly **yes** ¬tiny, or Isolated still unpaid for Has ∈ {yes, unknown} ∧ ¬tiny — even if files exist) → then `design-review`; Mode **simple:** Prefer `design-verify-phase` (pays Isolated when needed). Keep API/DB Isolated duty as above. Has that remains **`unknown`** (no flip) still requires Isolated like yes for API/DB (Design clean / Isolated unpaid above · [derive-next.md](derive-next.md)).  
 
-Checked on: design / design-phase / design-update After, preflight Always, Before Build.
+Checked on: design / design-phase / design-update After (proposed Has + flip signal only), preflight Always §4, Before Build.
 
 ## Lens plan
 
-Default `none`. When Has API/DB yes (not tiny), finalize `api` / `db` / `api|db` **before** Adv / code-review-phase.
+Default `none`. When Has API/DB ∈ {yes, unknown} (**not** Notes `tiny-contract-tweak`), finalize `api` / `db` / `api|db` **before Smoke and before Adv** (also gates code-review-phase / lenses / test).
 
-**Lenses paid / clean:** see [derive-next.md](derive-next.md) Lens plan unpaid. Prefer `merge-findings` only when every planned lens is Result-bearing **and** Merged unpaid.
+**Missing required api/db:** Expected Next `finalize-lens-plan` (parent-only) — open this file, set Lens plan, re-derive ([derive-next.md](derive-next.md)). Prefer order: finalize **before Smoke and before Adv** (Prefer-re-smoke + E1/skip-review unpaid Smoke + Adv / lenses / test) — intentional; never Prefer Smoke or Adv with plan=`none` while required missing ([verify.md](verify.md) Prefer order vs finalize-lens-plan).
+
+**Lenses paid / clean / dirty:** see [derive-next.md](derive-next.md). Prefer `merge-findings` only when planned lenses are **clean** **and** Merged unpaid (or after Fix re-unpay → re-lens) — **owns** Merged-unpaid dual-false. Lens **`needs fix`** → Prefer `fix-review` — never Prefer `test-*` / `gate-c` / `merge` while **Lenses dirty** or ¬ **Lenses clean**.
 
 ## skip-review legality
 
-Only Mode **simple** + Has API=no + Has DB=no + Has auth/PII/schema=no.  
+Only Mode **simple** + Has UI=no + Has API=no + Has DB=no + Has auth/PII/schema=no (explicit `no`; `unknown` ≠ `no`).  
+**Has UI = yes or `unknown`:** illegal skip-review — drop to **lite** (or reclassify). UI is a real review surface (fail-closed skip-review; no tiny-UI exception). Does **not** alone force Gate B **blocking** / deny Gate B auto — Gate B auto SoT is API=no ∧ DB=no ∧ auth/PII/schema=no ([gate-b.md](gate-b.md)).  
 Mode full + skip-review = Forbidden (Decision N cannot legalize).
 
 ## UI craft
 
-When Has UI = yes, design and review stages should apply interface craft: hierarchy, a11y, copy, typography, color, polish — point agents at project UI skills / impeccable / better-interface when installed ([references.md](references.md)). Do not invent a second design system.
+When Has UI = yes, design and review stages should apply interface craft: hierarchy, a11y, copy, typography, color, polish — point agents at project UI skills / impeccable / better-interface when installed ([references.md](references.md)). Do not invent a second design system. Profile must be **lite** \| **full** (never skip-review — legality above).
