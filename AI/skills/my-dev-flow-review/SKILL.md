@@ -1,7 +1,7 @@
 ---
 name: my-dev-flow-review
 description: >-
-  DEPRECATED for new runs — prefer my-dev-flow-v2-review. Kept discoverable for
+  DEPRECATED for new runs — prefer my-dev-flow-v3-review. Kept discoverable for
   in-flight v1 workflows. Verifies a code draft: full profile Adv→Quality→lenses;
   lite uses code-review-phase. Merge findings when 2+ lenses; Fix until clean.
   Use when resuming an in-flight my-dev-flow-review run, or when the user

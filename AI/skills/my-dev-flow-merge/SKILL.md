@@ -1,7 +1,7 @@
 ---
 name: my-dev-flow-merge
 description: >-
-  DEPRECATED for new runs — prefer my-dev-flow-v2-merge. Kept discoverable for
+  DEPRECATED for new runs — prefer my-dev-flow-v3-merge. Kept discoverable for
   in-flight v1 workflows. After explicit user Gate C approval, commits (if
   approved), pushes, opens a PR, then merges. Never commit/push without that
   yes. Use when resuming an in-flight my-dev-flow-merge run, or when the user

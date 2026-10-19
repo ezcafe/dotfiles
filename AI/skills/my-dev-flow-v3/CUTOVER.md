@@ -1,15 +1,16 @@
-# Cutover v2 → v3
+# Cutover → v3
 
 ## Rule
 
-- **In-flight v2 runs:** finish on `my-dev-flow-v2` (+ v2 subflows).  
-- **New runs:** prefer `my-dev-flow-v3`.  
+- **New runs:** use `my-dev-flow-v3` (+ v3 subflows).
+- **v2 removed:** `my-dev-flow-v2*` is no longer in SoT or Cursor discovery. Do not resume a v2 skill path.
+- **v1:** kept discoverable only for in-flight v1 resumes; prefer v3 for new work.
 - Do not mix Mode cards between versions in the same slug.
 
-## What changed in v3
+## What changed in v3 (vs former v2)
 
-| Topic | v2 | v3 |
-|-------|----|----|
+| Topic | Former v2 | v3 |
+|-------|-----------|----|
 | Gate B freshness | Clock compare (HH:MM vs ISO) | **Settle generation** integer |
 | Derive load | pre/post split files | Thin [derive-next.md](derive-next.md) (Definitions + Unsafe) + [derive-next-pre.md](derive-next-pre.md) / [derive-next-post.md](derive-next-post.md) halves |
 | Ideation | Implicit | Explicit [brainstorm.md](brainstorm.md) hard-gate (always; Prefer `ideation` while **ideation unpaid** = ¬Notes `ideation-confirmed` ∧ ¬Notes `ideation-skip`; both Modes) |
@@ -21,8 +22,8 @@
 
 ## Mapping
 
-| v2 | v3 |
-|----|----|
+| Former v2 | v3 |
+|-----------|----|
 | `my-dev-flow-v2` | `my-dev-flow-v3` |
 | `*-design` / `*-design-review` / `*-code` / `*-review` / `*-test` / `*-merge` | matching `my-dev-flow-v3-*` |
 

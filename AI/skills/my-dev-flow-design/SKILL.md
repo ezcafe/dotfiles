@@ -1,7 +1,7 @@
 ---
 name: my-dev-flow-design
 description: >-
-  DEPRECATED for new runs — prefer my-dev-flow-v2-design. Kept discoverable for
+  DEPRECATED for new runs — prefer my-dev-flow-v3-design. Kept discoverable for
   in-flight v1 workflows. Runs Ideation → Gate A → skim → Analyze → Grill →
   Design (Mode full), or one design-phase Task bundling Analyze+Grill+Design
   (Mode simple). Also updates design docs from my-dev-flow-design-review

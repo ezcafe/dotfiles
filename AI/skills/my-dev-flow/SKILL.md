@@ -1,7 +1,7 @@
 ---
 name: my-dev-flow
 description: >-
-  DEPRECATED for new runs — prefer my-dev-flow-v2. Kept discoverable for
+  DEPRECATED for new runs — prefer my-dev-flow-v3. Kept discoverable for
   in-flight v1 workflows. Orchestrates the AI-assisted delivery pipeline
   (design → review → build → test → merge). Classifies simple vs full. Gate C
   always blocking; Mode full Gate B blocking; Mode simple Gate B: prefer auto

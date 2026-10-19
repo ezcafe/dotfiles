@@ -1,7 +1,7 @@
 ---
 name: my-dev-flow-test
 description: >-
-  DEPRECATED for new runs — prefer my-dev-flow-v2-test. Kept discoverable for
+  DEPRECATED for new runs — prefer my-dev-flow-v3-test. Kept discoverable for
   in-flight v1 workflows. Supports smoke (Mode full + profile full requires
   independent Smoke before Adv; other paths often skip via Build-writes-Smoke),
   test-full, and test-lite. Use when resuming an in-flight my-dev-flow-test run,

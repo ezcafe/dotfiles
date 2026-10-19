@@ -1,7 +1,7 @@
 ---
 name: my-dev-flow-code
 description: >-
-  DEPRECATED for new runs — prefer my-dev-flow-v2-code. Kept discoverable for
+  DEPRECATED for new runs — prefer my-dev-flow-v3-code. Kept discoverable for
   in-flight v1 workflows. Optionally reviews planned TDD test cases before Gate
   B; then builds with TDD after Gate B is settled. Build/Fix must pass Verify
   (max 3; Result verify-pass). Build-writes-Smoke. Also fixes my-dev-flow-test

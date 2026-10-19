@@ -1,7 +1,7 @@
 ---
 name: my-dev-flow-design-review
 description: >-
-  DEPRECATED for new runs — prefer my-dev-flow-v2-design-review. Kept
+  DEPRECATED for new runs — prefer my-dev-flow-v3-design-review. Kept
   discoverable for in-flight v1 workflows. Reviews design artifacts for gaps
   against best practices, then hands findings to my-dev-flow-design. Mode full:
   isolated API∥DB then general design-review; Mode simple: design-verify-phase.

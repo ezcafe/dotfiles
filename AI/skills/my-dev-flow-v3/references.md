@@ -10,6 +10,6 @@
 | Structural ambition / code judo | [thermo-nuclear-code-quality-review](https://raw.githubusercontent.com/cursor/plugins/main/cursor-team-kit/skills/thermo-nuclear-code-quality-review/SKILL.md) | Adv / Quality prompts |
 | Behavior-preserving simplification | [addyosmani/code-simplification](https://github.com/addyosmani/agent-skills/blob/main/skills/code-simplification/SKILL.md) | Fix / review After |
 | UI craft modes / interface system review | [impeccable](https://github.com/pbakaus/impeccable) · [jakubkrehel/skills](https://github.com/jakubkrehel/skills) | [lenses.md](lenses.md) Has UI |
-| Fail-closed gates / settle gen / Smoke SoT | Learnings from `my-dev-flow-v2` review loops | [gate-b.md](gate-b.md) · [verify.md](verify.md) · [gate-c.md](gate-c.md) |
+| Fail-closed gates / settle gen / Smoke SoT | Learnings from former `my-dev-flow-v2` review loops | [gate-b.md](gate-b.md) · [verify.md](verify.md) · [gate-c.md](gate-c.md) |
 
 Prefer pointing agents at installed project skills rather than copying their full text here.
