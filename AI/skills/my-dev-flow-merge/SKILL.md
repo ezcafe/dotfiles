@@ -1,10 +1,11 @@
 ---
 name: my-dev-flow-merge
 description: >-
-  After explicit user Gate C approval, commits (if approved), pushes the branch,
-  opens a PR, then merges. Never commit or push without that yes. Use when the
-  user says run my-dev-flow-merge, merge the workflow, or after the Gate C test
-  bar for this Review profile is met (hitl-gate-c.md).
+  DEPRECATED for new runs — prefer my-dev-flow-v2-merge. Kept discoverable for
+  in-flight v1 workflows. After explicit user Gate C approval, commits (if
+  approved), pushes, opens a PR, then merges. Never commit/push without that
+  yes. Use when resuming an in-flight my-dev-flow-merge run, or when the user
+  explicitly says run my-dev-flow-merge.
 ---
 
 # my-dev-flow-merge

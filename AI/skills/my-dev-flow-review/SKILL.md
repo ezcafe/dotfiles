@@ -1,11 +1,11 @@
 ---
 name: my-dev-flow-review
 description: >-
-  Verifies a code draft: full profile uses Adversarial then Quality then
-  conditional lenses; lite profile must use one code-review-phase (Lite
-  combined). Lens plan defaults to none. Merge findings when 2+ lenses; Fix
-  until clean. Honors skip-review. Use when the user says run my-dev-flow-review,
-  review the draft, or after my-dev-flow-code.
+  DEPRECATED for new runs — prefer my-dev-flow-v2-review. Kept discoverable for
+  in-flight v1 workflows. Verifies a code draft: full profile Adv→Quality→lenses;
+  lite uses code-review-phase. Merge findings when 2+ lenses; Fix until clean.
+  Use when resuming an in-flight my-dev-flow-review run, or when the user
+  explicitly says run my-dev-flow-review.
 ---
 
 # my-dev-flow-review

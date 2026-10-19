@@ -1,15 +1,12 @@
 ---
 name: my-dev-flow-design
 description: >-
-  Runs Ideation → Gate A → skim → Analyze → Grill → Design (Mode full), or one
-  design-phase Task bundling Analyze+Grill+Design (Mode simple). Gate B comes
-  later (after design-review / design-verify-phase + optional TDD review). Also
-  updates design docs from my-dev-flow-design-review findings. Writes framing,
-  skim, analysis, grill, design options (two in full; one in simple), system
-  design + design-patterns, sequence diagrams, API/database contracts, and
-  TDD-ready tasks under .my-docs/workflow. Use when the user says run
-  my-dev-flow-design, design-only workflow, update design from review, or after
-  my-dev-flow-design-review.
+  DEPRECATED for new runs — prefer my-dev-flow-v2-design. Kept discoverable for
+  in-flight v1 workflows. Runs Ideation → Gate A → skim → Analyze → Grill →
+  Design (Mode full), or one design-phase Task bundling Analyze+Grill+Design
+  (Mode simple). Also updates design docs from my-dev-flow-design-review
+  findings. Use when resuming an in-flight my-dev-flow-design run, or when the
+  user explicitly says run my-dev-flow-design.
 ---
 
 # my-dev-flow-design

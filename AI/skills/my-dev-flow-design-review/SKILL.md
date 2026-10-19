@@ -1,13 +1,12 @@
 ---
 name: my-dev-flow-design-review
 description: >-
-  Reviews design artifacts for gaps against real-world best practices, then hands
-  findings to my-dev-flow-design for updates. Mode full: isolated API∥DB reviews
-  (both 03a-* missing → same-turn parallel; one exists → missing only / resume
-  serialize) then general design-review. Mode simple: one design-verify-phase
-  Task. Checks UI alignment with Gate A / Design UI specs (does not re-litigate
-  80/20). Use when the user says run my-dev-flow-design-review, review the
-  design, or after my-dev-flow-design before my-dev-flow-code.
+  DEPRECATED for new runs — prefer my-dev-flow-v2-design-review. Kept
+  discoverable for in-flight v1 workflows. Reviews design artifacts for gaps
+  against best practices, then hands findings to my-dev-flow-design. Mode full:
+  isolated API∥DB then general design-review; Mode simple: design-verify-phase.
+  Use when resuming an in-flight my-dev-flow-design-review run, or when the user
+  explicitly says run my-dev-flow-design-review.
 ---
 
 # my-dev-flow-design-review

@@ -1,15 +1,15 @@
 ---
 name: my-dev-flow
 description: >-
-  Orchestrates the AI-assisted delivery pipeline (design → review → build →
-  test → merge). Classifies simple vs full. Gate C always blocking; Mode full
-  Gate B blocking; Mode simple Gate B: prefer auto only when Has API=no AND
-  Has DB=no AND no auth/PII/schema (else blocking); Gate B async-notify only
-  when user asks for a veto window on that low-risk path (not Grill); Grill
-  soft/auto by default (independent of Gate B). Use when the user says run
-  my-dev-flow, start my-dev-flow, run my-plan-flow / my-workflow (legacy),
-  simple mode, ideate → build → merge, grill / stress-test this plan, or
-  wants the end-to-end delivery pipeline.
+  DEPRECATED for new runs — prefer my-dev-flow-v2. Kept discoverable for
+  in-flight v1 workflows. Orchestrates the AI-assisted delivery pipeline
+  (design → review → build → test → merge). Classifies simple vs full. Gate C
+  always blocking; Mode full Gate B blocking; Mode simple Gate B: prefer auto
+  only when Has API=no AND Has DB=no AND no auth/PII/schema (else blocking);
+  Gate B async-notify only when user asks for a veto window on that low-risk
+  path (not Grill); Grill soft/auto by default (independent of Gate B). Use
+  when resuming an in-flight my-dev-flow run, or when the user explicitly says
+  run my-dev-flow / start my-dev-flow (v1).
 ---
 
 # my-dev-flow

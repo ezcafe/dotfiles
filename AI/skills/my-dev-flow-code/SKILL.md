@@ -1,17 +1,12 @@
 ---
 name: my-dev-flow-code
 description: >-
-  Optionally reviews planned TDD test cases before Gate B when 04-tasks lists
-  real tests to create; then builds design tasks with TDD after Gate B is
-  settled (blocking → approved; async-notify → Build armed; auto may leave
-  approved none) using a fast model. Build and Fix must pass a Verify gate
-  (Verify commands; max 3 attempts; Result verify-pass first line). Build
-  writes the Smoke section so the parent can skip the Smoke Task
-  (Build-writes-Smoke). Also fixes failures from my-dev-flow-test when
-  06-test-log.md reports smoke-fail or failure. Produces a draft only — no
-  merge or self-approval. Use when the user says run my-dev-flow-code, build
-  from design, fix from test failures, TDD test-case review, or after
-  design-review / design-verify-phase is clean and Gate B is settled.
+  DEPRECATED for new runs — prefer my-dev-flow-v2-code. Kept discoverable for
+  in-flight v1 workflows. Optionally reviews planned TDD test cases before Gate
+  B; then builds with TDD after Gate B is settled. Build/Fix must pass Verify
+  (max 3; Result verify-pass). Build-writes-Smoke. Also fixes my-dev-flow-test
+  failures. Draft only — no merge. Use when resuming an in-flight
+  my-dev-flow-code run, or when the user explicitly says run my-dev-flow-code.
 ---
 
 # my-dev-flow-code

@@ -1,0 +1,83 @@
+---
+name: my-dev-flow-code
+description: >-
+  Optionally reviews planned TDD test cases before Gate B when 04-tasks lists
+  real tests to create; then builds design tasks with TDD after Gate B is
+  settled (blocking → approved; async-notify → Build armed; auto may leave
+  approved none) using a fast model. Build and Fix must pass a Verify gate
+  (Verify commands; max 3 attempts; Result verify-pass first line). Build
+  writes the Smoke section so the parent can skip the Smoke Task
+  (Build-writes-Smoke). Also fixes failures from my-dev-flow-test when
+  06-test-log.md reports smoke-fail or failure. Produces a draft only — no
+  merge or self-approval. Use when the user says run my-dev-flow-code, build
+  from design, fix from test failures, TDD test-case review, or after
+  design-review / design-verify-phase is clean and Gate B is settled.
+---
+
+# my-dev-flow-code
+
+Build subflow of [`my-dev-flow`](../my-dev-flow/SKILL.md). First output is a **draft** — no merge or self-approval.
+
+**Owned stages:** load **`stages/<stage-id>.md` only** (`tdd-review`, `build`, `fix-tests`) — index [stages.md](stages.md).
+
+**Honor parent SoT** (do not restate Happy path / skip-review / veto mechanics here):
+
+| Topic | File |
+|-------|------|
+| Runtime order | [`../my-dev-flow/stages.md`](../my-dev-flow/stages.md) |
+| Verify / Smoke after Build (Build-writes-Smoke) / Fix | [`../my-dev-flow/verify-and-fix.md`](../my-dev-flow/verify-and-fix.md) |
+| Gate B veto / Build armed / async gap | [`../my-dev-flow/hitl-gate-b.md`](../my-dev-flow/hitl-gate-b.md) |
+| Provenance / parent-only consent | [`../my-dev-flow/hitl.md`](../my-dev-flow/hitl.md) |
+| skip-review legality | [`../my-dev-flow/lenses.md`](../my-dev-flow/lenses.md) |
+| Design-backloop / max rounds | [`../my-dev-flow/invariants.md`](../my-dev-flow/invariants.md) |
+| Result tokens | [`../my-dev-flow/results.md`](../my-dev-flow/results.md) |
+| Handoffs / models | **Required** `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>` ([`skills-path.md`](../my-dev-flow/skills-path.md)) · [`handoffs.md`](../my-dev-flow/handoffs.md) = edit SoT / debug only · [`models.md`](../my-dev-flow/models.md) |
+
+## When to run
+
+`run my-dev-flow-code`, build from design, TDD review, fix from test failures, or when parent reaches 4a / Build / Test↔Code.
+
+## Principles (owned here)
+
+- **TDD review before Gate B** only if `04-tasks` lists planned tests; else Notes skip.
+- **Build after Gate B** (when parent is my-dev-flow). Re-read veto + Notes first — blocked tokens: [results.md](../my-dev-flow/results.md) / [hitl-gate-b.md](../my-dev-flow/hitl-gate-b.md).
+- **Verify gate:** first line `Result: verify-pass | verify-fail`; max 3; on pass Build writes Smoke (Build-writes-Smoke).
+- **Fix-from-tests:** repair from `06` Fix ask only; verify-pass before re-test.
+- **Design-backloop** if `03`/`04` must change — never silently rewrite (invariants.md).
+- TDD when tasks include tests. Has UI → match Design UI + chrome.
+- Paste `python3 {my-dev-flow}/scripts/handoff-for.py <stage-id>` output per Task (resolve per [`skills-path.md`](../my-dev-flow/skills-path.md)); plain words.
+
+## Models
+
+[`models.md`](../my-dev-flow/models.md) — TDD = mechanical; Build/Fix = Fast.
+
+## Prerequisites
+
+| Mode | Need |
+|------|------|
+| **TDD review** | `03`+`04` with planned tests; Gate B not required yet |
+| **Build** | Gate B settled per [hitl-gate-b.md](../my-dev-flow/hitl-gate-b.md); veto `none`; when HITL Gate B is **blocking**, **Gate B approved** `yes` (or named pick) **+ provenance** ([hitl.md](../my-dev-flow/hitl.md)); **Build armed** + turn-boundary gap if async window open (**auto** may leave Gate B approved `none`); Verify commands; prefer `04a` or Notes skip |
+| **Fix-from-tests** | `06` smoke-fail/failure + Fix ask; Verify commands |
+
+If not ready → **stop**.
+
+## Pipeline
+
+```
+TDD (if planned) → Gate B → Build → Verify → Smoke (Build-writes-Smoke)
+Fix-from-tests    → Fix → Verify → verify-pass → re-test
+```
+
+## Orchestrator rules
+
+- Detect: no planned tests → skip 04a; `06` failure → fix-tests; else Build (require Gate B when parent is my-dev-flow).
+- Advance only on **verify-pass**. Post-Build Smoke: parent [stages.md](../my-dev-flow/stages.md) Mode × Review profile · [verify-and-fix.md](../my-dev-flow/verify-and-fix.md) — **Mode full + profile full requires** independent Smoke before Adv; Skip Smoke Task (Build-writes-Smoke) only when independent smoke is not required.
+- After 3 verify-fail → Decision N (parent). Persist Last Verify on card.
+- Post-Build routing (skip-review vs review): parent [stages.md](../my-dev-flow/stages.md) · [lenses.md](../my-dev-flow/lenses.md).
+
+## Start checklist
+
+1. Confirm mode + files + Verify commands.
+2. Open [stages/clarity-check.md](stages/clarity-check.md); log matching `clarity-check ok — tdd-review|build|fix-*` before launch ([parent-next.md](../my-dev-flow/parent-next.md)).
+3. Resolve models.
+4. Run `stages/<id>.md` for TDD / Build / Fix.

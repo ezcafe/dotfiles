@@ -6,8 +6,9 @@
 # Usage:
 #   ./AI/skills/sync-to-cursor.sh           # sync all skills with SKILL.md
 #   ./AI/skills/sync-to-cursor.sh --check   # diff my-dev-flow* SoT ↔ discovery; exit 1 on drift
-# Step 0 (my-dev-flow): --check (or sync) before classify when AI/skills/my-dev-flow exists;
-# drift is a hard stop (skills-path.md · stages.md).
+# Step 0 (my-dev-flow / my-dev-flow-v2): --check (or sync) before classify when that SoT exists;
+# drift is a hard stop (skills-path.md). Matches my-dev-flow and my-dev-flow-v2* via globs below.
+# Archive backups under _archive/ are not synced (no SKILL sync of that tree).
 set -euo pipefail
 
 SRC="$(cd "$(dirname "$0")" && pwd)"

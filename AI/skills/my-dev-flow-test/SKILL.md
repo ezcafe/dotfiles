@@ -1,13 +1,11 @@
 ---
 name: my-dev-flow-test
 description: >-
-  Supports smoke mode (build + unit; Mode full + profile full requires independent
-  Smoke / re-run before Adv; Mode simple / Mode full + profile lite usually skip
-  when Build already wrote smoke-pass via Build-writes-Smoke), full mode as one
-  Task (coverage + missing e2e + build/unit/e2e), and lite mode (targeted e2e
-  after lite review). Use when the user says run my-dev-flow-test, smoke tests,
-  smoke re-run, verify before merge, after Build, or after my-dev-flow-review is
-  clean before merge.
+  DEPRECATED for new runs — prefer my-dev-flow-v2-test. Kept discoverable for
+  in-flight v1 workflows. Supports smoke (Mode full + profile full requires
+  independent Smoke before Adv; other paths often skip via Build-writes-Smoke),
+  test-full, and test-lite. Use when resuming an in-flight my-dev-flow-test run,
+  or when the user explicitly says run my-dev-flow-test.
 ---
 
 # my-dev-flow-test
