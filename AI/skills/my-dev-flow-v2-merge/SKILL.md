@@ -31,6 +31,7 @@ Merge subflow of [`my-dev-flow-v2`](../my-dev-flow-v2/SKILL.md).
 
 ## Start
 
-1. Confirm Gate C bar or waiver+provenance; Gate C approved set.
-2. Clarity-check Merge ([../my-dev-flow-v2-code/stages/clarity-check.md](../my-dev-flow-v2-code/stages/clarity-check.md#merge)); preflight Merge checks.
-3. Compose handoff; run [`stages/merge.md`](stages/merge.md) for approved actions only.
+1. If Gate C not yet settled: paste [gate-c.md](../my-dev-flow-v2/gate-c.md) **Read before you decide**, ask named commit/push/PR/merge; parent sets **Gate C approved** + provenance.
+2. Confirm Gate C bar or waiver+provenance; Gate C approved set.
+3. Clarity-check Merge ([../my-dev-flow-v2-code/stages/clarity-check.md](../my-dev-flow-v2-code/stages/clarity-check.md#merge)); preflight Merge checks.
+4. Compose handoff; run [`stages/merge.md`](stages/merge.md) for approved actions only.

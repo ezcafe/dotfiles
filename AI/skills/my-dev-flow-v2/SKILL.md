@@ -51,7 +51,7 @@ Follow [step-0.md](step-0.md). Honor [Load budget](step-0.md#load-budget).
 | Pre-Task checks | [preflight.md](preflight.md) · [derive-next.md](derive-next.md) |
 | Next → open 1–2 files | [parent-next.md](parent-next.md) |
 | Task handoff R/W | [handoffs.md](handoffs.md) |
-| Gates / consent | [hitl.md](hitl.md) · [gate-b.md](gate-b.md) · [gate-c.md](gate-c.md) |
+| Gates / consent | [hitl.md](hitl.md) · [gate-b.md](gate-b.md) · [gate-c.md](gate-c.md) (each has **Read before you decide**) · Gate A guide in [gate-a After](../my-dev-flow-v2-design/stages/gate-a.md) |
 | Verify / Smoke / Fix | [verify.md](verify.md) |
 | Has API/DB/auth / lenses / skip-review | [lenses.md](lenses.md) |
 | Models | [models.md](models.md) |

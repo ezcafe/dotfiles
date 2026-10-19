@@ -29,6 +29,8 @@
 
 After explicit user yes **in this parent turn**, parent records consent **same turn**. Prefer AskQuestion when available.
 
+**Gate pauses:** when asking the user at Gate A (escalate / Decision N), Gate B (blocking / async digest), or Gate C, paste that gate’s **Read before you decide** block ([gate-a After](../my-dev-flow-v2-design/stages/gate-a.md) · [gate-b.md](gate-b.md) · [gate-c.md](gate-c.md)) before or with the digest / AskQuestion.
+
 ## Notes tokens vs provenance kinds
 
 Notes strings and provenance `kind` values are **different**. Escape/waiver needs **both** sides of a required pair:

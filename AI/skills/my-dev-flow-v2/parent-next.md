@@ -23,7 +23,7 @@ Clarity boundaries: design [clarity-check](../my-dev-flow-v2-design/stages/clari
 | `design-review` | [../my-dev-flow-v2-design-review/stages/design-review.md](../my-dev-flow-v2-design-review/stages/design-review.md) |
 | `design-verify-phase` | [../my-dev-flow-v2-design-review/stages/design-verify-phase.md](../my-dev-flow-v2-design-review/stages/design-verify-phase.md) |
 | `tdd-review` | [../my-dev-flow-v2-code/stages/tdd-review.md](../my-dev-flow-v2-code/stages/tdd-review.md) · [verify.md](verify.md) |
-| `gate-b` | [gate-b.md](gate-b.md) · [hitl.md](hitl.md) — parent sets approved; no Task |
+| `gate-b` | [gate-b.md](gate-b.md) **Read before you decide** · [hitl.md](hitl.md) — paste reading guide + digest; parent sets approved; no Task |
 | `build` | [../my-dev-flow-v2-code/stages/build.md](../my-dev-flow-v2-code/stages/build.md) · [verify.md](verify.md) |
 | `smoke` | [../my-dev-flow-v2-test/stages/smoke.md](../my-dev-flow-v2-test/stages/smoke.md) |
 | `code-review-phase` | [../my-dev-flow-v2-review/stages/code-review-phase.md](../my-dev-flow-v2-review/stages/code-review-phase.md) |
@@ -35,7 +35,7 @@ Clarity boundaries: design [clarity-check](../my-dev-flow-v2-design/stages/clari
 | `test-full` | [../my-dev-flow-v2-test/stages/test-full.md](../my-dev-flow-v2-test/stages/test-full.md) |
 | `test-lite` | [../my-dev-flow-v2-test/stages/test-lite.md](../my-dev-flow-v2-test/stages/test-lite.md) |
 | `fix-tests` | [../my-dev-flow-v2-code/stages/fix-tests.md](../my-dev-flow-v2-code/stages/fix-tests.md) |
-| `gate-c` | [gate-c.md](gate-c.md) — blocking ask; no merge yet |
+| `gate-c` | [gate-c.md](gate-c.md) **Read before you decide** — paste reading guide + blocking ask; no merge yet |
 | `merge` | [../my-dev-flow-v2-merge/stages/merge.md](../my-dev-flow-v2-merge/stages/merge.md) · [gate-c.md](gate-c.md) · code [clarity-check Merge](../my-dev-flow-v2-code/stages/clarity-check.md#merge) |
 
 Resume: [resume.md](resume.md).

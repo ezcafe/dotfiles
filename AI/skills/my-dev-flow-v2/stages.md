@@ -101,8 +101,8 @@ flowchart LR
 
 ## Gates
 
-| Gate | When | Who |
-|------|------|-----|
-| **A** | After Ideation (full) | Auto when `01a` ok |
-| **B** | After design clean (+04a); before Build | HITL ([gate-b.md](gate-b.md)) |
-| **C** | Before commit/push/PR/merge | Always blocking ([gate-c.md](gate-c.md)) |
+| Gate | When | Who | User reading guide (parent pastes when asking) |
+|------|------|-----|------------------------------------------------|
+| **A** | After Ideation (full) | Auto when `01a` ok; human on escalate / max-3 | [gate-a.md](../my-dev-flow-v2-design/stages/gate-a.md) **Read before you decide** |
+| **B** | After design clean (+04a); before Build | HITL ([gate-b.md](gate-b.md)) | [gate-b.md](gate-b.md) **Read before you decide** |
+| **C** | Before commit/push/PR/merge | Always blocking ([gate-c.md](gate-c.md)) | [gate-c.md](gate-c.md) **Read before you decide** |

@@ -2,6 +2,26 @@
 
 **SoT for:** Default tiers, async-notify, Build armed, Gate B approved. Shared provenance: [hitl.md](hitl.md).
 
+## Read before you decide (show to user)
+
+When posting the Gate B digest / AskQuestion (blocking or async-notify), the **parent** pastes this reading guide to the user. Paths under `.my-docs/workflow/<slug>/`.
+
+**Must read (decision):**
+
+1. `03-design.md` — options, Recommendation, System design, contracts, UI locks
+2. `04-tasks.md` — acceptance + planned tests
+3. `03a-design-review-log.md` — overall design-review Result (must be **clean**)
+4. `03a-api-contract-review.md` / `03a-db-design-review.md` — when present (Has API/DB)
+5. `00-run.md` — Has API/DB/auth/PII/schema, HITL Gate B tier, Verify commands
+
+**Skim if open issues:**
+
+- `02b-grill.md` — Settled decisions (do not re-open without evidence)
+- `04a-tdd-test-review.md` — when TDD review ran
+- `01-idea.md` / `01a-gate-a.md` — only if UI locks or Core problem feel wrong
+
+**Decide:** approve Build (named yes / Option N) · reject / change pick · stop. Blocking → parent records **Gate B approved** + provenance. Async → digest only this turn; arm **Build armed** next turn if no veto.
+
 ## Default tier
 
 | Mode / scope | Prefer |
