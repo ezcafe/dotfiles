@@ -8,9 +8,11 @@ When asking Gate C (commit / push / PR / merge), the **parent** pastes this read
 
 **Must read (decision):**
 
-1. `06-test-log.md` — Result **success** + **Test path last run** (or skip-review escape + provenance pair)
+1. `06-test-log.md` + `00-run.md` Last Verify — by **Review profile** ([Test bar](#test-bar-before-merge)):
+   - **lite** / **full** → Result **success** + **Test path last run** matching profile (no escape / waiver substitute) **and** unpaid stale Notes cleared (`review-stale` / `test-stale`)
+   - **skip-review** → Last Verify **verify-pass** + independent Smoke **smoke-pass** per [verify.md](verify.md) Independent Smoke (SoT) **and** one required escape with matching Notes↔provenance pair ([hitl.md](hitl.md)) **and** unpaid stale Notes cleared (`review-stale` N/A cleared; `test-stale` cleared). Escape alone does **not** substitute for success under lite/full, and does **not** waive verify-pass + independent smoke-pass under skip-review.
 2. `05-review-log.md` — open Critical/Major? Fix asks? Merged lenses when Lens plan 2+
-3. `00-run.md` — Last Verify, Mode, Review profile, Has API/DB/auth, Gate C approved (still `none` until yes)
+3. `00-run.md` — Last Verify, Mode, Review profile, Has API/DB/auth, Gate C approved (still `none` until yes); unpaid `review-stale` / `test-stale` (skip-review: `review-stale` N/A)
 
 **Skim for risk summary / PR:**
 
@@ -22,11 +24,13 @@ When asking Gate C (commit / push / PR / merge), the **parent** pastes this read
 
 ## Test bar (before merge)
 
+**Tests success** ≡ this Test bar (one definition — [derive-next.md](derive-next.md) Definitions). Unpaid stale Notes fail the bar.
+
 | Review profile | Required |
 |----------------|----------|
-| **skip-review** | Legal per [lenses.md](lenses.md) **and** verify-pass + smoke-pass **and** one escape **with matching Notes↔provenance pair** ([hitl.md](hitl.md)): Notes `smoke-pass (re-run)` ↔ provenance `smoke-pass-rerun`; or `docs-only` ↔ `docs-only`; or `smoke-waive` / `gate-c-test-override` with same-kind provenance. Build-writes-Smoke alone is **not** enough. Escape kinds are valid **only** under skip-review. |
-| **lite** | `06-test-log.md` Result **success** and **Test path last run:** `lite` — no escape / waiver substitute |
-| **full** | `06-test-log.md` Result **success** and **Test path last run:** `full` — no escape / waiver substitute |
+| **skip-review** | Legal per [lenses.md](lenses.md) **and** verify-pass + independent smoke-pass per [verify.md](verify.md) Independent Smoke (SoT) **and** one escape **with matching Notes↔provenance pair** ([hitl.md](hitl.md)) **and** unpaid stale Notes cleared (`review-stale` N/A cleared; `test-stale` cleared). Escape kinds are valid **only** under skip-review. |
+| **lite** | `06-test-log.md` Result **success** and **Test path last run:** `lite` — no escape / waiver substitute — **and** unpaid stale Notes cleared (`review-stale` / `test-stale`) |
+| **full** | `06-test-log.md` Result **success** and **Test path last run:** `full` — no escape / waiver substitute — **and** unpaid stale Notes cleared (`review-stale` / `test-stale`) |
 
 ## Gate C approved
 
@@ -42,4 +46,6 @@ When asking Gate C (commit / push / PR / merge), the **parent** pastes this read
 
 Do not invent actions. Merge Task re-reads field before git/remote work.
 
-After Merge Result **success** and `merge` ∈ approved → Status **`done`**. Subset without merge → stay `paused`.
+**Gate C unpaid** (derive Definitions): approved `none` / empty, **or** remaining named actions unpaid — Prefer `gate-c`, not bare non-empty → `merge` ([derive-next.md](derive-next.md)).
+
+After Merge Result **success** and `merge` ∈ approved → Status **`done`**. Subset without merge → stay `paused` (do **not** Prefer `merge`).

@@ -10,7 +10,7 @@
 
 **Lite:** Prefer always re-runs `code-review-phase` (not Adv/Quality).
 
-**Lens / merged Fix ask:** use twin [fix-review-relens.md](fix-review-relens.md) — do **not** Prefer “already clean → test-*” while Merged / plan-1 still `needs fix`.
+**Lens / merged Fix ask:** use twin [fix-review-relens.md](fix-review-relens.md) — do **not** Prefer “already clean → test-*” while Merged / plan-1 still `needs fix` (Fix Mode `merged-lenses` \| `plan-1-lens`).
 
 **Do not:** After fix-review verify-pass, re-match the “Review needs fix → fix-review” row; pick next unpaid Adv while Quality is the dirty section.
 

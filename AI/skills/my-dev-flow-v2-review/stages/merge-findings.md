@@ -46,6 +46,7 @@ Write/update 05-review-log.md section “Merged lenses” using the template sha
 - Conflicts resolved (what lost and why)
 - Fix ask (numbered) — empty if clean
 - Round notes (Merged lenses section only — do **not** invent or bump file-top **Round**; parent increments on re-entry)
+- Do **not** require updating file-top **Result** — parent derive uses Merged section Result in **overall Result** when Lens plan **2+** (`{my-dev-flow-v2}/derive-next.md` Definitions); file-top may stay **pending**
 
 Do not edit the 05-lens-*.md files. Do not write production code.
 Return FIRST LINE exactly: Result: clean | needs fix
@@ -55,7 +56,7 @@ Then count of fix items + path to 05-review-log.md.
 
 **After:**
 
-- If **clean** → lens loop done (unless parent needs a profile-branched recheck from a prior Fix: **lite** → `code-review-phase`; **full** → Adversarial / Quality). Advance to `test-*` only when Merged is **clean** ([preflight.md](../../my-dev-flow-v2/preflight.md)).
-- If **needs fix** → `fix-review` Mode `merged-lenses` → on **verify-pass**, parent Prefer ([derive-next.md](../../my-dev-flow-v2/derive-next.md)): mark planned `05-lens-*` + Merged unpaid → re-run Lens plan lenses → Merge findings again (max 3 rounds, then Decision N). If Fix changed tests/behavior: **lite** Prefer `code-review-phase` once first; **full** Prefer Adversarial once (Quality if structure changed) first.
+- If **clean** → Prefer continue table in [derive-next.md](../../my-dev-flow-v2/derive-next.md) Post-Build (**Lenses clean** → unpaid `test-full` / `test-lite` when tests unpaid). Do **not** invent a profile-branched Adv/`code-review-phase` recheck from Merged clean alone.
+- If **needs fix** → `fix-review` Mode `merged-lenses` → on **verify-pass**, parent Prefer ([derive-next.md](../../my-dev-flow-v2/derive-next.md)): mark planned `05-lens-*` + Merged unpaid → Prefer re-run dirty Lens plan lenses → `merge-findings` if 2+ (max 3 rounds, then Decision N). Do **not** Prefer Adv/`code-review-phase` first when tests/behavior changed — that field is informational only.
 
 ---

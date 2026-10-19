@@ -30,7 +30,7 @@ Follow [step-0.md](step-0.md). Honor [Load budget](step-0.md#load-budget).
 
 - **Default:** `run my-dev-flow-v2` / `start my-dev-flow-v2` → classify Mode, then pipeline.
 - **Solo subflow:** [solo-entry.md](solo-entry.md).
-- **Override:** `simple` / `full` → that Mode; `skip-review` → profile skip-review (Mode simple only unless Decision N).
+- **Override:** `simple` / `full` → that Mode. User `skip-review` ([step-0.md](step-0.md) Overrides): (1) Mode **full** or profile **lite**|**full** → Decision N only ([decisions.md](decisions.md) User override `skip-review`); (2) fresh seed (no Mode/profile yet) → Mode **simple** + skip-review only if legality holds ([lenses.md](lenses.md)); (3) already Mode **simple** + legal → may set profile **skip-review**; (4) Decision N **cannot** legalize Mode **full** + skip-review ([stages.md](stages.md) Forbidden).
 - **Grill-only:** `grill` / `stress-test this plan` → [grill.md](grill.md).
 - **v1:** `my-dev-flow` (archived backup + live v1) — [CUTOVER.md](CUTOVER.md).
 
@@ -48,7 +48,7 @@ Follow [step-0.md](step-0.md). Honor [Load budget](step-0.md#load-budget).
 |------|------|
 | Happy path / Mode × profile | [stages.md](stages.md) |
 | Classify / seed | [step-0.md](step-0.md) |
-| Pre-Task checks | [preflight.md](preflight.md) · [derive-next.md](derive-next.md) |
+| Pre-Task checks | [preflight.md](preflight.md) · [derive-next.md](derive-next.md) (+ [pre](derive-next-pre.md) / [post](derive-next-post.md) half) |
 | Next → open 1–2 files | [parent-next.md](parent-next.md) |
 | Task handoff R/W | [handoffs.md](handoffs.md) |
 | Gates / consent | [hitl.md](hitl.md) · [gate-b.md](gate-b.md) · [gate-c.md](gate-c.md) (each has **Read before you decide**) · Gate A guide in [gate-a After](../my-dev-flow-v2-design/stages/gate-a.md) |
@@ -71,9 +71,9 @@ Follow [step-0.md](step-0.md). Honor [Load budget](step-0.md#load-budget).
 |-------|------|
 | [`my-dev-flow-v2-design`](../my-dev-flow-v2-design/SKILL.md) | Ideation→Design (full) or design-phase (simple) |
 | [`my-dev-flow-v2-design-review`](../my-dev-flow-v2-design-review/SKILL.md) | API∥DB + general, or design-verify-phase |
-| [`my-dev-flow-v2-code`](../my-dev-flow-v2-code/SKILL.md) | TDD review → Build → Fix |
-| [`my-dev-flow-v2-review`](../my-dev-flow-v2-review/SKILL.md) | Adv→Quality→lenses (full) or code-review-phase→lenses (lite) |
+| [`my-dev-flow-v2-code`](../my-dev-flow-v2-code/SKILL.md) | TDD → Build → fix-tests |
+| [`my-dev-flow-v2-review`](../my-dev-flow-v2-review/SKILL.md) | Adv→Quality→lenses (full) or code-review-phase→lenses (lite); Fix-from-review here |
 | [`my-dev-flow-v2-test`](../my-dev-flow-v2-test/SKILL.md) | Smoke / test-full / test-lite |
 | [`my-dev-flow-v2-merge`](../my-dev-flow-v2-merge/SKILL.md) | Gate C → commit/push/PR/merge |
 
-Do **not** re-read this SKILL every step. Load card + Open row + stage prompt only.
+Do **not** re-read this SKILL every step. Match [Start](#start-step-0) / [step-0 Load budget](step-0.md#load-budget): **preflight** + **derive** + handoff row + Open 1–2 + `stages/<id>.md`. Do **not** re-read this orchestrator SKILL or full [handoffs.md](handoffs.md).

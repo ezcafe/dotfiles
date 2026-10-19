@@ -6,7 +6,7 @@ Auto-add **api** / **db** only per `{my-dev-flow-v2}/lenses.md` — **not** when
 
 **api/db isolation:** When Lens plan includes **api** or **db** (not tiny-tweak), always launch isolated Tasks — even under lite, even if only one lens. Same rule for security / perf / memory: parent launches; never fold into `code-review-phase` as a paid lens.
 
-**After (parent):** When parent launched **parallel** (Lens plan **2+**): wait all siblings → `merge-findings` (do **not** Fix yet — even if any lens needs fix). When plan has **1** lens: parent copies Result into Merged lenses; needs fix → `fix-review` directly. Per-lens “next unpaid `lens-*`” only when parent launched **serial**.
+**After (parent):** When parent launched **parallel** (Lens plan **2+**): wait all siblings → `merge-findings` (do **not** Fix yet — even if any lens needs fix). When plan has **1** lens: parent copies Result into Merged lenses; needs fix → `fix-review` Mode `plan-1-lens`. Per-lens “next unpaid `lens-*`” only when parent launched **serial**.
 
 Wait for launched lenses. Merge findings only if **2+** lenses; if **1** lens, parent copies into Merged lenses (no Merge Task).
 

@@ -6,8 +6,8 @@ Read **one** template per stage. Size caps: [size-caps.md](../size-caps.md). Sev
 |-------------------|----------|
 | `00-run.md` | [00-run.md](00-run.md) |
 | `01-idea.md` | [01-idea.md](01-idea.md) |
-| `01a-gate-a.md` | [01a-gate-a.md](01a-gate-a.md) — Gate A Result (prefer) |
-| `01a-idea-ui-review.md` | [01a-idea-ui-review.md](01a-idea-ui-review.md) — **LEGACY** alias; resume only |
+| `01a-gate-a.md` | [01a-gate-a.md](01a-gate-a.md) — Gate A Result (prefer; new runs write this) |
+| `01a-idea-ui-review.md` | [01a-idea-ui-review.md](01a-idea-ui-review.md) — **LEGACY** alias; resume only — [derive-next.md](../derive-next.md) accepts when `01a-gate-a.md` absent |
 | `02-skim.md` | [02-skim.md](02-skim.md) |
 | `02-analysis.md` | [02-analysis.md](02-analysis.md) |
 | `02b-grill.md` | [02b-grill.md](02b-grill.md) |

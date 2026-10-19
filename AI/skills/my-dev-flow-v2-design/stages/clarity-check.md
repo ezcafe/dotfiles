@@ -45,6 +45,14 @@ Confirm:
 
 If no → ask the user; do not launch `grill`.
 
+### Grill (Mode **simple** re-entry)
+
+Before launching **`grill`** when Mode is **simple** (re-entry / settle after `design-phase`, not cold-start `design-phase`):
+
+Reuse **design-phase entry** clarity above **and** confirm Grill is still open ([grill.md](../../my-dev-flow-v2/grill.md) Grill open) — Expected Next stays `grill` until closed. Do **not** require the Mode-full Analyze What/Why/How checklist again.
+
+If no → ask the user; do not launch `grill`.
+
 ### Design (Mode **full**)
 
 Before launching **`design`**:
@@ -53,7 +61,7 @@ Before launching **`design`**:
 
 Confirm the same Problem map + What/Why/How as Grill above.
 
-Also confirm Grill is **frontier-empty** or **skipped** (see `02b-grill.md` / Notes). Do not start Design on `needs-round`.
+Also confirm Grill is **not open**: Result **frontier-empty** or **skipped**, or Notes grill-skip — and `02b` exists **or** Notes grill-skip ([grill.md](../../my-dev-flow-v2/grill.md) Grill open). Do **not** start Design on **`needs-round`** or **unpaid Grill** (no `02b` and no Notes grill-skip).
 
 If no → ask the user; do not launch `design`.
 

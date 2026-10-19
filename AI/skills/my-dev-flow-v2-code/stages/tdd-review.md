@@ -2,13 +2,13 @@
 
 **Stage id:** `tdd-review`
 
-**When:** After design-review clean; **before Gate B**. Only if `04-tasks.md` has planned test cases; else parent Notes-skips. Skip in Fix-from-tests mode (unless parent asks).
+**When:** After design-review clean (Mode **full**) or design-verify-phase clean (Mode **simple**); **before Gate B**. Only if `04-tasks.md` has planned test cases; else parent Notes-skips. Skip in Fix-from-tests mode (unless parent asks).
 
 **subagent_type:** `generalPurpose`  
 **model:** resolved Medium  
 **Task description:** `Review TDD test cases`
 
-**Done when:** `04a-tdd-test-review.md` written; Result **clean** or Fix ask lists gaps for Build.
+**Done when:** `04a-tdd-test-review.md` written. Parent advances to Gate B only on Result **`clean`** (or Notes `04a skipped`). Result **`needs more tests`** → Fix ask lists gaps; fold into `04-tasks` → Prefer re-`tdd-review` (not Gate B).
 
 **Task prompt:**
 
@@ -17,7 +17,7 @@ You are the Test Case Reviewer for my-dev-flow-v2-code. Fresh context only.
 
 <Paste output of: compose handoff from {my-dev-flow-v2}/handoffs.md for tdd-review>
 
-Read 03-design.md and 04-tasks.md (design-review clean; Gate B comes after this review). Optionally skim existing test files listed in tasks.
+Read 03-design.md and 04-tasks.md (design-review or design-verify-phase clean; Gate B comes after this review). Optionally skim existing test files listed in tasks.
 
 Your job: review planned TDD test cases from 04-tasks.md (this stage runs only because planned tests exist) for:
 
@@ -36,4 +36,4 @@ Return FIRST LINE exactly: Result: clean | needs more tests
 Then top gaps + path to 04a-tdd-test-review.md ({my-dev-flow-v2}/results.md).
 ```
 
-**After:** Parent: fold Fix ask into `04-tasks.md` when practical → **Gate B**. Do not Build yet when parent is `my-dev-flow-v2`.
+**After:** Parent: on Result **`needs more tests`**, fold Fix ask into `04-tasks.md` when practical → Prefer re-launch **`tdd-review`** until Result **`clean`** (or Notes `04a skipped` if planned tests removed). **Do not** advance to Gate B on `needs more tests` alone ([derive-next.md](../../my-dev-flow-v2/derive-next.md) · [results.md](../../my-dev-flow-v2/results.md)). On **`clean`** (or Notes skip) → Gate B. Do not Build yet when parent is `my-dev-flow-v2`.

@@ -3,9 +3,10 @@ name: my-dev-flow-v2-code
 description: >-
   Optionally reviews planned TDD test cases before Gate B; then builds design
   tasks with TDD after Gate B is settled. Build and Fix must pass a Verify gate
-  (max 3 attempts; Result verify-pass first line). Build writes Smoke so the
-  parent can skip the Smoke Task (Build-writes-Smoke). Also fixes failures from
-  my-dev-flow-v2-test. Draft only — no merge. Use when the user says run
+  (max 3 attempts; Result verify-pass first line). Build-writes-Smoke may skip
+  the Smoke Task when 06 matching smoke-pass from Build, except E1 (Mode full
+  + profile full) and skip-review unpaid Prefer unpaid. Also fixes failures
+  from my-dev-flow-v2-test. Draft only — no merge. Use when the user says run
   my-dev-flow-v2-code, build from design, or fix from test failures.
 ---
 
@@ -26,16 +27,16 @@ Build subflow of [`my-dev-flow-v2`](../my-dev-flow-v2/SKILL.md). Draft only — 
 ## Principles
 
 - TDD review only if `04-tasks` lists planned tests; else Notes skip.
-- Build after Gate B settled. Re-read veto / approved / Build armed first.
+- Build after Gate B settled. Re-read veto / approved / Gate B auto token / Build armed first ([verify.md](../my-dev-flow-v2/verify.md) Gate B check).
 - Advance only on **verify-pass**. Design-backloop if `03`/`04` must change.
-- Build-writes-Smoke: parent may skip the Smoke Task **except** Mode **full** + profile **full** (E1 independent Smoke required — [verify.md](../my-dev-flow-v2/verify.md)).
+- Build-writes-Smoke: parent may skip the Smoke Task when `06` matching smoke-pass from Build, **except** E1 (Mode **full** + profile **full**) and skip-review unpaid Prefer unpaid (Build-writes-Smoke does **not** waive Prefer unpaid — [verify.md](../my-dev-flow-v2/verify.md)).
 
 ## Prerequisites
 
 | Mode | Need |
 |------|------|
 | TDD | `03`+`04` with planned tests |
-| Build | Gate B settled; veto `none`; Verify commands; design clean |
+| Build | Gate B settled (blocking: approved + provenance; **auto:** design-scoped `gate-b auto — <HH:MM>` or digest after current **Design clean** / **Verify clean** (Design-clean time — [derive-next.md](../my-dev-flow-v2/derive-next.md) Settle freshness) — absence → `blocked — Gate B auto not settled`); veto `none`; Verify commands; design clean — [verify.md](../my-dev-flow-v2/verify.md) Gate B check |
 | Fix-from-tests | `06` smoke-fail/failure + Fix ask |
 
 ## Start

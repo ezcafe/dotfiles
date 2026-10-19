@@ -2,7 +2,7 @@
 
 **When:** Mode **full** and (`00-run.md` **Has DB = yes**, or `03-design.md` defines new/changed Database contracts / migrations and Has DB is unknown — treat as yes), **unless** Notes `tiny-contract-tweak` (`{my-dev-flow-v2}/lenses.md` fold). Mode **simple** uses **design-verify-phase** instead.
 
-**Parallel:** When Has API and Has DB are both yes (and not tiny-tweak): both `03a-*` missing → launch **api-contract-review** ∥ **db-design-review** in the **same** turn; one `03a-*` exists → launch **missing only** (resume serialize). See [lenses.md](../../my-dev-flow-v2/lenses.md).
+**Parallel:** When Has API and Has DB are both yes (and not tiny-tweak): both **Isolated unpaid** (missing **or** Result unpaid/pending) → launch **api-contract-review** ∥ **db-design-review** in the **same** turn; resume Prefer only unpaid/pending sibling; Prefer re-run even if files exist. See [lenses.md](../../my-dev-flow-v2/lenses.md).
 
 **Generation ≠ verification:** you did not write these contracts. Do not rewrite docs here.
 
@@ -44,7 +44,7 @@ Rules:
 - Simple plain words.
 - Do not edit 01–04 or 03a-design-review-log.md. Do not write production code.
 - Do not run the general design review or API contract review — those are separate Tasks.
-- Re-entry: do **not** invent or bump **Round** — parent increments before re-launch (`{my-dev-flow-v2}/parent-next.md` · `{my-dev-flow-v2}/decisions.md`).
+- Re-entry: do **not** invent or bump **Round** — parent increments before re-launch (`{my-dev-flow-v2}/decisions.md`).
 
 Return FIRST LINE exactly: Result: clean | needs update | skipped
 Then short summary + path to 03a-db-design-review.md ({my-dev-flow-v2}/results.md).

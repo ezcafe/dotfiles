@@ -6,7 +6,7 @@
 **model:** Fast preferred (Fast-on-simple); else Medium  
 **Task description:** `Design verify phase`
 
-**Done when:** Overall **clean** | **needs update** across written `03a-*` files (same clean rule as SKILL.md). Require isolated `03a-api` / `03a-db` only when present and not Notes `tiny-contract-tweak`.
+**Done when:** Overall **clean** | **needs update** (same clean rule as SKILL.md). When Has API/DB = **yes** and Notes ≠ `tiny-contract-tweak`, matching `03a-api-contract-review.md` / `03a-db-design-review.md` **must** be written and Result **clean** — missing file ≠ skipped. When Has = no or Notes `tiny-contract-tweak`, treat as Notes-skip only (do not invent empty files).
 
 **Task prompt:**
 
@@ -29,7 +29,10 @@ If Has DB = no: Notes skip only — do not invent an empty DB file. Treat as **s
 
 ### Always
 Write 03a-design-review-log.md using the general design-review checklist from stage design-review (gaps, System design, patterns, OWASP light). If API/DB isolated files exist, do not deep-duplicate those checks — point to them. Overall clean only if zero Critical/Major **and** API/DB are **clean|skipped** when required (skipped = Has no Notes-only, or Notes `tiny-contract-tweak`; Has yes not tiny → isolated file Result clean — never invent empty files) ({my-dev-flow-v2}/severity.md).
-On re-entry after Update: do **not** invent or bump **Round** — parent increments before re-launch (`{my-dev-flow-v2}/parent-next.md` · `{my-dev-flow-v2}/decisions.md`).
+
+**Grill (Mode simple — same bar as Mode full):** Fail **Major** if `02b-grill.md` Result is **`needs-round`**, or Build-critical open frontier remains, or Design re-opens Settled grill decisions without new evidence. Notes grill-skip / Result **`skipped`** OK when frontier was empty. Do **not** overall-clean while Grill is open ({my-dev-flow-v2}/grill.md · {my-dev-flow-v2}/derive-next.md).
+
+On re-entry after Update: do **not** invent or bump **Round** — parent increments before re-launch (`{my-dev-flow-v2}/decisions.md`).
 
 ### If Has UI = yes (Mode simple — thin UI-alignment; not full Gate A)
 In the general log, add a short **UI alignment** subsection (fail Major on drift):
@@ -42,6 +45,6 @@ Return FIRST LINE exactly: Result: clean | needs update
 Then short summary + paths to 03a files written ({my-dev-flow-v2}/results.md).
 ```
 
-**After:** needs update → design Update → **parent bumps Round** (+ Run metrics) before re-launch ([parent-next.md](../../my-dev-flow-v2/parent-next.md)) → re-run this stage (max 3 → Decision N in `{my-dev-flow-v2}/decisions.md`). **If clean:** parent continues (TDD → Gate B → Build). E1 independent Smoke: **N/A** (Mode simple). Lens plan: may set **api**/**db** now when Has API/DB and **not** tiny-tweak; parent **must** finalize Lens plan api/db per [lenses.md](../../my-dev-flow-v2/lenses.md) **before code review** (may set earlier before Gate B).
+**After:** needs update → design Update → **parent bumps Round** (+ Run metrics) before re-launch ([decisions.md](../../my-dev-flow-v2/decisions.md)) → re-run this stage (max 3 → Decision N in `{my-dev-flow-v2}/decisions.md`). **If clean:** parent continues (TDD → Gate B → Build). E1 independent Smoke: **N/A** (Mode simple). Lens plan: may set **api**/**db** now when Has API/DB and **not** tiny-tweak; parent **must** finalize Lens plan api/db per [lenses.md](../../my-dev-flow-v2/lenses.md) **before code review** (may set earlier before Gate B).
 
 ---

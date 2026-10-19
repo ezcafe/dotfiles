@@ -26,4 +26,4 @@ Return FIRST LINE exactly: Result: success | failure
 Then short summary + path to 06-test-log.md ({my-dev-flow-v2}/results.md).
 ```
 
-**After:** success → parent Gate C (not this skill). failure → Fix-from-tests (verify-pass) → re-run `test-lite`. Max 3 test↔fix rounds → Decision N (`{my-dev-flow-v2}/decisions.md`).
+**After:** success → parent clears `test-stale` when Lite/full clear is met (`{my-dev-flow-v2}/verify.md` Stale), then Prefer `merge` \| `gate-c` only when **Tests success** (`{my-dev-flow-v2}/derive-next.md`). failure → Fix-from-tests (verify-pass) → re-run `test-lite`. Max 3 test↔fix rounds → Decision N (`{my-dev-flow-v2}/decisions.md`).

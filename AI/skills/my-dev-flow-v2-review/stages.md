@@ -14,7 +14,9 @@ Order keys off **Review profile**, not Mode (Mode full + profile lite → lite r
 | Review profile | Order |
 |----------------|-------|
 | **lite** | `code-review-phase` ⇄ Fix → lenses per plan → Merge if 2+ → `test-lite` |
-| **full** | `adversarial` ⇄ Fix → `quality` ⇄ Fix → lenses → Merge if 2+ → Fix loop → `test-full` |
+| **full** | independent Smoke (`Smoke source: Smoke-Task`) → `adversarial` ⇄ Fix → `quality` ⇄ Fix → lenses → Merge if 2+ → Fix loop → `test-full` |
+
+> Notes `smoke-pass (re-run)` is companion provenance only (not the path unlock) — [verify.md](../my-dev-flow-v2/verify.md) Independent Smoke (SoT).
 
 Lens routing (when Lens plan ≠ none): [stages/lenses-overview.md](stages/lenses-overview.md).  
 Parent loop hint: [stages/parent-loop-hint.md](stages/parent-loop-hint.md).  

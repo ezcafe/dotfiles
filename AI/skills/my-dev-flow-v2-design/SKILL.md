@@ -5,8 +5,9 @@ description: >-
   design-phase Task bundling Analyze+Grill+Design (Mode simple). Also updates
   design docs from design-review findings. Writes framing, analysis, grill,
   design options, contracts, and TDD-ready tasks under .my-docs/workflow. Use
-  when the user says run my-dev-flow-v2-design, design-only workflow, or after
-  my-dev-flow-v2-design-review.
+  when the user says run my-dev-flow-v2-design, design-only workflow,
+  design-phase, design-update, or parent after Step 0 seed (solo or
+  orchestrated).
 ---
 
 # my-dev-flow-v2-design
@@ -28,7 +29,7 @@ Design-only subflow of [`my-dev-flow-v2`](../my-dev-flow-v2/SKILL.md). No produc
 
 - Design is the main artifact. Mode **full** → two options; Mode **simple** → one + ≤3-line reject.
 - Set Has UI / API / DB / auth/PII/schema when known. Do **not** write `03a-*`.
-- Gate A (full): auto when Result **ok**. Grill before Design; do not Design on `needs-round`.
+- Gate A (full): auto when Result **ok**. Grill before Design; do not Design on Grill open (`needs-round` or unpaid Grill) — [grill.md](../my-dev-flow-v2/grill.md).
 - Update from `03a` Fix ask or Notes `design-backloop`. Max 3 design↔review rounds → Decision N.
 
 ## Pipeline

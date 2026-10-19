@@ -1,5 +1,7 @@
 # Cutover: v1 → v2
 
+**New runs (2026-10+):** prefer [`my-dev-flow-v3`](../my-dev-flow-v3/SKILL.md) — leaner SoT (settle generation, single derive file). Finish in-flight v2 on v2. See [v3 CUTOVER](../my-dev-flow-v3/CUTOVER.md).
+
 ## What changed
 
 | v1 | v2 |
@@ -47,5 +49,20 @@ v1 `.my-docs/workflow/<slug>/00-run.md` files still work with v2 if you:
 | v1 / LEGACY label | v2 durable field | Where |
 |-------------------|------------------|--------|
 | **Mode last run** | **Test path last run** | `06-test-log.md` Smoke / full / lite |
+| `01a-idea-ui-review.md` | `01a-gate-a.md` | Gate A Result artifact |
 
 On resume only: if `06-test-log.md` still has **Mode last run**, treat it as **Test path last run** (`smoke` \| `full` \| `lite`). New writes use **Test path last run**. Gate C and derive read the v2 name; accept the LEGACY alias when the new field is absent ([artifacts/06-test-log.md](artifacts/06-test-log.md) · [gate-c.md](gate-c.md)).
+
+On resume only: if `01a-gate-a.md` is absent and `01a-idea-ui-review.md` exists, derive / Gate A treat the LEGACY file as `01a` ([derive-next.md](derive-next.md) · [artifacts/INDEX.md](artifacts/INDEX.md)). New runs write `01a-gate-a.md` only.
+
+## Stage alias (resume)
+
+Prefer current stage ids on new runs. On resume only, accept these legacy Task / stage names and map them to the v2 one-Task stages:
+
+| Legacy (separate Tasks) | Prefer now |
+|-------------------------|------------|
+| Coverage / Add missing e2e / Run suite (`coverage`, `add-e2e`, `run`) | One Task `test-full` ([my-dev-flow-v2-test/stages/test-full.md](../my-dev-flow-v2-test/stages/test-full.md)) |
+| Mode simple: separate Analyze → Grill → Design | One Task `design-phase` |
+| Mode simple: separate API/DB + design-review | One Task `design-verify-phase` |
+
+Do **not** launch separate `coverage` / `add-e2e` / `run` Tasks on new runs — `test-full` already covers those steps in one Task.

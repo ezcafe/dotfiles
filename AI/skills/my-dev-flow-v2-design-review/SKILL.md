@@ -1,11 +1,12 @@
 ---
 name: my-dev-flow-v2-design-review
 description: >-
-  Reviews design artifacts against best practices, then hands findings to
-  design-update. Mode full: isolated API∥DB reviews (both 03a-* missing →
-  same-turn parallel) then general design-review. Mode simple: one
-  design-verify-phase Task. Use when the user says run my-dev-flow-v2-design-review,
-  review the design, or after my-dev-flow-v2-design before Build.
+  Reviews design artifacts against best practices. Clean → TDD/Gate B; needs
+  update → design-update. Mode full: isolated API∥DB reviews (Has API+DB yes,
+  not tiny; both Isolated unpaid → same-turn parallel) then general
+  design-review. Mode simple: one design-verify-phase Task. Use when the user
+  says run my-dev-flow-v2-design-review, review the design, or after
+  my-dev-flow-v2-design before Build.
 ---
 
 # my-dev-flow-v2-design-review
@@ -23,10 +24,10 @@ Design-review subflow of [`my-dev-flow-v2`](../my-dev-flow-v2/SKILL.md).
 
 ## Principles
 
-- Result **clean** = zero Critical/Major **and** API/DB `clean`|`skipped` when required (Has=yes not tiny → isolated stage ran with Result clean, or Notes `tiny-contract-tweak`; Has=no → skipped via Notes only — “no file” alone is **not** skipped when Has=yes).
+- Result **clean** (overall) = zero Critical/Major **and** API/DB `clean`|`skipped` when required (Has=yes not tiny → isolated stage ran with Result clean, or Notes `tiny-contract-tweak`; Has=no → skipped via Notes only — “no file” alone is **not** skipped when Has=yes). Isolated `03a-api`/`03a-db` tokens are separate from overall — [results.md](../my-dev-flow-v2/results.md) · [lenses.md](../my-dev-flow-v2/lenses.md).
 - `needs update` → design-update → re-review.
-- Mode full + both API+DB yes (not tiny): both `03a-*` missing → same-turn parallel; one exists → missing only.
-- Never invent empty `03a-api` / `03a-db` when skipped or tiny-tweak. Result **skipped** only with Notes skip / Has=no.
+- Mode full + both API+DB yes (not tiny): unpaid = missing **or** Result unpaid/pending; both unpaid → same-turn parallel; resume Prefer only unpaid/pending sibling; Prefer re-run even if files exist ([lenses.md](../my-dev-flow-v2/lenses.md)).
+- Never invent empty `03a-api` / `03a-db` when skipped or tiny-tweak. Result **skipped** only with Notes skip / Has=no / Notes `tiny-contract-tweak`.
 - Max 3 rounds → Decision N. Do not Gate B from this skill.
 
 ## Pipeline

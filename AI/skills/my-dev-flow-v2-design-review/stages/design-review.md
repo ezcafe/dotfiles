@@ -31,7 +31,7 @@ Gaps / clarity
 - Missing success criteria, non-goals, or open questions that still block build
 - **Problem map missing or thin** — Mode **full:** `01-idea.md` must have Steps 1–2 (happening / missing / consequences → surface vs root → Core problem one sentence) + mind map with ★ priority; fail Major if skipped or hand-wavy. Mode **simple:** Core problem line or stub OK
 - **Analyze deep dive missing or thin** — `02-analysis.md` must answer What / Why / How (other ways + best practices) for overall change and major solution pieces; Mode **full** also requires **Solution branches** (Quick wins / Systemic / Creative) tied to Core problem; fail Major if skipped or hand-wavy
-- **Grill** — Mode full: `02b-grill.md` should be frontier-empty (or explicitly skipped with reason in Notes). Fail **Major** if Build-critical open frontier remains, or Design re-opens Settled grill decisions without new evidence. Mode simple: ok if grill skipped when frontier was empty.
+- **Grill** — Mode full **and** Mode simple: `02b-grill.md` Result **`frontier-empty`** or Notes grill-skip / Result **`skipped`**. Fail **Major** if Result **`needs-round`**, Build-critical open frontier remains, or Design re-opens Settled grill decisions without new evidence. Mode simple: Notes grill-skip OK when frontier was empty (same bar as full for open **`needs-round`**).
 - Spike notes (if any) must not contradict deep dive without explanation; spike must not be treated as shipped design without Design update
 - Vague contracts (API/DB) or missing error / auth / ownership — if Has API and API section already reviewed, note “see API contract review”; if Has DB and DB section already reviewed, note “see DB design review”
 - Sequence diagram missing actors, main path, or key failure returns
@@ -69,10 +69,10 @@ Write 03a-design-review-log.md (template: {my-dev-flow-v2}/artifacts/03a-design-
 - Fix ask for my-dev-flow-v2-design: Critical/Major only; merge pointers to API/DB Fix ask files when those are open
 - **Deferred Enhancements:** optional bullet list (do not block clean)
 - Round notes
-- **Round:** do **not** invent or bump — parent increments on re-entry (`{my-dev-flow-v2}/parent-next.md` · `{my-dev-flow-v2}/decisions.md`)
+- **Round:** do **not** invent or bump — parent increments on re-entry (`{my-dev-flow-v2}/decisions.md`)
 
 Rules:
-- Clean only if zero Critical and Major (Enhancements → Deferred).
+- Overall clean = zero Critical/Major **and** API/DB clean|skipped when required (overall vs isolated tokens — `{my-dev-flow-v2}/results.md` · SKILL Principles). Enhancements → Deferred (do not block clean).
 - Simple plain words.
 - Do not edit 01–04. Do not write production code.
 - Re-entry: leave **Round** for parent (parent also increments Run metrics `design-review rounds`).
@@ -81,4 +81,4 @@ Return FIRST LINE exactly: Result: clean | needs update
 Then short summary + path to 03a-design-review-log.md ({my-dev-flow-v2}/results.md).
 ```
 
-**After:** needs update → `design-update` → re-run from API contract review (when Has API **and** isolated file was required — not Notes `tiny-contract-tweak` / skipped) and/or DB design review (when Has DB **and** isolated file was required) → this stage. Parent bumps artifact **Round** (+ Run metrics) before each re-launch ([parent-next.md](../../my-dev-flow-v2/parent-next.md)). Tiny-tweak: re-run this stage only (folded checks). Max 3 → Decision N (`{my-dev-flow-v2}/decisions.md`). clean → continue (TDD → Gate B → Build verify-pass + Smoke section → then per [stages.md](../../my-dev-flow-v2/stages.md) Mode × Review profile / [verify.md](../../my-dev-flow-v2/verify.md) E1: **skip Smoke Task only when the table allows**; Mode **full** + profile **full** → independent Smoke first → review/test). Lens plan: may set **api**/**db** now when Has API/DB and **not** tiny-tweak; parent **must** finalize Lens plan api/db per `{my-dev-flow-v2}/lenses.md` **before code review** (may set earlier before Gate B).
+**After:** needs update → `design-update` → re-run from API contract review (when Has API **and** isolated file was required — not Notes `tiny-contract-tweak` / skipped) and/or DB design review (when Has DB **and** isolated file was required) → this stage. Parent bumps artifact **Round** (+ Run metrics) before each re-launch ([decisions.md](../../my-dev-flow-v2/decisions.md)). Tiny-tweak: re-run this stage only (folded checks). Max 3 → Decision N (`{my-dev-flow-v2}/decisions.md`). clean → continue (TDD → Gate B → Build verify-pass + Smoke section → then per [stages.md](../../my-dev-flow-v2/stages.md) Mode × Review profile / [verify.md](../../my-dev-flow-v2/verify.md) E1: **skip Smoke Task only when the table allows**; Mode **full** + profile **full** → independent Smoke first → review/test). Lens plan: may set **api**/**db** now when Has API/DB and **not** tiny-tweak; parent **must** finalize Lens plan api/db per `{my-dev-flow-v2}/lenses.md` **before code review** (may set earlier before Gate B).

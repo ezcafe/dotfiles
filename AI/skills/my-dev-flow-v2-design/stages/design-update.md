@@ -6,7 +6,7 @@
 **model:** resolved High  
 **Task description:** `Update design docs`
 
-**Done when:** Fix-ask items addressed (or Decision N amend scope when backloop); parent re-runs design-review.
+**Done when:** Fix-ask items addressed (or Decision N amend scope when backloop); Mode **full:** parent Prefer unpaid isolated while unpaid (even if files exist) → else `design-review`; Mode **simple:** parent Prefer `design-verify-phase` only (do **not** Prefer isolated stages).
 
 **Task prompt:**
 
@@ -28,6 +28,6 @@ Rules:
 Return: what you updated, which files.
 ```
 
-**After:** Parent re-runs `my-dev-flow-v2-design-review` (full: isolated API/DB when present and not tiny-tweak, then general; simple: design-verify-phase).
+**After:** Mode **full:** Prefer unpaid `api-contract-review` / `db-design-review` while **Isolated API/DB unpaid** (Has yes, not tiny; Prefer even if files exist) → else `design-review`. Mode **simple:** Prefer `design-verify-phase` only (do **not** Prefer isolated stages). (`{my-dev-flow-v2}/derive-next-pre.md` · `{my-dev-flow-v2}/design-backloop.md` · `{my-dev-flow-v2}/handoffs.md` design-update After). **Has flip:** drop skip-review → lite\|reclassify → HITL Gate B **blocking** → settle clear (**Gate B approved: none** / **Build armed: none** / veto-window / `async-gap-pending` / `gate-b auto`) → Notes `has-flip — <flags> — <HH:MM>` → invalidate-or-Prefer-re-run when API/DB newly yes (`{my-dev-flow-v2}/lenses.md` Has flip · `{my-dev-flow-v2}/derive-next.md` Settle freshness).
 
 ---

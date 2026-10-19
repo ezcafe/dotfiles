@@ -45,7 +45,8 @@ Then Grill digest (≤4 bullets) + paths touched (02b, glossary, ADR) ({my-dev-f
 
 1. If **skipped** → Notes `grill skipped — <reason>`; continue to Design.
 2. If **frontier-empty** → post Grill digest; Run log `done · Grill · frontier-empty · auto` (or blocking settled); continue to Design.
-3. If **needs-round** and HITL **blocking** → pause with digest; after human answers, re-run Grill or parent applies answers into `02b` then Design.
-4. If **needs-round** under auto (should be rare) → parent user-first settles remaining frontier into `02b`, then Design.
+3. If **needs-round** and HITL **blocking** → Status **`paused`**, Next=`grill`; pause with digest ([grill.md](../../my-dev-flow-v2/grill.md) After). After human answers, re-run Grill or parent applies answers into `02b`; restore Status **`running`** only then → Design when frontier-empty/skipped.
+4. If **needs-round** and HITL **async-notify** → do **not** advance on digest alone; parent user-first settles remaining frontier into `02b` (or re-run `grill`) until **`frontier-empty`** / **`skipped`** — [grill.md](../../my-dev-flow-v2/grill.md) After. Mode simple inside design-phase: same settle before Design section / verify.
+5. If **needs-round** under **auto** (should be rare) → same settle path as async-notify; then Design.
 
 ---

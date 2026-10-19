@@ -14,7 +14,7 @@ Severity: `{my-dev-flow-v2}/severity.md`.
 
 | Mode | Order |
 |------|-------|
-| **full** | Has API **and** Has DB (not tiny): both `03a-*` missing → `api-contract-review` ∥ `db-design-review` (**same-turn** parallel); one `03a-*` exists → launch **missing only** (resume serialize) → `design-review` |
+| **full** | Has API **and** Has DB (not tiny): both **Isolated unpaid** (missing **or** Result unpaid/pending) → `api-contract-review` ∥ `db-design-review` (**same-turn** parallel); resume Prefer only unpaid/pending sibling; Prefer re-run even if files exist → `design-review` |
 | **full** | API or DB only → that isolated stage → `design-review` |
 | **simple** | `design-verify-phase` only |
 

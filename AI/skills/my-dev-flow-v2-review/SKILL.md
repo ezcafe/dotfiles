@@ -26,11 +26,11 @@ Review + Fix subflow of [`my-dev-flow-v2`](../my-dev-flow-v2/SKILL.md).
 
 - Writers (Fix) never self-approve; verifiers re-check after Fix.
 - skip-review → do nothing here (parent Gate C path).
-- Profile **full:** Adv → Quality (always Adv before Quality) → lenses → merge-findings if 2+.
+- Profile **full:** first unpaid pass Adv → Quality (Adv before Quality on that pass) → lenses → merge-findings if 2+. After `fix-review` verify-pass, defer to Prefer dirty ([derive-next.md](../my-dev-flow-v2/derive-next.md)) — do **not** force Adv before Quality when Prefer names Quality (or re-lens) only.
 - Profile **lite:** `code-review-phase` → lenses per plan → merge-findings if 2+.
-- Mode **full** + profile **full:** E1 independent Smoke (`smoke-pass (re-run)`) **required** before Adv ([verify.md](../my-dev-flow-v2/verify.md)).
+- Mode **full** + profile **full:** E1 independent Smoke **required** before Adv / Quality ([verify.md](../my-dev-flow-v2/verify.md) Independent Smoke (SoT)).
 - Parent always launches unpaid `lens-*` Tasks; `code-review-phase` may note signals but does not write `05-lens-*` or mark lenses paid.
-- Fix → verify-pass before re-review (lite → `code-review-phase`; full → Adv then Quality); max 3 → Decision N.
+- Fix → verify-pass before re-review; Prefer re-run **dirty** verifier / re-lens ([derive-next.md](../my-dev-flow-v2/derive-next.md) Prefer · [After Fix](stages/fix-review.md#after-fix)); max 3 → Decision N.
 
 ## Start
 

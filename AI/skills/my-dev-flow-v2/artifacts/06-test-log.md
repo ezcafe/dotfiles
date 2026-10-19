@@ -1,6 +1,13 @@
 Copy into `.my-docs/workflow/<slug>/`. [handoffs.md](../handoffs.md) · [CUTOVER.md](../CUTOVER.md) · [verify.md](../verify.md) · [hitl.md](../hitl.md).
 
-Gate C (full|lite): when Result is **success**, **Test path last run** must be `full` or `lite` matching Review profile — missing → fail closed. LEGACY alias: **Mode last run** ([CUTOVER.md](../CUTOVER.md)).
+Gate C (full|lite): when Result is **success**, **Test path last run** must be `full` or `lite` matching Review profile — missing → fail closed. Also unpaid stale Notes cleared (`review-stale` / `test-stale`) — [gate-c.md](../gate-c.md) Test bar. LEGACY alias: **Mode last run** ([CUTOVER.md](../CUTOVER.md)).
+
+Gate C (**skip-review**): require independent Smoke per [verify.md](../verify.md) Independent Smoke (SoT) **and** escape Notes↔provenance **and** unpaid stale Notes cleared (`review-stale` N/A cleared; `test-stale` cleared) ([gate-c.md](../gate-c.md)).
+
+**Who writes Smoke source:**
+- Build on verify-pass → `Build-verify` (Build-writes-Smoke).
+- Independent Smoke Task on smoke-pass → `Smoke-Task`.
+- Seed / unpaid → `pending`.
 
 # 06-test-log.md
 
@@ -13,6 +20,7 @@ Gate C (full|lite): when Result is **success**, **Test path last run** must be `
 **Round:** 1
 **Updated:**
 **Smoke source:** Build-verify | Smoke-Task | pending
+<!-- Build → Build-verify; Smoke Task → Smoke-Task; skip-review Gate C: Smoke-Task required; Notes smoke-pass (re-run) = companion only (verify.md SoT) -->
 
 ## Smoke (build + unit — usually written by Build on verify-pass)
 

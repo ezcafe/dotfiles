@@ -33,4 +33,4 @@ Return FIRST LINE exactly: Result: clean | needs fix
 Then path to 05-lens-api.md.
 ```
 
-**After:** Lens plan **2+** (parent parallel): wait sibling lenses → `merge-findings` (do **not** Fix yet — even on needs fix). Plan **1** lens: clean → test; needs fix → `fix-review`. Serial next unpaid `lens-*` only when parent launched serial ([derive-next.md](../../my-dev-flow-v2/derive-next.md) · [lenses-overview.md](lenses-overview.md)).
+**After:** Lens plan **2+** (parent parallel): wait sibling lenses → `merge-findings` (do **not** Fix yet — even on needs fix). Plan **1** lens: clean → test; needs fix → `fix-review` Mode `plan-1-lens`. Serial next unpaid `lens-*` only when parent launched serial ([derive-next.md](../../my-dev-flow-v2/derive-next.md) · [lenses-overview.md](lenses-overview.md)).

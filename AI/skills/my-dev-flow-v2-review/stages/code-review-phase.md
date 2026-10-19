@@ -30,13 +30,11 @@ Multi-axis quality vs idea/design/tasks. Has UI → fail Major on Design UI / Ga
 Parent **always** launches isolated `lens-*` Tasks for every unpaid entry on Lens plan ([lenses-overview.md](lenses-overview.md) · `{my-dev-flow-v2}/lenses.md` · `{my-dev-flow-v2}/derive-next.md`). This Task must **not** write `05-lens-*.md` and must **not** mark any lens paid. You may note lens signals / deferrals in Adv or Quality prose only. **api/db:** When Lens plan includes api/db and Notes are **not** `tiny-contract-tweak`, do **not** deep-fold contracts here. Tiny-tweak: fold light contract checks into Quality (no forced api/db lens; still no `05-lens-*` write).
 
 Clean only if zero Critical/Major in Adv + Quality ({my-dev-flow-v2}/severity.md). Else Fix ask ≤15 bullets Critical/Major only.
-Keep / update file-top **Result:** clean | needs fix (overall SoT — [artifacts/05-review-log.md](../../my-dev-flow-v2/artifacts/05-review-log.md)). **Round:** do **not** invent or bump — parent increments on re-entry (`{my-dev-flow-v2}/parent-next.md` · `{my-dev-flow-v2}/decisions.md`). When both section Results are present, parent derive requires both clean; max-round Decision N uses overall / worst-section Result.
+Keep / update file-top **Result:** clean | needs fix to match worst-of Adv+Quality section Results (lite convenience only — file-top alone never pays **Review clean**; file-top here does **not** include Merged; **overall Result** may also include Merged when Lens plan **2+** — [artifacts/05-review-log.md](../../my-dev-flow-v2/artifacts/05-review-log.md) · `{my-dev-flow-v2}/derive-next.md` Definitions). **Review clean** = Adv + Quality section Results both **`clean`**; missing or **`pending`** section Result = unpaid (**code-review unpaid**). **Round:** do **not** invent or bump — parent increments on re-entry (`{my-dev-flow-v2}/decisions.md`). max-round Decision N uses derived **overall Result** / worst-section (may include Merged).
 Return FIRST LINE exactly: Result: clean | needs fix
 Then path to 05-review-log.md.
 ```
 
-**If findings:** Fix → re-run this stage until clean (parent increments Round + review fix rounds) → then **parent** launches lenses per Lens plan (never in-band; 2+ → parallel + Merge).
-
-**After:** clean → parent launches unpaid `lens-*` per Lens plan (never in-band; 2+ → parallel → `merge-findings`) → `test-lite`. needs fix → `fix-review` → re-run this stage ([derive-next.md](../../my-dev-flow-v2/derive-next.md) · [parent-loop-hint.md](parent-loop-hint.md)).
+**After:** SoT → [derive-next.md](../../my-dev-flow-v2/derive-next.md) · [parent-loop-hint.md](parent-loop-hint.md). clean → parent launches unpaid `lens-*` per Lens plan (never in-band; 2+ → parallel → `merge-findings`) → `test-lite`. needs fix → Next=`fix-review` (Fix Mode code-review-phase); then Prefer re-run this dirty stage.
 
 ---

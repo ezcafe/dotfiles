@@ -28,11 +28,15 @@ If Grill yes: follow {my-dev-flow-v2}/grill.md; write 02b-grill.md; HITL Grill a
 
 ### C — Design
 Write 03-design.md: one recommended design + ≤3-line rejected alternative. System design + Design patterns headings (N/A OK per templates). Sequence, API/DB contracts, OWASP, UI locks when Has UI. Write 04-tasks.md with acceptance (+ TDD notes or clear “no automated tests”).
-Honor artifact size caps ([size-caps.md](../../my-dev-flow-v2/size-caps.md)). Confirm Has API/DB and Has auth/PII/schema again.
+Honor artifact size caps already inlined/pasted in this handoff (link optional — open `{my-dev-flow-v2}/size-caps.md` only if a needed cap is missing from the paste). Confirm Has API/DB and Has auth/PII/schema again.
 
 Return: Has API/DB + Has auth/PII/schema + Verify commands + Grill result + paths to 02-analysis, 02b (or skip), 03-design, 04-tasks.
 ```
 
-**After:** Parent copies Has API/DB + Has auth/PII/schema + Verify commands into `00-run.md`. When any of Has API / Has DB / Has auth/PII/schema becomes **yes**, parent **MUST** set **HITL Gate B** = **blocking** per [gate-b.md](../../my-dev-flow-v2/gate-b.md) before Gate B/Build. Next: `design-verify-phase` (not separate Analyze/Grill/Design).
+**After:** Parent copies Has API/DB + Has auth/PII/schema + Verify commands into `00-run.md`.
+
+1. **Grill gate:** advance only when Grill Result is **`frontier-empty`** or **`skipped`** (or Notes grill-skip). On Grill open **and** (design artifacts present **or** `02b` Result **`needs-round`**) → Expected Next = **`grill`** (Task or parent apply into `02b`; card Next stays `grill` until Grill closed). Do **not** Prefer re-`design-phase` while that Prefer matches; do **not** launch `design-verify-phase`. Prefer `design-phase` on Grill open **only** for true cold start: no `02b` **needs-round** **and** no design artifacts — [derive-next-pre.md](../../my-dev-flow-v2/derive-next-pre.md) · [grill.md](../../my-dev-flow-v2/grill.md).
+2. **Has flip:** when any of Has API / Has DB / Has auth/PII/schema becomes **yes**, parent **MUST** drop Review profile **skip-review** → **lite** (or Decision N reclassify to full) **and** set **HITL Gate B** = **blocking** per [gate-b.md](../../my-dev-flow-v2/gate-b.md) · [lenses.md](../../my-dev-flow-v2/lenses.md) before Gate B/Build. Also apply [lenses.md](../../my-dev-flow-v2/lenses.md) Has flip settle clear + **Has flip → Design/Verify unpaid** (invalidate overall `03a` to **`pending`**, **or** Prefer `design-verify-phase` / API∥DB → `design-review`).
+3. When Grill closed: Next = `design-verify-phase` (not separate Analyze/Grill/Design).
 
 ---
