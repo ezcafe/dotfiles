@@ -11,5 +11,6 @@
 | Behavior-preserving simplification | [addyosmani/code-simplification](https://github.com/addyosmani/agent-skills/blob/main/skills/code-simplification/SKILL.md) | Fix / review After |
 | UI craft modes / interface system review | [impeccable](https://github.com/pbakaus/impeccable) · [jakubkrehel/skills](https://github.com/jakubkrehel/skills) | [lenses.md](lenses.md) Has UI |
 | Fail-closed gates / settle gen / Smoke SoT | Learnings from former `my-dev-flow-v2` review loops | [gate-b.md](gate-b.md) · [verify.md](verify.md) · [gate-c.md](gate-c.md) |
+| Isolated subflow Tasks (parent context budget) | Cursor Task + APEX load-current-step | [subagents.md](subagents.md) |
 
 Prefer pointing agents at installed project skills rather than copying their full text here.

@@ -9,13 +9,13 @@
 | Token | Meaning |
 |-------|---------|
 | `clean` | Zero Critical/Major — paid |
-| `needs update` | Critical/Major open — Prefer **Grill open** → `grill` first; else Prefer unpaid `design-update`; **allowed to write** |
+| `needs update` | Critical/Major open — unpaid under **design-update unpaid** ([../../my-dev-flow-v3/derive-next-defs-pre.md](../../my-dev-flow-v3/derive-next-defs-pre.md)); **allowed to write** |
 | `skipped` | Has DB = no or Notes `tiny-contract-tweak` — never invent empty file to skip (`unknown` ≠ skip) |
 | `pending` | Unpaid / invalidated |
 
-Prefer unpaid sibling `api-contract-review` if parallel; then `design-review` when both paid.
+Parallel sibling / next stage — parent Prefer only ([../../my-dev-flow-v3/derive-next-pre.md](../../my-dev-flow-v3/derive-next-pre.md)).
 
-**After:** `needs update` → Prefer **Grill open** → `grill` first; else Prefer unpaid `design-update` (parent pays Run-log only after Task complete — [../../my-dev-flow-v3/design-backloop.md](../../my-dev-flow-v3/design-backloop.md) · [../../my-dev-flow-v3/preflight.md](../../my-dev-flow-v3/preflight.md) Always §7).
+**After:** Return Result → **Hard stop** — do **not** Prefer Next. Parent pays Run-log only after `design-update` Task complete ([../../my-dev-flow-v3/design-backloop.md](../../my-dev-flow-v3/design-backloop.md) · [../../my-dev-flow-v3/preflight.md](../../my-dev-flow-v3/preflight.md) Always §8 · [../../my-dev-flow-v3/derive-next-pre.md](../../my-dev-flow-v3/derive-next-pre.md)).
 
 ## FIRST
 

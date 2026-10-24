@@ -1,6 +1,6 @@
 # Merge Prefer cheat (solo)
 
-**Negative guards only — not Prefer Next lookup.** First-match Prefer SoT = parent [derive-next-post.md](../my-dev-flow-v3/derive-next-post.md) (+ [derive-next.md](../my-dev-flow-v3/derive-next.md) Definitions / Unsafe jumps).
+**Negative guards only — not Prefer Next lookup.** First-match Prefer SoT = parent [derive-next-post.md](../my-dev-flow-v3/derive-next-post.md) (+ [derive-next-defs-post.md](../my-dev-flow-v3/derive-next-defs-post.md) · [derive-next.md](../my-dev-flow-v3/derive-next.md) Unsafe jumps).
 
 | Ban when | Do not Prefer |
 |----------|---------------|

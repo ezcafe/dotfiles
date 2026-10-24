@@ -4,7 +4,7 @@
 **When:** Mode **simple**. One Task replaces isolated API/DB Prefer stages + general design-review. Mode **full** uses `api-contract-review` / `db-design-review` / `design-review` instead. Isolated write duty when Has API/DB ∈ {yes, unknown} ∧ ¬tiny — same as Mode-full Isolated Prefer.  
 **Skills:** same checklists as Isolated + general design-review; fold light API/DB only when Notes `tiny-contract-tweak` ([../../my-dev-flow-v3/lenses.md](../../my-dev-flow-v3/lenses.md)).
 
-**Done when:** Overall `03a-design-review-log.md` Result **`clean`** only (for advance / Design clean / Verify clean). Writing **`needs update`** is **allowed** ≠ Done — Prefer **Grill open** → `grill` first; else Prefer `design-update` (same tokens as [design-review.md](design-review.md) / [../../my-dev-flow-v3/results.md](../../my-dev-flow-v3/results.md)).
+**Done when:** Overall `03a-design-review-log.md` Result **`clean`** only (for advance / Design clean / Verify clean). Writing **`needs update`** is **allowed** ≠ Done — unpaid under **design-update unpaid** ([../../my-dev-flow-v3/derive-next-defs-pre.md](../../my-dev-flow-v3/derive-next-defs-pre.md) · [design-review.md](design-review.md) · [../../my-dev-flow-v3/results.md](../../my-dev-flow-v3/results.md)).
 
 | Has / Notes | Isolated write duty |
 |-------------|---------------------|
@@ -12,13 +12,13 @@
 | Has DB ∈ {**yes**, **unknown**} and Notes ≠ `tiny-contract-tweak` | **Must** write `03a-db-design-review.md` with Result **`clean`** \| **`needs update`**. Missing file ≠ skipped. |
 | Has API/DB = **no**, or Notes `tiny-contract-tweak` | **Notes-skip only** — do **not** invent empty Isolated files. Treat that surface as **`skipped`** for overall clean. (`unknown` ≠ skip.) |
 
-**Design clean / Verify clean** (Mode simple ≡): overall **`clean`** **and** required Isolated paid (`clean`\|`skipped`). This stage **pays** required Isolated when Has ∈ {yes, unknown} (not tiny) — Prefer never launches Isolated Prefer stages under Mode simple ([../../my-dev-flow-v3/derive-next.md](../../my-dev-flow-v3/derive-next.md)).
+**Design clean / Verify clean** (Mode simple ≡): overall **`clean`** **and** required Isolated paid (`clean`\|`skipped`). This stage **pays** required Isolated when Has ∈ {yes, unknown} (not tiny) — never launch Isolated Prefer stages under Mode simple ([../../my-dev-flow-v3/derive-next.md](../../my-dev-flow-v3/derive-next.md)).
 
-**Allowed Results** (FIRST LINE of overall `03a-design-review-log.md`): `clean` \| `needs update` \| `pending` — **Advance-on-clean** (Done when = `clean` only); writing **`needs update`** allowed ≠ Done — Prefer **Grill open** → `grill` first; else Prefer `design-update`.
+**Allowed Results** (FIRST LINE of overall `03a-design-review-log.md`): `clean` \| `needs update` \| `pending` — **Advance-on-clean** (Done when = `clean` only); writing **`needs update`** allowed ≠ Done — Hard stop; parent re-derives ([../../my-dev-flow-v3/derive-next-defs-pre.md](../../my-dev-flow-v3/derive-next-defs-pre.md)).
 
 ## FIRST
 
-1. ¬ **Design present** → `Result: blocked — Design not present` (Mode simple: Prefer `design-phase` while ¬ Design present — never Prefer cold) ([../../my-dev-flow-v3/derive-next.md](../../my-dev-flow-v3/derive-next.md) · [../../my-dev-flow-v3/handoffs.md](../../my-dev-flow-v3/handoffs.md)).  
+1. ¬ **Design present** → `Result: blocked — Design not present` — **Hard stop**; parent re-derives ([../../my-dev-flow-v3/derive-next.md](../../my-dev-flow-v3/derive-next.md) · [../../my-dev-flow-v3/handoffs.md](../../my-dev-flow-v3/handoffs.md)).  
 2. **Grill open** → `Result: blocked — Grill open` (fail-closed — do **not** launch while Grill unsettled; Mid-task Grill soft-fail Major below may remain) ([../../my-dev-flow-v3/grill.md](../../my-dev-flow-v3/grill.md) · [../../my-dev-flow-v3/derive-next.md](../../my-dev-flow-v3/derive-next.md) unsafe jumps).  
 3. Notes `design-stale` → `Result: blocked — design-stale` ([../../my-dev-flow-v3/derive-next.md](../../my-dev-flow-v3/derive-next.md) unsafe jumps).  
 4. **design-update unpaid** → `Result: blocked — design-update unpaid` ([../../my-dev-flow-v3/derive-next.md](../../my-dev-flow-v3/derive-next.md) · [../../my-dev-flow-v3/handoffs.md](../../my-dev-flow-v3/handoffs.md)).  
@@ -33,6 +33,6 @@
 5. Grill bar (Mode simple = Mode full): fail Major if Grill open / Build-critical frontier open ([../../my-dev-flow-v3/grill.md](../../my-dev-flow-v3/grill.md)).  
 6. Return FIRST LINE: `Result: clean | needs update` + paths to `03a*` written.
 
-**After:** `needs update` → Prefer **Grill open** → `grill` first; else Prefer `design-update` → parent bumps Round → re-run (max 3 → Decision N). Parent pays Run-log only after Task complete ([../../my-dev-flow-v3/design-backloop.md](../../my-dev-flow-v3/design-backloop.md) · [../../my-dev-flow-v3/preflight.md](../../my-dev-flow-v3/preflight.md) Always §7). If **clean:** re-derive ([../../my-dev-flow-v3/derive-next.md](../../my-dev-flow-v3/derive-next.md)) — Prefer `tdd-review` **only** when **04a unpaid / dirty**; else Prefer `gate-b` / `build` per derive. After Build verify-pass: when **missing required api/db**, Prefer `finalize-lens-plan` **before Smoke and before Adv** ([../../my-dev-flow-v3/lenses.md](../../my-dev-flow-v3/lenses.md) · [../../my-dev-flow-v3/derive-next-post.md](../../my-dev-flow-v3/derive-next-post.md)) — not a Pre-Build duty after this stage.
+**After:** Return Result → **Hard stop** — do **not** Prefer Next. Parent bumps Round / pays Run-log after `design-update` Task complete / re-derives ([../../my-dev-flow-v3/design-backloop.md](../../my-dev-flow-v3/design-backloop.md) · [../../my-dev-flow-v3/preflight.md](../../my-dev-flow-v3/preflight.md) Always §8 · [../../my-dev-flow-v3/derive-next-pre.md](../../my-dev-flow-v3/derive-next-pre.md) · [../../my-dev-flow-v3/derive-next-post.md](../../my-dev-flow-v3/derive-next-post.md)). Not a Pre-Build duty after this stage.
 
 Never write Gate B consent.

@@ -11,8 +11,10 @@
 | HITL / Gate B / Gate C | [hitl.md](hitl.md) · [gate-b.md](gate-b.md) · [gate-c.md](gate-c.md) |
 | Results / Verify / Lenses | [results.md](results.md) · [verify.md](verify.md) · [lenses.md](lenses.md) |
 | Open files | [parent-next.md](parent-next.md) |
+| Isolated subflows | spawn open = [spawn-contract.md](spawn-contract.md) (map inlined); After = [step-0.md](step-0.md) After Task |
 
-**Progress:** ≤5 lines + path after each step; update `00-run.md` card.
+**Progress:** ≤5 lines + path after each step; update `00-run.md` card.  
+**Orchestrator:** skill-mapped stages run in isolated Tasks (spawn open = [spawn-contract.md](spawn-contract.md) — map inlined; After = [step-0.md](step-0.md) After Task); parent does not accumulate stage context.
 
 ## Status vs stage
 
@@ -21,10 +23,12 @@
 | **Status** | `running` \| `paused` \| `stopped` \| `done` | Lifecycle |
 | **Last stage** / card **Next** | handoff ids (+ `gate-b` / `gate-c`) | Pipeline position |
 
-**Done:** only after Merge Result **success** and `merge` ∈ **Gate C approved**.  
-**PR-only subset:** stay `paused`. Abort → `stopped`.
+**Done:** parent **or** labeled solo (acting as orchestrator) stamps Status `done` only after Merge Result **success** + `candidate Status: done` and `merge` ∈ **Gate C approved** (orchestrated Task never writes Status — [hitl.md](hitl.md) · [solo-entry.md](solo-entry.md)).  
+**PR-only subset:** parent **or** labeled solo stamps `paused` from `candidate Status: paused`. Abort → `stopped`.
 
 ## Happy path
+
+Prefer SoT for Post-Build order = [derive-next-post.md](derive-next-post.md) (+ [derive-next-defs-post.md](derive-next-defs-post.md)). Mermaid is orientation only.
 
 ```mermaid
 flowchart LR
@@ -35,8 +39,8 @@ flowchart LR
     F3 --> F3a[optional tdd-review]
     F3a --> F4[Gate B→TDD Build]
     F4 --> F5{Review profile}
-    F5 -->|full| F6[Smoke→Adv→Quality→lenses→test-full→Gate C]
-    F5 -->|lite| F7[code-review-phase→lenses→test-lite→Gate C]
+    F5 -->|full| F6[finalize-lens-plan if missing required→Smoke→Adv→Quality→lenses→test-full→Gate C]
+    F5 -->|lite| F7[finalize-lens-plan if missing required→code-review-phase→lenses→test-lite→Gate C]
   end
   subgraph simple [Mode simple]
     S0[Step 0] --> S0a[Ideation]
@@ -45,8 +49,8 @@ flowchart LR
     S2 --> S2a[optional tdd-review]
     S2a --> S3[Gate B→TDD Build]
     S3 --> S4{Review profile}
-    S4 -->|lite| S5[code-review-phase→lenses→test-lite→Gate C]
-    S4 -->|skip-review| S6[skip-review ordered recovery — verify.md]
+    S4 -->|lite| S5[finalize-lens-plan if missing required→code-review-phase→lenses→test-lite→Gate C]
+    S4 -->|skip-review| S6[finalize if needed→skip-review ordered recovery — verify.md]
   end
 ```
 
@@ -56,10 +60,10 @@ Skip-review node caption: SoT = [verify.md](verify.md) **Skip-review ordered rec
 
 | Mode | Profile | After Build verify-pass |
 |------|---------|-------------------------|
-| **full** | **full** | Independent Smoke (`Smoke source: Smoke-Task`) → Adv → Quality → lenses → `merge-findings` if 2+ → `test-full` → Gate C |
-| **full** | **lite** | Build-writes-Smoke may pay → `code-review-phase` → lenses → `test-lite` → Gate C |
+| **full** | **full** | **`finalize-lens-plan`** if **missing required api/db** → Independent Smoke (`Smoke source: Smoke-Task`) → Adv → Quality → lenses → `merge-findings` if 2+ → `test-full` → Gate C |
+| **full** | **lite** | **`finalize-lens-plan`** if missing required → Build-writes-Smoke may pay → `code-review-phase` → lenses → `test-lite` → Gate C |
 | **simple** | **lite** | Same as full+lite |
-| **simple** | **skip-review** | Legal only per [lenses.md](lenses.md). Ordered recovery SoT: [verify.md](verify.md) **Skip-review ordered recovery** (pointer only). |
+| **simple** | **skip-review** | Legal only per [lenses.md](lenses.md). **`finalize-lens-plan`** if missing required **before** Smoke / Prefer paid. Ordered recovery SoT: [verify.md](verify.md) **Skip-review ordered recovery** (pointer only). |
 
 ### Forbidden (never unlocked by Decision N or `card-override`)
 
@@ -77,10 +81,10 @@ Skip-review node caption: SoT = [verify.md](verify.md) **Skip-review ordered rec
 2. Ideation — hard-gate (**always**); paid = Notes `ideation-confirmed` + provenance **or** Notes `ideation-skip` → write `01-idea`  
 3. Gate A → skim → Analyze → Grill (`frontier-empty` or Notes `grill-skip` — not template `pending` / Result `skipped`) → Design (two options; Prefer `design` when ¬ Design present)  
 4. Design-review (API∥DB parallel when both unpaid) until Design clean — only after Design present (`03` + Result `done`)  
-5. Optional TDD plan review (`04a`) — Prefer `tdd-review` **only** when **04a unpaid / dirty** (planned tests present ∧ ¬skip ∧ Result ∉ {`clean`}, incl. `pending`); waiver = Notes `04a skipped` (parent-only named yes — [hitl.md](hitl.md)); Prefer `gate-b` when Design clean ∧ **04a ok** (incl. ¬ planned tests) ([derive-next.md](derive-next.md))  
+5. Optional TDD plan review (`04a`) — Prefer `tdd-review` only when **04a unpaid / dirty**; Prefer `gate-b` when Design clean ∧ **04a ok** ([derive-next-defs-pre.md](derive-next-defs-pre.md) · [hitl.md](hitl.md))  
 6. Gate B (**blocking**) → settle gen token  
 7. Build (TDD) → verify-pass (max 3)  
-8. Post-Build per table  
+8. Post-Build per table (Prefer SoT: finalize-lens-plan before Smoke/Adv when missing required — [derive-next-post.md](derive-next-post.md))  
 9. Fix loops (max 3) → Gate C → merge → `done`
 
 ### Mode simple
@@ -88,7 +92,7 @@ Skip-review node caption: SoT = [verify.md](verify.md) **Skip-review ordered rec
 1. Step 0 — seed **only** `00-run.md`; Mode simple; profile lite|skip-review (if legal)  
 2. Prefer `ideation` while **ideation unpaid** ([derive-next.md](derive-next.md) · [brainstorm.md](brainstorm.md)) → then Prefer `design-phase` while ¬ Design present (Analyze+Grill+Design bundled; cold start carve — [grill.md](grill.md))  
 3. `design-verify-phase` until Design clean (only after Design present; Verify clean ≡ Design clean; stage writes Isolated when Has API/DB ∈ {yes, unknown} ∧ ¬tiny)  
-4. Optional `tdd-review` **only** when **04a unpaid / dirty** (incl. Result `pending`); waiver = Notes `04a skipped` (parent-only named yes — [hitl.md](hitl.md)); Prefer `gate-b` when Design clean ∧ **04a ok** (incl. ¬ planned tests) ([derive-next.md](derive-next.md))  
+4. Optional `tdd-review` only when **04a unpaid / dirty**; Prefer `gate-b` when Design clean ∧ **04a ok** ([derive-next-defs-pre.md](derive-next-defs-pre.md) · [hitl.md](hitl.md))  
 5. Gate B (auto only if API=no ∧ DB=no ∧ auth/PII/schema=no explicit; else blocking — yes **or** unknown)  
 6. Build → Post-Build per profile  
 7. Gate C → merge → `done`

@@ -7,9 +7,15 @@
 **Setup:** Independent Smoke returned **smoke-fail** (or `06` test **fail**); Last stage ≠ post-`fix-tests` verify-pass.  
 **Prefer:** `fix-tests` — **before** Prefer unpaid `smoke` / unpaid `test-*`.
 
-**After** Last stage `fix-tests` + Last Verify = **verify-pass**: Prefer `smoke` if Smoke unpaid/**fail** (Prefer-re-smoke eligible) **or** unpaid `test-*` — do **not** stay on `fix-tests`; Smoke fail does **not** re-match `fix-tests` on that turn. **Gate:** Prefer-re-smoke / unpaid Smoke only when ¬ **missing required api/db** — else Prefer `finalize-lens-plan` first (before Smoke **and** before Adv — [../verify.md](../verify.md)).
+**After** Last stage `fix-tests` + Last Verify = **verify-pass**: Prefer `smoke` **only when** Smoke unpaid/**fail** (Prefer-re-smoke eligible); Prefer unpaid `test-*` **only when** test-fail unpaid — those rows match only when they emit a concrete id ([../derive-next-post.md](../derive-next-post.md)). Do **not** stay on `fix-tests`; Smoke fail does **not** re-match `fix-tests` on that turn. **Gate:** Prefer-re-smoke / unpaid Smoke only when ¬ **missing required api/db** — else Prefer `finalize-lens-plan` first (before Smoke **and** before Adv — [../verify.md](../verify.md)).
 
 See also [smoke-fail-fix-resmoke.md](smoke-fail-fix-resmoke.md).
+
+## F8 — `fix-tests` verify-pass + Smoke paid → next unpaid Post (not continue)
+
+**Setup:** Last stage = `fix-tests`; Last Verify = **verify-pass**; Smoke already paid/success (¬ Prefer-re-smoke); no test-fail unpaid; ¬ **missing required api/db**; profile full; Adv unpaid (or next unpaid among Review / lenses / test / gate-c per card).  
+**Prefer:** next unpaid Post-Build concrete row (e.g. unpaid Adv then Quality) — Fix rows **do not match** when they cannot emit `smoke` / unpaid `test-*`.  
+**Do not:** treat “continue” as Expected Next; do **not** stay on `fix-tests`; do **not** invent Next.
 
 ## F4 — lens `needs fix` → `fix-review`
 

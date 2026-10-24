@@ -36,7 +36,7 @@ Same entry under Notes `design-backloop` / **backloop rewrite unpaid** when **Gr
 
 ## F5 — ideation unpaid
 
-**ideation unpaid** = ¬Notes `ideation-skip` **and** ¬Notes `ideation-confirmed`. Paid = Notes `ideation-confirmed` + provenance (`user:"…" ≥12 chars`) **or** Notes `ideation-skip` (parent-only — Stages return candidates only; no Prefer on waive).
+**ideation unpaid** = ¬Notes `ideation-skip` **and** ¬Notes `ideation-confirmed`. Paid = Notes `ideation-confirmed` + provenance (`user:"…" ≥12 chars`) **or** Notes `ideation-skip` (parent after Parent-relay **or** labeled solo after AskQuestion — Stages return candidates only; no Prefer on waive — [../hitl.md](../hitl.md) · [../solo-entry.md](../solo-entry.md)).
 
 | Mode | Prefer |
 |------|--------|
@@ -63,10 +63,10 @@ Mode full:
 
 ## F11 — Happy Upgrade → design-stale unpaid chain
 
-**Setup:** Mid-run Upgrade simple→full writes card **Mode = full** (+ drop skip-review → lite|full if set — [../step-0.md](../step-0.md)); parent Notes `design-stale`; Gate A + skim paid; **Grill closed** (Notes `grill-skip` **or** `02b` Result `frontier-empty`); **Analyze unpaid** (`02-analysis` missing **or** Result ≠ `done`, or optionally invalidated → `pending`); `03` Result `pending` (Upgrade invalidate). Prefer assumes **Mode full** (Mode simple Prefer rows do **not** apply).  
+**Setup:** Mid-run Upgrade simple→full writes card **Mode = full** (+ drop skip-review → lite|full if set — [../step-0.md](../step-0.md)); parent **or** labeled solo Notes `design-stale`; Gate A + skim paid; **Grill closed** (Notes `grill-skip` **or** `02b` Result `frontier-empty`); **Analyze unpaid** (`02-analysis` missing **or** Result ≠ `done`, or optionally invalidated → `pending`); `03` Result `pending` (Upgrade invalidate). Prefer assumes **Mode full** (Mode simple Prefer rows do **not** apply).  
 **Prefer:** `analyze` (Analyze unpaid) — **not** Isolated / design-review / design-update / gate-b / build.  
 **After** Analyze paid + Grill closed + still Notes `design-stale` → Prefer **design unpaid under design-stale** → `design` rewrite (even if prior `03` looked `done` before Upgrade).  
-**Clear:** parent clears Notes only after Mode-full `design` + `03` Result `done` (`candidate clear design-stale`).
+**Clear:** parent **or** labeled solo clears Notes only after Mode-full `design` + `03` Result `done` (`candidate clear design-stale` — [../hitl.md](../hitl.md) · [../solo-entry.md](../solo-entry.md)).
 
 ## F12 — design-stale + Grill open → `grill` first
 

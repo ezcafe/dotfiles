@@ -31,13 +31,20 @@ That copies each package with a `SKILL.md` into `~/.cursor/skills/<name>/` witho
 
 | Skill | Role |
 |-------|------|
-| [my-dev-flow](my-dev-flow/SKILL.md) | Full delivery pipeline; Speed defaults; [stages.md](my-dev-flow/stages.md); [results.md](my-dev-flow/results.md); [parent-next.md](my-dev-flow/parent-next.md); [failure-playbook.md](my-dev-flow/failure-playbook.md); [verify-and-fix.md](my-dev-flow/verify-and-fix.md); [severity.md](my-dev-flow/severity.md); lint `scripts/lint-run.py` |
-| [my-dev-flow-design](my-dev-flow-design/SKILL.md) | Design phase (Ideation → Grill → Design) |
-| [my-dev-flow-design-review](my-dev-flow-design-review/SKILL.md) | Design verification (+ isolated API/DB reviews) |
-| [my-dev-flow-code](my-dev-flow-code/SKILL.md) | TDD review + Build / Fix (Verify gate; Smoke Option B) |
-| [my-dev-flow-test](my-dev-flow-test/SKILL.md) | Smoke re-run / full / lite (uses Verify commands) |
-| [my-dev-flow-review](my-dev-flow-review/SKILL.md) | Code review lenses (`lens-*` stage ids) |
-| [my-dev-flow-merge](my-dev-flow-merge/SKILL.md) | Gate C → commit / push / PR / merge |
+| [my-dev-flow-v3](my-dev-flow-v3/SKILL.md) | **Current** end-to-end delivery orchestrator (settle gen; seed only `00-run.md`; isolated subflow Tasks). Prefer for new runs — [CUTOVER.md](my-dev-flow-v3/CUTOVER.md) |
+| [my-dev-flow-v3-design](my-dev-flow-v3-design/SKILL.md) | v3 design (Ideation → Grill → Design / design-phase) |
+| [my-dev-flow-v3-design-review](my-dev-flow-v3-design-review/SKILL.md) | v3 design verification (+ isolated API/DB) |
+| [my-dev-flow-v3-code](my-dev-flow-v3-code/SKILL.md) | v3 TDD → Build → Fix |
+| [my-dev-flow-v3-review](my-dev-flow-v3-review/SKILL.md) | v3 Adv / Quality / lenses / code-review-phase |
+| [my-dev-flow-v3-test](my-dev-flow-v3-test/SKILL.md) | v3 Smoke / test-full / test-lite |
+| [my-dev-flow-v3-merge](my-dev-flow-v3-merge/SKILL.md) | v3 Gate C → commit / push / PR / merge |
+| [my-dev-flow](my-dev-flow/SKILL.md) | **v1 resume-only** — in-flight v1 cards; not for new runs. Full pipeline + Speed defaults; [stages.md](my-dev-flow/stages.md); [results.md](my-dev-flow/results.md); [parent-next.md](my-dev-flow/parent-next.md); [failure-playbook.md](my-dev-flow/failure-playbook.md); [verify-and-fix.md](my-dev-flow/verify-and-fix.md); [severity.md](my-dev-flow/severity.md); lint `scripts/lint-run.py` |
+| [my-dev-flow-design](my-dev-flow-design/SKILL.md) | v1 design (resume-only with v1 orchestrator) |
+| [my-dev-flow-design-review](my-dev-flow-design-review/SKILL.md) | v1 design verification (resume-only) |
+| [my-dev-flow-code](my-dev-flow-code/SKILL.md) | v1 TDD review + Build / Fix (resume-only) |
+| [my-dev-flow-test](my-dev-flow-test/SKILL.md) | v1 Smoke re-run / full / lite (resume-only) |
+| [my-dev-flow-review](my-dev-flow-review/SKILL.md) | v1 code review lenses (resume-only) |
+| [my-dev-flow-merge](my-dev-flow-merge/SKILL.md) | v1 Gate C → commit / push / PR / merge (resume-only) |
 | [my-gtd-flow](my-gtd-flow/SKILL.md) | Lazy GTD: GitHub Projects / Reminders, Calendar / Outlook, 9–5 plan |
 | [myplan](myplan/SKILL.md) | Discovery → spec → plan (use *before* task breakdown) |
 | [vercel-react-best-practices](vercel-react-best-practices/SKILL.md) | React/Next performance rule catalog |

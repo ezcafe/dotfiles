@@ -1,5 +1,8 @@
 # Grill (Task)
 
-Follow [../../my-dev-flow-v3/grill.md](../../my-dev-flow-v3/grill.md). Write rounds into `02b-grill.md`.  
-**Done when:** Grill closed — Notes `grill-skip` (parent-only + provenance) **or** Result `frontier-empty` only (Notes closes even if Result is `pending`/`needs-round`). Result `skipped` does **not** close. Card Next stays `grill` until closed when artifacts present.  
-**After:** return `candidate grill-skip` only when user skip grill is appropriate — parent writes Notes `grill-skip` / `grill skipped — <reason>` + provenance; Tasks never write Notes or invent Result `skipped` as a waive ([../../my-dev-flow-v3/hitl.md](../../my-dev-flow-v3/hitl.md)).
+Follow [../../my-dev-flow-v3/grill.md](../../my-dev-flow-v3/grill.md). Write rounds into `02b-grill.md`.
+
+**HITL (orchestrated Task):** Parent-relay — never AskQuestion. Write the whole frontier into `02b` + Return `Blocked / questions for user`; hard-stop (`hitl:grill-frontier` or `hitl:grill-skip`). Parent presents answers / skip; re-spawns until Grill closed ([../../my-dev-flow-v3/hitl.md](../../my-dev-flow-v3/hitl.md) · [../../my-dev-flow-v3/spawn-contract.md](../../my-dev-flow-v3/spawn-contract.md)). **Solo:** settle frontier in chat same turn OK.
+
+**Done when:** Grill closed — Definitions: [../../my-dev-flow-v3/derive-next-defs-pre.md](../../my-dev-flow-v3/derive-next-defs-pre.md) (**Grill closed**). Card Next stays `grill` until closed when artifacts present.  
+**After:** **Orchestrated Task:** return `candidate grill-skip` only + Parent-relay — never write Notes or invent Result `skipped` as a waive. **Labeled solo:** stamps Notes `grill-skip` / preferred `grill skipped — <reason>` + provenance after AskQuestion ([../../my-dev-flow-v3/solo-entry.md](../../my-dev-flow-v3/solo-entry.md) · [../../my-dev-flow-v3/hitl.md](../../my-dev-flow-v3/hitl.md)).

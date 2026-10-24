@@ -4,12 +4,12 @@
 
 ## Test bar ≡ Tests success
 
-**SoT** (one definition — [derive-next.md](derive-next.md) Definitions copy this):
+**SoT** (one definition — [derive-next-defs-post.md](derive-next-defs-post.md) **Tests success** copies this):
 
 | Profile | Bar |
 |---------|-----|
-| **lite** / **full** | `06` Result **success** + **Test path last run** matches profile **and** unpaid `review-stale` / `test-stale` **cleared** (parent-only clear — [hitl.md](hitl.md) · [verify.md](verify.md) Stale) |
-| **skip-review** | verify-pass + independent Smoke (`Smoke source: Smoke-Task`) + one escape Notes↔provenance **and** stale cleared (`review-stale` N/A cleared; `test-stale` cleared — parent-only) |
+| **lite** / **full** | `06` Result **success** + **Test path last run** matches profile **and** unpaid `review-stale` / `test-stale` **cleared** (parent **or** labeled solo clear — [hitl.md](hitl.md) · [solo-entry.md](solo-entry.md) · [verify.md](verify.md) Stale) |
+| **skip-review** | verify-pass + independent Smoke (`Smoke source: Smoke-Task`) + one escape Notes↔provenance **and** stale cleared (`review-stale` N/A cleared; `test-stale` cleared — parent **or** labeled solo) |
 
 **Escape pair (typical happy path):** Notes `smoke-pass` ↔ provenance `smoke-pass-rerun` (evidence form) — used on **first-pass and Prefer-re-smoke**; alias `smoke-pass (re-run)` ≡ `smoke-pass`. Prose / `06` Result `smoke-pass` is a **label only** — it does **not** pay Prefer paid / Gate C escape without the Notes↔provenance pair ([verify.md](verify.md) Escape Notes name). Alternates: `docs-only` / `smoke-waive` / `gate-c-test-override` with same-kind user provenance ([hitl.md](hitl.md)).
 

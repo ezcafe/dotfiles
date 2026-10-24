@@ -33,4 +33,8 @@ Return FIRST LINE exactly: Result: clean | needs fix
 Then path to 05-lens-api.md.
 ```
 
-**After:** Wait siblings (plan 2+). Any planned lens **`needs fix`** → Prefer `fix-review` Mode `merged-lenses` (plan 2+) / `plan-1-lens` (plan 1). Prefer `merge-findings` only when planned lenses **clean** + Merged unpaid (plan 2+). Plan **1**: parent copies Result into Merged. Serial next unpaid `lens-*` only when parent launched serial ([derive-next.md](../../my-dev-flow-v3/derive-next.md) · [lenses-overview.md](lenses-overview.md) · [lenses.md](../../my-dev-flow-v3/lenses.md)).
+**After:** Return FIRST LINE Result only. Wait siblings (plan 2+) before Hard stop when parent launched parallel. **Hard stop** — do **not** Prefer Next / write card fields. Parent re-derives ([../../my-dev-flow-v3/derive-next-post.md](../../my-dev-flow-v3/derive-next-post.md) · [lenses-overview.md](lenses-overview.md) · [lenses.md](../../my-dev-flow-v3/lenses.md)).
+
+### Ban-when
+
+Shared table — [lenses-overview.md](lenses-overview.md) Ban-when.

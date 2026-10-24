@@ -4,12 +4,14 @@
 
 ## Verify gate
 
-Build / Fix must end with `Result: verify-pass` (max 3 attempts). On verify-pass, parent same turn:
+Build / Fix must end with `Result: verify-pass` (max 3 attempts). On verify-pass, same turn stamp:
 
 - `Last Verify: verify-pass`  
 - `Last verify-pass at: <ISO-8601 Run-log local wall time>`  
 - `Last verify settle-gen: <current Gate B settle gen>`  
 - Build may set `Smoke source: Build-verify` on `06`
+
+**Orchestrated:** parent stamps from Result. **Labeled solo:** stamps when acting as orchestrator ([solo-entry.md](solo-entry.md) §9 · [hitl.md](hitl.md) · match [../my-dev-flow-v3-code/stages/build.md](../my-dev-flow-v3-code/stages/build.md) / [../my-dev-flow-v3-code/stages/fix-tests.md](../my-dev-flow-v3-code/stages/fix-tests.md) After).
 
 Do not advance while `Last Verify=verify-pass` and `Last verify-pass at=none`.
 
@@ -20,7 +22,7 @@ Do not advance while `Last Verify=verify-pass` and `Last verify-pass at=none`.
 | Who writes | Field |
 |------------|-------|
 | Smoke Task | `Smoke source: Smoke-Task` on `06` |
-| Parent | Notes `smoke-pass` + provenance `smoke-pass-rerun` (evidence form); clear Notes `smoke re-run` |
+| Parent **or** labeled solo (acting as orchestrator) | Notes `smoke-pass` + provenance `smoke-pass-rerun` (evidence form); clear Notes `smoke re-run` ([solo-entry.md](solo-entry.md) · [hitl.md](hitl.md)) |
 | Build | `Smoke source: Build-verify` only |
 
 Applies to: Mode full + profile full (**E1**) and legal **skip-review**. Build-writes-Smoke does **not** waive Prefer unpaid for those paths.
@@ -29,13 +31,13 @@ Applies to: Mode full + profile full (**E1**) and legal **skip-review**. Build-w
 
 Literal Notes token is **`smoke-pass`** ↔ provenance **`smoke-pass-rerun`**.
 
-**Alias:** Notes `smoke-pass (re-run)` ≡ `smoke-pass` (historical name). Prose / `06` Result `smoke-pass` may **label** the same event only when parent also writes the escape Notes↔provenance pair after Smoke-Task success (first-pass or Prefer-re-smoke) — Result alone never pays.
+**Alias:** Notes `smoke-pass (re-run)` ≡ `smoke-pass` (historical name). Prose / `06` Result `smoke-pass` may **label** the same event only when parent **or** labeled solo (acting as orchestrator) also writes the escape Notes↔provenance pair after Smoke-Task success (first-pass or Prefer-re-smoke) — Result alone never pays ([solo-entry.md](solo-entry.md) · [hitl.md](hitl.md)).
 
 **Unlock vs escape (do not conflate):**
 - **E1 Adv unlock** = `Smoke source: Smoke-Task` **only** (Notes/Run-log are companions — never substitutes).
 - **skip-review Prefer paid / Gate C escape** = `Smoke source: Smoke-Task` **and** one escape Notes↔provenance (typically `smoke-pass` ↔ `smoke-pass-rerun`).
 
-**`06` Result alone does not pay escape:** a Smoke / `06` Result of `smoke-pass` / **success** (or prose “smoke-pass”) is **not** Prefer paid and **not** Gate C escape by itself. Parent must still write the Notes↔provenance escape pair. Accept Result/prose `smoke-pass` only as a **label** when that pair is written — never as a substitute for Notes or provenance ([gate-c.md](gate-c.md)).
+**`06` Result alone does not pay escape:** a Smoke / `06` Result of `smoke-pass` / **success** (or prose “smoke-pass”) is **not** Prefer paid and **not** Gate C escape by itself. Parent **or** labeled solo (acting as orchestrator) must still write the Notes↔provenance escape pair. Accept Result/prose `smoke-pass` only as a **label** when that pair is written — never as a substitute for Notes or provenance ([gate-c.md](gate-c.md) · [solo-entry.md](solo-entry.md) · [hitl.md](hitl.md)).
 
 | When | Use |
 |------|-----|
@@ -48,7 +50,7 @@ Do **not** invent a different first-pass Notes name. Other escape kinds (`docs-o
 
 **SoT** for Mode×profile skip-review cell and mermaid ([stages.md](stages.md)) — do not invent a shorter order; stages.md is pointer-only.
 
-1. **Smoke fail** → Prefer `fix-tests` first (even if an escape pair exists). Prefer-re-smoke only after Last stage `fix-tests` + verify-pass ([derive-next.md](derive-next.md) · [derive-next-post.md](derive-next-post.md)). Parent may set Notes `smoke re-run` once before re-smoke launch.  
+1. **Smoke fail** → Prefer `fix-tests` first (even if an escape pair exists). Prefer-re-smoke only after Last stage `fix-tests` + verify-pass ([derive-next.md](derive-next.md) · [derive-next-post.md](derive-next-post.md)). Parent **or** labeled solo (acting as orchestrator) may set Notes `smoke re-run` once before re-smoke launch ([hitl.md](hitl.md) · [solo-entry.md](solo-entry.md)).  
 2. **Smoke unpaid** → Prefer unpaid independent `smoke` (Build-writes-Smoke does not waive).  
 3. **Prefer paid** — when **skip-review Prefer paid** ([derive-next.md](derive-next.md)): Tests success (verify-pass + `Smoke source: Smoke-Task` + one escape Notes↔provenance — typically `smoke-pass` ↔ `smoke-pass-rerun` on first-pass or re-smoke; alias `smoke-pass (re-run)` — + stale cleared — [gate-c.md](gate-c.md)) **and** **Lenses clean**. Destination: if `merge` ∈ Gate C approved → Prefer `merge`; else Prefer `gate-c` ([derive-next-post.md](derive-next-post.md)).
 4. **Else** — Decision N ([decisions.md](decisions.md)): Smoke unpaid → ask escape **or run Smoke**; Smoke-Task set ∧ only escape missing → escape/drop only (**not** run Smoke). Do not drop profile or write escape Notes without named user yes.
@@ -59,7 +61,7 @@ Do **not** invent a different first-pass Notes name. Other escape kinds (`docs-o
 
 ## Stale after rebuild / Amend
 
-Parent alone marks / clears `review-stale` / `test-stale` ([hitl.md](hitl.md)). Mark when prior Results look paid but design changed. Stages return `candidate review-stale` / `candidate test-stale` only. Prefer unpaid review on Notes `review-stale` **before** Lens plan unpaid when Adv/Quality still look `clean` ([derive-next-post.md](derive-next-post.md)).
+**Orchestrated:** parent marks / clears `review-stale` / `test-stale` ([hitl.md](hitl.md)); stages return `candidate review-stale` / `candidate test-stale` only. **Labeled solo:** marks / clears when acting as orchestrator ([solo-entry.md](solo-entry.md)). Mark when prior Results look paid but design changed. Prefer unpaid review on Notes `review-stale` **before** Lens plan unpaid when Adv/Quality still look `clean` ([derive-next-post.md](derive-next-post.md)).
 
 ### Lite / full clear
 

@@ -1,7 +1,7 @@
 # Golden: Has flip drop skip-review
 
 **Start:** Mode simple, profile skip-review, Has UI=no ∧ Has API=no ∧ Has DB=no ∧ Has auth/PII/schema=no (all explicit `no`).  
-**Flip:** Design After returns `proposed Has: …` with API and/or DB = yes (not tiny), UI = yes, and/or auth/PII/schema = yes — parent applies card Has via Always §4 ([../lenses.md](../lenses.md) · [../preflight.md](../preflight.md)).
+**Flip:** Design After returns `proposed Has: …` with API and/or DB = yes (not tiny), UI = yes, and/or auth/PII/schema = yes — parent **or** labeled solo (acting as orchestrator) applies card Has via Always §4 ([../lenses.md](../lenses.md) · [../preflight.md](../preflight.md) · [../solo-entry.md](../solo-entry.md) · [../hitl.md](../hitl.md)).
 
 **Parent** ([../lenses.md](../lenses.md)):
 

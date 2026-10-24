@@ -4,11 +4,12 @@ Fix smoke-fail / test-fail. Prefer this stage **before** Prefer re-smoke / re-te
 
 ## After
 
-Return `Result: verify-pass` \| `verify-fail` only — **parent stamps** `Last Verify` / `Last verify-pass at` / `Last verify settle-gen` ([../../my-dev-flow-v3/verify.md](../../my-dev-flow-v3/verify.md) · [../../my-dev-flow-v3/preflight.md](../../my-dev-flow-v3/preflight.md) Always §7). Never stage-clear lifecycle Notes — return `candidate clear review-stale` only when skip-review clear applies ([../../my-dev-flow-v3/hitl.md](../../my-dev-flow-v3/hitl.md) · [../../my-dev-flow-v3/verify.md](../../my-dev-flow-v3/verify.md) Stale).
+Return `Result: verify-pass` \| `verify-fail` only — **Hard stop** — do **not** Prefer Next / cross skill / write card fields. Never stage-clear lifecycle Notes — return `candidate clear review-stale` only when skip-review clear applies. **Orchestrated:** parent stamps `Last Verify` / `Last verify-pass at` / `Last verify settle-gen` from Result; parent clears lifecycle Notes from candidates. **Labeled solo:** stamps verify fields / clears lifecycle when acting as orchestrator ([../../my-dev-flow-v3/solo-entry.md](../../my-dev-flow-v3/solo-entry.md) · [../../my-dev-flow-v3/hitl.md](../../my-dev-flow-v3/hitl.md) · [../../my-dev-flow-v3/verify.md](../../my-dev-flow-v3/verify.md) · [../../my-dev-flow-v3/preflight.md](../../my-dev-flow-v3/preflight.md) Always §8). Parent re-derives ([../../my-dev-flow-v3/derive-next-post.md](../../my-dev-flow-v3/derive-next-post.md)).
 
-**After verify-pass** (align [../../my-dev-flow-v3/derive-next-post.md](../../my-dev-flow-v3/derive-next-post.md) Last stage `fix-tests` row):
+### Ban-when (Task / solo cheat — not Prefer Next lookup)
 
-1. **missing required api/db** → Prefer `finalize-lens-plan` first (before Smoke **and** before Adv — [../../my-dev-flow-v3/verify.md](../../my-dev-flow-v3/verify.md)).  
-2. Else Prefer-re-smoke `smoke` when Smoke unpaid/**fail** (Prefer-re-smoke eligible — even if `Smoke source` already `Smoke-Task` — [../../my-dev-flow-v3/examples/smoke-fail-fix-resmoke.md](../../my-dev-flow-v3/examples/smoke-fail-fix-resmoke.md)). Do **not** Prefer unpaid `test-*` while Smoke fail unpaid.  
-3. Else Prefer unpaid `test-*` **only** if test-fail unpaid.  
-4. Else continue (do **not** stay on `fix-tests`). Skip-review ordered recovery otherwise ([../../my-dev-flow-v3/verify.md](../../my-dev-flow-v3/verify.md)).
+| Ban when | Do not Prefer |
+|----------|---------------|
+| verify-pass ∧ **missing required api/db** | Prefer-re-smoke / unpaid `smoke` / Adv — Prefer `finalize-lens-plan` (**parent**) |
+| Smoke fail unpaid ∧ Last ≠ `fix-tests` + verify-pass | Prefer-re-smoke / unpaid `test-*` — Prefer `fix-tests` first (**parent**) |
+| stay on `fix-tests` after verify-pass | continue — parent re-derives |
