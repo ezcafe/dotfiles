@@ -24,7 +24,9 @@ CLAIMS_FM_RE = re.compile(r"^claims:\s*\[(.*?)\]\s*$", re.M | re.S)
 
 CANONICAL = (
     "architecture.md",
+    "topic-index.md",
     "solution-design.md",
+    "decisions.md",
     "glossary.md",
 )
 OBSOLETE = (
@@ -46,7 +48,16 @@ REQUIRED_H2 = {
         "Key decisions and constraints",
         "Related solution designs",
     ],
+    "topic-index.md": [
+        "Topic map",
+    ],
     "solution-design.md": [],  # hub — flexible index
+    "decisions.md": [
+        "Decision rules",
+        "Anti-patterns",
+        "Trade-offs",
+        "Related architecture decisions",
+    ],
     "glossary.md": [],  # table body
 }
 
@@ -64,9 +75,26 @@ FEATURE_H2 = [
     "Decisions and open questions",
 ]
 
+HOWTO_H2 = [
+    "Prerequisites",
+    "Steps",
+    "Verify",
+]
+
+CONCEPT_H2 = [
+    "Definition",
+    "When to use",
+    "Related projects",
+]
+
+VALID_ENTITY = {"tutorial", "how-to", "howto", "reference", "explanation", "concept"}
+VALID_STATUS = {"proposed", "accepted", "superseded", "deprecated"}
+VALID_CONFIDENCE = {"high", "medium", "low"}
+
 DOCS_ONLY = re.compile(
     r"(?i)(README\.md|CONTRIBUTING\.md|docs/|/\.md\b|ADR|changelog)",
 )
+TABLE_SEP_RE = re.compile(r"^\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)+\|?\s*$")
 
 
 @dataclass
@@ -162,7 +190,7 @@ def git_short_sha(workspace: Path) -> str | None:
 
 def collect_md_pages(root: Path) -> list[Path]:
     pages: list[Path] = []
-    for base in (root / "projects", root / "inbox"):
+    for base in (root / "projects", root / "inbox", root / "concepts"):
         if not base.is_dir():
             continue
         for p in base.rglob("*.md"):
@@ -181,7 +209,34 @@ def link_targets(root: Path, pages: list[Path]) -> set[str]:
         # projects/slug/index → projects/slug
         if p.name == "index.md":
             targets.add(p.parent.relative_to(root).as_posix().lower())
+        text = p.read_text(encoding="utf-8")
+        meta, _ = parse_frontmatter(text)
+        aliases = meta.get("aliases")
+        if isinstance(aliases, list):
+            for a in aliases:
+                key = str(a).strip().lower().removesuffix(".md").strip("/")
+                if key:
+                    targets.add(key)
+                    targets.add(key.split("/")[-1])
     return targets
+
+
+def maintain_ages(cfg: dict) -> tuple[int, int]:
+    m = cfg.get("maintain") if isinstance(cfg.get("maintain"), dict) else {}
+    inbox = int(str((m or {}).get("inbox_max_age_days") or 14))
+    reviewed = int(str((m or {}).get("reviewed_max_age_days") or 90))
+    return inbox, reviewed
+
+
+def file_age_days(path: Path) -> int | None:
+    try:
+        mtime = path.stat().st_mtime
+    except OSError:
+        return None
+    from datetime import datetime, timezone
+
+    age = datetime.now(timezone.utc) - datetime.fromtimestamp(mtime, tz=timezone.utc)
+    return max(0, age.days)
 
 
 def resolve_workspace(cfg: dict, slug: str, root: Path) -> Path | None:
@@ -494,6 +549,112 @@ def check_complex_logic(body: str, path: str, result: LintResult) -> None:
         )
 
 
+def check_topic_index(body: str, path: str, result: LintResult) -> None:
+    """Topic index must route with a table and at least one project wikilink."""
+    section = _section_body(body, "Topic map")
+    if not section:
+        return
+    if "|" not in section:
+        result.add("error", path, "Topic map must be a GFM table (Topic | Page | Notes)")
+        return
+    links = WIKI_LINK_RE.findall(section)
+    if not links:
+        result.add(
+            "error",
+            path,
+            "Topic map must include at least one [[wikilink]] to a project page",
+        )
+
+
+def check_decisions(body: str, path: str, result: LintResult) -> None:
+    """Decision layer tables should cite workspace evidence."""
+    for heading in ("Decision rules", "Anti-patterns", "Trade-offs"):
+        section = _section_body(body, heading)
+        if not section:
+            continue
+        # Placeholder-only stubs are OK at scaffold time; warn if filled rows lack cites
+        rows = [
+            ln
+            for ln in section.splitlines()
+            if ln.strip().startswith("|")
+            and not TABLE_SEP_RE.match(ln.strip())
+            and "---" not in ln
+            and not re.search(r"\|\s*Rule\s*\|", ln, re.I)
+            and not re.search(r"\|\s*Anti-pattern\s*\|", ln, re.I)
+            and not re.search(r"\|\s*Choice A\s*\|", ln, re.I)
+            and "…" not in ln
+            and "..." not in ln
+        ]
+        for ln in rows:
+            if "workspace:" not in ln:
+                result.add(
+                    "warn",
+                    path,
+                    f"{heading} row lacks workspace: cite: {ln.strip()[:80]}",
+                )
+
+
+def check_adr_status(body: str, path: str, result: LintResult) -> None:
+    section = _section_body(body, "Key decisions and constraints")
+    if not section:
+        return
+    for ln in section.splitlines():
+        if not ln.strip().startswith("|") or TABLE_SEP_RE.match(ln.strip()):
+            continue
+        if re.search(r"\|\s*Decision\s*\|", ln, re.I):
+            continue
+        if "…" in ln or "..." in ln:
+            continue
+        cells = [c.strip().lower() for c in ln.split("|") if c.strip()]
+        if len(cells) < 2:
+            continue
+        status = cells[1]
+        if status and status not in VALID_STATUS and status not in (
+            "accepted / superseded / proposed",
+            "proposed / accepted / superseded / deprecated",
+        ):
+            # Allow multi-word placeholders in scaffold templates
+            if "/" in status and all(
+                part.strip() in VALID_STATUS or part.strip() in ("accepted",)
+                for part in status.replace("deprecated", "deprecated").split("/")
+            ):
+                continue
+            if status not in VALID_STATUS:
+                result.add(
+                    "warn",
+                    path,
+                    f"ADR Status should be one of {sorted(VALID_STATUS)}: {cells[1][:40]}",
+                )
+
+
+def check_howto(body: str, path: str, result: LintResult) -> None:
+    check_required_h2(body, HOWTO_H2, path, result)
+    steps = _section_body(body, "Steps")
+    if steps and not re.search(r"(?m)^\s*\d+\.\s+", steps):
+        result.add("warn", path, "How-to Steps should use a numbered list")
+
+
+def check_concept(body: str, path: str, result: LintResult) -> None:
+    check_required_h2(body, CONCEPT_H2, path, result)
+
+
+def check_frontmatter_meta(meta: dict, path: str, result: LintResult) -> None:
+    et = str(meta.get("entity_type") or "").strip().lower()
+    if et and et not in VALID_ENTITY:
+        result.add(
+            "warn",
+            path,
+            f"entity_type should be tutorial|how-to|reference|explanation (got {et})",
+        )
+    conf = str(meta.get("confidence") or "").strip().lower()
+    if conf and conf not in VALID_CONFIDENCE:
+        result.add(
+            "warn",
+            path,
+            f"confidence should be high|medium|low (got {conf})",
+        )
+
+
 def check_key_claims(body: str, meta: dict, path: str, result: LintResult) -> None:
     if "## Key claims" not in body:
         result.add("warn", path, "Missing ## Key claims section")
@@ -550,12 +711,18 @@ def lint_project(
             continue
         text = p.read_text(encoding="utf-8")
         meta, body = parse_frontmatter(text)
+        check_frontmatter_meta(meta, rel, result)
         if not meta.get("validated_against"):
             result.add("warn", rel, "Missing validated_against frontmatter")
         if name in REQUIRED_H2 and REQUIRED_H2[name]:
             check_required_h2(body, REQUIRED_H2[name], rel, result)
         if name == "architecture.md":
             check_architecture_diagrams(body, rel, result)
+            check_adr_status(body, rel, result)
+        if name == "topic-index.md":
+            check_topic_index(body, rel, result)
+        if name == "decisions.md":
+            check_decisions(body, rel, result)
         check_key_claims(body, meta, rel, result)
         # wikilinks
         for m in WIKI_LINK_RE.finditer(body):
@@ -574,11 +741,25 @@ def lint_project(
             rel = f"projects/{slug}/solution-design/{fp.name}"
             text = fp.read_text(encoding="utf-8")
             meta, body = parse_frontmatter(text)
+            check_frontmatter_meta(meta, rel, result)
             check_required_h2(body, FEATURE_H2, rel, result)
             check_mermaid_types(body, rel, "sequence", result)
             check_complex_logic(body, rel, result)
             check_scope_and_requirements(body, rel, result)
             check_api_contracts(body, rel, result)
+            check_key_claims(body, meta, rel, result)
+
+    # How-to pages
+    ht_dir = proj / "how-to"
+    if ht_dir.is_dir():
+        for fp in sorted(ht_dir.glob("*.md")):
+            if fp.name.lower() == "readme.md":
+                continue
+            rel = f"projects/{slug}/how-to/{fp.name}"
+            text = fp.read_text(encoding="utf-8")
+            meta, body = parse_frontmatter(text)
+            check_frontmatter_meta(meta, rel, result)
+            check_howto(body, rel, result)
             check_key_claims(body, meta, rel, result)
 
     # SHA freshness
@@ -599,6 +780,143 @@ def lint_project(
                         f"projects/{slug}/architecture.md",
                         f"Stale validated_against SHA {recorded} vs HEAD {head}",
                     )
+
+
+def lint_concepts(
+    root: Path, result: LintResult, all_targets: set[str], *, maintain: bool, reviewed_max: int
+) -> None:
+    concepts = root / "concepts"
+    if not concepts.is_dir():
+        return
+    topic = concepts / "topic-index.md"
+    if topic.is_file():
+        text = topic.read_text(encoding="utf-8")
+        meta, body = parse_frontmatter(text)
+        check_frontmatter_meta(meta, "concepts/topic-index.md", result)
+        check_topic_index(body, "concepts/topic-index.md", result)
+    for fp in sorted(concepts.glob("*.md")):
+        if fp.name.lower() in ("readme.md", "topic-index.md"):
+            continue
+        rel = f"concepts/{fp.name}"
+        text = fp.read_text(encoding="utf-8")
+        meta, body = parse_frontmatter(text)
+        check_frontmatter_meta(meta, rel, result)
+        check_concept(body, rel, result)
+        check_key_claims(body, meta, rel, result)
+        if maintain:
+            reviewed = str(meta.get("reviewed") or "").strip()
+            if not reviewed:
+                result.add("warn", rel, "Missing reviewed: frontmatter (concepts)")
+            else:
+                try:
+                    from datetime import datetime
+
+                    d = datetime.strptime(reviewed, "%Y-%m-%d").date()
+                    age = (date.today() - d).days
+                    if age > reviewed_max:
+                        result.add(
+                            "warn",
+                            rel,
+                            f"reviewed: {reviewed} is {age} days old (max {reviewed_max})",
+                        )
+                except ValueError:
+                    result.add("warn", rel, f"Invalid reviewed: date {reviewed}")
+        for m in WIKI_LINK_RE.finditer(body):
+            target = m.group(1).strip().lower().replace("\\", "/").removesuffix(".md")
+            if target not in all_targets and not target.startswith("http"):
+                if target.split("/")[-1] not in all_targets:
+                    result.add("warn", rel, f"Possibly broken wikilink: [[{m.group(1)}]]")
+
+
+def lint_inbox_maintain(root: Path, result: LintResult, inbox_max: int) -> None:
+    inbox = root / "inbox"
+    if not inbox.is_dir():
+        return
+    for fp in sorted(inbox.glob("*.md")):
+        if fp.name.lower() == "readme.md":
+            continue
+        age = file_age_days(fp)
+        rel = f"inbox/{fp.name}"
+        if age is not None and age > inbox_max:
+            result.add(
+                "warn",
+                rel,
+                f"Inbox item age {age} days (max {inbox_max}) — promote, file, or delete",
+            )
+
+
+def lint_references_reviewed(
+    root: Path, slug: str, result: LintResult, reviewed_max: int
+) -> None:
+    ref = root / "projects" / slug / "references"
+    if not ref.is_dir():
+        return
+    for fp in sorted(ref.glob("*.md")):
+        if fp.name.lower() == "readme.md":
+            continue
+        rel = f"projects/{slug}/references/{fp.name}"
+        text = fp.read_text(encoding="utf-8")
+        meta, _ = parse_frontmatter(text)
+        reviewed = str(meta.get("reviewed") or "").strip()
+        if not reviewed:
+            result.add("warn", rel, "Missing reviewed: frontmatter (references)")
+            continue
+        try:
+            from datetime import datetime
+
+            d = datetime.strptime(reviewed, "%Y-%m-%d").date()
+            age = (date.today() - d).days
+            if age > reviewed_max:
+                result.add(
+                    "warn",
+                    rel,
+                    f"reviewed: {reviewed} is {age} days old (max {reviewed_max})",
+                )
+        except ValueError:
+            result.add("warn", rel, f"Invalid reviewed: date {reviewed}")
+
+
+def coverage_summary(root: Path, cfg: dict, slugs: list[str]) -> str:
+    pages = collect_md_pages(root)
+    inbox_n = sum(
+        1
+        for p in pages
+        if "inbox" in p.parts and p.name.lower() != "readme.md"
+    )
+    concepts_n = sum(
+        1
+        for p in pages
+        if "concepts" in p.parts
+        and p.name.lower() not in ("readme.md", "topic-index.md")
+    )
+    features = 0
+    howtos = 0
+    fresh = 0
+    stale = 0
+    for slug in slugs:
+        sd = root / "projects" / slug / "solution-design"
+        if sd.is_dir():
+            features += len(list(sd.glob("*.md")))
+        ht = root / "projects" / slug / "how-to"
+        if ht.is_dir():
+            howtos += len([p for p in ht.glob("*.md") if p.name.lower() != "readme.md"])
+        ws = resolve_workspace(cfg, slug, root)
+        arch = root / "projects" / slug / "architecture.md"
+        if ws and arch.is_file():
+            head = git_short_sha(ws)
+            m = VALIDATED_RE.search(arch.read_text(encoding="utf-8"))
+            if head and m:
+                recorded = m.group(2)
+                if recorded == "unknown" or recorded == head or head.startswith(
+                    recorded
+                ) or recorded.startswith(head):
+                    fresh += 1
+                else:
+                    stale += 1
+    return (
+        f"coverage: projects={len(slugs)} features={features} howtos={howtos} "
+        f"concepts={concepts_n} inbox={inbox_n} sha_fresh={fresh} sha_stale={stale}"
+    )
 
 
 def lint_orphans(root: Path, pages: list[Path], result: LintResult) -> None:
@@ -645,6 +963,11 @@ def main() -> int:
         default=os.environ.get("WIKI_ROOT", str(Path.home() / "Documents/my-wiki")),
     )
     ap.add_argument("--project", default="", help="Lint one project slug only")
+    ap.add_argument(
+        "--maintain",
+        action="store_true",
+        help="Vault hygiene: inbox age, reviewed age, coverage summary",
+    )
     ap.add_argument("--no-log", action="store_true", help="Do not append log.md")
     args = ap.parse_args()
     root = expand_root(args.root)
@@ -653,6 +976,7 @@ def main() -> int:
         return 2
 
     cfg = load_config(root)
+    inbox_max, reviewed_max = maintain_ages(cfg)
     result = LintResult()
     pages = collect_md_pages(root)
     targets = link_targets(root, pages)
@@ -670,9 +994,16 @@ def main() -> int:
 
     for slug in slugs:
         lint_project(root, slug, cfg, result, targets)
+        if args.maintain:
+            lint_references_reviewed(root, slug, result, reviewed_max)
 
     if not args.project:
+        lint_concepts(
+            root, result, targets, maintain=args.maintain, reviewed_max=reviewed_max
+        )
         lint_orphans(root, pages, result)
+        if args.maintain:
+            lint_inbox_maintain(root, result, inbox_max)
 
     errors = result.errors
     warns = result.warns
@@ -680,9 +1011,20 @@ def main() -> int:
         print(f"{i.severity.upper()}: {i.path}: {i.message}")
 
     summary = f"{len(errors)} error(s), {len(warns)} warning(s) across {len(slugs)} project(s)"
+    if args.maintain:
+        cov = coverage_summary(root, cfg, slugs)
+        print(cov)
+        summary = f"maintain | {summary} | {cov}"
     print(summary)
     if not args.no_log:
-        append_log(root, summary)
+        if args.maintain:
+            log = root / "log.md"
+            if log.is_file():
+                line = f"\n## [{date.today().isoformat()}] maintain | {summary}\n"
+                with log.open("a", encoding="utf-8") as f:
+                    f.write(line)
+        else:
+            append_log(root, summary)
 
     return 1 if errors else 0
 

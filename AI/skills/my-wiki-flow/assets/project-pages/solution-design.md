@@ -2,12 +2,14 @@
 title: Solution design
 project: PROJECT_SLUG
 tags: [solution-design, features]
-entity_type: concept
+entity_type: reference
 source: workspace:REPO_PATH
 validated_against: workspace:REPO_PATH@GIT_SHA
 updated: YYYY-MM-DD
 summary: Master index of feature-level solution designs for this project.
 claims: []
+confidence: high
+aliases: []
 ---
 
 # Solution design
@@ -40,5 +42,7 @@ Use `wiki-add-feature.sh PROJECT_SLUG {feature} [master]` to create pages.
 
 ## See also
 
+- [[projects/PROJECT_SLUG/topic-index|Topic index]]
 - [[projects/PROJECT_SLUG/architecture|Architecture]]
+- [[projects/PROJECT_SLUG/decisions|Decisions]]
 - [[projects/PROJECT_SLUG/glossary|Glossary]]

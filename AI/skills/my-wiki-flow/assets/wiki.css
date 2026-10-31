@@ -698,6 +698,30 @@ a:active {
   text-align: center;
 }
 
+.wiki-backlinks {
+  clear: both;
+  margin: 1.5rem 0 0;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--wiki-border-subtle);
+  background: var(--wiki-toc-bg);
+  font-size: 0.875rem;
+}
+
+.wiki-backlinks .toc-title {
+  margin: 0 0 0.35rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.wiki-backlinks ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.wiki-entity-badge {
+  margin-left: 0.35rem;
+}
+
 .wiki-footer {
   clear: both;
   margin-top: 2rem;
@@ -705,6 +729,13 @@ a:active {
   border-top: 1px solid var(--wiki-border-subtle);
   font-size: 0.8125rem;
   color: var(--wiki-muted);
+}
+
+.wiki-footer code {
+  font-size: 0.8125rem;
+  background: var(--wiki-toc-bg);
+  padding: 0.05rem 0.3rem;
+  border: 1px solid var(--wiki-border-subtle);
 }
 
 @media (max-width: 48rem) {

@@ -2,12 +2,14 @@
 title: Architecture
 project: PROJECT_SLUG
 tags: [architecture]
-entity_type: concept
+entity_type: explanation
 source: workspace:REPO_PATH
 validated_against: workspace:REPO_PATH@GIT_SHA
 updated: YYYY-MM-DD
 summary: Project-wide architecture — quality goals, building blocks, interactions, deployment, risks, and constraints.
 claims: []
+confidence: high
+aliases: []
 ---
 
 # Architecture
@@ -125,9 +127,11 @@ Add a deployment Mermaid when more than one deployable unit maps to distinct hos
 
 | Decision | Status | Date | Summary | Consequences |
 |----------|--------|------|---------|--------------|
-| … | accepted / superseded / proposed | YYYY-MM-DD | Grounded in code | … |
+| … | proposed / accepted / superseded / deprecated | YYYY-MM-DD | Grounded in code | … |
 
+Append-only: when a decision changes, add a new row and mark the old one `superseded` — do not rewrite past Status/Date.
 Link an ADR only after confirming the code still matches.
+Actionable use-when rules live on [[projects/PROJECT_SLUG/decisions|Decisions]].
 
 ## Related solution designs
 
@@ -139,5 +143,7 @@ Link an ADR only after confirming the code still matches.
 
 ## See also
 
+- [[projects/PROJECT_SLUG/topic-index|Topic index]]
 - [[projects/PROJECT_SLUG/solution-design|Solution design]]
+- [[projects/PROJECT_SLUG/decisions|Decisions]]
 - [[projects/PROJECT_SLUG/glossary|Glossary]]

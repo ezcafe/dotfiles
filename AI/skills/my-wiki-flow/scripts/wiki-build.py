@@ -23,9 +23,20 @@ INFRA_BASENAMES = {"index.md", "log.md", "agents.md", "claude.md", "soul.md", "c
 # Canonical project nav order (project-structure.md).
 PROJECT_PAGE_ORDER = (
     "architecture",
+    "topic-index",
     "solution-design",
+    "decisions",
     "glossary",
 )
+
+VALID_ENTITY_LABELS = {
+    "tutorial": "Tutorial",
+    "how-to": "How-to",
+    "howto": "How-to",
+    "reference": "Reference",
+    "explanation": "Explanation",
+    "concept": "Concept",
+}
 
 TABLE_SEP_RE = re.compile(r"^\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)+\|?\s*$")
 TABLE_ROW_RE = re.compile(r"^\|(.+)\|\s*$")
@@ -45,6 +56,9 @@ class Page:
     html_rel: Path = field(default_factory=Path)
     # Optional group label under Solution design (master feature name).
     nav_group: str = ""
+    entity_type: str = ""
+    aliases: list[str] = field(default_factory=list)
+    confidence: str = ""
 
 
 def expand_root(raw: str) -> Path:
@@ -119,9 +133,37 @@ def build_link_map(pages: list[Page]) -> dict[str, Path]:
         if rel_no_ext.startswith("projects/"):
             short = rel_no_ext[len("projects/") :]
             link_map[short] = p.html_rel
+        if rel_no_ext.startswith("concepts/"):
+            link_map[rel_no_ext] = p.html_rel
+            link_map.setdefault(stem, p.html_rel)
         title_key = slugify(p.title)
         link_map.setdefault(title_key, p.html_rel)
+        for alias in p.aliases:
+            key = alias.strip().lower().removesuffix(".md").strip("/")
+            if key:
+                link_map.setdefault(key, p.html_rel)
+                link_map.setdefault(key.split("/")[-1], p.html_rel)
     return link_map
+
+
+def build_backlinks(pages: list[Page]) -> dict[str, list[Page]]:
+    """Map page rel (no ext, lower) → pages that wikilink to it."""
+    by_key: dict[str, Page] = {}
+    for p in pages:
+        rel = p.rel.with_suffix("").as_posix().lower()
+        by_key[rel] = p
+        by_key[p.path.stem.lower()] = p
+    inbound: dict[str, list[Page]] = {p.rel.with_suffix("").as_posix().lower(): [] for p in pages}
+    for src in pages:
+        for m in WIKI_LINK_RE.finditer(src.body_md):
+            target = m.group(1).strip().lower().replace("\\", "/").removesuffix(".md")
+            dest = by_key.get(target) or by_key.get(target.split("/")[-1])
+            if not dest or dest.path == src.path:
+                continue
+            key = dest.rel.with_suffix("").as_posix().lower()
+            if src not in inbound[key]:
+                inbound[key].append(src)
+    return inbound
 
 
 def resolve_wikilink_href(target: str, from_html: Path, link_map: dict[str, Path]) -> str:
@@ -418,14 +460,19 @@ def inline(
 
 def collect_pages(root: Path) -> list[Page]:
     pages: list[Page] = []
-    for base, project_default in ((root / "projects", None), (root / "inbox", "inbox")):
+    bases: list[tuple[Path, str | None]] = [
+        (root / "projects", None),
+        (root / "inbox", "inbox"),
+        (root / "concepts", "concepts"),
+    ]
+    for base, project_default in bases:
         if not base.is_dir():
             continue
         for path in sorted(base.rglob("*.md")):
             if path.name == ".gitkeep":
                 continue
             # Vault helper docs — not wiki articles
-            if path == root / "inbox" / "README.md":
+            if path.name.lower() == "readme.md":
                 continue
             if path.name.lower() in INFRA_BASENAMES and path.parent == root:
                 continue
@@ -436,6 +483,8 @@ def collect_pages(root: Path) -> list[Page]:
             project = str(meta.get("project") or project_default or "")
             if not project and rel.parts[0] == "projects" and len(rel.parts) > 1:
                 project = rel.parts[1]
+            if not project and rel.parts[0] == "concepts":
+                project = "concepts"
             if not project:
                 project = "inbox"
             title = str(meta.get("title") or path.stem.replace("-", " ").title())
@@ -443,6 +492,12 @@ def collect_pages(root: Path) -> list[Page]:
             nav_group = str(
                 meta.get("nav_group") or meta.get("master_feature") or ""
             ).strip()
+            aliases_raw = meta.get("aliases")
+            aliases = (
+                [str(a) for a in aliases_raw]
+                if isinstance(aliases_raw, list)
+                else []
+            )
             page = Page(
                 path=path,
                 rel=rel,
@@ -454,12 +509,16 @@ def collect_pages(root: Path) -> list[Page]:
                 updated=str(meta.get("updated") or ""),
                 body_md=body,
                 nav_group=nav_group,
+                entity_type=str(meta.get("entity_type") or "").strip().lower(),
+                aliases=aliases,
+                confidence=str(meta.get("confidence") or "").strip().lower(),
             )
-            parts = list(path.relative_to(root).parts)
             if project == "inbox":
                 page.html_rel = Path("inbox") / f"{path.stem}.html"
+            elif project == "concepts" or rel.parts[0] == "concepts":
+                page.html_rel = Path("concepts") / f"{path.stem}.html"
             elif rel.parts[0] == "projects" and len(rel.parts) >= 3:
-                # Preserve nested paths: solution-design/, references/, …
+                # Preserve nested paths: solution-design/, how-to/, references/, …
                 under = Path(*rel.parts[2:]).with_suffix(".html")
                 page.html_rel = Path("projects") / project / under
             else:
@@ -483,46 +542,68 @@ def is_solution_design_feature(page: Page) -> bool:
     return "/solution-design/" in page.rel.as_posix().lower()
 
 
+def is_howto_page(page: Page) -> bool:
+    return "/how-to/" in page.rel.as_posix().lower()
+
+
 def page_kind(page: Page) -> str:
     """CSS body kind for ArchWiki-style page accents."""
     stem = page.path.stem.lower()
+    if is_howto_page(page):
+        return "how-to"
+    if page.project == "concepts":
+        return "concept" if stem != "topic-index" else "topic-index"
     if is_solution_design_feature(page):
         return "solution-design-feature"
     if is_solution_design_hub(page):
         return "solution-design"
     if stem == "architecture":
         return "architecture"
-    if stem == "glossary":
+    if stem in ("glossary", "decisions", "topic-index"):
         return stem
     return "article"
 
 
-def page_kind_badge(kind: str) -> str:
+def page_kind_badge(kind: str, entity_type: str = "") -> str:
     labels = {
         "architecture": "Architecture",
+        "topic-index": "Topic index",
         "solution-design": "Solution design",
         "solution-design-feature": "Feature design",
+        "decisions": "Decisions",
+        "glossary": "Glossary",
+        "how-to": "How-to",
+        "concept": "Concept",
     }
     label = labels.get(kind)
-    if not label:
-        return ""
-    return (
-        f'<p class="wiki-kind-badge" data-kind="{html.escape(kind)}">'
-        f"{html.escape(label)}</p>"
-    )
+    bits: list[str] = []
+    if label:
+        bits.append(
+            f'<p class="wiki-kind-badge" data-kind="{html.escape(kind)}">'
+            f"{html.escape(label)}</p>"
+        )
+    et_label = VALID_ENTITY_LABELS.get(entity_type)
+    if et_label and et_label.lower() != (label or "").lower():
+        bits.append(
+            f'<p class="wiki-kind-badge wiki-entity-badge" data-entity="{html.escape(entity_type)}">'
+            f"{html.escape(et_label)}</p>"
+        )
+    return "".join(bits)
 
 
 def page_sort_key(page: Page) -> tuple[int, str, str]:
-    """Canonical pages first, then solution-design features, then the rest."""
+    """Canonical pages first, then solution-design features, how-tos, then the rest."""
     stem = page.path.stem.lower()
     rel = page.rel.as_posix().lower()
-    if stem in PROJECT_PAGE_ORDER and "solution-design/" not in rel:
+    if stem in PROJECT_PAGE_ORDER and "solution-design/" not in rel and "how-to/" not in rel:
         return (0, f"{PROJECT_PAGE_ORDER.index(stem):02d}", page.title.lower())
     if "/solution-design/" in rel or rel.endswith("/solution-design.md"):
         if stem == "solution-design":
             return (0, f"{PROJECT_PAGE_ORDER.index('solution-design'):02d}", page.title.lower())
         return (1, page.nav_group.lower(), page.title.lower())
-    return (2, stem, page.title.lower())
+    if "/how-to/" in rel:
+        return (2, stem, page.title.lower())
+    return (3, stem, page.title.lower())
 
 
 def _nav_link(page: Page, current: Page | None, from_html: Path) -> str:
@@ -571,24 +652,48 @@ def _feature_nav_tree(features: list[Page], current: Page | None, from_html: Pat
     return "".join(parts)
 
 
+def _howto_nav_tree(howtos: list[Page], current: Page | None, from_html: Path) -> str:
+    if not howtos:
+        return ""
+    parts: list[str] = ['<ul class="nav-children">']
+    for h in sorted(howtos, key=lambda p: p.title.lower()):
+        parts.append(f"<li>{_nav_link(h, current, from_html)}</li>")
+    parts.append("</ul>")
+    return "".join(parts)
+
+
+def _project_nav_order(keys: list[str]) -> list[str]:
+    """Concepts first, then inbox last, projects alphabetical in between."""
+    special_first = [k for k in ("concepts",) if k in keys]
+    special_last = [k for k in ("inbox",) if k in keys]
+    mid = sorted(k for k in keys if k not in special_first and k not in special_last)
+    return special_first + mid + special_last
+
+
 def build_nav(pages: list[Page], current: Page | None, from_html: Path) -> str:
     by_proj: dict[str, list[Page]] = {}
     for p in pages:
         by_proj.setdefault(p.project, []).append(p)
     chunks: list[str] = []
-    for proj in sorted(by_proj.keys()):
+    for proj in _project_nav_order(list(by_proj.keys())):
         proj_pages = by_proj[proj]
         features = [p for p in proj_pages if is_solution_design_feature(p)]
-        top = [p for p in proj_pages if not is_solution_design_feature(p)]
+        howtos = [p for p in proj_pages if is_howto_page(p)]
+        top = [
+            p
+            for p in proj_pages
+            if not is_solution_design_feature(p) and not is_howto_page(p)
+        ]
         current_here = bool(current and current.project == proj)
         proj_cls = "nav-project nav-collapsible"
         if current_here:
             proj_cls += " has-current"
+        label = "Concepts" if proj == "concepts" else proj
         chunks.append(
             f'<div class="{proj_cls}" data-nav-id="project:{html.escape(proj)}">'
             f'<div class="nav-row project-row">'
-            f"{_nav_toggle(f'Collapse project {proj}')}"
-            f'<div class="project">{html.escape(proj)}</div>'
+            f"{_nav_toggle(f'Collapse {label}')}"
+            f'<div class="project">{html.escape(label)}</div>'
             f"</div>"
             f'<ul class="nav-root">'
         )
@@ -601,7 +706,6 @@ def build_nav(pages: list[Page], current: Page | None, from_html: Path) -> str:
                 ):
                     parent_cls += " has-current"
                 if child_tree:
-                    # Hub link stays a peer of Architecture; toggle sits after the label.
                     chunks.append(
                         f'<li class="{parent_cls}" data-nav-id="hub:solution-design">'
                         f'<div class="nav-row nav-page-row">'
@@ -613,7 +717,6 @@ def build_nav(pages: list[Page], current: Page | None, from_html: Path) -> str:
                     chunks.append(f"<li>{_nav_link(p, current, from_html)}</li>")
             else:
                 chunks.append(f"<li>{_nav_link(p, current, from_html)}</li>")
-        # Orphan features if hub page is missing
         if features and not any(is_solution_design_hub(p) for p in top):
             chunks.append(
                 f'<li class="nav-parent nav-collapsible" data-nav-id="hub:solution-design">'
@@ -621,6 +724,17 @@ def build_nav(pages: list[Page], current: Page | None, from_html: Path) -> str:
                 f'<span class="nav-page-label">Solution design</span>'
                 f'{_nav_toggle("Collapse Solution design")}</div>'
                 f"{_feature_nav_tree(features, current, from_html)}</li>"
+            )
+        if howtos:
+            ht_cls = "nav-parent nav-collapsible"
+            if current and is_howto_page(current) and current.project == proj:
+                ht_cls += " has-current"
+            chunks.append(
+                f'<li class="{ht_cls}" data-nav-id="hub:how-to">'
+                f'<div class="nav-row nav-page-row">'
+                f'<span class="nav-page-label">How-to</span>'
+                f'{_nav_toggle("Collapse How-to")}</div>'
+                f"{_howto_nav_tree(howtos, current, from_html)}</li>"
             )
         chunks.append("</ul></div>")
     return "\n".join(chunks)
@@ -641,6 +755,26 @@ def build_toc(toc: list[tuple[int, str, str]]) -> str:
     )
 
 
+def render_backlinks(
+    page: Page, backlinks: dict[str, list[Page]], from_html: Path
+) -> str:
+    key = page.rel.with_suffix("").as_posix().lower()
+    linked = backlinks.get(key) or []
+    if not linked:
+        return ""
+    items = []
+    for src in sorted(linked, key=lambda p: p.title.lower())[:24]:
+        href = rel_href(from_html, src.html_rel)
+        items.append(
+            f'<li><a href="{html.escape(href)}">{html.escape(src.title)}</a></li>'
+        )
+    return (
+        '<nav class="wiki-backlinks" aria-label="Linked from">'
+        '<div class="toc-title">Linked from</div>'
+        f'<ul>{"".join(items)}</ul></nav>'
+    )
+
+
 def render_page(
     template: str,
     site_title: str,
@@ -649,6 +783,8 @@ def render_page(
     toc_html: str,
     nav_html: str,
     from_html: Path,
+    *,
+    backlinks_html: str = "",
 ) -> str:
     depth = len(from_html.parent.parts)
     prefix = "/".join([".."] * depth) + "/" if depth else ""
@@ -656,7 +792,9 @@ def render_page(
     home = f"{prefix}index.html"
     project_href = f"{prefix}projects/{page.project}/architecture.html"
     if page.project == "inbox":
-        project_href = f"{prefix}inbox/index.html"
+        project_href = home
+    elif page.project == "concepts":
+        project_href = f"{prefix}concepts/topic-index.html"
     meta_bits = []
     if page.summary:
         meta_bits.append(f'<p class="wiki-lead">{html.escape(page.summary)}</p>')
@@ -664,7 +802,9 @@ def render_page(
     if page.updated:
         details.append(f"Updated: {html.escape(page.updated)}")
     if page.source:
-        details.append(f"Source: {html.escape(page.source)}")
+        details.append(f"Evidence: {html.escape(page.source)}")
+    if page.confidence:
+        details.append(f"Confidence: {html.escape(page.confidence)}")
     if page.tags:
         details.append("Tags: " + ", ".join(html.escape(t) for t in page.tags))
     meta = "".join(meta_bits)
@@ -673,24 +813,60 @@ def render_page(
 
     kind = page_kind(page)
     body_class = f"wiki-kind-{kind}"
+    source_md = page.rel.as_posix() if page.rel.as_posix() != "index.md" else ""
     return (
         template.replace("{{TITLE}}", html.escape(page.title))
         .replace("{{SITE_TITLE}}", html.escape(site_title))
         .replace("{{SUMMARY}}", html.escape(page.summary or page.title))
         .replace("{{BODY_CLASS}}", body_class)
-        .replace("{{PAGE_KIND}}", page_kind_badge(kind))
+        .replace("{{PAGE_KIND}}", page_kind_badge(kind, page.entity_type))
         .replace("{{CSS_HREF}}", css)
         .replace("{{HOME_HREF}}", home)
         .replace("{{NAV}}", nav_html)
         .replace("{{TOC}}", toc_html)
         .replace("{{META}}", meta)
         .replace("{{BODY}}", body_html)
+        .replace("{{BACKLINKS}}", backlinks_html)
+        .replace("{{SOURCE_MD}}", html.escape(source_md or "(generated)"))
         .replace("{{PROJECT}}", html.escape(page.project))
         .replace("{{PROJECT_HREF}}", project_href)
         .replace("{{PAGEFIND_CSS}}", f"{prefix}pagefind/pagefind-component-ui.css")
         .replace("{{PAGEFIND_JS}}", f"{prefix}pagefind/pagefind-component-ui.js")
         .replace("{{PAGEFIND_BUNDLE}}", f"{prefix}pagefind/")
     )
+
+
+def write_alias_redirects(site: Path, pages: list[Page]) -> int:
+    """Write simple HTML redirect stubs for frontmatter aliases."""
+    count = 0
+    for page in pages:
+        for alias in page.aliases:
+            key = alias.strip().removesuffix(".md").strip("/")
+            if not key:
+                continue
+            # Prefer path-like aliases under site/; else stem next to page
+            if "/" in key:
+                dest = site / Path(key).with_suffix(".html")
+            else:
+                dest = page.html_rel.parent / f"{slugify(key)}.html"
+                dest = site / dest
+            if dest.resolve() == (site / page.html_rel).resolve():
+                continue
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            target = page.html_rel.as_posix()
+            # Relative redirect from dest to page
+            href = rel_href(dest.relative_to(site), page.html_rel)
+            dest.write_text(
+                "<!DOCTYPE html><html lang=\"en\"><head>"
+                f'<meta charset="utf-8"><meta http-equiv="refresh" content="0;url={html.escape(href)}">'
+                f"<title>Redirect</title>"
+                f'<link rel="canonical" href="{html.escape(href)}">'
+                f"</head><body><p>Moved to <a href=\"{html.escape(href)}\">{html.escape(target)}</a>.</p>"
+                "</body></html>\n",
+                encoding="utf-8",
+            )
+            count += 1
+    return count
 
 
 def write_home(
@@ -746,6 +922,8 @@ def write_home(
         f'Project: <a href="projects/home/architecture.html">home</a>',
         "Home",
     )
+    html_out = html_out.replace("Edit source: <code>index.md</code>", "Wiki home")
+    html_out = html_out.replace("Edit source: <code>(generated)</code>", "Wiki home")
     (site / "index.html").write_text(html_out, encoding="utf-8")
 
 
@@ -863,6 +1041,7 @@ def main() -> int:
 
     pages = collect_pages(root)
     link_map = build_link_map(pages)
+    backlinks = build_backlinks(pages) if pages else {}
     if not pages:
         # Still write a minimal home
         write_home(site, template, site_title, [])
@@ -874,15 +1053,27 @@ def main() -> int:
         body_html, toc = md_to_html(page.body_md, from_html=page.html_rel, link_map=link_map)
         toc_html = build_toc(toc)
         nav = build_nav(pages, page, page.html_rel)
-        out = render_page(template, site_title, page, body_html, toc_html, nav, page.html_rel)
+        bl_html = render_backlinks(page, backlinks, page.html_rel)
+        out = render_page(
+            template,
+            site_title,
+            page,
+            body_html,
+            toc_html,
+            nav,
+            page.html_rel,
+            backlinks_html=bl_html,
+        )
         dest = site / page.html_rel
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_text(out, encoding="utf-8")
 
+    alias_n = write_alias_redirects(site, pages)
     write_home(site, template, site_title, pages)
     update_root_index(root, pages, site_title)
     update_ai_index(root, pages)
-    print(f"Built {len(pages)} pages → {site}")
+    extra = f", {alias_n} alias redirect(s)" if alias_n else ""
+    print(f"Built {len(pages)} pages{extra} → {site}")
     return 0
 
 

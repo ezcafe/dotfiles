@@ -5,9 +5,11 @@ code** (sources, handlers, schemas, build/run config, tests) — **not** from
 README/docs/ADRs. Repo Markdown is a pointer only; confirm every claim in code
 at the validation SHA.
 
-Aligned with [Diátaxis](https://diataxis.fr/),
-[Google tech writing — large docs](https://developers.google.com/tech-writing/two/large-docs),
-and [ADS](https://archstandard.org/v1/standard/overview/).
+Aligned with [ADS](https://archstandard.org/v1/standard/overview/) and
+[Google tech writing — large docs](https://developers.google.com/tech-writing/two/large-docs).
+[Diátaxis](https://diataxis.fr/) informs optional **how-to** pages and
+`entity_type` labels — this is **not** a four-quadrant Diátaxis site (see
+[philosophy.md](philosophy.md)).
 
 Frontmatter, lint rules, and Karpathy layers: [content-contract.md](content-contract.md).
 Operations: [stages.md](stages.md).
@@ -15,15 +17,25 @@ Operations: [stages.md](stages.md).
 ```text
 projects/{slug}/
   architecture.md          # 1. Architecture
-  solution-design.md       # 2. Solution design hub
+  topic-index.md           # 2. Topic index (agent routing)
+  solution-design.md       # 3. Solution design hub
   solution-design/         #    one page per feature
     {feature-slug}.md
-  glossary.md              # 3. Glossary
-  references/              # overflow (article.template.md)
+  decisions.md             # 4. Decisions (judgment layer)
+  glossary.md              # 5. Glossary
+  how-to/                  #    optional ops / task guides
+    {task-slug}.md
+  references/              # overflow / prose fold-in (article.template.md)
+
+concepts/                  # cross-project evergreen notes (optional)
+  {concept-slug}.md
+  topic-index.md           # optional vault-wide concept map
 ```
 
 Scaffold: `wiki-scaffold-project.sh {slug} [workspace]`  
-Feature page: `wiki-add-feature.sh {slug} {feature} [master-feature]`
+Feature page: `wiki-add-feature.sh {slug} {feature} [master-feature]`  
+How-to: `wiki-add-howto.sh {slug} {task-slug}`  
+Concept: `wiki-add-concept.sh {concept-slug}`
 
 ## Page roles and required sections
 
@@ -42,10 +54,20 @@ Project-wide only. **No** feature sequence diagrams.
 | Cross-cutting concerns | Security, observability, errors, resilience (project-wide) |
 | Deployment view | Environments; optional deployment Mermaid if >1 deployable |
 | Risks and technical debt | Risk/debt, impact, mitigation, source |
-| Key decisions and constraints | ADR-lite: Status, Date, Summary, Consequences |
+| Key decisions and constraints | ADR-lite: Status (`proposed`/`accepted`/`superseded`/`deprecated`), Date, Summary, Consequences — **append-only**; supersede with a new row |
 | Related solution designs | Links to feature pages |
 
-### 2. Solution design — hub + features
+### 2. Topic index — `topic-index.md`
+
+Thin **topic → page** map. Agents load this before opening full pages.
+
+| Section | Content |
+|---------|---------|
+| Topic map | GFM table: Topic \| Page (`[[wikilink]]`) \| Notes. Synonym rows OK. One row per confirmed feature. Include how-to and concept links when relevant. |
+
+Keep short. No diagrams. No essay prose.
+
+### 3. Solution design — hub + features
 
 **Hub** (`solution-design.md`): master feature index (Owner + Status columns).
 Optional frontmatter `nav_group:` / `master_feature:` groups features in the HTML sidebar.
@@ -66,11 +88,56 @@ Optional frontmatter `nav_group:` / `master_feature:` groups features in the HTM
 | Testing and rollout | Separate lists: Key tests / Release / Rollback |
 | Decisions and open questions | Decisions / open items |
 
-### 3. Glossary — `glossary.md`
+Ops procedures that a competent person runs repeatedly belong in **`how-to/`**, not as a substitute for this design page. Link them from Topic index and from Testing and rollout when useful.
+
+### 4. Decisions — `decisions.md`
+
+Practitioner judgment layer (not ADR dump). Voice: **Use X when Y**.
+
+| Section | Content |
+|---------|---------|
+| Decision rules | Rule / Use when / Avoid when / `workspace:` source |
+| Anti-patterns | Anti-pattern / Why / Prefer instead / source |
+| Trade-offs | Choice A / B / Pick A when / Pick B when / source |
+| Related architecture decisions | Links to Architecture ADR-lite (do not duplicate full tables) |
+
+Architecture owns Status/Date records. Decisions owns actionable rules. Both cite code.
+
+### 5. Glossary — `glossary.md`
 
 | Term | Definition | Related link |
 |------|------------|--------------|
 | … | Project-specific meaning | `[[wikilink]]` |
+
+### 6. How-to — `how-to/{task}.md` (optional)
+
+Task guides for competent operators (`entity_type: how-to`). One goal per page.
+
+| Section | Content |
+|---------|---------|
+| Prerequisites | Tools, access, assumptions |
+| Steps | Numbered procedure (no Architecture re-narration) |
+| Verify | How to confirm success |
+| Rollback | Optional; how to undo |
+| Related | Links to Architecture / feature / Decisions |
+
+Scaffold: `wiki-add-howto.sh {slug} {task}`. Add a Topic map row.
+
+### 7. Concepts — `concepts/{slug}.md` (optional, vault-wide)
+
+Cross-project evergreen notes (`entity_type: explanation` or `reference`).
+One idea per page. Dense wikilinks to projects that apply the concept.
+
+| Section | Content |
+|---------|---------|
+| Definition | What it means in *your* practice |
+| When to use | Short rules |
+| Related projects | Links into Architecture / Decisions / features |
+| Key claims | Prefer `confidence: high` with `workspace:`; else `confidence: low` + source |
+
+Optional `concepts/topic-index.md` Topic map for vault-wide routing.
+Set `reviewed:` on distill/fold-in; lint warns after 90 days.
+Scaffold: `wiki-add-concept.sh {concept-slug}`.
 
 ## Feature discovery (before writing feature pages)
 
@@ -92,7 +159,8 @@ Do **not** invent dozens of shallow pages. Propose a list, then **confirm with t
 | Cross-service orchestration | One-line wrappers |
 | Cap default proposal at **8** features; ask to add more | Duplicate pages for the same flow |
 
-After confirmation: `wiki-add-feature.sh` for each; fill from code; link from hub.
+After confirmation: `wiki-add-feature.sh` for each; fill from code; link from hub;
+add Topic map rows on `topic-index.md`.
 
 ## Codebase validation (mandatory on distill / update)
 
@@ -100,15 +168,26 @@ After confirmation: `wiki-add-feature.sh` for each; fill from code; link from hu
 2. Inspect code: entrypoints, handlers, schemas-as-code, manifests/Makefile/CI, tests.
 3. Do not treat README/`docs/**`/ADRs as source of truth.
 4. Set `validated_against: workspace:{path}@{sha}` and `updated`.
-5. Every Key claims bullet maps to a code path or runnable command.
+5. Every Key claims bullet maps to a code path or runnable command (`confidence: high`), or is marked `confidence: low`.
 6. If code and wiki disagree → update the wiki (or mark superseded).
 7. Append `log.md`.
+
+## Prose fold-in (code stays primary)
+
+Books, Confluence, papers, brand docs under `raw/` or `inbox/`:
+
+- Fold synthesized notes into `references/` (and optional Glossary / Decisions / concepts).
+- Set `confidence: low` and `reviewed:` until code-confirmed.
+- **Never** use prose alone as evidence for Architecture building blocks, Interaction
+  diagrams, feature sequences, or high-confidence Key claims — confirm in code first.
+- See [stages.md](stages.md) Stage 3e.
 
 ## Diagrams and tables
 
 - Architecture building blocks: **`C4Container`** or **`C4Component`**.
 - Architecture interaction: **`C4Dynamic`** (or flowchart with `C4Dynamic unavailable`).
 - Features: **`sequenceDiagram` only** (prefer `alt`/`opt` for errors).
+- How-tos: no required Mermaid.
 - HTML Mermaid figures are zoomable (wheel / drag / toolbar).
 - GFM tables → `.wiki-table` on build. No escaped `\|` in table wikilinks.
 
@@ -129,3 +208,7 @@ Mermaid C4 packs **4 shapes per row by default**, which overlaps labels on Inter
 - Leave agent instructional essays on distilled pages (keep fill rules in AGENTS / this file).
 - Force full API field tables when the feature only consumes an API (`Owns contract?` = `no`).
 - Create Overview (`index.md`) or Quick start pages — remove them; they are obsolete.
+- Put use-when rules only in Architecture ADR table (use `decisions.md`).
+- Leave Topic index empty after features exist.
+- Put multi-step ops only inside feature Testing and rollout when a reusable how-to would serve better.
+- Silently edit past ADR Status/Date rows instead of superseding.

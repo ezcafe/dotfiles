@@ -255,5 +255,7 @@ Only what differs from [[projects/PROJECT_SLUG/architecture|Architecture]]. If n
 
 ## See also
 
+- [[projects/PROJECT_SLUG/topic-index|Topic index]]
 - [[projects/PROJECT_SLUG/solution-design|Solution design hub]]
 - [[projects/PROJECT_SLUG/architecture|Architecture]]
+- [[projects/PROJECT_SLUG/decisions|Decisions]]

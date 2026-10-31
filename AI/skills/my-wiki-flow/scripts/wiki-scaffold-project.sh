@@ -14,7 +14,7 @@ REPO_PATH="."
 for arg in "$@"; do
   case "$arg" in
     --lite|--full)
-      echo "Note: profiles removed; scaffolding Architecture + Solution design + Glossary" >&2
+      echo "Note: profiles removed; scaffolding Architecture + Topic index + Solution design + Decisions + Glossary" >&2
       ;;
     -*)
       echo "Unknown flag: $arg" >&2
@@ -32,7 +32,7 @@ done
 
 if [[ -z "$SLUG" ]]; then
   echo "Usage: wiki-scaffold-project.sh <project-slug> [workspace-path]"
-  echo "  Creates: architecture.md, solution-design.md, glossary.md"
+  echo "  Creates: architecture.md, topic-index.md, solution-design.md, decisions.md, glossary.md"
   exit 1
 fi
 
@@ -46,9 +46,9 @@ TODAY="$(date +%Y-%m-%d)"
 # Absolute workspace for config
 ABS_REPO="$(cd "$REPO_PATH" 2>/dev/null && pwd || echo "$REPO_PATH")"
 
-mkdir -p "$DEST/solution-design" "$DEST/references"
+mkdir -p "$DEST/solution-design" "$DEST/how-to" "$DEST/references"
 
-PAGES=(architecture.md solution-design.md glossary.md)
+PAGES=(architecture.md topic-index.md solution-design.md decisions.md glossary.md)
 
 for page in "${PAGES[@]}"; do
   out="$DEST/$page"
@@ -82,3 +82,4 @@ fi
 
 echo "Scaffolded projects/$SLUG — fill from real code, then wiki-build.sh"
 echo "Feature pages: wiki-add-feature.sh $SLUG <feature-slug> [master-feature]"
+echo "How-to pages:  wiki-add-howto.sh $SLUG <task-slug>"

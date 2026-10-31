@@ -15,7 +15,7 @@ is_empty() {
 }
 
 fill_karpathy_gaps() {
-  mkdir -p "$ROOT/raw" "$ROOT/site"
+  mkdir -p "$ROOT/raw" "$ROOT/site" "$ROOT/concepts"
   if [[ -f "$SKILL_DIR/assets/AGENTS.template.md" && ! -f "$ROOT/AGENTS.md" ]]; then
     cp "$SKILL_DIR/assets/AGENTS.template.md" "$ROOT/AGENTS.md"
   fi
@@ -24,6 +24,10 @@ fill_karpathy_gaps() {
 # Wiki index
 
 $TITLE — rebuild with \`wiki-build.sh\` to refresh catalog links.
+
+## Concepts
+
+_Empty._
 
 ## inbox
 
@@ -44,6 +48,13 @@ EOF
 Immutable inputs. Wiki pages cite \`source: raw/...\`.
 EOF
   fi
+  if [[ ! -f "$ROOT/concepts/README.md" ]]; then
+    cat > "$ROOT/concepts/README.md" <<EOF
+# Concepts
+
+Cross-project evergreen notes. Add with \`wiki-add-concept.sh <slug>\`.
+EOF
+  fi
 }
 
 if ! is_empty "$ROOT"; then
@@ -56,12 +67,18 @@ mkdir -p \
   "$ROOT/raw" \
   "$ROOT/inbox" \
   "$ROOT/projects" \
+  "$ROOT/concepts" \
   "$ROOT/ai" \
   "$ROOT/assets" \
   "$ROOT/site"
 # Optional PARA overflow (not in HTML nav): create only if WIKI_PARA=1
+# Prefer projects/ + concepts/ for wiki content; PARA is personal overflow only.
 if [[ "${WIKI_PARA:-0}" == "1" ]]; then
   mkdir -p "$ROOT/areas" "$ROOT/resources" "$ROOT/archives"
+fi
+# Optional vault git history (docs-as-code); never invent remotes.
+if [[ "${WIKI_GIT:-0}" == "1" ]] && [[ ! -d "$ROOT/.git" ]]; then
+  git -C "$ROOT" init
 fi
 
 cp "$SKILL_DIR/assets/wiki.css" "$ROOT/assets/wiki.css"
@@ -81,6 +98,9 @@ build:
   pagefind: true
 nav:
   group_by: project
+maintain:
+  inbox_max_age_days: 14
+  reviewed_max_age_days: 90
 # Map each project slug to its code workspace (used by distill / lint / update).
 projects: {}
 # Example:
@@ -93,14 +113,16 @@ cat > "$ROOT/README.md" <<EOF
 # $TITLE
 
 Personal knowledge wiki (my-wiki-flow) — Karpathy three-layer pattern.
+Code-validated project pages + optional cross-project \`concepts/\`.
 
 - **Raw sources:** \`raw/\` (immutable)
-- **Wiki articles:** \`projects/\`, \`inbox/\`
+- **Wiki articles:** \`projects/\`, \`concepts/\`, \`inbox/\`
 - **Schema:** \`AGENTS.md\`, root \`index.md\`, \`log.md\`
 - **Generated site:** \`site/\` (HTML + Pagefind)
 - **AI entrypoints:** \`ai/INDEX.md\`, \`ai/CONTEXT.md\`
 
 Run \`wiki-build.sh\` after adding Markdown pages.
+Run \`wiki-lint.py --maintain\` for inbox / stale hygiene.
 Compatible with [Understand Anything](https://github.com/Egonex-AI/Understand-Anything) \`/understand-knowledge\`.
 EOF
 
@@ -108,7 +130,11 @@ if [[ ! -f "$ROOT/index.md" ]]; then
   cat > "$ROOT/index.md" <<EOF
 # Wiki index
 
-$TITLE — add projects under \`projects/{slug}/\`, then rebuild.
+$TITLE — add projects under \`projects/{slug}/\` or concepts under \`concepts/\`, then rebuild.
+
+## Concepts
+
+_Empty._
 
 ## inbox
 
@@ -136,26 +162,38 @@ cat > "$ROOT/ai/CONTEXT.md" <<EOF
 # AI context — $TITLE
 
 - **Root:** \`$ROOT\`
-- **Canonical:** Markdown under \`projects/\`
+- **Canonical:** Markdown under \`projects/\` and \`concepts/\`
 - **Do not:** paste all of \`site/\` into the prompt
 
 ## How to answer from this wiki
 
-1. Pick project(s) from [INDEX.md](INDEX.md)
-2. Read that project's Architecture, Solution design, and Glossary as needed
-3. Prefer frontmatter \`summary\` before full body
-4. Cite page paths when stating facts from the wiki
-5. If missing, say so — do not invent wiki content
+1. Pick project(s) or Concepts from [INDEX.md](INDEX.md)
+2. Open \`topic-index.md\` and match one Topic row
+3. Two-hop: Decisions (if needed) + at most one See also
+4. Prefer frontmatter \`summary\` before full body
+5. Cite page paths when stating facts from the wiki
+6. If missing, say so — do not invent wiki content
 EOF
 
 cat > "$ROOT/ai/INDEX.md" <<EOF
 # Wiki index
 
 _No projects yet. Ingest a workspace or add \`projects/{slug}/architecture.md\`._
+Add evergreen notes with \`wiki-add-concept.sh\`.
+
+## concepts
+
+_Empty._
 
 ## inbox
 
 _Empty._
+EOF
+
+cat > "$ROOT/concepts/README.md" <<EOF
+# Concepts
+
+Cross-project evergreen notes. Add with \`wiki-add-concept.sh <slug>\`.
 EOF
 
 cat > "$ROOT/ai/glossary.md" <<EOF
