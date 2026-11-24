@@ -46,4 +46,4 @@ Do **not** cross skills, write parent-only fields, or AskQuestion for HITL ([spa
 
 ## Models
 
-Soft hints stay in [models.md](models.md). Parent may pass a stronger/faster model on spawn when the user asked for a specific model; otherwise omit (inherit).
+Follow [models.md](models.md). Parent resolves and passes the appropriate model tier on spawn based on the entry stage (Stronger for Grill/Adv/Design-Review, Faster for Skim/Smoke/tiny fixes, else inherit). Explicit user model choice overrides stage defaults.
