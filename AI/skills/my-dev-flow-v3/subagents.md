@@ -46,4 +46,4 @@ Do **not** cross skills, write parent-only fields, or AskQuestion for HITL ([spa
 
 ## Models
 
-Follow [models.md](models.md). Parent resolves and passes the appropriate model tier on spawn based on the entry stage (Stronger for Grill/Adv/Design-Review/Design with Sonnet for low/med complexity and Opus only for high/critical complexity, Faster for Build/Tests/Merge/Skim/Smoke/uncertain, else inherit). Explicit user model choice overrides stage defaults.
+Follow [models.md](models.md). Subagents must always use their own designated models based on the stage (Stronger: Sonnet for low/med complexity, Opus for high/critical complexity; Faster: Flash/Haiku for build/tests/merge/uncertain); never inherit the model from the orchestrator. Explicit user model choice overrides stage defaults.

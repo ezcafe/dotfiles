@@ -2,7 +2,7 @@
 
 **Load budget §5:** open **this file only** when Next maps to a subflow skill (not full [subagents.md](subagents.md) every turn). **Skill map is inlined below.** After Task checklist SoT = [step-0.md](step-0.md) After Task + [preflight.md](preflight.md) Always §8 — open [subagents.md](subagents.md) only if that checklist is missing (optional narrative). **Hard stop list is inlined below** (must paste into every Task prompt).
 
-Use Cursor **Task** tool (or Antigravity `invoke_subagent`): `subagent_type=generalPurpose`, **local** (not cloud / not `best-of-n-runner` unless user asks). **Fresh** Task each time parent enters a skill (or re-enters after a hard stop). Resolve model per [models.md](models.md) (Stronger / Faster / inherit). Do **not** dump prior stage transcripts into the prompt.
+Use Cursor **Task** tool (or Antigravity `invoke_subagent`): `subagent_type=generalPurpose`, **local** (not cloud / not `best-of-n-runner` unless user asks). **Fresh** Task each time parent enters a skill (or re-enters after a hard stop). Resolve model per [models.md](models.md) (subagents use their own designated Stronger/Faster models; never inherit from orchestrator). Do **not** dump prior stage transcripts into the prompt.
 
 ## Skill map (Expected Next → skill)
 
