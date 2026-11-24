@@ -9,7 +9,9 @@ description: >-
   unknown ≠ no; else blocking). Settle gen freshness; seed only 00-run.md;
   spawn isolated Tasks for subflow skills; parent-inline only Step 0 / Gate
   B·C / finalize-lens-plan / HITL (Parent-relay — Task never AskQuestion);
-  Gate C always blocking / no invent consent.
+  Gate C always blocking / no invent consent. Enforces mandatory live web search
+  & primary source grounding for every prompt (latest libraries >1 week, live
+  search overrides training memory).
   Use when the user says run my-dev-flow-v3, start my-dev-flow-v3, or wants
   the v3 end-to-end delivery pipeline.
 ---
@@ -49,6 +51,13 @@ Follow [step-0.md](step-0.md). Honor **Load budget** (SoT there — not restated
 7. **No secrets** in commits; never force-push.
 8. **No code lint for this skill** — markdown checklists only (no Python/JS skill linters).
 9. **Isolated subflows** — orchestrator spawns a fresh skill Task (open [spawn-contract.md](spawn-contract.md) — map inlined; After = step-0 After Task); parent does not run skill-mapped stages inline.
+10. **Live Web Search & External Grounding**:
+    - For every single user prompt—regardless of topic, person, tool, codebase, release, or pricing—you MUST NOT answer from internal pre-training memory alone.
+    - You must immediately trigger external Google Web Search before writing your response.
+    - For technical frameworks, tools, packages, or news, append current temporal filters to your queries (e.g., include the current year, "latest documentation", "changelog", or "release notes").
+    - Target primary sources: official documentation, GitHub commits/tags, vendor release pages, or engineering blogs. Bypass generic SEO roundup articles.
+    - Use latest version (release date > 1 week) of libraries.
+    - If internal training data conflicts with live search results or documentation, live web search ALWAYS overrides training. Never assume the search snippet is an anomaly.
 
 ## Routing
 

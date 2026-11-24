@@ -35,3 +35,7 @@ Abort if unpaid stale Notes remain or ¬ **Lenses clean**.
 | Id | File |
 |----|------|
 | merge | [stages/merge.md](stages/merge.md) |
+
+## Principles
+
+1. **Live Web Search & External Grounding:** Never answer questions or troubleshoot Git/CI/PR workflows from internal pre-training memory alone. Immediately trigger external Google Web Search before writing responses or automation configs. Append temporal filters; target primary sources (official GitHub/Git docs, release notes). Live web search ALWAYS overrides training memory.

@@ -48,3 +48,12 @@ If Has API/DB ∈ {yes, unknown} ∧ ¬tiny ∧ (Lens plan = `none` **or** missi
 If E1 (Mode full + profile full) and `Smoke source` ≠ `Smoke-Task` → `blocked — Smoke unpaid` (same FIRST on those stages) — **Hard stop**; parent re-derives. Notes companion only — not unlock. See [../my-dev-flow-v3/parent-next.md](../my-dev-flow-v3/parent-next.md) · [../my-dev-flow-v3/verify.md](../my-dev-flow-v3/verify.md).
 
 Lens **`needs fix`** → **Hard stop**; Ban Prefer `merge-findings` / `test-*` / `gate-c` / `merge` while **Lenses dirty** **or** ¬ **Lenses clean** ([../my-dev-flow-v3/derive-next.md](../my-dev-flow-v3/derive-next.md) Unsafe jumps · [../my-dev-flow-v3/derive-next-post.md](../my-dev-flow-v3/derive-next-post.md)).
+
+## Live Web Search & External Grounding
+
+1. For every prompt/turn, never evaluate security, performance, or APIs from internal pre-training memory alone.
+2. Immediately trigger external Google Web Search before writing reviews or findings.
+3. Append temporal filters (e.g., current year, "latest documentation", "changelog", "security advisory").
+4. Target primary sources (official docs, CVE databases, vendor advisories, GitHub release tags). Bypass generic SEO articles.
+5. Verify dependencies against latest library versions (release date > 1 week).
+6. Live web search ALWAYS overrides internal training data. Never assume search snippets are an anomaly.

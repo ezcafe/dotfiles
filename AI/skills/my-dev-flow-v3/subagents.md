@@ -46,4 +46,4 @@ Do **not** cross skills, write parent-only fields, or AskQuestion for HITL ([spa
 
 ## Models
 
-Follow [models.md](models.md). Parent resolves and passes the appropriate model tier on spawn based on the entry stage (Stronger for Grill/Adv/Design-Review, Faster for Skim/Smoke/tiny fixes, else inherit). Explicit user model choice overrides stage defaults.
+Follow [models.md](models.md). Parent resolves and passes the appropriate model tier on spawn based on the entry stage (Stronger for Grill/Adv/Design-Review/Design with Sonnet for low/med complexity and Opus only for high/critical complexity, Faster for Build/Tests/Merge/Skim/Smoke/uncertain, else inherit). Explicit user model choice overrides stage defaults.

@@ -51,3 +51,12 @@ Design clean; **Gate B settled** ([../my-dev-flow-v3/gate-b.md](../my-dev-flow-v
 Mode **full** Gate B is always **blocking**. Absence of a matching settle → `Result: blocked — Gate B not settled` (+ subtype `blocking` / `auto` / `async` / `stale`).
 
 Post-Build Prefer / Fix → Smoke: [../my-dev-flow-v3/derive-next-post.md](../my-dev-flow-v3/derive-next-post.md).
+
+## Live Web Search & External Grounding
+
+1. For every prompt/turn, never answer or write code from internal pre-training memory alone.
+2. Immediately trigger external Google Web Search before writing tests, code, or documentation.
+3. Append current temporal filters to queries (e.g., current year, "latest documentation", "changelog", "release notes").
+4. Target primary sources: official documentation, GitHub commits/tags, vendor release pages, engineering blogs. Bypass generic SEO roundup articles.
+5. Use latest version (release date > 1 week) of libraries.
+6. Live web search ALWAYS overrides internal training data. Never assume the search snippet is an anomaly.

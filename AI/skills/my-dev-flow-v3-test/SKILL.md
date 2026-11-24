@@ -33,3 +33,7 @@ description: >-
 | smoke | [stages/smoke.md](stages/smoke.md) |
 | test-full | [stages/test-full.md](stages/test-full.md) |
 | test-lite | [stages/test-lite.md](stages/test-lite.md) |
+
+## Principles
+
+1. **Live Web Search & External Grounding:** Never diagnose test failures or configure test tooling from internal pre-training memory alone. Immediately trigger external Google Web Search before writing responses or test configs. Append temporal filters (e.g., current year, "latest documentation", "changelog"). Target primary sources (official testing framework docs, GitHub issues/releases). Use latest versions (>1 week) of test libraries. Live web search ALWAYS overrides training memory.

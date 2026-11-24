@@ -46,7 +46,15 @@ Do not cross into another skill. Do not write parent-only fields
 Do not AskQuestion for HITL.
 ```
 
-9. **Return shape** (required) — `Last stage:` here is a **report** only; parent stamps card Last stage / Next:
+9. **Live Web Search & External Grounding**:
+   - For every prompt/task—regardless of topic, tool, codebase, release, or pricing—Task MUST NOT answer from internal pre-training memory alone.
+   - Immediately trigger external Google Web Search before writing code or response.
+   - Append current temporal filters (e.g., current year, "latest documentation", "changelog", "release notes").
+   - Target primary sources: official documentation, GitHub commits/tags, vendor release pages, engineering blogs. Bypass generic SEO roundup articles.
+   - Use latest version (release date > 1 week) of libraries.
+   - Live web search ALWAYS overrides internal training data. Never assume the search snippet is an anomaly.
+
+10. **Return shape** (required) — `Last stage:` here is a **report** only; parent stamps card Last stage / Next:
 
 ```text
 Last stage: <id>
